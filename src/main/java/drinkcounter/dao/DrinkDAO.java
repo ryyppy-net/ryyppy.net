@@ -5,8 +5,8 @@
 
 package drinkcounter.dao;
 
-import com.google.appengine.api.datastore.Key;
 import drinkcounter.model.Drink;
+import drinkcounter.model.Participant;
 import java.util.List;
 import org.synyx.hades.dao.GenericDao;
 
@@ -14,8 +14,8 @@ import org.synyx.hades.dao.GenericDao;
  *
  * @author Toni
  */
-public interface DrinkDAO extends GenericDao<Drink, Key>{
+public interface DrinkDAO extends GenericDao<Drink, Integer>{
 
-    List<Drink> findByDrinker(Key drinkerKey);
+    List<Drink> findByDrinker(Participant drinker);
 
 }

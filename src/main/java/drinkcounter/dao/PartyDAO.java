@@ -5,7 +5,6 @@
 
 package drinkcounter.dao;
 
-import com.google.appengine.api.datastore.Key;
 import drinkcounter.model.Party;
 import org.synyx.hades.dao.GenericDao;
 
@@ -13,6 +12,6 @@ import org.synyx.hades.dao.GenericDao;
  *
  * @author Toni
  */
-public interface PartyDAO extends GenericDao<Party, Key> {
+public interface PartyDAO extends GenericDao<Party, Integer> {
     Party findById(String id);
 }
