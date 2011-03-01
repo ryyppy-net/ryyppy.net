@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+    <cron>
+        <url>/internal/burnAlcohol?timePassed=0.25</url>
+        <description>Burn alcohol of party participants every 15 minutes</description>
+        <schedule>every 15 minutes</schedule>
+    </cron>
+</cronentries>
