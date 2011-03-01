@@ -11,7 +11,6 @@ import drinkcounter.model.Participant;
 import drinkcounter.model.ParticipantHistory;
 import drinkcounter.model.Party;
 import drinkcounter.model.PartyHistory;
-import drinkcounter.util.DrinkCounterCache;
 import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
@@ -30,8 +29,6 @@ public class HistoryServiceImpl implements HistoryService{
     private static final Logger log = LoggerFactory.getLogger(DrinkCounterServiceImpl.class);
 
     @Autowired
-    private DrinkCounterCache cache;
-    @Autowired
     private PartyDAO partyDAO;
     @Autowired
     private PartyHistoryDAO partyHistoryDAO;
@@ -45,7 +42,6 @@ public class HistoryServiceImpl implements HistoryService{
     @Transactional
     public void takeHistorySnapshot(String partyId) {
         log.info("Taking history snapshot for party {}", partyId);
-        cache.clearPartyHistoryCache(partyId);
         Party party = partyDAO.findById(partyId);
         PartyHistory snapshot = new PartyHistory();
         snapshot.setPartyId(partyId);

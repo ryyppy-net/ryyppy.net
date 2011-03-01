@@ -5,7 +5,6 @@
 
 package drinkcounter.model;
 
-import com.google.appengine.api.datastore.KeyFactory;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
@@ -42,7 +41,7 @@ public class Participant extends AbstractEntity{
 
     @Transient
     public String getId(){
-        return KeyFactory.keyToString(getStoreKey());
+        return getStoreKey().toString();
     }
 
     @ManyToOne(fetch=FetchType.LAZY)

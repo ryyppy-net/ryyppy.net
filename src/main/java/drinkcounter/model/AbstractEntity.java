@@ -4,7 +4,6 @@
  */
 
 package drinkcounter.model;
-import com.google.appengine.api.datastore.Key;
 import java.io.Serializable;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,15 +17,15 @@ import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class AbstractEntity implements Serializable {
-    private Key storeKey;
+    private Integer storeKey;
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    public Key getStoreKey() {
+    public Integer getStoreKey() {
         return storeKey;
     }
 
-    public void setStoreKey(Key key) {
+    public void setStoreKey(Integer key) {
         this.storeKey = key;
     }
 }

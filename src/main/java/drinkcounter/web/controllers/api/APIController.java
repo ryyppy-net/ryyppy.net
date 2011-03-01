@@ -12,7 +12,6 @@ import drinkcounter.HistoryService;
 import drinkcounter.model.Participant;
 import drinkcounter.model.ParticipantHistory;
 import drinkcounter.model.PartyHistory;
-import drinkcounter.util.DrinkCounterCache;
 import drinkcounter.util.PartyMarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,8 +39,6 @@ public class APIController {
 
     private static final Logger log = LoggerFactory.getLogger(APIController.class);
 
-    @Autowired
-    private DrinkCounterCache cache;
 
     @Autowired
     private PartyMarshaller partyMarshaller;
@@ -54,17 +51,10 @@ public class APIController {
 
     @RequestMapping("/{partyId}")
     public @ResponseBody byte[] printXml(@PathVariable String partyId) throws IOException{
-        byte[] cached = cache.getPartyDrinksCache(partyId);
-
-        if(cached != null){
-            return cached;
-        }else{
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            partyMarshaller.marshall(partyId, baos);
-            byte[] bytesXml = baos.toByteArray();
-            cache.setPartyDrinksCache(partyId, bytesXml);
-            return bytesXml;
-        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        partyMarshaller.marshall(partyId, baos);
+        byte[] bytesXml = baos.toByteArray();
+        return bytesXml;
     }
 
     @RequestMapping("/{partyId}/add-drink")
@@ -94,35 +84,28 @@ public class APIController {
 
     @RequestMapping("/{partyId}/show-history")
     public ResponseEntity<byte[]> showHistory(@PathVariable String partyId) throws IOException{
-        byte[] cachedHistory = cache.getPartyHistoryCache(partyId);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
-        if(cachedHistory != null){
-            log.info("Loading history from cache for party {}", partyId);
-            return new ResponseEntity<byte[]>(cachedHistory, headers, HttpStatus.OK);
-        }else{
-            log.info("History cache for party {} not found, creating csv", partyId);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
-            csvWriter.writeRecord(new String[]{"Time", "Name", "Alcohol Level", "Drinks"});
-            List<PartyHistory> partyHistories = historyService.getPartyHistory(partyId);
-            for (PartyHistory partyHistory : partyHistories) {
-                DateTime time = new DateTime(partyHistory.getSnapshotTime());
-                for (ParticipantHistory participantHistory : partyHistory.getParticipants()) {
-                    csvWriter.writeRecord(
-                            new String[]{
-                                time.toString(),
-                                participantHistory.getParticipantName(),
-                                Float.toString(participantHistory.getAlcoholLevel()),
-                                participantHistory.getTotalDrinks().toString()
-                            }
-                    );
-                }
+        log.info("History cache for party {} not found, creating csv", partyId);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        csvWriter.writeRecord(new String[]{"Time", "Name", "Alcohol Level", "Drinks"});
+        List<PartyHistory> partyHistories = historyService.getPartyHistory(partyId);
+        for (PartyHistory partyHistory : partyHistories) {
+            DateTime time = new DateTime(partyHistory.getSnapshotTime());
+            for (ParticipantHistory participantHistory : partyHistory.getParticipants()) {
+                csvWriter.writeRecord(
+                        new String[]{
+                            time.toString(),
+                            participantHistory.getParticipantName(),
+                            Float.toString(participantHistory.getAlcoholLevel()),
+                            participantHistory.getTotalDrinks().toString()
+                        }
+                );
             }
-            csvWriter.close();
-            byte[] bytes = baos.toByteArray();
-            cache.setPartyHistoryCache(partyId, bytes);
-            return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
         }
+        csvWriter.close();
+        byte[] bytes = baos.toByteArray();
+        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
 }

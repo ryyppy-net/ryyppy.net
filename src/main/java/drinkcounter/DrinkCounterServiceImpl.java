@@ -4,14 +4,12 @@
  */
 package drinkcounter;
 
-import com.google.appengine.api.datastore.KeyFactory;
 import drinkcounter.dao.DrinkDAO;
 import drinkcounter.dao.ParticipantDAO;
 import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Participant;
 import drinkcounter.model.Party;
-import drinkcounter.util.DrinkCounterCache;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +33,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     private static final Logger log = LoggerFactory.getLogger(DrinkCounterServiceImpl.class);
     @Autowired
     private HistoryService historyService;
-    @Autowired
-    private DrinkCounterCache cache;
 
     @Autowired
     private PartyDAO partyDao;
@@ -91,14 +87,13 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         Party party = getParty(partyIdentifier);
         party.addParticipant(participant);
         participantDAO.save(participant);
-        cache.clearPartyDrinksCache(partyIdentifier);
         log.info("Participant with name {} was added to party {}", participant.getName(), party.getName());
         return participant;
     }
 
     @Override
     public void addDrink(String participantIdentifier) {
-        Participant participant = participantDAO.readByPrimaryKey(KeyFactory.stringToKey(participantIdentifier));
+        Participant participant = participantDAO.readByPrimaryKey(Integer.parseInt(participantIdentifier));
         String partyId = participant.getParty().getId();
         TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
         participant.drink();
@@ -107,24 +102,23 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
         status = txManager.getTransaction(new DefaultTransactionDefinition());
         Drink drink = new Drink();
-        drink.setDrinkerKey(participant.getStoreKey());
+        drink.setDrinker(participant);
         drink.setTimeStamp(new Date());
         drinkDao.save(drink);
         txManager.commit(status);
         log.info("Participant {} has drunk a drink in party {}", participant.getName(), partyId);
-        cache.clearPartyDrinksCache(partyId);
         historyService.takeHistorySnapshot(partyId);
     }
 
     @Override
     public List<Drink> getDrinks(String participantIdentifier) {
         Participant participant = getParticipant(participantIdentifier);
-        return drinkDao.findByDrinker(participant.getStoreKey());
+        return drinkDao.findByDrinker(participant);
     }
 
     @Override
     public Participant getParticipant(String participantId) {
-        return participantDAO.readByPrimaryKey(KeyFactory.stringToKey(participantId));
+        return participantDAO.readByPrimaryKey(Integer.parseInt(participantId));
     }
 
     @Override
@@ -167,7 +161,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         }
         
         for (String partyId : activeParties) {
-            cache.clearPartyDrinksCache(partyId);
             // party was still active, take a snapshot
             historyService.takeHistorySnapshot(partyId);
         }
