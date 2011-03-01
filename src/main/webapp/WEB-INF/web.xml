@@ -14,6 +14,7 @@
     <servlet>
         <servlet-name>UI</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>UI</servlet-name>
@@ -23,6 +24,7 @@
     <servlet>
         <servlet-name>internal</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
     </servlet>
     <servlet-mapping>
         <servlet-name>internal</servlet-name>
@@ -73,6 +75,7 @@
     <servlet>
         <servlet-name>API</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>0</load-on-startup>
     </servlet>
 
     <servlet-mapping>

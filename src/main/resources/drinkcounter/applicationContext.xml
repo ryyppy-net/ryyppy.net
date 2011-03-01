@@ -13,20 +13,42 @@
           http://schemas.synyx.org/hades http://schemas.synyx.org/hades/hades.xsd
 ">
 
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_FALLBACK" />
+        <property name="locations" value="classpath:drinkcounter/jdbc.properties"/>
+    </bean>
     <context:component-scan base-package="drinkcounter"/>
     <hades:dao-config base-package="drinkcounter.dao" />
-    <bean id="cache" class="drinkcounter.util.DrinkCounterCache" />
     <bean id="partyMarshaller" class="drinkcounter.util.PartyMarshaller" />
-    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="transactions-optional"/>
+
+    <!-- Database settings -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">${jdbc.dialect}</prop>
+            </props>
+        </property>
+        <property name="persistenceUnitName" value="defaultPersistence"/>
     </bean>
 
-    <bean id="transactionManager"
-            class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxActive" value="1" />
+        <property name="maxIdle" value="1" />
+        <property name="minIdle" value="0" />
+        <property name="timeBetweenEvictionRunsMillis" value="30000" /> <!-- 30 seconds -->
+        <property name="minEvictableIdleTimeMillis" value="30000" />
     </bean>
 
     <!-- Transactions -->
     <tx:annotation-driven/>
+    <bean id="transactionManager"
+            class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
 
 </beans>
