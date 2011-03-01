@@ -1,0 +1,3 @@
+Julkaisu:
+* Pyydä Tonilta oikeudet Google App Engine -projektiin
+* Aja projektihakemistossa mvn gae:deploy

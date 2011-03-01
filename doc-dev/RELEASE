@@ -1,0 +1,4 @@
+Version julkaisu:
+* Vain Tonilla riittää oikeudet tähän tällä hetkellä, vaatii oikat kapsiin
+* Aja mvn release:prepare
+* Aja mvn release:perform

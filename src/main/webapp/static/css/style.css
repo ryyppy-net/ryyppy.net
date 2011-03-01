@@ -1,0 +1,51 @@
+body {
+    padding: 0px;
+    margin: 0px;
+}
+
+h1 {
+    background-color: #F56991;
+    color: #d32308;
+    margin: 0px;
+    padding: 5px;
+}
+
+table#drinkers {
+    height: 100%;
+    width: 100%;
+    border-spacing: 7px;
+}
+
+td {
+    margin: 5px;
+    border: 4px outset #aaaaaa;
+    text-align: center;
+    font-size: 2em;
+    background-repeat:no-repeat;
+    background-position:center;
+}
+
+div.drinker {
+    width: 25%;
+    height: 300px;
+    text-align: center;
+    float: left;
+}
+
+div.drinker p {
+    font-size: 2em;
+}
+
+span.name {
+    font-size: 100%;
+}
+
+span.details {
+    font-size: 66%;
+}
+
+div#addDrinkerDialog {
+    padding: 5px;
+    border: 1px solid #000000;
+    background-color: #ffffff;
+}
