@@ -20,9 +20,9 @@
         </repository>
     </distributionManagement>
     <scm>
-        <connection>scm:svn:https://juomalaskuri.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://juomalaskuri.googlecode.com/svn/trunk</developerConnection>
-        <url>http://code.google.com/p/juomalaskuri/source/browse/</url>
+        <connection>scm:hg:ssh://hg@bitbucket.org/palto/juomalaskuri</connection>
+        <developerConnection>scm:hg:ssh://hg@bitbucket.org/palto/juomalaskuri</developerConnection>
+        <url>https://bitbucket.org/palto/juomalaskuri/src</url>
     </scm>
 
     <repositories>
