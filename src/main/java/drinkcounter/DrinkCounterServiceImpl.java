@@ -18,10 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
  *
@@ -40,9 +37,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     private DrinkDAO drinkDao;
     @Autowired
     private ParticipantDAO participantDAO;
-
-    @Autowired
-    private PlatformTransactionManager txManager;
 
     @Override
     public Party startParty(String identifier) {
@@ -92,20 +86,15 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    @Transactional
     public void addDrink(String participantIdentifier) {
         Participant participant = participantDAO.readByPrimaryKey(Integer.parseInt(participantIdentifier));
         String partyId = participant.getParty().getId();
-        TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
         participant.drink();
-        participantDAO.save(participant);
-        txManager.commit(status);
-
-        status = txManager.getTransaction(new DefaultTransactionDefinition());
         Drink drink = new Drink();
         drink.setDrinker(participant);
         drink.setTimeStamp(new Date());
         drinkDao.save(drink);
-        txManager.commit(status);
         log.info("Participant {} has drunk a drink in party {}", participant.getName(), partyId);
         historyService.takeHistorySnapshot(partyId);
     }
@@ -126,11 +115,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         return getParticipant(participantId).getParty().getId();
     }
 
-    /**
-     * TODO I don't think this works because we have to different entity groups
-     * in this transaction
-     * @param participantId
-     */
     @Override
     @Transactional
     public void deleteParticipant(String participantId) {
@@ -143,18 +127,16 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    @Transactional
     public void timePassed(float hours) {
         log.info("Burning alcohol of participants...");
         List<Party> parties = listParties();
         List<String> activeParties = new LinkedList<String>();
         for (Party party : parties) {
             float burnedAlcohol = 0;
-            TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
             for (Participant participant : party.getParticipants()) {
                 burnedAlcohol += participant.passTime(hours);
-                participantDAO.save(participant);
             }
-            txManager.commit(status);
             if (burnedAlcohol > 0) {
                 activeParties.add(party.getId());
             }
