@@ -86,7 +86,6 @@ public class APIController {
     public ResponseEntity<byte[]> showHistory(@PathVariable String partyId) throws IOException{
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
-        log.info("History cache for party {} not found, creating csv", partyId);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Name", "Alcohol Level", "Drinks"});
