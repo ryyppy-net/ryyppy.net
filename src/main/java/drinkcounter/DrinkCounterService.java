@@ -34,6 +34,4 @@ public interface DrinkCounterService {
     void timePassed(float hours);
     List<Drink> getDrinks(String participantIdentifier);
     void archiveParty(String partyId);
-
-
 }

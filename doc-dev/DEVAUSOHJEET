@@ -1,0 +1,38 @@
+Tietokanta:
+    Hei koodaaja. Olen Kapteeni Toni ja tietokantaa voit vaihtaa seuraavasti:
+        * Lisää projektiin pom.xml-tiedostoon tietokannan ajuri riippuvuudeksi
+        * src/main/resources/drinkcounter/jdbc.properties tiedostossa on asetukset jolla yhdistetään tietokantaan, konffaa sieltä
+
+
+Spring:
+    Spring on konffattu latautumaan softan latautumisen yhteydessä web.xml-tiedostossa.
+    Siellä on selitetty se springin lataus niin en tässä selitä.
+
+Open Session in View:
+    EntityManager avataan jokaiselle sivupyynnölle erikseen ja se suljetaan kun sivupyyntö loppuu.
+    Tämä on toteutettu filterillä web.xml:ssä. Sen nimi on EntityManager Filter. Lue sieltä lisää
+
+Spring MVC:
+    Softassa käytetään käyttöliittymään ja API:n Springin MVC-frameworkkia.
+    Softaan on konffattu oma MVC eri osille softaa koska olen hienostelija,
+    jälkeenpäin ajateltuna ei siinä ole paljon järkeä. Lähinnä voidaan pitää
+    eri MVC-osien konteksti siistinä. Whatever.
+
+    *** API ***
+        Konffit: WEB-INF/API-servlet.xml
+        Vastaa API-kutsuista ja on konffattu urliin /API/parties/*
+
+    *** Käyttöliitymä ***
+        Konffit: WEB-INF/UI-servlet.xml
+        Konffattu urliin /ui/*
+        Vastaa perus JSP-käyttöliittymän näyttämisestä käyttäjälle.
+        Konffattu siten että näkymän nimestä päätellään käyttäjälle näytettävä jsp-tiedosto:
+        WEB-INF/jsp/<näkymän nimi>.jsp
+
+    *** Sisäiset ***
+        Konffit: WEB-INF/internal-servlet.xml
+        konffattu urliin /internal/*
+        Jäänyt GAE-ajoilta, voisi varmaan poistaa. Tämän avulla poltettu aika-ajoin alkoholia
+
+
+
