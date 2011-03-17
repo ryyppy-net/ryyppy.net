@@ -199,4 +199,13 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+	
+	<repositories>
+		<repository>
+			<id>JBoss</id>
+			<name>JBoss Repsitory</name>
+			<layout>default</layout>
+			<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+		</repository>
+	</repositories>
 </project>

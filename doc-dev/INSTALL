@@ -1,8 +1,8 @@
 Alkoholilaskurin asennus:
 
 * Asenna Maven (3.0.2)
-* Hae koodit osoitteesta: http://code.google.com/p/juomalaskuri/source/checkout
+* Hae koodit osoitteesta: https://username@bitbucket.org/palto/juomalaskuri
 * Mene checkout-hakemistoon ja aja:
-  * mvn gae:unpack
-  * mvn install gae:run
+  * ajaminen: mvn jetty:run
+  * k‰‰nt‰minen: mvn install
 * Avaa juomalaskuri osoitteesta http://localhost:8080
