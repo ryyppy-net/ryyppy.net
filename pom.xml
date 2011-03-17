@@ -12,13 +12,6 @@
             <name>Toni Paloniemi</name>
         </developer>
     </developers>
-    <distributionManagement>
-        <repository>
-            <id>lakka.kapsi.fi</id>
-            <name>Kapsi repository</name>
-            <url>scp://lakka.kapsi.fi/home/users/palto/sites/palto.kapsi.fi/www/maven2</url>
-        </repository>
-    </distributionManagement>
     <scm>
         <connection>scm:hg:ssh://hg@bitbucket.org/palto/juomalaskuri</connection>
         <developerConnection>scm:hg:ssh://hg@bitbucket.org/palto/juomalaskuri</developerConnection>
@@ -29,14 +22,6 @@
     </properties>
 
     <build>
-        <extensions>
-      <!-- Enabling the use of SCP -->
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-7</version>
-            </extension>
-        </extensions>
         <pluginManagement>
             <plugins>
                 <plugin>
