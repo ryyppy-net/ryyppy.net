@@ -170,6 +170,4 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public void archiveParty(String partyId) {
 
     }
-
-
 }
