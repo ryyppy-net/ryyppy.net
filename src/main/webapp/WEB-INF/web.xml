@@ -28,16 +28,6 @@
         <url-pattern>/ui/*</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>internal</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>0</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>internal</servlet-name>
-        <url-pattern>/internal/*</url-pattern>
-    </servlet-mapping>
-
     <filter>
         <filter-name>EntityManager Filter</filter-name>
         <filter-class>
@@ -53,11 +43,7 @@
         <filter-name>EntityManager Filter</filter-name>
         <url-pattern>/API/*</url-pattern>
     </filter-mapping>
-    <filter-mapping>
-        <filter-name>EntityManager Filter</filter-name>
-        <url-pattern>/internal/*</url-pattern>
-    </filter-mapping>
-
+    
     <filter>
         <filter-name>encodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -90,14 +76,6 @@
         <url-pattern>/API/parties/*</url-pattern>
     </servlet-mapping>
 
-    <security-constraint>
-        <web-resource-collection>
-            <url-pattern>/internal/*</url-pattern>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>admin</role-name>
-        </auth-constraint>
-    </security-constraint>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
