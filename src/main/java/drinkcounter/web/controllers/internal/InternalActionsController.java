@@ -22,9 +22,4 @@ public class InternalActionsController {
     @Autowired
     private DrinkCounterService drinkCounterService;
 
-    @RequestMapping("/burnAlcohol")
-    public void burnAlcohol(@RequestParam("timePassed") float hours, Writer writer){
-        drinkCounterService.timePassed(hours);
-    }
-
 }

@@ -5,6 +5,9 @@
 
 package drinkcounter.model;
 
+import java.util.Date;
+import org.joda.time.DateTime;
+import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -16,7 +19,46 @@ public class ParticipantTest {
     @Test
     public void testBloodAlcohol(){
         Participant participant = new Participant();
-        participant.drink();;
-        assertEquals((float)Participant.STANDARD_DRINK_ALCOHOL_GRAMS, participant.getBloodAlcoholGrams(), 0.1f);
+        participant.drink();
+        assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, participant.getBloodAlcoholGrams(), 0.1f);
+    }
+    
+    @Test
+    public void testPromilles() {
+        Participant participant = new Participant();
+        
+        Drink drink1 = new Drink();
+        drink1.setTimeStamp(new DateTime().minusMinutes(90).toDate());
+        Drink drink2 = new Drink();
+        drink2.setTimeStamp(new DateTime().minusMinutes(60).toDate());
+        Drink drink3 = new Drink();
+        drink3.setTimeStamp(new DateTime().minusMinutes(30).toDate());
+
+        ArrayList<Drink> al = new ArrayList<Drink>();
+        al.add(drink1);
+        al.add(drink2);
+        al.add(drink3);
+        
+        participant.setDrinks(al);
+        Date dt = new Date();
+        assertEquals(0.49, participant.getPromilles(), 0.01);
+        assertEquals(0, new Date().getTime() - dt.getTime(), 1);
+    }
+    
+    @Test
+    public void stressTest() {
+        final int amount = 2000;
+        ArrayList<Drink> list = new ArrayList<Drink>();
+        for (int i= 0; i < amount; i++) {
+            Drink drink = new Drink();
+            drink.setTimeStamp(new DateTime().minusMinutes(amount).toDate());
+            list.add(drink);
+        }
+        
+        Participant participant = new Participant();
+        participant.setDrinks(list);
+        Date dt = new Date();
+        participant.getPromilles();
+        assertTrue(new Date().getTime() - dt.getTime() < 20);
     }
 }

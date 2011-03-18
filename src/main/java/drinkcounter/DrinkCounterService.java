@@ -31,7 +31,5 @@ public interface DrinkCounterService {
     void addDrink(String participantIdentifier);
 
     // Global
-    void timePassed(float hours);
     List<Drink> getDrinks(String participantIdentifier);
-    void archiveParty(String partyId);
 }
