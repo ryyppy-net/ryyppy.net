@@ -69,20 +69,22 @@ public class PartyMarshaller {
 
      private Node createParticipantNode(Document doc, Participant participant) {
         Node participantNode = doc.createElement("participant");
+        
+        List<Drink> drinks = service.getDrinks(participant.getId());
+        participant.setDrinks(drinks);
 
         participantNode.appendChild(createTextContentElement("id", participant.getId(), doc));
         participantNode.appendChild(createTextContentElement("name", participant.getName(), doc));
         participantNode.appendChild(createTextContentElement("alcoholInPromilles", Float.toString(participant.getPromilles()), doc));
         participantNode.appendChild(createTextContentElement("weight", Float.toString(participant.getWeight()), doc));
         participantNode.appendChild(createTextContentElement("sex", participant.getSex().toString(), doc));
-        participantNode.appendChild(createDrinksNode(doc, participant));
+        participantNode.appendChild(createDrinksNode(doc, drinks));
 
         return participantNode;
     }
 
-    private Node createDrinksNode(Document d, Participant participant){
+    private Node createDrinksNode(Document d, List<Drink> drinks){
         Node drinksNode = d.createElement("drinks");
-        List<Drink> drinks = service.getDrinks(participant.getId());
         drinksNode.appendChild(createTextContentElement("count", Integer.toString(drinks.size()), d));
         for (Drink drink : drinks) {
             Node drinkNode = d.createElement("drink");

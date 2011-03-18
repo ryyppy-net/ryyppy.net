@@ -40,25 +40,18 @@ public class ParticipantTest {
         al.add(drink3);
         
         participant.setDrinks(al);
-        Date dt = new Date();
         assertEquals(0.49, participant.getPromilles(), 0.01);
-        assertEquals(0, new Date().getTime() - dt.getTime(), 1);
     }
     
     @Test
-    public void stressTest() {
-        final int amount = 2000;
-        ArrayList<Drink> list = new ArrayList<Drink>();
-        for (int i= 0; i < amount; i++) {
-            Drink drink = new Drink();
-            drink.setTimeStamp(new DateTime().minusMinutes(amount).toDate());
-            list.add(drink);
-        }
-        
+    public void testDrinking() {
         Participant participant = new Participant();
-        participant.setDrinks(list);
-        Date dt = new Date();
-        participant.getPromilles();
-        assertTrue(new Date().getTime() - dt.getTime() < 20);
+        participant.drink();
+        participant.drink();
+        participant.drink();
+        participant.drink();
+        participant.drink();
+
+        assertEquals(1.143, participant.getPromilles(), 0.01);
     }
 }

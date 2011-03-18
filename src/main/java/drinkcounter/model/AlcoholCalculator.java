@@ -3,9 +3,9 @@
  * and open the template in the editor.
  */
 
+// probably the wrong package for this, feel free to move
 package drinkcounter.model;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,8 +49,7 @@ public class AlcoholCalculator {
         return (float)calculate(time);
     }
     
-    public void calculateDrink(Drink drink) {
-        Date stamp = drink.getTimeStamp();
+    public void calculateDrink(Date stamp) {
         double p = calculate(stamp);
         
         // If there is still alcohol to burn, then the last function will be "disabled" with a cutter

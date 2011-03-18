@@ -92,12 +92,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public void addDrink(String participantIdentifier) {
         Participant participant = participantDAO.readByPrimaryKey(Integer.parseInt(participantIdentifier));
         String partyId = participant.getParty().getId();
-        TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
         participant.drink();
-        participantDAO.save(participant);
-        txManager.commit(status);
 
-        status = txManager.getTransaction(new DefaultTransactionDefinition());
+        TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
         Drink drink = new Drink();
         drink.setDrinker(participant);
         drink.setTimeStamp(new Date());
@@ -125,6 +122,8 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     /**
      * TODO I don't think this works because we have to different entity groups
      * in this transaction
+     * 
+     * cascade perhaps? --murg
      * @param participantId
      */
     @Override
