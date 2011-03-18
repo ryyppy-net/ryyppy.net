@@ -29,10 +29,5 @@ Spring MVC:
         Konffattu siten että näkymän nimestä päätellään käyttäjälle näytettävä jsp-tiedosto:
         WEB-INF/jsp/<näkymän nimi>.jsp
 
-    *** Sisäiset ***
-        Konffit: WEB-INF/internal-servlet.xml
-        konffattu urliin /internal/*
-        Jäänyt GAE-ajoilta, voisi varmaan poistaa. Tämän avulla poltettu aika-ajoin alkoholia
-
 
 
