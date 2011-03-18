@@ -111,8 +111,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         return getParticipant(participantId).getParty().getId();
     }
 
-     * 
-     * cascade perhaps? --murg
     @Override
     @Transactional
     public void deleteParticipant(String participantId) {
@@ -123,6 +121,4 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         }
         participantDAO.delete(participant);
     }
-
-    @Transactional
 }
