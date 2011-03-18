@@ -32,9 +32,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     private static final Logger log = LoggerFactory.getLogger(DrinkCounterServiceImpl.class);
     @Autowired
-    private HistoryService historyService;
-
-    @Autowired
     private PartyDAO partyDao;
     @Autowired
     private DrinkDAO drinkDao;
@@ -107,7 +104,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         drinkDao.save(drink);
         txManager.commit(status);
         log.info("Participant {} has drunk a drink in party {}", participant.getName(), partyId);
-        historyService.takeHistorySnapshot(partyId);
     }
 
     @Override
@@ -142,32 +138,4 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         participantDAO.delete(participant);
     }
 
-    @Override
-    public void timePassed(float hours) {
-        log.info("Burning alcohol of participants...");
-        List<Party> parties = listParties();
-        List<String> activeParties = new LinkedList<String>();
-        for (Party party : parties) {
-            float burnedAlcohol = 0;
-            TransactionStatus status = txManager.getTransaction(new DefaultTransactionDefinition());
-            for (Participant participant : party.getParticipants()) {
-                burnedAlcohol += participant.passTime(hours);
-                participantDAO.save(participant);
-            }
-            txManager.commit(status);
-            if (burnedAlcohol > 0) {
-                activeParties.add(party.getId());
-            }
-        }
-        
-        for (String partyId : activeParties) {
-            // party was still active, take a snapshot
-            historyService.takeHistorySnapshot(partyId);
-        }
-    }
-
-    @Override
-    public void archiveParty(String partyId) {
-
-    }
 }

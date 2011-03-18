@@ -8,10 +8,7 @@ package drinkcounter.web.controllers.api;
 import com.csvreader.CsvWriter;
 import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.HistoryService;
 import drinkcounter.model.Participant;
-import drinkcounter.model.ParticipantHistory;
-import drinkcounter.model.PartyHistory;
 import drinkcounter.util.PartyMarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,9 +42,6 @@ public class APIController {
 
     @Autowired
     private DrinkCounterService service;
-
-    @Autowired
-    private HistoryService historyService;
 
     @RequestMapping("/{partyId}")
     public @ResponseBody byte[] printXml(@PathVariable String partyId) throws IOException{
@@ -89,6 +83,8 @@ public class APIController {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Name", "Alcohol Level", "Drinks"});
+        /*
+         * TODO Fix
         List<PartyHistory> partyHistories = historyService.getPartyHistory(partyId);
         for (PartyHistory partyHistory : partyHistories) {
             DateTime time = new DateTime(partyHistory.getSnapshotTime());
@@ -103,6 +99,8 @@ public class APIController {
                 );
             }
         }
+         * 
+         */
         csvWriter.close();
         byte[] bytes = baos.toByteArray();
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);

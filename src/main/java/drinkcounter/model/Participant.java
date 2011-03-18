@@ -5,17 +5,22 @@
 
 package drinkcounter.model;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 /**
  *
- * @author Toni
+ * @author Toni, Lauri
  */
 @Entity
 public class Participant extends AbstractEntity{
+
     public enum Sex {
         MALE(0.75f), FEMALE(0.66f);
         public float factor;
@@ -23,13 +28,12 @@ public class Participant extends AbstractEntity{
             this.factor = factor;
         }
     }
-    public static final int STANDARD_DRINK_ALCOHOL_GRAMS = 12;
     private String name;
     private Party party;
-    private float bloodAlcoholGrams;
     private float weight = 70;
     private Sex sex = Sex.MALE;
-    private int totalDrinks;
+    private List<Drink> drinks = new ArrayList<Drink>();
+    private AlcoholCalculator alcoholCalculator = new AlcoholCalculator(weight);
     
     public String getName() {
         return name;
@@ -54,33 +58,30 @@ public class Participant extends AbstractEntity{
     }
 
     public void drink(){
-        setBloodAlcoholGrams(getBloodAlcoholGrams() + STANDARD_DRINK_ALCOHOL_GRAMS);
-        setTotalDrinks(getTotalDrinks() + 1);
-    }
-
-    /**
-     * Burns alcohol based on time passed and weight
-     * @param hours
-     * @return
-     */
-    public float passTime(float hours){
-        if(bloodAlcoholGrams == 0){
-            // nothing to burn so no need to calculate anything
-            return 0;
-        }
-        float burnRate = hours * (weight / 10.0f);
-        float newAlcoholAmount = bloodAlcoholGrams - burnRate;
-        if(newAlcoholAmount < 0){
-            newAlcoholAmount = 0;
-        }
-        float burnedAlcohol = bloodAlcoholGrams - newAlcoholAmount;
-        setBloodAlcoholGrams(newAlcoholAmount);
-        return burnedAlcohol;
+        Drink drink = new Drink();
+        drink.setDrinker(this);
+        drink.setTimeStamp(new Date());
+        this.drinks.add(drink);
+        alcoholCalculator.calculateDrink(drink);
     }
 
     @Transient
     public float getPromilles(){
-        return bloodAlcoholGrams / (sex.factor * weight );
+        return alcoholCalculator.getAlcoholAmountAt(new Date()) / (sex.factor * weight);
+    }
+
+    public List<Float> getPromillesAtInterval(Date start, Date end, int intervalMs) {
+        List<Float> list = new ArrayList<Float>();
+        for (long i = start.getTime(); i  < end.getTime(); i += intervalMs) {
+            list.add(alcoholCalculator.getAlcoholAmountAt(new Date(i)) / (sex.factor * weight));
+        }
+
+        return list;
+    }
+
+    @Transient
+    public float getBloodAlcoholGrams() {
+        return alcoholCalculator.getAlcoholAmountAt(new Date());
     }
 
     /**
@@ -97,6 +98,7 @@ public class Participant extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
+        alcoholCalculator.calculateBurnRate(this.weight);
     }
 
     public void setSex(Sex sex) {
@@ -107,24 +109,27 @@ public class Participant extends AbstractEntity{
         return sex;
     }
 
-    public float getBloodAlcoholGrams() {
-        return bloodAlcoholGrams;
+    public Integer getTotalDrinks(){
+        return this.drinks.size();
     }
 
-    public void setBloodAlcoholGrams(float bloodAlcoholGrams) {
-        if(bloodAlcoholGrams > 0 ){
-            this.bloodAlcoholGrams = bloodAlcoholGrams;
-        }else{
-            this.bloodAlcoholGrams = 0;
+    /**
+     * @return the drinks
+     */
+    @OneToMany
+    public List<Drink> getDrinks() {
+        return drinks;
+    }
+
+    /**
+     * MUST BE SORTED BY TIME DESCENDING
+     * @param drinks the drinks to set
+     */
+    public void setDrinks(List<Drink> drinks) {
+        this.drinks = drinks;
+        alcoholCalculator.reset();
+        for (Drink drink : drinks) {
+            alcoholCalculator.calculateDrink(drink);
         }
     }
-
-    public void setTotalDrinks(Integer totalDrinks){
-        this.totalDrinks = totalDrinks != null ? totalDrinks : 0;
-    }
-
-    public Integer getTotalDrinks(){
-        return this.totalDrinks;
-    }
-
 }
