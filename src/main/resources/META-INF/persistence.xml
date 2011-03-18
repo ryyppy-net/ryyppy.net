@@ -10,9 +10,7 @@
         <class>drinkcounter.model.AbstractEntity</class>
         <class>drinkcounter.model.Party</class>
         <class>drinkcounter.model.Participant</class>
-        <class>drinkcounter.model.Party</class>
-        <class>drinkcounter.model.ParticipantHistory</class>
-        <class>drinkcounter.model.PartyHistory</class>
+        <class>drinkcounter.model.Drink</class>
         <properties>
             <property name="hibernate.hbm2ddl.auto" value="update" />
             <property name="hibernate.show_sql" value="false" />

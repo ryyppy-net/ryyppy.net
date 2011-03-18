@@ -58,11 +58,7 @@ public class Participant extends AbstractEntity{
     }
 
     public void drink(){
-        Drink drink = new Drink();
-        drink.setDrinker(this);
-        drink.setTimeStamp(new Date());
-        this.drinks.add(drink);
-        alcoholCalculator.calculateDrink(drink);
+        alcoholCalculator.calculateDrink(new Date());
     }
 
     @Transient
@@ -109,6 +105,7 @@ public class Participant extends AbstractEntity{
         return sex;
     }
 
+    @Transient
     public Integer getTotalDrinks(){
         return this.drinks.size();
     }
@@ -129,7 +126,8 @@ public class Participant extends AbstractEntity{
         this.drinks = drinks;
         alcoholCalculator.reset();
         for (Drink drink : drinks) {
-            alcoholCalculator.calculateDrink(drink);
+            if (drink.getTimeStamp() == null) continue;
+            alcoholCalculator.calculateDrink(drink.getTimeStamp());
         }
     }
 }
