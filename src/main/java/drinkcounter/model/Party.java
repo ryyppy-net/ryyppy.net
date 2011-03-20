@@ -3,6 +3,7 @@ package drinkcounter.model;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 
@@ -12,7 +13,7 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Party extends AbstractEntity{
-    private List<User> users;
+    private List<User> participants;
     private String id;
 
     public String getId() {
@@ -29,18 +30,19 @@ public class Party extends AbstractEntity{
     }
 
     @ManyToMany
-    public List<User> getUsers() {
-        if(users == null){
-            users =  new ArrayList<User>();
+    @JoinTable(name="participants")
+    public List<User> getParticipants() {
+        if(participants == null){
+            participants =  new ArrayList<User>();
         }
-        return users;
+        return participants;
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public void setParticipants(List<User> participants) {
+        this.participants = participants;
     }
 
-    public void addUser(User user){
-        getUsers().add(user);
+    public void addParticipant(User participant){
+        getParticipants().add(participant);
     }
 }

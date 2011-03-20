@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
@@ -67,7 +66,7 @@ public class User extends AbstractEntity{
         return getStoreKey().toString();
     }
 
-    @ManyToMany(fetch=FetchType.LAZY)
+    @ManyToMany(mappedBy="participants")
     public List<Party> getParties() {
         return parties;
     }
@@ -76,8 +75,9 @@ public class User extends AbstractEntity{
         this.parties = parties;
     }
 
-    public void drink(){
-        alcoholCalculator.calculateDrink(new Date());
+    public void drink(Drink drink){
+        getDrinks().add(drink);
+        alcoholCalculator.calculateDrink(drink.getTimeStamp());
     }
 
     @Transient

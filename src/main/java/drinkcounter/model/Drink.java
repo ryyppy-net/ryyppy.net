@@ -7,6 +7,7 @@ package drinkcounter.model;
 
 import java.util.Date;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -25,7 +26,13 @@ public class Drink extends AbstractEntity {
     private User drinker;
     private Date timeStamp;
 
-    @ManyToOne
+    public Drink() {
+        timeStamp = new Date();
+    }
+
+
+
+    @ManyToOne(fetch=FetchType.LAZY)
     public User getDrinker() {
         return drinker;
     }
