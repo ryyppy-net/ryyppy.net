@@ -19,9 +19,11 @@ public class PartyController {
     @Autowired private DrinkCounterService drinkCounterService;
 
     @RequestMapping("/parties")
-    public ModelAndView parties() {
+    public ModelAndView parties(@RequestParam(value="openId", required=false) String openId) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("parties");
+        if (openId == null) openId = "anonymous";
+        mav.addObject("openId", openId);
         mav.addObject("parties", drinkCounterService.listParties());
         mav.addObject("users", drinkCounterService.listUsers());
         return mav;
@@ -43,19 +45,7 @@ public class PartyController {
         return "redirect:viewParty?id="+partyName;
     }
 
-    @RequestMapping("/addUser")
-    public String addUser(
-            @RequestParam("name") String name,
-            @RequestParam("sex") String sex,
-            @RequestParam("weight") float weight){
-            User user = new User();
-            user.setName(name);
-            user.setSex(User.Sex.valueOf(sex));
-            user.setWeight(weight);
-            drinkCounterService.addUser(user);
-            return "redirect:parties";
-    }
-    
+   
     @RequestMapping("/addAnonymousUser")
     public String addAnonymousUser(
             @RequestParam("partyId") String partyId,
@@ -77,11 +67,5 @@ public class PartyController {
             @RequestParam("userId") String userId){
             drinkCounterService.linkUserToParty(userId, partyId);
             return "redirect:viewParty?id="+partyId;
-    }
-
-    @RequestMapping("/addDrink")
-    public String addDrink(@RequestParam("id") String userId){
-        drinkCounterService.addDrink(userId);
-        return "redirect:parties";
     }
 }
