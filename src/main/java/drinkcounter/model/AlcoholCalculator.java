@@ -44,8 +44,6 @@ public class AlcoholCalculator {
      * @return grams of alcohol in blood at given time
      */
     public float getAlcoholAmountAt(Date time) {
-        if (functions == null) throw new IllegalStateException("calculate() must be called before getAlcoholAmountAt()");
-        
         return (float)calculate(time);
     }
     
