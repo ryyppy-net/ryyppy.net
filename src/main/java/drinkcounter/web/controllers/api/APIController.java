@@ -54,7 +54,7 @@ public class APIController {
     public @ResponseBody String addDrink(@PathVariable String userId){
         service.addDrink(userId);
         User user = service.getUser(userId);
-        return user.getTotalDrinks().toString();
+        return Integer.toString(user.getTotalDrinks());
     }
     
     @RequestMapping("/users/{userId}/show-history")
