@@ -1,13 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.model.Participant;
-import org.apache.commons.lang.StringUtils;
+import drinkcounter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +23,7 @@ public class PartyController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("parties");
         mav.addObject("parties", drinkCounterService.listParties());
+        mav.addObject("users", drinkCounterService.listUsers());
         return mav;
     }
 
@@ -37,7 +32,8 @@ public class PartyController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", drinkCounterService.getParty(partyId));
-        mav.addObject("participants", drinkCounterService.listParticipants(partyId));
+        mav.addObject("allUsers", drinkCounterService.listUsers());
+        mav.addObject("users", drinkCounterService.listUsersByParty(partyId));
         return mav;
     }
 
@@ -47,23 +43,45 @@ public class PartyController {
         return "redirect:viewParty?id="+partyName;
     }
 
-    @RequestMapping("/addParticipant")
-    public String addParticipant(@RequestParam("partyId") String partyId,
+    @RequestMapping("/addUser")
+    public String addUser(
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight){
-            Participant participant = new Participant();
-            participant.setName(name);
-            participant.setSex(Participant.Sex.valueOf(sex));
-            participant.setWeight(weight);
-            drinkCounterService.addParticipant(participant, partyId);
+            User user = new User();
+            user.setName(name);
+            user.setSex(User.Sex.valueOf(sex));
+            user.setWeight(weight);
+            drinkCounterService.addUser(user);
+            return "redirect:parties";
+    }
+    
+    @RequestMapping("/addAnonymousUser")
+    public String addAnonymousUser(
+            @RequestParam("partyId") String partyId,
+            @RequestParam("name") String name,
+            @RequestParam("sex") String sex,
+            @RequestParam("weight") float weight){
+            User user = new User();
+            user.setName(name);
+            user.setSex(User.Sex.valueOf(sex));
+            user.setWeight(weight);
+            user.setGuest(true);
+            drinkCounterService.addUser(user);
+            drinkCounterService.linkUserToParty(user.getId(), partyId);
+            return "redirect:viewParty?id=" + partyId;
+    }
+    
+    @RequestMapping("/linkUserToParty")
+    public String linkUserToParty(@RequestParam("partyId") String partyId,
+            @RequestParam("userId") String userId){
+            drinkCounterService.linkUserToParty(userId, partyId);
             return "redirect:viewParty?id="+partyId;
     }
 
     @RequestMapping("/addDrink")
-    public String addDrink(@RequestParam("id") String participantId){
-        drinkCounterService.addDrink(participantId);
-        String partyId = drinkCounterService.getPartyIdForParticipant(participantId);
-        return "redirect:viewParty?id="+partyId;
+    public String addDrink(@RequestParam("id") String userId){
+        drinkCounterService.addDrink(userId);
+        return "redirect:parties";
     }
 }

@@ -5,7 +5,6 @@
 
 package drinkcounter.model;
 
-import java.util.Date;
 import org.joda.time.DateTime;
 import java.util.ArrayList;
 import org.junit.Test;
@@ -15,17 +14,17 @@ import static org.junit.Assert.*;
  *
  * @author Toni
  */
-public class ParticipantTest {
+public class UserTest {
     @Test
     public void testBloodAlcohol(){
-        Participant participant = new Participant();
-        participant.drink();
-        assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, participant.getBloodAlcoholGrams(), 0.1f);
+        User user = new User();
+        user.drink();
+        assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, user.getBloodAlcoholGrams(), 0.1f);
     }
     
     @Test
     public void testPromilles() {
-        Participant participant = new Participant();
+        User user = new User();
         
         Drink drink1 = new Drink();
         drink1.setTimeStamp(new DateTime().minusMinutes(90).toDate());
@@ -39,19 +38,19 @@ public class ParticipantTest {
         al.add(drink2);
         al.add(drink3);
         
-        participant.setDrinks(al);
-        assertEquals(0.49, participant.getPromilles(), 0.01);
+        user.setDrinks(al);
+        assertEquals(0.49, user.getPromilles(), 0.01);
     }
     
     @Test
     public void testDrinking() {
-        Participant participant = new Participant();
-        participant.drink();
-        participant.drink();
-        participant.drink();
-        participant.drink();
-        participant.drink();
+        User user = new User();
+        user.drink();
+        user.drink();
+        user.drink();
+        user.drink();
+        user.drink();
 
-        assertEquals(1.143, participant.getPromilles(), 0.01);
+        assertEquals(1.143, user.getPromilles(), 0.01);
     }
 }

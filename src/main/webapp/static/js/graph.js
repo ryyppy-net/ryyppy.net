@@ -1,33 +1,25 @@
 var alcoholScale = 3;
-var timeScale = 300;
+var timeScale = 5 * 60 * 60 * 1000;
 
-var personhistories = [];
-
-function generateChart(name) {
-	alert(personhistories[name]);
-
-	var data = personhistories[name];
-}
-
-function loaded(data, callback) {
+function dataLoaded(data, userId, width, height, callback) {
 	var rows = data.split('\n');
 
-	for (var i = 1; i < rows.length; i++) {
-		var row = rows[i];
-		
-		var columns = row.split(',');
-		
-		var person = {"timestamp": new Date(columns[0]), "name": columns[1], "alcohol": Number(columns[2]), "drinks": columns[3]};
-		if (!personhistories[person.name])
-			personhistories[person.name] = []
-		personhistories[person.name].push(person);
-	}
+        histories = [];
 
-	callback();
+	for (var i = 1; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.length < 1) continue;
+            var columns = row.split(',');
+
+            var history = {"timestamp": new Date(columns[0]), "alcohol": Number(columns[1])};
+            histories.push(history);
+	}
+        
+        getChartFromGoogle(histories, userId, width, height, callback);
 }
 
-function initialize(callback) {
-	$.get(historyUrl, function(data) { loaded(data, callback); } );
+function getGraph(userId, width, height, callback) {
+	$.get(historyUrl.replace('_userid_', userId), function(data) { dataLoaded(data, userId, width, height, callback); } );
 }
 
 String.prototype.format = function() {
@@ -39,7 +31,7 @@ String.prototype.format = function() {
     return formatted;
 };
 
-function getChart(name, width, height, callback) {
+function getChartFromGoogle(histories, userId, width, height, callback) {
 	if (width < 10) width = 10;
 
 	var url = 
@@ -47,40 +39,46 @@ function getChart(name, width, height, callback) {
 
 	var w = Math.min(width, 500);
 	var h = Math.min(height, 500);
-	var asd = getDataFromHistories(name);
+	var data = reformData(histories);
 	
-	if (asd == null || asd.length == 0)
+	if (data == null || data.length == 0)
 		return;
 
-	url = url.format(asd, Math.floor(w), Math.floor(h), timeScale, alcoholScale, 100 / (timeScale / 60), 100 / alcoholScale, '000000');
+	url = url.format(data, Math.floor(w), Math.floor(h), timeScale, alcoholScale, 100 / 5, 100 / alcoholScale, '000000');
 
-	callback(url, name);
+	callback(url, userId);
 }
 
-function getDataFromHistories(name)
+function reformData(datas)
 {
-	var datas = personhistories[name];
+    /**
+     *
+     * uncomment this to have fixed time scale
 	var values = [];
 	for (var i = 0; i < datas.length; i++) {
-		var data = datas[i];
-		if (data.timestamp.getTime() >= new Date().getTime() - timeScale * 60 * 1000) {
-			values.push(data);
-		}
+            var data = datas[i];
+            if (data.timestamp.getTime() >= new Date().getTime() - timeScale) {
+                values.push(data);
+            }
 	}
+     */
+        var values = datas;
 	
 	if (values.length == 0) return "";
-	values.sort(function(a, b) { return (a.timestamp < b.timestamp) ? -1 : (a.timestamp == b.timestamp) ? 0 : 1;});
+	values.sort(function(a, b) {return (a.timestamp < b.timestamp) ? -1 : (a.timestamp == b.timestamp) ? 0 : 1;});
 	
+        timeScale = Math.abs(values[0].timestamp.getTime() - values[values.length - 1].timestamp.getTime());
+        
 	var y = "";
 	var x = "";
 	
 	for (var i in values)
 	{
-		var personHistory = values[i];
-		y += String(Number(personHistory.alcohol).toFixed(2)).replace(",", ".") + ",";
+            var userHistory = values[i];
+            y += String(Number(userHistory.alcohol).toFixed(2)).replace(",", ".") + ",";
 
-		var minutes = "" + Number(timeScale - (new Date().getTime() - personHistory.timestamp.getTime()) / (1000 * 60)).toFixed(2);
-		x += ("" + minutes).replace(",", ".") + ",";
+            var minutes = "" + Number(timeScale - (new Date().getTime() - userHistory.timestamp.getTime())).toFixed(2);
+            x += ("" + minutes).replace(",", ".") + ",";
 
 	}
 	return x.substr(0, x.length - 1) + '|' + y.substr(0, y.length - 1);

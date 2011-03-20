@@ -26,10 +26,10 @@ public class AlcoholCalculator {
     private ShotFunction lastAddedFunction = null;
 
     AlcoholCalculator(float weight) {
-        calculateBurnRate(weight);
+        setWeight(weight);
     }
     
-    public void calculateBurnRate(float weight) {
+    public void setWeight(float weight) {
         burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
     }
     
@@ -66,7 +66,7 @@ public class AlcoholCalculator {
     private double calculate(Date time)
     {
         double alcohol = 0;
-
+        
         for (ShotFunction shotFunction : functions)
         {
             alcohol = shotFunction.calc(time);

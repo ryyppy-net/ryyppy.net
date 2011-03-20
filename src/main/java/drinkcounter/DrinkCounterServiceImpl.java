@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package drinkcounter;
 
 import drinkcounter.dao.DrinkDAO;
-import drinkcounter.dao.ParticipantDAO;
+import drinkcounter.dao.UserDAO;
 import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Drink;
-import drinkcounter.model.Participant;
+import drinkcounter.model.User;
 import drinkcounter.model.Party;
 import java.util.Date;
 import java.util.LinkedList;
@@ -33,7 +29,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Autowired
     private DrinkDAO drinkDao;
     @Autowired
-    private ParticipantDAO participantDAO;
+    private UserDAO userDAO;
 
     @Override
     public Party startParty(String identifier) {
@@ -68,57 +64,84 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    public List<Participant> listParticipants(String partyIdentifier) {
-        return new LinkedList(getParty(partyIdentifier).getParticipants());
+    public List<User> listUsersByParty(String partyIdentifier) {
+        return new LinkedList<User>(getParty(partyIdentifier).getUsers());
+    }
+
+    // this doesn't return include anonymous users
+    @Override
+    public List<User> listUsers() {
+        List<User> list = userDAO.readAll();
+        List<User> list2 = new LinkedList<User>();
+        for (User user : list) {
+            if (!user.isGuest())
+                list2.add(user);
+        }
+        return list2;
     }
 
     @Override
     @Transactional
-    public Participant addParticipant(Participant participant, String partyIdentifier) {
+    public User addUser(User user) {
+        userDAO.save(user);
+        log.info("User with name {} was added", user.getName());
+        return user;
+    }
+    
+    @Override
+    @Transactional
+    public void linkUserToParty(String userId, String partyIdentifier) {
         Party party = getParty(partyIdentifier);
-        party.addParticipant(participant);
-        participantDAO.save(participant);
-        log.info("Participant with name {} was added to party {}", participant.getName(), party.getName());
-        return participant;
+        User user = getUser(userId);
+        party.addUser(user);
+        partyDao.save(party);
+        log.info("User with name {} was added to party {}", user.getName(), party.getName());
     }
 
     @Override
     @Transactional
-    public void addDrink(String participantIdentifier) {
-        Participant participant = participantDAO.readByPrimaryKey(Integer.parseInt(participantIdentifier));
-        String partyId = participant.getParty().getId();
-        participant.drink();
+    public void addDrink(String userIdentifier) {
+        User user = userDAO.readByPrimaryKey(Integer.parseInt(userIdentifier));
         Drink drink = new Drink();
-        drink.setDrinker(participant);
+        drink.setDrinker(user);
         drink.setTimeStamp(new Date());
+
+        user.drink(); // this shouldn't be necessary in the future
+        user.getDrinks().add(drink);
+        
         drinkDao.save(drink);
-        log.info("Participant {} has drunk a drink in party {}", participant.getName(), partyId);
+        log.info("User {} has drunk a drink", user.getName());
     }
 
     @Override
-    public List<Drink> getDrinks(String participantIdentifier) {
-        Participant participant = getParticipant(participantIdentifier);
-        return drinkDao.findByDrinker(participant);
+    public List<Drink> getDrinks(String userIdentifier) {
+        User user = getUser(userIdentifier);
+        return drinkDao.findByDrinker(user);
     }
 
     @Override
-    public Participant getParticipant(String participantId) {
-        return participantDAO.readByPrimaryKey(Integer.parseInt(participantId));
+    public User getUser(String userId) {
+        return userDAO.readByPrimaryKey(Integer.parseInt(userId));
     }
 
-    @Override
-    public String getPartyIdForParticipant(String participantId) {
-        return getParticipant(participantId).getParty().getId();
-    }
-
+    // can't we use CASCADE
     @Override
     @Transactional
-    public void deleteParticipant(String participantId) {
-        Participant participant = getParticipant(participantId);
-        List<Drink> drinks = getDrinks(participantId);
+    public void deleteUser(String userId) {
+        User user = getUser(userId);
+        List<Drink> drinks = getDrinks(userId);
         for (Drink drink : drinks) {
             drinkDao.delete(drink);
         }
-        participantDAO.delete(participant);
+        
+        // not sure if necessary, stupid object db's
+        List<Party> parties = user.getParties();
+        if (parties != null) {
+            for (Party party : parties) {
+                party.getUsers().remove(user);
+            }
+        }
+        
+        userDAO.delete(user);
     }
 }

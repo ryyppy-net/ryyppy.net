@@ -22,15 +22,15 @@ import javax.persistence.Temporal;
 })
 public class Drink extends AbstractEntity {
 
-    private Participant drinker;
+    private User drinker;
     private Date timeStamp;
 
     @ManyToOne
-    public Participant getDrinker() {
+    public User getDrinker() {
         return drinker;
     }
 
-    public void setDrinker(Participant drinkerKey) {
+    public void setDrinker(User drinkerKey) {
         this.drinker = drinkerKey;
     }
 
