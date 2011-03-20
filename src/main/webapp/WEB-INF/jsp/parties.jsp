@@ -1,17 +1,17 @@
-<%@page contentType="text/html" pageEncoding="windows-1252" isELIgnored="false"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
    "http://www.w3.org/TR/html4/loose.dtd">
 
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Bileet!</title>
-        <script type="text/javascript" src="/static/js/jquery.js" />
-        <script type="text/javascript" src="/static/js/drinkerchecks.js" />
+        <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
     </head>
     <body>
-        <h1>Käynnissä olevat bileet</h1>
+        <h1>KÃ¤ynnissÃ¤ olevat bileet</h1>
         <ul>
             <c:forEach items="${parties}" var="party">
                 <li>
@@ -30,7 +30,7 @@
             <input type="submit" value="Luo bileet" />
         </form>
             
-        <h1>Olemassa olevat äijät</h1>
+        <h1>Olemassa olevat Ã¤ijÃ¤t</h1>
         <ul>
             <c:forEach items="${users}" var="user">
                 <li>
@@ -63,7 +63,7 @@
                     <td><input type="text" name="weight" /></td>
                 </tr>
             </table>
-            <input type="submit" value="Lisää bilettäjä" />
+            <input type="submit" value="LisÃ¤Ã¤ bilettÃ¤jÃ¤" />
         </form>
             
     </body>
