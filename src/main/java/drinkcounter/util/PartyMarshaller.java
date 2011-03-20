@@ -7,7 +7,7 @@ package drinkcounter.util;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.model.Drink;
-import drinkcounter.model.Participant;
+import drinkcounter.model.User;
 import drinkcounter.model.Party;
 import java.io.OutputStream;
 import java.util.List;
@@ -38,6 +38,7 @@ public class PartyMarshaller {
     public void marshall(String partyId, OutputStream out){
         try {
             Party party = service.getParty(partyId);
+            
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             DocumentBuilder b = f.newDocumentBuilder();
             Document d = b.newDocument();
@@ -49,10 +50,10 @@ public class PartyMarshaller {
             Node partyNameNode = d.createElement("name");
             partyNameNode.setTextContent(party.getName());
             rootNode.appendChild(partyNameNode);
-            Node participantsNode = d.createElement("participants");
-            rootNode.appendChild(participantsNode);
-            for (Participant participant : service.listParticipants(partyId)) {
-                participantsNode.appendChild(createParticipantNode(d, participant));
+            Node usersNode = d.createElement("users");
+            rootNode.appendChild(usersNode);
+            for (User user : service.listUsersByParty(partyId)) {
+                usersNode.appendChild(createUserNode(d, user));
             }
             StreamResult streamResult = new StreamResult(out);
             TransformerFactory tf = TransformerFactory.newInstance();
@@ -67,22 +68,25 @@ public class PartyMarshaller {
         }
     }
 
-     private Node createParticipantNode(Document doc, Participant participant) {
-        Node participantNode = doc.createElement("participant");
+     private Node createUserNode(Document doc, User user) {
+        Node userNode = doc.createElement("user");
+
+        userNode.appendChild(createTextContentElement("id", user.getId(), doc));
+        userNode.appendChild(createTextContentElement("name", user.getName(), doc));
+        userNode.appendChild(createTextContentElement("alcoholInPromilles", Float.toString(user.getPromilles()), doc));
+        userNode.appendChild(createTextContentElement("totalDrinks", user.getTotalDrinks().toString(), doc));
         
-        List<Drink> drinks = service.getDrinks(participant.getId());
-        participant.setDrinks(drinks);
-
-        participantNode.appendChild(createTextContentElement("id", participant.getId(), doc));
-        participantNode.appendChild(createTextContentElement("name", participant.getName(), doc));
-        participantNode.appendChild(createTextContentElement("alcoholInPromilles", Float.toString(participant.getPromilles()), doc));
-        participantNode.appendChild(createTextContentElement("weight", Float.toString(participant.getWeight()), doc));
-        participantNode.appendChild(createTextContentElement("sex", participant.getSex().toString(), doc));
-        participantNode.appendChild(createDrinksNode(doc, drinks));
-
-        return participantNode;
+        if (user.getDrinks().size() > 0) {
+            Drink lastDrink = user.getDrinks().get(user.getDrinks().size() - 1);
+            userNode.appendChild(createTextContentElement("lastDrink", new DateTime(lastDrink.getTimeStamp()).toString(), doc));
+        }
+        else
+            userNode.appendChild(createTextContentElement("lastDrink", new DateTime().toString(), doc));
+        
+        return userNode;
     }
 
+     // this might be redundant
     private Node createDrinksNode(Document d, List<Drink> drinks){
         Node drinksNode = d.createElement("drinks");
         drinksNode.appendChild(createTextContentElement("count", Integer.toString(drinks.size()), d));

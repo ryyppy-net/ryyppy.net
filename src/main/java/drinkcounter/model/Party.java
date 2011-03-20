@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drinkcounter.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 
 /**
@@ -17,7 +12,7 @@ import javax.persistence.Transient;
  */
 @Entity
 public class Party extends AbstractEntity{
-    private List<Participant> participants;
+    private List<User> users;
     private String id;
 
     public String getId() {
@@ -33,20 +28,19 @@ public class Party extends AbstractEntity{
         return getId();
     }
 
-    @OneToMany(mappedBy="party")
-    public List<Participant> getParticipants() {
-        if(participants ==null){
-            participants =  new ArrayList<Participant>();
+    @ManyToMany
+    public List<User> getUsers() {
+        if(users == null){
+            users =  new ArrayList<User>();
         }
-        return participants;
+        return users;
     }
 
-    public void setParticipants(List<Participant> participants) {
-        this.participants = participants;
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
-    public void addParticipant(Participant participant){
-        getParticipants().add(participant);
-        participant.setParty(this);
+    public void addUser(User user){
+        getUsers().add(user);
     }
 }

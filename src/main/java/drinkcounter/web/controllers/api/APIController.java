@@ -8,7 +8,7 @@ package drinkcounter.web.controllers.api;
 import com.csvreader.CsvWriter;
 import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.model.Participant;
+import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,14 +36,13 @@ public class APIController {
 
     private static final Logger log = LoggerFactory.getLogger(APIController.class);
 
-
     @Autowired
     private PartyMarshaller partyMarshaller;
 
     @Autowired
     private DrinkCounterService service;
 
-    @RequestMapping("/{partyId}")
+    @RequestMapping("/parties/{partyId}")
     public @ResponseBody byte[] printXml(@PathVariable String partyId) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshall(partyId, baos);
@@ -51,56 +50,36 @@ public class APIController {
         return bytesXml;
     }
 
-    @RequestMapping("/{partyId}/add-drink")
-    public @ResponseBody String addDrink(@PathVariable String partyId, @RequestParam("participant-id") String participantId){
-        service.addDrink(participantId);
-        Participant participant = service.getParticipant(participantId);
-        return participant.getTotalDrinks().toString();
+    @RequestMapping("/users/{userId}/add-drink")
+    public @ResponseBody String addDrink(@PathVariable String userId){
+        service.addDrink(userId);
+        User user = service.getUser(userId);
+        return user.getTotalDrinks().toString();
     }
-
-    @RequestMapping("/{partyId}/add-participant")
-    public @ResponseBody String addDrink(@PathVariable String partyId,
-            @RequestParam("name") String name,
-            @RequestParam("sex") String sex,
-            @RequestParam("weight") float weight){
-        Participant participant = new Participant();
-        participant.setName(name);
-        participant.setSex(Participant.Sex.valueOf(sex));
-        participant.setWeight(weight);
-        participant = service.addParticipant(participant, partyId);
-        return participant.getId();
-    }
-
-    @RequestMapping("/{partyId}/remove-participant")
-    public void removeParticipant(@RequestParam("participant-id") String participantId){
-        service.deleteParticipant(participantId);
-    }
-
-    @RequestMapping("/{partyId}/show-history")
-    public ResponseEntity<byte[]> showHistory(@PathVariable String partyId) throws IOException{
+    
+    @RequestMapping("/users/{userId}/show-history")
+    public ResponseEntity<byte[]> showHistory(@PathVariable String userId) throws IOException{
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{"Time", "Name", "Alcohol Level", "Drinks"});
-        /*
-         * TODO Fix
-        List<PartyHistory> partyHistories = historyService.getPartyHistory(partyId);
-        for (PartyHistory partyHistory : partyHistories) {
-            DateTime time = new DateTime(partyHistory.getSnapshotTime());
-            for (ParticipantHistory participantHistory : partyHistory.getParticipants()) {
-                csvWriter.writeRecord(
-                        new String[]{
-                            time.toString(),
-                            participantHistory.getParticipantName(),
-                            Float.toString(participantHistory.getAlcoholLevel()),
-                            participantHistory.getTotalDrinks().toString()
-                        }
-                );
-            }
+        csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
+
+        User user = service.getUser(userId);
+        
+        int intervalMs = 5 * 60 * 1000;
+        
+        DateTime now = new DateTime();
+        DateTime start = now.minusMinutes(300);
+        List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
+
+        DateTime time = start;
+        for (Float f : history) {
+            csvWriter.writeRecord(
+                    new String[]{time.toString(), Float.toString(f)}
+            );
+            time = time.plusMillis(intervalMs);
         }
-         * 
-         */
         csvWriter.close();
         byte[] bytes = baos.toByteArray();
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);

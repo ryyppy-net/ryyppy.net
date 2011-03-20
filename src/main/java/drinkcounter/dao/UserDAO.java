@@ -5,13 +5,13 @@
 
 package drinkcounter.dao;
 
-import drinkcounter.model.Participant;
+import drinkcounter.model.User;
 import org.synyx.hades.dao.GenericDao;
 
 /**
  *
  * @author Toni
  */
-public interface ParticipantDAO extends GenericDao<Participant, Integer> {
+public interface UserDAO extends GenericDao<User, Integer> {
 
 }
