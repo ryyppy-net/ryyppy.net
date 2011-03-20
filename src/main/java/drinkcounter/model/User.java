@@ -131,7 +131,7 @@ public class User extends AbstractEntity{
      * @return
      */
     @Transient
-    public Integer getTotalDrinks(){
+    public int getTotalDrinks(){
         // TODO optimize
         if (getDrinks().isEmpty()) return 0;
         Date soberTime = getTimeWhenUserLastSober();

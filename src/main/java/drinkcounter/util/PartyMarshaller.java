@@ -74,7 +74,7 @@ public class PartyMarshaller {
         userNode.appendChild(createTextContentElement("id", user.getId(), doc));
         userNode.appendChild(createTextContentElement("name", user.getName(), doc));
         userNode.appendChild(createTextContentElement("alcoholInPromilles", Float.toString(user.getPromilles()), doc));
-        userNode.appendChild(createTextContentElement("totalDrinks", user.getTotalDrinks().toString(), doc));
+        userNode.appendChild(createTextContentElement("totalDrinks", Integer.toString(user.getTotalDrinks()), doc));
         
         if (user.getDrinks().size() > 0) {
             Drink lastDrink = user.getDrinks().get(user.getDrinks().size() - 1);
