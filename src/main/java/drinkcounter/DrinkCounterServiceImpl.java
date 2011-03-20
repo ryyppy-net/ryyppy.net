@@ -32,6 +32,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     private UserDAO userDAO;
 
     @Override
+    @Transactional
     public Party startParty(String identifier) {
         if(StringUtils.isBlank(identifier)){
             throw new IllegalArgumentException("Party id cannot be empty");
@@ -49,6 +50,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    @Transactional
     public void updateParty(Party party) {
         partyDao.save(party);
     }
@@ -65,7 +67,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     public List<User> listUsersByParty(String partyIdentifier) {
-        return new LinkedList<User>(getParty(partyIdentifier).getUsers());
+        return new LinkedList<User>(getParty(partyIdentifier).getParticipants());
     }
 
     // this doesn't return include anonymous users
@@ -93,7 +95,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public void linkUserToParty(String userId, String partyIdentifier) {
         Party party = getParty(partyIdentifier);
         User user = getUser(userId);
-        party.addUser(user);
+        party.addParticipant(user);
         partyDao.save(party);
         log.info("User with name {} was added to party {}", user.getName(), party.getName());
     }
@@ -106,8 +108,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         drink.setDrinker(user);
         drink.setTimeStamp(new Date());
 
-        user.drink(); // this shouldn't be necessary in the future
-        user.getDrinks().add(drink);
+        user.drink(drink); // this shouldn't be necessary in the future
         
         drinkDao.save(drink);
         log.info("User {} has drunk a drink", user.getName());
@@ -138,7 +139,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         List<Party> parties = user.getParties();
         if (parties != null) {
             for (Party party : parties) {
-                party.getUsers().remove(user);
+                party.getParticipants().remove(user);
             }
         }
         

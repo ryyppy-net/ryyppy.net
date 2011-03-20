@@ -18,7 +18,8 @@ public class UserTest {
     @Test
     public void testBloodAlcohol(){
         User user = new User();
-        user.drink();
+        Drink drink = new Drink();
+        user.drink(drink);
         assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, user.getBloodAlcoholGrams(), 0.1f);
     }
     
@@ -45,11 +46,11 @@ public class UserTest {
     @Test
     public void testDrinking() {
         User user = new User();
-        user.drink();
-        user.drink();
-        user.drink();
-        user.drink();
-        user.drink();
+        user.drink(new Drink());
+        user.drink(new Drink());
+        user.drink(new Drink());
+        user.drink(new Drink());
+        user.drink(new Drink());
 
         assertEquals(1.143, user.getPromilles(), 0.01);
     }
