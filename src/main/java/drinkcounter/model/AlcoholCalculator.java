@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 // probably the wrong package for this, feel free to move
 package drinkcounter.model;
 

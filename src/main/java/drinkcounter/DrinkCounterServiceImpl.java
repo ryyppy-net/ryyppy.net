@@ -108,7 +108,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         drink.setDrinker(user);
         drink.setTimeStamp(new Date());
 
-        user.drink(drink); // this shouldn't be necessary in the future
+        user.drink(drink);
         
         drinkDao.save(drink);
         log.info("User {} has drunk a drink", user.getName());

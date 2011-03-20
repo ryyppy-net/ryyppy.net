@@ -49,7 +49,7 @@ public class User extends AbstractEntity{
     private AlcoholCalculator alcoholCalculator = new AlcoholCalculator(weight);
 
     /**
-     * Guest of what? What is this I don't even
+     * This user is a guest in the system, can be removed after sober
      */
     private boolean guest;
     
@@ -132,7 +132,6 @@ public class User extends AbstractEntity{
      */
     @Transient
     public int getTotalDrinks(){
-        // TODO optimize
         if (getDrinks().isEmpty()) return 0;
         Date soberTime = getTimeWhenUserLastSober();
         return drinksSince(soberTime);
@@ -157,6 +156,7 @@ public class User extends AbstractEntity{
      */
     @Transient
     private Date getTimeWhenUserLastSober(){
+        // TODO optimize
         final int maxMinutes = 10080;
         final int interval = 15;
 
@@ -189,8 +189,7 @@ public class User extends AbstractEntity{
     }
 
     /**
-     * MUST BE SORTED BY TIME DESCENDING
-     * Or must it? Shouldn't this be sorted time ascending?
+     * Must be sorted by time ascending
      * @param drinks the drinks to set
      */
     public void setDrinks(List<Drink> drinks) {
