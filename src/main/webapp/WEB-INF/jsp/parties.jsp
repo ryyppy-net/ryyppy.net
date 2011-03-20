@@ -11,6 +11,8 @@
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
     </head>
     <body>
+        <h3>Terve <c:out value="${openId}" /></h3>
+        <br> <br>
         <h1>Käynnissä olevat bileet</h1>
         <ul>
             <c:forEach items="${parties}" var="party">
