@@ -1,6 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+1439 (@murgo) mikähän meillä ois yhen juojan nimi
+1439 (@murgo) kun ei tuo nykyinen participant enää oikein kuvasta sitä
+1440 (@murgo) jos ne eriytetään
+1440 (@murgo) tai siis kun ne eriytetään
+1440 (@murgo) oisko se sit Drinker vai User vai Person vai
+1440 (@ville_salonen) Drinker
+1440 (@ville_salonen) User ja Person on tylsemmille projekteille.
+1441 (@ville_salonen) Tietty mitäs sit, jos halutaan ottaa kovemmat huumeet mukaan, niin heroiininpiikittäjä
+                      ei oo enää Drinker!
+1441 (@murgo) User kävis tähänkin :)
+1442 (@ville_salonen) No, ihan miten vaan :)
+1442 (@murgo) hehe, kait tajusit, hehe
+1442 (@ville_salonen) Ah :D
+1442 (@murgo) http://en.wikipedia.org/wiki/User
  */
 
 package drinkcounter.model;
@@ -10,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
@@ -19,7 +31,7 @@ import javax.persistence.Transient;
  * @author Toni, Lauri
  */
 @Entity
-public class Participant extends AbstractEntity{
+public class User extends AbstractEntity{
 
     public enum Sex {
         MALE(0.75f), FEMALE(0.66f);
@@ -28,12 +40,14 @@ public class Participant extends AbstractEntity{
             this.factor = factor;
         }
     }
+
+    private List<Party> parties;
     private String name;
-    private Party party;
     private float weight = 70;
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
     private AlcoholCalculator alcoholCalculator = new AlcoholCalculator(weight);
+    private boolean guest;
     
     public String getName() {
         return name;
@@ -48,13 +62,13 @@ public class Participant extends AbstractEntity{
         return getStoreKey().toString();
     }
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    public Party getParty() {
-        return party;
+    @ManyToMany(fetch=FetchType.LAZY)
+    public List<Party> getParties() {
+        return parties;
     }
 
-    public void setParty(Party party) {
-        this.party = party;
+    public void setParties(List<Party> parties) {
+        this.parties = parties;
     }
 
     public void drink(){
@@ -68,7 +82,7 @@ public class Participant extends AbstractEntity{
 
     public List<Float> getPromillesAtInterval(Date start, Date end, int intervalMs) {
         List<Float> list = new ArrayList<Float>();
-        for (long i = start.getTime(); i  < end.getTime(); i += intervalMs) {
+        for (long i = start.getTime(); i  <= end.getTime(); i += intervalMs) {
             list.add(alcoholCalculator.getAlcoholAmountAt(new Date(i)) / (sex.factor * weight));
         }
 
@@ -94,7 +108,7 @@ public class Participant extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
-        alcoholCalculator.calculateBurnRate(this.weight);
+        alcoholCalculator.setWeight(this.weight);
     }
 
     public void setSex(Sex sex) {
@@ -107,7 +121,39 @@ public class Participant extends AbstractEntity{
 
     @Transient
     public Integer getTotalDrinks(){
-        return this.drinks.size();
+        // TODO optimize
+        if (getDrinks().isEmpty()) return 0;
+
+        final int maxMinutes = 10080;
+        final int interval = 15;
+
+        long time = new Date().getTime();
+
+        for (int i= 0; i < maxMinutes; i += interval) {
+            float a = alcoholCalculator.getAlcoholAmountAt(new Date(time));
+            if (a < 0.01) {
+                break;
+            }
+            time -= interval * 60 * 1000;
+        }
+
+        int length = getDrinks().size();
+        int count = 0;
+        for (int i = length - 1; i >= 0; i--) {
+            Drink drink = drinks.get(i);
+            if (drink.getTimeStamp().getTime() < time)
+                break;
+            count++;
+        }
+        return count;
+    }
+
+    public boolean isGuest() {
+        return guest;
+    }
+
+    public void setGuest(boolean guest) {
+        this.guest = guest;
     }
 
     /**

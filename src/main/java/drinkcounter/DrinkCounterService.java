@@ -6,7 +6,7 @@
 package drinkcounter;
 
 import drinkcounter.model.Drink;
-import drinkcounter.model.Participant;
+import drinkcounter.model.User;
 import drinkcounter.model.Party;
 import java.util.List;
 
@@ -21,15 +21,16 @@ public interface DrinkCounterService {
     void updateParty(Party party);
     List<Party> listParties();
     Party getParty(String identifier);
-    String getPartyIdForParticipant(String participantId);
+    void linkUserToParty(String userId, String partyIdentifier);
+    List<User> listUsersByParty(String partyIdentifier);
 
-    // Participants
-    List<Participant> listParticipants(String partyIdentifier);
-    Participant addParticipant(Participant participant, String partyIdentifier);
-    Participant getParticipant(String participantid);
-    void deleteParticipant(String participantId);
-    void addDrink(String participantIdentifier);
+    // Users
+    List<User> listUsers();
+    User addUser(User user);
+    User getUser(String userid);
+    void deleteUser(String userId);
+    void addDrink(String userIdentifier);
 
     // Global
-    List<Drink> getDrinks(String participantIdentifier);
+    List<Drink> getDrinks(String userIdentifier);
 }

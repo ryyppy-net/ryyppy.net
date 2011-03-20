@@ -7,6 +7,8 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
         <title>Bileet!</title>
+        <script type="text/javascript" src="/static/js/jquery.js" />
+        <script type="text/javascript" src="/static/js/drinkerchecks.js" />
     </head>
     <body>
         <h1>Käynnissä olevat bileet</h1>
@@ -27,5 +29,42 @@
             </table>
             <input type="submit" value="Luo bileet" />
         </form>
+            
+        <h1>Olemassa olevat äijät</h1>
+        <ul>
+            <c:forEach items="${users}" var="user">
+                <li>
+                    Name: <c:out value="${user.name}" />,
+                    Total drinks: <c:out value="${user.totalDrinks}" />,
+                    Alcohol: <c:out value="${user.promilles}" />,
+                    <c:url var="drinkUrl" value="addDrink?id=${user.id}" />
+                    <a href="${drinkUrl}">Drink</a>
+                </li>
+            </c:forEach>
+        </ul>
+        <form method="post" action="<c:url value="addUser" />">
+              <input type="hidden" name="partyId" value="${party.id}" />
+            <table>
+                <tr>
+                    <td>Nimi</td>
+                    <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerName();" /></td>
+                </tr>
+                <tr>
+                    <td>Sukupuoli</td>
+                    <td>
+                        <select name="sex">
+                            <option value="MALE">Mies</option>
+                            <option value="FEMALE">Nainen</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Paino</td>
+                    <td><input type="text" name="weight" /></td>
+                </tr>
+            </table>
+            <input type="submit" value="Lisää bilettäjä" />
+        </form>
+            
     </body>
 </html>

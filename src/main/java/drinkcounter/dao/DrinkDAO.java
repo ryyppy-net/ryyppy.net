@@ -6,7 +6,7 @@
 package drinkcounter.dao;
 
 import drinkcounter.model.Drink;
-import drinkcounter.model.Participant;
+import drinkcounter.model.User;
 import java.util.List;
 import org.synyx.hades.dao.GenericDao;
 
@@ -16,6 +16,6 @@ import org.synyx.hades.dao.GenericDao;
  */
 public interface DrinkDAO extends GenericDao<Drink, Integer>{
 
-    List<Drink> findByDrinker(Participant drinker);
+    List<Drink> findByDrinker(User drinker);
 
 }
