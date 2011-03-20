@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
     <context-param>
         <description>
             Configuration files for spring context
@@ -9,7 +9,6 @@
             classpath:drinkcounter/applicationContext.xml
         </param-value>
     </context-param>
-
     <listener>
         <description>
             Loads spring context when software starts.
@@ -17,7 +16,6 @@
         </description>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-
     <servlet>
         <servlet-name>UI</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -27,7 +25,6 @@
         <servlet-name>UI</servlet-name>
         <url-pattern>/ui/*</url-pattern>
     </servlet-mapping>
-
     <servlet>
         <servlet-name>internal</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -37,14 +34,12 @@
         <servlet-name>internal</servlet-name>
         <url-pattern>/internal/*</url-pattern>
     </servlet-mapping>
-
     <filter>
         <filter-name>EntityManager Filter</filter-name>
         <filter-class>
             org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
         </filter-class>
     </filter>
-
     <filter-mapping>
         <filter-name>EntityManager Filter</filter-name>
         <url-pattern>/ui/*</url-pattern>
@@ -57,7 +52,6 @@
         <filter-name>EntityManager Filter</filter-name>
         <url-pattern>/internal/*</url-pattern>
     </filter-mapping>
-
     <filter>
         <filter-name>encodingFilter</filter-name>
         <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -78,18 +72,11 @@
         <filter-name>encodingFilter</filter-name>
         <url-pattern>/ui/*</url-pattern>
     </filter-mapping>
-
     <servlet>
         <servlet-name>API</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
     </servlet>
-
-    <servlet-mapping>
-        <servlet-name>API</servlet-name>
-        <url-pattern>/API/parties/*</url-pattern>
-    </servlet-mapping>
-
     <security-constraint>
         <web-resource-collection>
             <url-pattern>/internal/*</url-pattern>
@@ -98,6 +85,10 @@
             <role-name>admin</role-name>
         </auth-constraint>
     </security-constraint>
+    <servlet-mapping>
+        <servlet-name>API</servlet-name>
+        <url-pattern>/API/*</url-pattern>
+    </servlet-mapping>
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
