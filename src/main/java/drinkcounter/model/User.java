@@ -20,6 +20,7 @@ package drinkcounter.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
@@ -47,6 +48,10 @@ public class User extends AbstractEntity{
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
     private AlcoholCalculator alcoholCalculator = new AlcoholCalculator(weight);
+
+    /**
+     * Guest of what? What is this I don't even
+     */
     private boolean guest;
     
     public String getName() {
@@ -119,11 +124,39 @@ public class User extends AbstractEntity{
         return sex;
     }
 
+    /**
+     * What is this i don't even.
+     * As far as I understand, this doesn't return total drinks like the name implies
+     * but how many drinks has the user drunk since he was last sober
+     * @return
+     */
     @Transient
     public Integer getTotalDrinks(){
         // TODO optimize
         if (getDrinks().isEmpty()) return 0;
+        Date soberTime = getTimeWhenUserLastSober();
+        return drinksSince(soberTime);
+    }
 
+    private int drinksSince(Date date){
+        int count = 0;
+        // iterate from last to first
+        ListIterator<Drink> iterator = drinks.listIterator(drinks.size());
+        while(iterator.hasPrevious()){
+            Drink drink = iterator.previous();
+            if (drink.getTimeStamp().before(date))
+                break;
+            count++;
+        }
+        return count;
+    }
+
+    /**
+     * When was the user sober last time? Accuracy is 15 minutes :P
+     * @return Time when user was last sober
+     */
+    @Transient
+    private Date getTimeWhenUserLastSober(){
         final int maxMinutes = 10080;
         final int interval = 15;
 
@@ -136,16 +169,7 @@ public class User extends AbstractEntity{
             }
             time -= interval * 60 * 1000;
         }
-
-        int length = getDrinks().size();
-        int count = 0;
-        for (int i = length - 1; i >= 0; i--) {
-            Drink drink = drinks.get(i);
-            if (drink.getTimeStamp().getTime() < time)
-                break;
-            count++;
-        }
-        return count;
+        return new Date(time);
     }
 
     public boolean isGuest() {
@@ -166,6 +190,7 @@ public class User extends AbstractEntity{
 
     /**
      * MUST BE SORTED BY TIME DESCENDING
+     * Or must it? Shouldn't this be sorted time ascending?
      * @param drinks the drinks to set
      */
     public void setDrinks(List<Drink> drinks) {
