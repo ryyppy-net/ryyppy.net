@@ -2,7 +2,7 @@ package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
-import drinkcounter.authentication.RegistrationService;
+import drinkcounter.authentication.AuthenticationService;
 import drinkcounter.model.User;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class AuthenticationController {
 
 //    @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
-    @Autowired private RegistrationService registrationService;
+    @Autowired private AuthenticationService registrationService;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
