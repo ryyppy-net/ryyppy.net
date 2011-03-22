@@ -18,5 +18,7 @@
             </table>
             <input type="submit" value="Tunnistaudu" />
         </form>
+            
+        Tai kirjaudu käyttämällä <a href="authenticate?openid=https://www.google.com/accounts/o8/id">Google-tiliäsi</a>
     </body>
 </html>
