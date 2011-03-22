@@ -25,14 +25,9 @@ public interface DrinkCounterService {
     void unlinkUserFromParty(String partyId, String toKick);
     List<User> listUsersByParty(String partyIdentifier);
 
-    // Users
-    List<User> listUsers();
-    User addUser(User user);
-    User getUser(String userid);
-    User getUserByOpenId(String openId);
-    void deleteUser(String userId);
-    void addDrink(String userIdentifier);
+    
 
-    // Global
+    // Drinks
     List<Drink> getDrinks(String userIdentifier);
+    void addDrink(String userIdentifier);
 }

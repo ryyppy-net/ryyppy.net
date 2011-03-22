@@ -69,32 +69,12 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public List<User> listUsersByParty(String partyIdentifier) {
         return new LinkedList<User>(getParty(partyIdentifier).getParticipants());
     }
-
-    // this doesn't return include anonymous users
-    @Override
-    public List<User> listUsers() {
-        List<User> list = userDAO.readAll();
-        List<User> list2 = new LinkedList<User>();
-        for (User user : list) {
-            if (!user.isGuest())
-                list2.add(user);
-        }
-        return list2;
-    }
-
-    @Override
-    @Transactional
-    public User addUser(User user) {
-        userDAO.save(user);
-        log.info("User with name {} was added", user.getName());
-        return user;
-    }
     
     @Override
     @Transactional
     public void linkUserToParty(String userId, String partyIdentifier) {
         Party party = getParty(partyIdentifier);
-        User user = getUser(userId);
+        User user = userDAO.readByPrimaryKey(Integer.parseInt(userId));
         party.addParticipant(user);
         partyDao.save(party);
         log.info("User with name {} was added to party {}", user.getName(), party.getName());
@@ -104,7 +84,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public void unlinkUserFromParty(String partyId, String toKick) {
         Party party = getParty(partyId);
-        User user = getUser(toKick);
+        User user = userDAO.readByPrimaryKey(Integer.parseInt(toKick));
         party.removeParticipant(user);
         partyDao.save(party);
         log.info("User with name {} was added to party {}", user.getName(), party.getName());
@@ -126,38 +106,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     public List<Drink> getDrinks(String userIdentifier) {
-        User user = getUser(userIdentifier);
+        User user = userDAO.readByPrimaryKey(Integer.parseInt(userIdentifier));
         return drinkDao.findByDrinker(user);
-    }
-
-    @Override
-    public User getUser(String userId) {
-        return userDAO.readByPrimaryKey(Integer.parseInt(userId));
-    }
-
-    // can't we use CASCADE
-    @Override
-    @Transactional
-    public void deleteUser(String userId) {
-        User user = getUser(userId);
-        List<Drink> drinks = getDrinks(userId);
-        for (Drink drink : drinks) {
-            drinkDao.delete(drink);
-        }
-        
-        // not sure if necessary, stupid object db's
-        List<Party> parties = user.getParties();
-        if (parties != null) {
-            for (Party party : parties) {
-                party.getParticipants().remove(user);
-            }
-        }
-        
-        userDAO.delete(user);
-    }
-
-    @Override
-    public User getUserByOpenId(String openId) {
-        return userDAO.findByOpenId(openId);
     }
 }
