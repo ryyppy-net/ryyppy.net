@@ -19,6 +19,7 @@
         <property name="locations" value="classpath:drinkcounter/jdbc.properties"/>
     </bean>
     <context:component-scan base-package="drinkcounter"/>
+    <context:component-scan base-package="drinkcounter.authentication"/>
     <hades:dao-config base-package="drinkcounter.dao" />
     <bean id="partyMarshaller" class="drinkcounter.util.PartyMarshaller" />
 

@@ -28,6 +28,7 @@ public class AuthenticationController {
     public static final String DISCOVERYINFORMATION = "discoveryInformation";
 
     @Autowired private DrinkCounterService drinkCounterService;
+    @Autowired private RegistrationService registrationService;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
@@ -35,10 +36,10 @@ public class AuthenticationController {
     public String authenticate(HttpSession session, @RequestParam("openid") String openId) {
         log.info("Authenticating " + openId);
         try {
-            DiscoveryInformation disco = RegistrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
+            DiscoveryInformation disco = registrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
             session.setAttribute(DISCOVERYINFORMATION, disco);
 
-            AuthRequest request = RegistrationService.createOpenIdAuthRequest(disco, RegistrationService.getReturnToUrl());
+            AuthRequest request = registrationService.createOpenIdAuthRequest(disco, RegistrationService.getReturnToUrl());
 
             return "redirect:" + request.getDestinationUrl(true);
         } catch (Exception ex) {
@@ -74,7 +75,6 @@ public class AuthenticationController {
     public String openId(HttpSession session, ServletRequest request) {
         Map<String, String> pageParameters = new HashMap<String, String>();
         Map shitmap = request.getParameterMap();
-
         // shitty hack
         for (Object key : shitmap.keySet()) {
             pageParameters.put((String)key, ((String[])shitmap.get(key))[0]);
@@ -86,7 +86,7 @@ public class AuthenticationController {
             String isReturn = (String)pageParameters.get("is_return");
             if (isReturn != null && isReturn.equals("true")) {
                 DiscoveryInformation discoveryInformation = (DiscoveryInformation)session.getAttribute("discoveryInformation");
-                openId = RegistrationService.processReturn(discoveryInformation, pageParameters, RegistrationService.getReturnToUrl());
+                openId = registrationService.processReturn(discoveryInformation, pageParameters, getReturnToUrl());
             }
         }
 
@@ -100,5 +100,10 @@ public class AuthenticationController {
             return "redirect:newuser";
         
         return "redirect:user";
+    }
+
+    public String getReturnToUrl() {
+        // TODO: fix hardcoding
+        return "http://localhost:8080/ui/openId?is_return=true";
     }
 }
