@@ -145,4 +145,16 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         
         userDAO.delete(user);
     }
+
+    @Override
+    public User getUserByOpenId(String openId) {
+        // TODO kysely tälle
+        
+        List<User> users = listUsers();
+        for (User user : users) {
+            if (user.getOpenId().equals(openId))
+                return user;
+        }
+        return null;
+    }
 }

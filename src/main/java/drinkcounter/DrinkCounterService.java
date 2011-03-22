@@ -28,6 +28,7 @@ public interface DrinkCounterService {
     List<User> listUsers();
     User addUser(User user);
     User getUser(String userid);
+    User getUserByOpenId(String openId);
     void deleteUser(String userId);
     void addDrink(String userIdentifier);
 

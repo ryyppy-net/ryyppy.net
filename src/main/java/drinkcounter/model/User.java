@@ -47,6 +47,7 @@ public class User extends AbstractEntity{
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
     private AlcoholCalculator alcoholCalculator = new AlcoholCalculator(weight);
+    private String openId;
 
     /**
      * This user is a guest in the system, can be removed after sober
@@ -59,6 +60,14 @@ public class User extends AbstractEntity{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
+    }
+
+    public String getOpenId() {
+        return openId;
     }
 
     @Transient
