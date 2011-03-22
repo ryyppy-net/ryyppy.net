@@ -3,8 +3,6 @@ package drinkcounter.authentication;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-import org.joda.time.YearMonthDay;
 import org.openid4java.consumer.ConsumerException;
 import org.openid4java.consumer.ConsumerManager;
 import org.openid4java.consumer.InMemoryConsumerAssociationStore;
@@ -15,11 +13,11 @@ import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.discovery.Identifier;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.AuthSuccess;
-import org.openid4java.message.MessageExtension;
 import org.openid4java.message.ParameterList;
-import org.openid4java.message.sreg.SRegMessage;
 import org.openid4java.message.sreg.SRegRequest;
-import org.openid4java.message.sreg.SRegResponse;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Consolidates business logic from the UI code for Registration activities.
@@ -33,8 +31,25 @@ import org.openid4java.message.sreg.SRegResponse;
  * @author http://makotoconsulting.com
  *
  */
+@Component
 public class RegistrationService {
-	private static final Logger log = Logger.getLogger(RegistrationService.class);
+	private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
+    private ConsumerManager consumerManager;
+
+    public RegistrationService() {
+        try {
+            consumerManager = new ConsumerManager();
+            consumerManager.setAssociations(new InMemoryConsumerAssociationStore());
+            consumerManager.setNonceVerifier(new InMemoryNonceVerifier(10000));
+		} catch (ConsumerException e) {
+			String message = "Exception creating ConsumerManager!";
+			log.error(message, e);
+			throw new RuntimeException(message, e);
+		}
+    }
+
+
+
 	
 	/**
 	 * Perform discovery on the User-Supplied identifier and return the
@@ -56,10 +71,8 @@ public class RegistrationService {
 	 *  returned by openid4java following successful association with the OP.
 	 */
 	@SuppressWarnings("unchecked")
-	public static DiscoveryInformation performDiscoveryOnUserSuppliedIdentifier(String userSuppliedIdentifier) {
+	public DiscoveryInformation performDiscoveryOnUserSuppliedIdentifier(String userSuppliedIdentifier) {
 		DiscoveryInformation ret = null;
-		//
-		ConsumerManager consumerManager = getConsumerManager();
 		try {
 		// Perform discover on the User-Supplied Identifier
 		List<DiscoveryInformation> discoveries = consumerManager.discover(userSuppliedIdentifier);
@@ -92,12 +105,12 @@ public class RegistrationService {
 	 *  must take this object and forward it on to the OP. Or call
 	 *  processAuthRequest() - part of this Service Class.
 	 */
-	public static AuthRequest createOpenIdAuthRequest(DiscoveryInformation discoveryInformation, String returnToUrl) {
+	public AuthRequest createOpenIdAuthRequest(DiscoveryInformation discoveryInformation, String returnToUrl) {
 		AuthRequest ret = null;
 		//
 		try {
 			// Create the AuthRequest object
-			ret = getConsumerManager().authenticate(discoveryInformation, returnToUrl);
+			ret = consumerManager.authenticate(discoveryInformation, returnToUrl);
 			// Create the Simple Registration Request
 			SRegRequest sRegRequest = SRegRequest.createFetchRequest();
 			sRegRequest.addAttribute("email", false);
@@ -133,13 +146,13 @@ public class RegistrationService {
 	 *  
 	 * @return openId of the dude if authenticated, null otherwise
 	 */
-	public static String processReturn(DiscoveryInformation discoveryInformation, Map<String, String> pageParameters, String returnToUrl) {
+	public String processReturn(DiscoveryInformation discoveryInformation, Map<String, String> pageParameters, String returnToUrl) {
             String openId = null;
             // Verify the Information returned from the OP
             /// This is required according to the spec
             ParameterList response = new ParameterList(pageParameters);
             try {
-                    VerificationResult verificationResult = getConsumerManager().verify(returnToUrl, response, discoveryInformation);
+                    VerificationResult verificationResult = consumerManager.verify(returnToUrl, response, discoveryInformation);
                     Identifier verifiedIdentifier = verificationResult.getVerifiedId();
                     AuthSuccess authSuccess = (AuthSuccess)verificationResult.getAuthResponse();
                     if (verifiedIdentifier != null && authSuccess != null) {
@@ -154,35 +167,6 @@ public class RegistrationService {
             return openId;
 	}
 
-	private static ConsumerManager consumerManager;
-	/**
-	 * Retrieves an instance of the ConsumerManager object. It is static
-	 * (see note in Class-level JavaDoc comments above) because openid4java
-	 * likes it that way.
-	 * 
-	 * Note: if you are planning to debug the code, set the lifespan parameter
-	 * of the InMemoryNonceVerifier high enough to outlive your debug cycle, or
-	 * you may notice Nonce Verification errors. Depending on where you are
-	 * debugging, this might pose an artificial problem for you (of your own
-	 * making) that has nothing to do with either your code or openid4java.
-	 * 
-	 * @return ConsumerManager - The ConsumerManager object that handles
-	 *  communication with the openid4java API.
-	 */
-	private static ConsumerManager getConsumerManager() {
-		try {
-			if (consumerManager == null) {
-				consumerManager = new ConsumerManager();
-				consumerManager.setAssociations(new InMemoryConsumerAssociationStore());
-				consumerManager.setNonceVerifier(new InMemoryNonceVerifier(10000));
-			}
-		} catch (ConsumerException e) {
-			String message = "Exception creating ConsumerManager!";
-			log.error(message, e);
-			throw new RuntimeException(message, e);
-		}
-		return consumerManager;
-	}
   /**
    * Generates the returnToUrl parameter that is passed to the OP. The
    * User Agent (i.e., the browser) will be directed to this page following
