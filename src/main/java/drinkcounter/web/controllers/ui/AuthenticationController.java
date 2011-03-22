@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.UserService;
 import drinkcounter.authentication.RegistrationService;
 import drinkcounter.model.User;
 import java.util.HashMap;
@@ -26,7 +27,8 @@ public class AuthenticationController {
     public static final String OPENID = "openId";
     public static final String DISCOVERYINFORMATION = "discoveryInformation";
 
-    @Autowired private DrinkCounterService drinkCounterService;
+//    @Autowired private DrinkCounterService drinkCounterService;
+    @Autowired private UserService userService;
     @Autowired private RegistrationService registrationService;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
@@ -91,7 +93,7 @@ public class AuthenticationController {
         
         session.setAttribute(OPENID, openId);
 
-        User user = drinkCounterService.getUserByOpenId(openId);
+        User user = userService.getUserByOpenId(openId);
         if (user == null)
             return "redirect:newuser";
         

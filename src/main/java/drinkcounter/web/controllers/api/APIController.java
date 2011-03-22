@@ -3,6 +3,7 @@ package drinkcounter.web.controllers.api;
 import com.csvreader.CsvWriter;
 import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
+import drinkcounter.UserService;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +35,10 @@ public class APIController {
     private PartyMarshaller partyMarshaller;
 
     @Autowired
-    private DrinkCounterService service;
+    private DrinkCounterService drinkCounterService;
+
+    @Autowired
+    private UserService userService;
 
     @RequestMapping("/parties/{partyId}")
     public @ResponseBody byte[] printXml(@PathVariable String partyId) throws IOException{
@@ -46,8 +50,8 @@ public class APIController {
 
     @RequestMapping("/users/{userId}/add-drink")
     public @ResponseBody String addDrink(@PathVariable String userId){
-        service.addDrink(userId);
-        User user = service.getUser(userId);
+        drinkCounterService.addDrink(userId);
+        User user = userService.getUser(userId);
         return Integer.toString(user.getTotalDrinks());
     }
     
@@ -59,7 +63,7 @@ public class APIController {
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
-        User user = service.getUser(userId);
+        User user = userService.getUser(userId);
         
         int intervalMs = 5 * 60 * 1000;
         

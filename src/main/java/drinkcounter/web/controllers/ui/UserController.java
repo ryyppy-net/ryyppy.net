@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.model.Party;
-import java.util.List;
+import drinkcounter.UserService;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class UserController {
     
     @Autowired private DrinkCounterService drinkCounterService;
+    @Autowired private UserService userService;
 
     @RequestMapping("/addUser")
     public String addUser(
@@ -35,7 +35,7 @@ public class UserController {
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
         user.setOpenId(openId);
-        drinkCounterService.addUser(user);
+        userService.addUser(user);
         return "redirect:user";
     }
 
@@ -51,7 +51,7 @@ public class UserController {
         if (openId == null)
             throw new RuntimeException("gtfo");
         
-        User user = drinkCounterService.getUserByOpenId(openId);
+        User user = userService.getUserByOpenId(openId);
         if (user == null)
             throw new RuntimeException("gtfo");
         
