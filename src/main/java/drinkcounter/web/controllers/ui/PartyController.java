@@ -19,13 +19,10 @@ public class PartyController {
     @Autowired private DrinkCounterService drinkCounterService;
 
     @RequestMapping("/parties")
-    public ModelAndView parties(@RequestParam(value="openId", required=false) String openId) {
+    public ModelAndView parties() {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("parties");
-        if (openId == null) openId = "anonymous";
-        mav.addObject("openId", openId);
         mav.addObject("parties", drinkCounterService.listParties());
-        mav.addObject("users", drinkCounterService.listUsers());
         return mav;
     }
 

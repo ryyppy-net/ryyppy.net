@@ -131,57 +131,27 @@ public class RegistrationService {
 	 *  match exactly, or openid4java will issue a verification failed message
 	 *  in the logs.
 	 *  
-	 * @return RegistrationModel - null if there was a problem, or a RegistrationModel
-	 *  object, with parameters filled in as compeletely as possible from the
-	 *  information available from the OP. If you are using MyOpenID, most of the
-	 *  time what is returned is from your "Default" profile, so if you need more 
-	 *  information returned, make sure your Default profile is completely filled
-	 *  out.
+	 * @return openId of the dude if authenticated, null otherwise
 	 */
-	public static RegistrationModel processReturn(DiscoveryInformation discoveryInformation, Map<String, String> pageParameters, String returnToUrl) {
-		RegistrationModel ret = null;
-		// Verify the Information returned from the OP
-		/// This is required according to the spec
-		ParameterList response = new ParameterList(pageParameters);
-		try {
-			VerificationResult verificationResult = getConsumerManager().verify(returnToUrl, response, discoveryInformation);
-			Identifier verifiedIdentifier = verificationResult.getVerifiedId();
-			if (verifiedIdentifier != null && verificationResult.getAuthResponse() instanceof AuthSuccess) {
-				AuthSuccess authSuccess = (AuthSuccess)verificationResult.getAuthResponse();
-                		ret = new RegistrationModel();
-        			ret.setOpenId(verifiedIdentifier.getIdentifier());
-                                
-				if (authSuccess.hasExtension(SRegMessage.OPENID_NS_SREG)) {
-					MessageExtension extension = authSuccess.getExtension(SRegMessage.OPENID_NS_SREG);
-					if (extension instanceof SRegResponse) {
-						SRegResponse sRegResponse = (SRegResponse)extension;
-						String value = sRegResponse.getAttributeValue("dob");
-						if (value != null) {
-						  ret.setDateOfBirth(new YearMonthDay(value).toDateMidnight().toDate());
-						}
-						value = sRegResponse.getAttributeValue("email");
-						if (value != null) {
-						  ret.setEmailAddress(value);
-						}
-						value = sRegResponse.getAttributeValue("fullname");
-						if (value != null) {
-						  ret.setFullName(value);
-						}
-						value = sRegResponse.getAttributeValue("postcode");
-						if (value != null) {
-						  ret.setZipCode(value);
-						}
-					}
-				}
-                                
-                                return ret;
-			}
-		} catch (Exception e) {
-			String message = "Exception occurred while verifying response!";
-			log.error(message, e);
-			throw new RuntimeException(message, e);
-		}
-		return ret;
+	public static String processReturn(DiscoveryInformation discoveryInformation, Map<String, String> pageParameters, String returnToUrl) {
+            String openId = null;
+            // Verify the Information returned from the OP
+            /// This is required according to the spec
+            ParameterList response = new ParameterList(pageParameters);
+            try {
+                    VerificationResult verificationResult = getConsumerManager().verify(returnToUrl, response, discoveryInformation);
+                    Identifier verifiedIdentifier = verificationResult.getVerifiedId();
+                    AuthSuccess authSuccess = (AuthSuccess)verificationResult.getAuthResponse();
+                    if (verifiedIdentifier != null && authSuccess != null) {
+                            openId = verifiedIdentifier.getIdentifier();
+                    }
+            } catch (Exception e) {
+                    String message = "Exception occurred while verifying response!";
+                    log.error(message, e);
+                    throw new RuntimeException(message, e);
+            }
+            
+            return openId;
 	}
 
 	private static ConsumerManager consumerManager;
