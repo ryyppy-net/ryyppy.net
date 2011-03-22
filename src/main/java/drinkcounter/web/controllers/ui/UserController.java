@@ -59,8 +59,7 @@ public class UserController {
         mav.setViewName("user");
         mav.addObject("user", user);
         
-        List<Party> parties = drinkCounterService.getPartiesByUserId(user.getId());
-        mav.addObject("parties", parties);
+        mav.addObject("parties", user.getParties());
         
         return mav;
     }

@@ -24,7 +24,6 @@ public interface DrinkCounterService {
     void linkUserToParty(String userId, String partyIdentifier);
     void unlinkUserFromParty(String partyId, String toKick);
     List<User> listUsersByParty(String partyIdentifier);
-    List<Party> getPartiesByUserId(String userId);
 
     // Users
     List<User> listUsers();
