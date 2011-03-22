@@ -39,7 +39,7 @@ public class AuthenticationController {
             DiscoveryInformation disco = registrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
             session.setAttribute(DISCOVERYINFORMATION, disco);
 
-            AuthRequest request = registrationService.createOpenIdAuthRequest(disco, RegistrationService.getReturnToUrl());
+            AuthRequest request = registrationService.createOpenIdAuthRequest(disco, getReturnToUrl());
 
             return "redirect:" + request.getDestinationUrl(true);
         } catch (Exception ex) {

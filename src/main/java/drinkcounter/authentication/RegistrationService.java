@@ -166,18 +166,4 @@ public class RegistrationService {
             
             return openId;
 	}
-
-  /**
-   * Generates the returnToUrl parameter that is passed to the OP. The
-   * User Agent (i.e., the browser) will be directed to this page following
-   * authentication.
-   * 
-   * @param representedPage The RegistrationPage object whose cover is to be
-   *  cracked open to get at the raw HttpServlet goodies inside.
-   *  
-   * @return String - the returnToUrl to be used for the authentication request.
-   */
-  public static String getReturnToUrl() {
-    return "http://localhost:8080/ui/openId?is_return=true";
-  }
 }
