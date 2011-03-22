@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -23,16 +24,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class AuthenticationController {
     
+    public static final String OPENID = "openId";
+    public static final String DISCOVERYINFORMATION = "discoveryInformation";
+
     @Autowired private DrinkCounterService drinkCounterService;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     @RequestMapping("/authenticate")
-    public String parties(HttpSession session, @RequestParam("openid") String openId) {
+    public String authenticate(HttpSession session, @RequestParam("openid") String openId) {
         log.info("Authenticating " + openId);
         try {
             DiscoveryInformation disco = RegistrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
-            session.setAttribute("discoveryInformation", disco);
+            session.setAttribute(DISCOVERYINFORMATION, disco);
 
             AuthRequest request = RegistrationService.createOpenIdAuthRequest(disco, RegistrationService.getReturnToUrl());
 
@@ -41,6 +45,29 @@ public class AuthenticationController {
             log.error("Error authenticating OpenId", ex);
             return "redirect: vituiksmeniautentikointi";
         }
+    }
+    
+    @RequestMapping("/checklogin")
+    public String checkLogin(HttpSession session) {
+        if (session.getAttribute(OPENID) != null)
+            return "redirect:user";
+        return "redirect:login";
+    }
+    
+    @RequestMapping("/login")
+    public ModelAndView logout() {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("login");
+        
+        return mav;
+    }
+    
+    @RequestMapping("/logout")
+    public String logout(HttpSession session) {
+        session.removeAttribute(OPENID);
+        session.removeAttribute(DISCOVERYINFORMATION);
+        
+        return "redirect:login";
     }
     
     @RequestMapping("/openId")
@@ -66,7 +93,7 @@ public class AuthenticationController {
         if (openId == null)
               return "redirect:vituiksman";
         
-        session.setAttribute("openId", openId);
+        session.setAttribute(OPENID, openId);
 
         User user = drinkCounterService.getUserByOpenId(openId);
         if (user == null)

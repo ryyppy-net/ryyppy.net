@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,16 +19,11 @@ public class PartyController {
 
     @Autowired private DrinkCounterService drinkCounterService;
 
-    @RequestMapping("/parties")
-    public ModelAndView parties() {
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("parties");
-        mav.addObject("parties", drinkCounterService.listParties());
-        return mav;
-    }
-
     @RequestMapping("/viewParty")
-    public ModelAndView viewParty(@RequestParam("id") String partyId){
+    public ModelAndView viewParty(@RequestParam("id") String partyId, @RequestParam(value="kick", required=false) String toKick){
+        if (toKick != null)
+            drinkCounterService.unlinkUserFromParty(partyId, toKick);
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", drinkCounterService.getParty(partyId));
@@ -36,12 +32,22 @@ public class PartyController {
         return mav;
     }
 
-    @RequestMapping("/addParty")
-    public String addParty(@RequestParam("name") String partyName){
-        drinkCounterService.startParty(partyName);
-        return "redirect:viewParty?id="+partyName;
+    @RequestMapping("/partytouch")
+    public ModelAndView partyTouch(@RequestParam("id") String partyId){
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("partytouch");
+        mav.addObject("party", drinkCounterService.getParty(partyId));
+        mav.addObject("allUsers", drinkCounterService.listUsers());
+        mav.addObject("users", drinkCounterService.listUsersByParty(partyId));
+        return mav;
     }
 
+    @RequestMapping("/addParty")
+    public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") String userId){
+        Party party = drinkCounterService.startParty(partyName);
+        drinkCounterService.linkUserToParty(userId, party.getId());
+        return "redirect:viewParty?id="+partyName;
+    }
    
     @RequestMapping("/addAnonymousUser")
     public String addAnonymousUser(
