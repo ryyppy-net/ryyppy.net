@@ -6,6 +6,7 @@ import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,6 +102,15 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    public void unlinkUserFromParty(String partyId, String toKick) {
+        Party party = getParty(partyId);
+        User user = getUser(toKick);
+        party.removeParticipant(user);
+        partyDao.save(party);
+        log.info("User with name {} was added to party {}", user.getName(), party.getName());
+    }
+
+    @Override
     @Transactional
     public void addDrink(String userIdentifier) {
         User user = userDAO.readByPrimaryKey(Integer.parseInt(userIdentifier));
@@ -156,5 +166,23 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
                 return user;
         }
         return null;
+    }
+
+    @Override
+    public List<Party> getPartiesByUserId(String userId) {
+        // TODO kysely tälle
+        List<Party> ret = new ArrayList<Party>();
+        
+        List<Party> parties = listParties();
+        for (Party party : parties) {
+            for (User user : party.getParticipants()) {
+                if (user.getId().equals(userId)) {
+                    ret.add(party);
+                    break;
+                }
+            }
+        }
+        
+        return ret;
     }
 }

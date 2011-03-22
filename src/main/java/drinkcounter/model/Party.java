@@ -45,4 +45,8 @@ public class Party extends AbstractEntity{
     public void addParticipant(User participant){
         getParticipants().add(participant);
     }
+
+    public void removeParticipant(User toKick) {
+        getParticipants().remove(toKick);
+    }
 }

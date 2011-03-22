@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
+import drinkcounter.model.Party;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
@@ -15,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @Controller
 public class UserController {
-
+    
     @Autowired private DrinkCounterService drinkCounterService;
 
     @RequestMapping("/addUser")
@@ -24,7 +26,7 @@ public class UserController {
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight, 
             HttpSession session){
-        String openId = (String)session.getAttribute("openId");
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
             throw new RuntimeException("gtfo");
 
@@ -45,7 +47,7 @@ public class UserController {
     
     @RequestMapping("/user")
     public ModelAndView userPage(HttpSession session){
-        String openId = (String)session.getAttribute("openId");
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
             throw new RuntimeException("gtfo");
         
@@ -56,12 +58,16 @@ public class UserController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
         mav.addObject("user", user);
+        
+        List<Party> parties = drinkCounterService.getPartiesByUserId(user.getId());
+        mav.addObject("parties", parties);
+        
         return mav;
     }
     
     @RequestMapping("/newuser")
     public ModelAndView newUser(HttpSession session){
-        String openId = (String)session.getAttribute("openId");
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
             throw new RuntimeException("gtfo");
         

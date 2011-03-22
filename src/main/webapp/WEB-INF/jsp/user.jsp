@@ -10,5 +10,28 @@
     </head>
     <body>
         Terve <c:out value="${user.name}" />.
+        
+        <a href="logout">Kirjaudu ulos.</a>
+        
+        <h1>Minun bileet!</h1>
+        <ul>
+            <c:forEach items="${parties}" var="party">
+                <li>
+                    <c:url var="viewPartyUrl" value="viewParty?id=${party.id}" />
+                    <a href="${viewPartyUrl}"><c:out value="${party.id}" /></a>
+                </li>
+            </c:forEach>
+        </ul>
+        <br>
+        <form method="POST" action="<c:url value="addParty" />">
+            <input type="hidden" name="userId" value="${user.id}" />
+            <h2>Uudet bileet</h2>
+            <table>
+                <tr>
+                    <td>Nimi</td><td><input type="text" name="name" /></td>
+                </tr>
+            </table>
+            <input type="submit" value="Luo bileet" />
+        </form>
     </body>
 </html>
