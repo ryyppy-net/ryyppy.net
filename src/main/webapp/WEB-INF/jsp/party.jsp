@@ -10,17 +10,22 @@
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         
-        <script type="text/javascript">
-            var persons = [];
-            <c:forEach items="${users}" var="user">
-                persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
-            </c:forEach>
-        </script>
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
         <script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.js"></script>
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
+        
+        <script type="text/javascript">
+            $(document).ready(function() {
+                var persons = [];
+                <c:forEach items="${users}" var="user">
+                    persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
+                </c:forEach>
+
+                render('graph', persons);
+            });
+        </script>
     </head>
     <body>
             Tähän sit kivasti jotain settiä.

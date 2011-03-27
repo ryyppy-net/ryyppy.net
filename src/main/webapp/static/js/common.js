@@ -8,6 +8,10 @@ function fix_the_fucking_css() {
     $("#goBack").css("font-size", $("#goBack").height() + 'px');
     $("#goBack").width($("#goBack").height());
 
+    $("#graphButton").height($("#header").height() - 8);
+    $("#graphButton").css("font-size", $("#graphButton").height() + 'px');
+    $("#graphButton").width($("#goBack").height());
+    
     $(".party").width($("#body").width() - 10 + 'px');
 }
 

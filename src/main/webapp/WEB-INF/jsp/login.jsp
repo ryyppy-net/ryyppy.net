@@ -17,7 +17,7 @@
     <div id="apLogo"></div>
 
     <div id="login">
-        <h2>Kirjaudu sisään OpenID-tunnuksellasi</h2>
+        <h2>Kirjaudu jonkin OpenID-palvelun avulla</h2>
 
         <table>
             <tr>
@@ -43,7 +43,7 @@
                 <a href="#" onClick="$('#form').get(0).submit();"
                     onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"
                     onmouseout="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo.png');">
-                    <img id="submitButton" src="/static/images/kirjaudu_pullo.png" style="border:none"/>
+                    <img id="submitButton" src="/static/images/kirjaudu_pullo.png" />
                 </a>
             </div>
         </form>

@@ -24,7 +24,7 @@ div#header {
     position: relative;
 }
 
-div#addDrinkerButton, div#goBack {
+div#addDrinkerButton, div#goBack, div#graphButton {
     position: absolute;
     top: 2px;
     color: #ffffff;
@@ -42,6 +42,11 @@ div#addDrinkerButton {
 div#goBack {
     left: 2px;
     background-color: #e60d0f;
+}
+
+div#graphButton {
+    left: 50px;
+    background-color: #dd318a;
 }
 
 div#header a {
@@ -84,12 +89,32 @@ span.details {
     font-size: 133%;
 }
 
+div#graphDialog {
+    padding: 5px;
+    width: 400px;
+    height: 300px;
+    border: 3px solid #505050;
+    border-radius: 10px;
+    background-color: #252525;
+    color: #ffffff;
+    display: none;
+    position: absolute;
+}
+
+div#graphDialog a {
+    color: #ffffff;
+    text-decoration: none;
+    z-index: 666;
+}
+
 div#addDrinkerDialog {
     padding: 5px;
     border: 3px solid #505050;
     border-radius: 10px;
     background-color: #252525;
     color: #ffffff;
+    display: none;
+    position: absolute;
 }
 
 div#addDrinkerDialog table {
@@ -133,9 +158,4 @@ div.party {
 div.party a {
     text-decoration: none;
     color: #000000;
-}
-
-div#addDrinkerDialog {
-    display: none;
-    position: absolute;
 }
