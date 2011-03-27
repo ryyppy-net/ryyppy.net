@@ -6,9 +6,21 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-            <title><c:out value="${party.name}" /></title>
+        <title><c:out value="${party.name}" /></title>
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
+        
+        <script type="text/javascript">
+            var persons = [];
+            <c:forEach items="${users}" var="user">
+                persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
+            </c:forEach>
+        </script>
+        <!-- hack -->
+        <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.js"></script>
+        <script type="text/javascript" src="/static/js/partygraph.js"></script>
     </head>
     <body>
             Tähän sit kivasti jotain settiä.
@@ -42,7 +54,7 @@
                 <table>
                     <tr>
                         <td>Nimi</td>
-                        <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerName();" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <td>Sukupuoli</td>
@@ -55,11 +67,12 @@
                     </tr>
                     <tr>
                         <td>Paino</td>
-                        <td><input type="text" name="weight" /></td>
+                        <td><input id="drinkerWeight" type="text" name="weight" onBlur="checkDrinkerFields();" /></td>
                     </tr>
                 </table>
-                <input type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" />
+                <input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" />
             </form>
-        
+                
+            <div id="graph" style="width:600px;height:300px"></div>
     </body>
 </html>

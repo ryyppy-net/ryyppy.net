@@ -14,8 +14,10 @@
             var dataUrl = '/API/parties/${party.id}/';
         </script>
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.js"></script>
         <script type="text/javascript" src="/static/js/graph.js"></script>
-        <script type="text/javascript" src="/static/js/party.js"></script>
+        <script type="text/javascript" src="/static/js/partytouch.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
     </head>
 
@@ -43,7 +45,7 @@
                 <table>
                     <tr>
                         <td>Nimi</td>
-                        <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerName();" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <td>Sukupuoli</td>
@@ -56,10 +58,10 @@
                     </tr>
                     <tr>
                         <td>Paino</td>
-                        <td><input type="text" name="weight" /></td>
+                        <td><input id="drinkerWeight" type="text" name="weight" onBlur="checkDrinkerFields();" /></td>
                     </tr>
                 </table>
-                <input type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" />
+                <input id="submitButton" type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" disabled="disabled" />
             </form>
         </div>
     </body>
