@@ -16,6 +16,7 @@ h1 {
 h2 {
     text-shadow: #6a6a6a 2px 2px 0px;
     font-variant: small-caps;
+    margin: 0px;
 }
 
 div#header {
