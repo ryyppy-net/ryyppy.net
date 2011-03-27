@@ -7,56 +7,46 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Känniin</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
 
         <script type="text/javascript" src="/static/js/jquery.js"></script>
-        <script type="text/javascript" src="/static/js/InFieldLabels/src/jquery.infieldlabel.min.js"></script>
-        <script type="text/javascript">
-          $(document).ready(function() {
-            $("label").inFieldLabels({fadeOpacity: 0.5, fadeDuration: 300});
-            $("#openId").focus();
-          });
-        </script>
     </head>
 
 <body>
-	<div id="apLogo"></div>
+    <div id="apLogo"></div>
 
-	<div id="login">
-	
-		<div id="loginText">
-                    <a href="http://en.wikipedia.org/wiki/Openid#OpenID_Providers">
-			<img src="/static/images/kirjaudu.png" />
+    <div id="login">
+        <h2>Kirjaudu sisään OpenID-tunnuksellasi</h2>
+
+        <table>
+            <tr>
+                <td>
+                    <a href="authenticate?openid=https://www.google.com/accounts/o8/id">
+                        <img src="/static/images/google-icon.png" style="border:none"/>
                     </a>
-		</div>
-	
-                <form id="form" method="POST" action="<c:url value="authenticate" />">
-                    <div id="tekstilaatikko">
-                                <label id="openIdLabel" for="openId">OPENID-TUNNUS</label>
-                                <input name="openid" type="text" maxlength="100" id="openId"> </input>
-                    </div>
-                    <div id="apNappula">
-                            <a href="#" onClick="$('#form').get(0).submit();" 
-                                onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');" 
-                                onmouseout="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo.png');">
-                                <img id="submitButton" src="/static/images/kirjaudu_pullo.png" style="border:none"/>
-                            </a>
-                    </div>
-                </form>
+                </td>
+                <td>
+                    <a href="authenticate?openid=https://steamcommunity.com/openid/">
+                        <img src="/static/images/steam-icon2.png" style="border:none"/>
+                    </a>
+                </td>
+            </tr>
+        </table>
 
-                <div id="altLogin">
-			<div id="apGoogleIcon">
-				<a href="authenticate?openid=https://www.google.com/accounts/o8/id">
-                                    <img src="/static/images/google-icon.png" style="border:none"/>
-				</a>
-			</div>
-			<div id="apSteam">
-				 <a href="authenticate?openid=https://steamcommunity.com/openid/">
-                                    <img src="/static/images/steam-icon2.png" style="border:none"/>
-				 </a>
-			</div>
-		</div>
-	</div>
+        <h2>Manuaalinen OpenID-kirjautuminen</h2>
 
+        <form id="form" method="POST" action="<c:url value="authenticate" />">
+            <input name="openid" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
+                
+            <div id="apNappula">
+                <a href="#" onClick="$('#form').get(0).submit();"
+                    onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"
+                    onmouseout="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo.png');">
+                    <img id="submitButton" src="/static/images/kirjaudu_pullo.png" style="border:none"/>
+                </a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
