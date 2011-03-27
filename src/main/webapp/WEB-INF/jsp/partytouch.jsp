@@ -23,7 +23,8 @@
 
     <body>
         <div id="header">
-            <h1 id="topic"><c:out value="${party.id}" /> <a href="#" onClick="openAddDrinkerDialog();">+</a></h1>
+            <h1 id="topic"><c:out value="${party.id}" /></h1>
+            <a href="#" onClick="openAddDrinkerDialog();"><div id="addDrinkerButton">+</div></a>
         </div>
 
         <table id="drinkers">

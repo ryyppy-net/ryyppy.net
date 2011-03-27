@@ -1,13 +1,39 @@
 body {
     padding: 0px;
     margin: 0px;
+    background-color: #505050;
 }
 
 h1 {
-    background-color: #F56991;
-    color: #d32308;
+    background-color: #252525;
+    color: #ffffff;
     margin: 0px;
     padding: 5px;
+    text-shadow: #6a6a6a 2px 2px 0px;
+}
+
+div#header {
+    text-align: center;
+    position: relative;
+    font-variant: small-caps;
+}
+
+div#addDrinkerButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #50b93e;
+    color: #ffffff;
+    border: 1px solid #0c0c0c;
+    border-radius: 5px;
+    float: right;
+    font-weight: bold;
+    text-shadow: #6a6a6a 3px 3px 2px;
+}
+
+div#header a {
+    color: #ffffff;
+    text-decoration: none;
 }
 
 table#drinkers {
@@ -18,7 +44,8 @@ table#drinkers {
 
 td {
     margin: 5px;
-    border: 4px outset #aaaaaa;
+    border: 4px #aaaaaa;
+    border-radius: 5px;
     text-align: center;
     font-size: 1em;
     background-repeat:no-repeat;
