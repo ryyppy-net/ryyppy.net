@@ -61,7 +61,7 @@ public class APIController {
 
         User user = service.getUser(userId);
         
-        int intervalMs = 5 * 60 * 1000;
+        int intervalMs = 2 * 60 * 1000;
         
         DateTime now = new DateTime();
         DateTime start = now.minusMinutes(300);
