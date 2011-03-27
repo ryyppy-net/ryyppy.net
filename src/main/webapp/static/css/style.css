@@ -10,25 +10,37 @@ h1 {
     margin: 0px;
     padding: 5px;
     text-shadow: #6a6a6a 2px 2px 0px;
+    font-variant: small-caps;
+}
+
+h2 {
+    text-shadow: #6a6a6a 2px 2px 0px;
+    font-variant: small-caps;
 }
 
 div#header {
     text-align: center;
     position: relative;
-    font-variant: small-caps;
 }
 
-div#addDrinkerButton {
+div#addDrinkerButton, div#goBack {
     position: absolute;
     top: 2px;
-    right: 2px;
-    background-color: #50b93e;
     color: #ffffff;
     border: 1px solid #0c0c0c;
     border-radius: 5px;
-    float: right;
     font-weight: bold;
     text-shadow: #6a6a6a 3px 3px 2px;
+}
+
+div#addDrinkerButton {
+    right: 2px;
+    background-color: #50b93e;
+}
+
+div#goBack {
+    left: 2px;
+    background-color: #e60d0f;
 }
 
 div#header a {
@@ -73,6 +85,38 @@ span.details {
 
 div#addDrinkerDialog {
     padding: 5px;
-    border: 1px solid #000000;
-    background-color: #ffffff;
+    border: 3px solid #505050;
+    border-radius: 10px;
+    background-color: #252525;
+    color: #ffffff;
+}
+
+div#addDrinkerDialog table {
+    width: 100%;
+}
+
+div#addDrinkerDialog th {
+    text-align: left;
+    width: 25%;
+    font-variant: small-caps;
+}
+
+div#addDrinkerDialog td {
+    text-align: right;
+    width: 75%;
+}
+
+td input, td select {
+    width: 100%;
+    background-color: #505050;
+    color: #ffffff;
+}
+
+td input[type=submit] {
+    width: 50%;
+}
+
+div#addDrinkerDialog a {
+    color: #ffffff;
+    text-decoration: none;
 }

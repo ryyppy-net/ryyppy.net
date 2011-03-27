@@ -4,21 +4,13 @@ var inProgress = [];
 
 var colors = [
   "#65E6A4",
-
   "#65A8E6",
-
   "#68E665",
-
   "#1DB466",
-
   "#A8E665",
-
   "#DD318A",
-
   "#E6E465",
-
   "#E66568",
-
   "#65E6E4",
   "#6568E6",
   "#31DD84",
@@ -245,6 +237,10 @@ function fix_the_fucking_css() {
     $("#addDrinkerButton").height($("#header").height() - 8);
     $("#addDrinkerButton").css("font-size", $("#addDrinkerButton").height() + 'px');
     $("#addDrinkerButton").width($("#addDrinkerButton").height());
+
+    $("#goBack").height($("#header").height() - 8);
+    $("#goBack").css("font-size", $("#goBack").height() + 'px');
+    $("#goBack").width($("#goBack").height());
 }
 
 function parse_data(data) {

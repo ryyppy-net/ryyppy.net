@@ -1,7 +1,10 @@
 function openAddDrinkerDialog() {
+    var left = Math.floor(($("#body").width() - $("#addDrinkerDialog").width()) / 2);
+    var top = Math.floor(($("#body").height() - $("#addDrinkerDialog").height()) / 3);
+
     $('#addDrinkerDialog').css('display', 'block')
-                            .css('left', '50px')
-                            .css('top', '50px');
+                            .css('left', left)
+                            .css('top', top);
 }
 
 function closeAddDrinkerDialog() {

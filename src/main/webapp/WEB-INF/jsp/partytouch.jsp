@@ -24,32 +24,48 @@
     <body>
         <div id="header">
             <h1 id="topic"><c:out value="${party.id}" /></h1>
+            <a href="http://localhost:8080/ui/viewParty?id=Syndet"><div id="goBack">&lt;</div></a>
             <a href="#" onClick="openAddDrinkerDialog();"><div id="addDrinkerButton">+</div></a>
         </div>
 
-        <table id="drinkers">
-        </table>
+        <div id="body">
+            <table id="drinkers">
+            </table>
+        </div>
 
         <div id="addDrinkerDialog" style="display: none; position: absolute;">
             <span style="float: right;"><a href="#" onClick="closeAddDrinkerDialog();">X</a></span>
+
+            <h2>Lisää rekisteröitynyt käyttäjä</h2>
             <form method="post" action="<c:url value="linkUserToParty" />">
                 <input type="hidden" name="partyId" value="${party.id}" />
-                <select name="userId">
-                    <c:forEach items="${allUsers}" var="user">
-                        <option value="${user.id}"><c:out value="${user.name}" /></option>
-                    </c:forEach>
-                </select>
-                <input type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" />
+                <table>
+                    <tr>
+                        <th>Nimi</th>
+                        <td>
+                        <select name="userId">
+                            <c:forEach items="${allUsers}" var="user">
+                                <option value="${user.id}"><c:out value="${user.name}" /></option>
+                            </c:forEach>
+                        </select>
+                    </td></tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <td><input type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" /></td>
+                    </tr>
+                </table>
             </form>
+
+            <h2>Lisää vieras</h2>
             <form method="post" action="<c:url value="addAnonymousUser" />">
                   <input type="hidden" name="partyId" value="${party.id}" />
                 <table>
                     <tr>
-                        <td>Nimi</td>
+                        <th>Nimi</th>
                         <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
-                        <td>Sukupuoli</td>
+                        <th>Sukupuoli</th>
                         <td>
                             <select name="sex">
                                 <option value="MALE">Mies</option>
@@ -58,11 +74,14 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Paino</td>
+                        <th>Paino</th>
                         <td><input id="drinkerWeight" type="text" name="weight" onBlur="checkDrinkerFields();" /></td>
                     </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <td><input id="submitButton" type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" disabled="disabled" /></td>
+                    </tr>
                 </table>
-                <input id="submitButton" type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" disabled="disabled" />
             </form>
         </div>
     </body>
