@@ -9,8 +9,8 @@ $(document).ready(function() {
     // if resized, refresh
     setInterval(function() {if (needsRefreshing == true) forceRefresh();}, 1000);
     
-    // update data every minute
-    setInterval(function() {get_data(updateGrid);}, 60 * 1000);
+    // update data every two minutes
+    setInterval(function() {get_data(updateGrid);}, 2 * 60 * 1000);
 });
 
 $(window).resize(function() {
@@ -87,7 +87,9 @@ function updateGrid(data) {
                 break;
             }
         }
+        
         if (!found) {
+            // someone was removed
             forceRefresh();
             return;
         }
@@ -105,16 +107,22 @@ function updateGrid(data) {
             }
         }
         if (!found) {
+            // someone was added
             forceRefresh();
             return;
         }
     }
     
+    users = newdata;
+    
     updateGraphs();
 }
 
 function getUserHtml(d) {
-    return '<span class="name">' + d.name + '</span><br /><span class="details">' + Number(d.alcohol).toFixed(2) + ' ‰<br />' + d.drinks + " drinks <br /> idle: " + String(Math.floor(d.idletime / 1000 / 60)) + " min</span>";
+    var html = '<span class="name">' + d.name + '</span><br />'
+    html += '<span class="details">' + Number(d.alcohol).toFixed(2) + ' ‰<br />' + d.drinks + " drinks <br /> idle: " + String(Math.floor(d.idletime / 1000 / 60)) + " min</span>";
+
+    return html;
 }
 
 function createAndFillGrid(data) {
@@ -151,12 +159,49 @@ function updateGraphs() {
         var user = users[i];
         var w = $('#' + user.id).width();
         var h = $('#' + user.id).height();
-        getGraph(user.id, w, h, picLoaded);
+        getGraph(user.id, picLoaded);
     }
 }
 
-function picLoaded(url, userId) {
-    $('#' + userId).css('background-image', 'url(\'' + url + '\')');
+var options = {
+    lines: { show: true },
+    yaxis: { min: 0, max: 5 },
+    xaxis: { mode: "time", timeformat: "%H:%M" }
+};
+
+function getPositionLeft(This){
+var el = This;var pL = 0;
+while(el){pL+=el.offsetLeft;el=el.offsetParent;}
+return pL;
+}
+
+function getPositionTop(This){
+var el = This;var pT = 0;
+while(el){pT+=el.offsetTop;el=el.offsetParent;}
+return pT;
+}
+
+function picLoaded(data, userId) {
+    var h = $('#' + userId);
+    
+    var newElement = $('#graph' + userId);
+    if (newElement.length == 0) {
+        newElement = $('<div>');
+        newElement.attr('id', 'graph' + userId);
+        newElement.css('position', 'absolute');
+        
+        var width = parseFloat(h.css('width')) * 0.9;
+        var height = parseFloat(h.css('height')) * 0.9;
+        var top = getPositionTop(h.get(0)) + (parseFloat(h.css('height')) - height) / 2;
+        var left = getPositionLeft(h.get(0)) + (parseFloat(h.css('width')) - width) / 2;
+        newElement.css('width', width);
+        newElement.css('height', height);
+        newElement.css('left', left);
+        newElement.css('top', top);
+        h.append(newElement);
+    }
+        
+    $.plot(newElement, [data], options);
 }
 
 function buttonClick(sender) {
