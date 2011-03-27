@@ -24,7 +24,7 @@
     <body>
         <div id="header">
             <h1 id="topic"><c:out value="${party.id}" /></h1>
-            <a href="http://localhost:8080/ui/viewParty?id=Syndet"><div id="goBack">&lt;</div></a>
+            <a href="http://localhost:8080/ui/viewParty?id=${party.id}"><div id="goBack">&lt;</div></a>
             <a href="#" onClick="openAddDrinkerDialog();"><div id="addDrinkerButton">+</div></a>
         </div>
 
