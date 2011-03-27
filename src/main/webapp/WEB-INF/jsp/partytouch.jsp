@@ -14,6 +14,7 @@
             var dataUrl = '/API/parties/${party.id}/';
         </script>
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.js"></script>
         <script type="text/javascript" src="/static/js/graph.js"></script>
@@ -25,7 +26,7 @@
         <div id="header">
             <h1 id="topic"><c:out value="${party.id}" /></h1>
             <a href="http://localhost:8080/ui/viewParty?id=${party.id}"><div id="goBack">&lt;</div></a>
-            <a href="#" onClick="openAddDrinkerDialog();"><div id="addDrinkerButton">+</div></a>
+            <a href="#" onClick="openPopupDialog();"><div id="addDrinkerButton">+</div></a>
         </div>
 
         <div id="body">
@@ -33,7 +34,7 @@
             </table>
         </div>
 
-        <div id="addDrinkerDialog" style="display: none; position: absolute;">
+        <div id="addDrinkerDialog">
             <span style="float: right;"><a href="#" onClick="closeAddDrinkerDialog();">X</a></span>
 
             <h2>Lisää rekisteröitynyt käyttäjä</h2>

@@ -121,3 +121,21 @@ div#addDrinkerDialog a {
     color: #ffffff;
     text-decoration: none;
 }
+
+div.party {
+    margin: 5px;
+    font-size: 2.0em;
+    border-radius: 5px;
+    background-color: #50b93e;
+    color: #000000;
+}
+
+div.party a {
+    text-decoration: none;
+    color: #000000;
+}
+
+div#addDrinkerDialog {
+    display: none;
+    position: absolute;
+}

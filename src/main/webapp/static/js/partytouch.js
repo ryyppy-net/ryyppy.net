@@ -2,25 +2,6 @@ var needsRefreshing = false;
 var users;
 var inProgress = [];
 
-var colors = [
-  "#65E6A4",
-  "#65A8E6",
-  "#68E665",
-  "#1DB466",
-  "#A8E665",
-  "#DD318A",
-  "#E6E465",
-  "#E66568",
-  "#65E6E4",
-  "#6568E6",
-  "#31DD84",
-  "#A465E6",
-  "#B41D6B",
-  "#E465E6",
-  "#E6A465",
-  "#E665A8",
-];
-
 // entry point
 $(document).ready(function() {
     forceRefresh();
@@ -230,17 +211,6 @@ function buttonClick(sender) {
     $(sender).css('border-style', 'inset');
     $(sender).fadeTo('slow', 0.5);
     playSound();
-}
-
-function fix_the_fucking_css() {
-    $("#drinkers").height($(window).height() - $("#topic").height() - 20);
-    $("#addDrinkerButton").height($("#header").height() - 8);
-    $("#addDrinkerButton").css("font-size", $("#addDrinkerButton").height() + 'px');
-    $("#addDrinkerButton").width($("#addDrinkerButton").height());
-
-    $("#goBack").height($("#header").height() - 8);
-    $("#goBack").css("font-size", $("#goBack").height() + 'px');
-    $("#goBack").width($("#goBack").height());
 }
 
 function parse_data(data) {
