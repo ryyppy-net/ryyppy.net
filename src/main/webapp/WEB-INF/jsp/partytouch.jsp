@@ -14,6 +14,8 @@
             var dataUrl = '/API/parties/${party.id}/';
         </script>
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.js"></script>
         <script type="text/javascript" src="/static/js/graph.js"></script>
         <script type="text/javascript" src="/static/js/partytouch.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
