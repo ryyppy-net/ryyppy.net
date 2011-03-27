@@ -155,12 +155,6 @@ function updateGraphs() {
     }
 }
 
-var options = {
-    lines: { show: true },
-    yaxis: { min: 0, max: 5 },
-    xaxis: { mode: "time", timeformat: "%H:%M" }
-};
-
 function getPositionLeft(This){
 var el = This;var pL = 0;
 while(el){pL+=el.offsetLeft;el=el.offsetParent;}
@@ -192,7 +186,13 @@ function picLoaded(data, userId) {
         newElement.css('top', top);
         h.append(newElement);
     }
-        
+    
+    var options = {
+        crosshair: { mode: null },
+        yaxis: { min: 0, max: 5 },
+        xaxis: { mode: "time", timeformat: "%H:%M" }
+    };
+
     $.plot(newElement, [data], options);
 }
 
