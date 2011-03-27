@@ -9,7 +9,7 @@ body {
     border: 3px solid #505050;
     border-radius: 10px;
     position: relative;
-    width: 400px;
+    width: 420px;
     z-index:1;
     margin-left:auto;
     margin-right:auto;
@@ -20,9 +20,11 @@ body {
 
 #login h2 {
     margin-bottom: 10px;
+    font-size: 1.4em;
 }
 
 #login table {
+    border-spacing: 10px;
     margin-bottom: 10px;
 }
 
@@ -32,11 +34,13 @@ body {
 }
 
 #apNappula {
-    position:relative;
-    left: 213px;
-    width:191px;
     height:67px;
     z-index:2;
+}
+
+#apNappula img {
+    float: right;
+    border: none;
 }
 
 #apLogo {
@@ -52,8 +56,13 @@ body {
 
 #openId {
     padding: 6px;
-    width:inherit;
+    width:300px;
     color: #333;
     font-size: 16px;
     font-family: "Arial", "Helvetica", sans-serif;
+}
+
+table {
+    margin-left:auto;
+    margin-right:auto;
 }
