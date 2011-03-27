@@ -31,7 +31,7 @@
             <c:forEach items="${parties}" var="party">
                 <div class="party">
                     <span style="margin: 5px;">
-                        <c:url var="viewPartyUrl" value="viewParty?id=${party.id}" />
+                        <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
                         <a href="${viewPartyUrl}"><c:out value="${party.id}" /></a>
                     </span>
                 </div>
