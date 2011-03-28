@@ -2,7 +2,10 @@ Tietokanta:
     Hei koodaaja. Olen Kapteeni Toni ja tietokantaa voit vaihtaa seuraavasti:
         * Lisää projektiin pom.xml-tiedostoon tietokannan ajuri riippuvuudeksi
         * src/main/resources/drinkcounter/jdbc.properties tiedostossa on asetukset jolla yhdistetään tietokantaan, konffaa sieltä
-
+		
+	Remark from murgo:
+		* Vaihda vaan tiedoston src/main/resources/drinkcounter/jdbc.properties ylimmäks riviks 
+		jdbc.url=jdbc:hsqldb:file:/temp/juomalaskuri nii tallentuu levylle, vaihda tarvittaessa polku file:n jälkeen
 
 Spring:
     Spring on konffattu latautumaan softan latautumisen yhteydessä web.xml-tiedostossa.
