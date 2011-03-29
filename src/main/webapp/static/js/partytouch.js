@@ -1,6 +1,7 @@
 var needsRefreshing = false;
 var users;
 var inProgress = [];
+var userButtons = [];
 
 // entry point
 $(document).ready(function() {
@@ -16,13 +17,6 @@ $(document).ready(function() {
 $(window).resize(function() {
     needsRefreshing = true;
 });
-
-// clamp i to 16-255
-function fix(i) {if(i < 16) {return 16;}if(i > 255) {return 255;}return i;}
-
-function getColorAtIndex(i) {
-    return colors[i % 16];
-}
 
 function forceRefresh() {
     needsRefreshing = false;
@@ -64,173 +58,76 @@ function get_data(callback) {
     $.get(dataUrl, callback);
 }
 
-function updateGrid(data) {
-    var newdata = parse_data(data);
-
-    for (var i in users) {
-        var user = users[i];
+function areSame(list1, list2) {
+    if (list1.length != list2.length) return false;
+    
+    for (var i in list1) {
         var found = false;
-
-        for (var j in newdata) {
-            var d = newdata[j];
-            if (d.id == user.id) {
-                $('#' + user.id).html(getUserHtml(d));
+        for (var j in list2) {
+            if (list1[i].id == list2[j].id) {
                 found = true;
                 break;
             }
         }
-        
-        if (!found) {
-            // someone was removed
-            forceRefresh();
-            return;
-        }
-    }
-
-    for (var j in newdata) {
-        var d = newdata[j];
-        var found = false;
-
-        for (var i in users) {
-            var user = users[i];
-            if (d.id == user.id) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            // someone was added
-            forceRefresh();
-            return;
-        }
+        if (!found) return false;
     }
     
-    users = newdata;
-    
-    updateGraphs();
+    return true;
 }
 
-function getUserHtml(d) {
-    var html = '<span class="name">' + d.name + '</span><br />'
-    html += '<span class="details">' + Number(d.alcohol).toFixed(2) + ' ‰<br />' + d.drinks + " drinks <br /> idle: " + String(Math.floor(d.idletime / 1000 / 60)) + " min</span>";
+function updateGrid(data) {
+    var newdata = parse_data(data);
+    
+    if (!areSame(newdata, users)) {
+        forceRefresh();
+        return;
+    }
 
-    return html;
+    updateButtons();
 }
 
 function createAndFillGrid(data) {
     $('#drinkers').html('');
     users = parse_data(data);
-
+    
     var layout = determine_layout(users.length);
     layout = pivot_layout_if_necessary(layout);
+    var width = "" + (1 / layout[0] * 100) + "%;";
+    var height = "" + (1 / layout[1] * 100) + "%;";
     for (var i = 0; i < layout[1]; i++) {
-        $('#drinkers').append('<tr id="row' + i + '"></tr>');
+        $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
         for (var j = 0; j < layout[0]; j++) {
             var colorIndex = i*layout[0] + j;
             if (colorIndex >= users.length) continue;
+            
             var newElement = $('<td>');
+            newElement.attr("width", width);
             var user = users[colorIndex];
+            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
+            userButtons.push(ub);
 
-            newElement.attr('id', user.id);
-            newElement.html(getUserHtml(user));
-            newElement.css('background-color', getColorAtIndex(colorIndex));
-            newElement.click(function() {
-                buttonClick(this);
-            });
             $('#row' + i).append(newElement);
         }
     }
-
     fix_the_fucking_css();
     
-    updateGraphs();
+    updateButtons();
 }
 
-function updateGraphs() {
-    for (var i in users) {
-        var user = users[i];
-        var w = $('#' + user.id).width();
-        var h = $('#' + user.id).height();
-        getGraph(user.id, picLoaded);
+function updateButtons() {
+    for (var i in userButtons) {
+        var userButton = userButtons[i];
+        userButton.update();
     }
-}
-
-function getPositionLeft(This){
-var el = This;var pL = 0;
-while(el){pL+=el.offsetLeft;el=el.offsetParent;}
-return pL;
-}
-
-function getPositionTop(This){
-var el = This;var pT = 0;
-while(el){pT+=el.offsetTop;el=el.offsetParent;}
-return pT;
-}
-
-function picLoaded(data, userId) {
-    var h = $('#' + userId);
-    
-    var newElement = $('#graph' + userId);
-    if (newElement.length == 0) {
-        newElement = $('<div>');
-        newElement.attr('id', 'graph' + userId);
-        newElement.css('position', 'absolute');
-        
-        var width = parseFloat(h.css('width')) * 0.9;
-        var height = parseFloat(h.css('height')) * 0.9;
-        var top = getPositionTop(h.get(0)) + (parseFloat(h.css('height')) - height) / 2;
-        var left = getPositionLeft(h.get(0)) + (parseFloat(h.css('width')) - width) / 2;
-        newElement.css('width', width);
-        newElement.css('height', height);
-        newElement.css('left', left);
-        newElement.css('top', top);
-        h.append(newElement);
-    }
-    
-    var options = {
-        crosshair: { mode: null },
-        yaxis: { min: 0, max: 5 },
-        xaxis: { mode: "time", timeformat: "%H:%M" }
-    };
-
-    $.plot(newElement, [data], options);
-}
-
-function buttonClick(sender) {
-    if (inProgress[sender])
-        return;
-    inProgress[sender] = true;
-
-    $.get(addDrinkUrl.replace('_userid_', sender.id), function() {
-        get_data(updateGrid);
-        $(sender).fadeTo('slow', 1.0);
-        inProgress[sender] = false;
-        $(sender).css('border-style', 'outset');
-    });
-    
-    $(sender).css('border-style', 'inset');
-    $(sender).fadeTo('slow', 0.5);
-    playSound();
 }
 
 function parse_data(data) {
     var users = [];
     $(data).find('user').each(function() {
         var part = $(this);
-        var user = {};
-        user.name = part.find('name').text();
-        user.alcohol = part.find('alcoholInPromilles').text();
-        user.drinks = part.find('totalDrinks').text();
-        user.id = part.find('id').text();
-        user.idletime = new Date().getTime() - new Date(part.find('lastDrink').text()).getTime();
+        var userId = part.find('id').text();
 
-        users.push(user);
+        users.push(userId);
     });
     return users;
-}
-
-function playSound() {
-    var filename = "/static/sounds/" + Math.floor(Math.random() * 8 + 1) + ".wav.ogg";
-    var snd = new Audio(filename);
-    snd.play();
 }

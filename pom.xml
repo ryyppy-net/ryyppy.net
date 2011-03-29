@@ -45,6 +45,8 @@
                 <artifactId>maven-jetty-plugin</artifactId>
                 <version>6.1.10</version>
                 <configuration>
+                    <!-- this should end the stupid "user mapped section open" error on windows -->
+                    <webDefaultXml>src/main/resources/webdefault.xml</webDefaultXml>
                     <stopPort>9966</stopPort>
                     <stopKey>juomalaskuri</stopKey>
                     <contextPath>/</contextPath>

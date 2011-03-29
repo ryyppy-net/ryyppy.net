@@ -46,3 +46,34 @@ var colors = [
   "#E6A465",
   "#E665A8",
 ];
+
+function getColorAtIndex(i) {
+    return colors[i % 16];
+}
+
+String.prototype.format = function() {
+    var formatted = this;
+    for (var i = 0; i < arguments.length; i++) {
+        var regexp = new RegExp('\\{'+i+'\\}', 'gi');
+        formatted = formatted.replace(regexp, arguments[i]);
+    }
+    return formatted;
+};
+
+function playSound() {
+    var filename = "/static/sounds/" + Math.floor(Math.random() * 8 + 1) + ".wav.ogg";
+    var snd = new Audio(filename);
+    snd.play();
+}
+
+function getPositionLeft(el){
+    var pL = 0;
+    while(el) { pL += el.offsetLeft; el = el.offsetParent; }
+    return pL;
+}
+
+function getPositionTop(el){
+    var pT = 0;
+    while(el) { pT += el.offsetTop; el = el.offsetParent; }
+    return pT;
+}

@@ -9,6 +9,7 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -86,7 +87,6 @@ public class PartyMarshaller {
         return userNode;
     }
 
-     // this might be redundant
     private Node createDrinksNode(Document d, List<Drink> drinks){
         Node drinksNode = d.createElement("drinks");
         drinksNode.appendChild(createTextContentElement("count", Integer.toString(drinks.size()), d));
@@ -103,5 +103,30 @@ public class PartyMarshaller {
         Element element = document.createElement(name);
         element.setTextContent(content);
         return element;
+    }
+
+    public void marshallUser(String userId, ByteArrayOutputStream out) {
+        try {
+            User user = service.getUser(userId);
+
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+            DocumentBuilder b = f.newDocumentBuilder();
+            Document d = b.newDocument();
+
+            Node rootNode = createUserNode(d, user);
+            d.appendChild(rootNode);
+            rootNode.appendChild(createDrinksNode(d, user.getDrinks())); // TODO remove this if you cannot think about anything else to optimize
+            
+            StreamResult streamResult = new StreamResult(out);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer serializer = tf.newTransformer();
+            serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+            serializer.transform(new DOMSource(d), streamResult);
+        } catch (TransformerException ex) {
+            throw new RuntimeException(ex);
+        } catch (ParserConfigurationException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

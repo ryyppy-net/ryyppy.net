@@ -7,20 +7,25 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Alkoholilaskuri</title>
         <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
+        
         <script type="text/javascript">
-            // shitty hack, plz fix
+            // global urls
             var addDrinkUrl = '/API/users/_userid_/add-drink';
             var historyUrl = '/API/users/_userid_/show-history';
+            var userUrl = '/API/users/_userid_/';
             var dataUrl = '/API/parties/${party.id}/';
         </script>
+        
         <script type="text/javascript" src="/static/js/jquery.js"></script>
-        <script type="text/javascript" src="/static/js/common.js"></script>
+        
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
-        <script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
-        <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.js"></script>
-        <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.js"></script>
-        <script type="text/javascript" src="/static/js/graph.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.min.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
+        
+        <script type="text/javascript" src="/static/js/common.js"></script>
+        <script type="text/javascript" src="/static/js/userbutton.js"></script>
         <script type="text/javascript" src="/static/js/partytouch.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
@@ -34,13 +39,13 @@
                 var top = Math.floor(($(window).height() - $("#graphDialog").height()) / 3);
 
                 var dialog = $('#graphDialog');
-                dialog.css('display', 'block')
-                                        .css('left', left)
-                                        .css('top', top);
+                dialog.css('display', 'block').css('left', left).css('top', top);
+                
+                // TODO clean up
                 var persons = [];
-                <c:forEach items="${users}" var="user">
-                    persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
-                </c:forEach>
+<c:forEach items="${users}" var="user">
+                persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
+</c:forEach>
                     
                 $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
 
