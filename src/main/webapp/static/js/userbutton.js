@@ -1,3 +1,7 @@
+var addDrinkUrl = '/API/users/_userid_/add-drink';
+var historyUrl = '/API/users/_userid_/show-history';
+var userUrl = '/API/users/_userid_/';
+
 function UserButton(userId, element, color) {
     this.alcoholScale = 3;
     this.timeScale = 5 * 60 * 60 * 1000;

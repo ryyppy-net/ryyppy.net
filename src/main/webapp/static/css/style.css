@@ -13,45 +13,19 @@ h1 {
     font-variant: small-caps;
 }
 
+h1 > a {
+    background-color: #252525;
+    color: #ffffff;
+    margin: 0px;
+    padding: 5px;
+    text-shadow: #6a6a6a 2px 2px 0px;
+    font-variant: small-caps;
+}
+
 h2 {
     text-shadow: #6a6a6a 2px 2px 0px;
     font-variant: small-caps;
     margin: 0px;
-}
-
-div#header {
-    text-align: center;
-    position: relative;
-}
-
-div#addDrinkerButton, div#goBack, div#graphButton {
-    position: absolute;
-    top: 2px;
-    color: #ffffff;
-    border: 1px solid #0c0c0c;
-    border-radius: 5px;
-    font-weight: bold;
-    text-shadow: #6a6a6a 3px 3px 2px;
-}
-
-div#addDrinkerButton {
-    right: 2px;
-    background-color: #50b93e;
-}
-
-div#goBack {
-    left: 2px;
-    background-color: #e60d0f;
-}
-
-div#graphButton {
-    left: 50px;
-    background-color: #dd318a;
-}
-
-div#header a {
-    color: #ffffff;
-    text-decoration: none;
 }
 
 table#drinkers {
@@ -66,8 +40,17 @@ td {
     border-radius: 5px;
     text-align: center;
     font-size: 1em;
-    background-repeat:no-repeat;
-    background-position:center;
+}
+
+td.userButton {
+    display:table-cell;
+    vertical-align:middle;
+    margin: 5px;
+    border: 4px #aaaaaa;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1em;
+    text-align:center;
 }
 
 div.drinker {
@@ -87,6 +70,19 @@ span.name {
 
 span.details {
     font-size: 133%;
+}
+
+div.party {
+    margin: 5px;
+    font-size: 2.0em;
+    border-radius: 5px;
+    background-color: #50b93e;
+    color: #000000;
+}
+
+div.party a {
+    text-decoration: none;
+    color: #000000;
 }
 
 div#graphDialog {
@@ -147,15 +143,52 @@ div#addDrinkerDialog a {
     text-decoration: none;
 }
 
-div.party {
-    margin: 5px;
-    font-size: 2.0em;
+
+
+
+/* header stuff */
+.headerButton {
+    margin: 4px;
+    color: #ffffff;
+    border: 1px solid #0c0c0c;
     border-radius: 5px;
+    font-weight: bold;
+    text-shadow: #6a6a6a 3px 3px 2px;
+    
+    background-color: #252525;
+    font-variant: small-caps;
+    font-size: 2em;
+    
+    width: 1em;
     background-color: #50b93e;
-    color: #000000;
 }
 
-div.party a {
+.headerButton a {
+    color: #ffffff;
     text-decoration: none;
-    color: #000000;
 }
+
+.headerButtonLeft {
+    float: left;
+}
+
+.headerButtonRight {
+    float: right;
+}
+
+div#addDrinkerButton {
+    background-color: #50b93e;
+}
+
+div#goBack {
+    background-color: #e60d0f;
+}
+
+div#graphButton {
+    background-color: #dd318a;
+}
+
+.header {
+    text-align: center;
+}
+

@@ -9,22 +9,47 @@
         <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
+        
+        <!-- hack -->
+        <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.min.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
+        <script type="text/javascript" src="/static/js/userbutton.js"></script>
+        
         <script type="text/javascript">
+            var userButton = null;
+            
             $(document).ready(function() {
-                fix_the_fucking_css();
+                //fix_the_fucking_css();
 
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
                 });
+                
+                userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
+                userButton.update();
+                //setInterval(function() {userButton.update()}, 1000);
             });
         </script>
         <title>Bileet</title>
     </head>
     <body>
-        <div id="header">
-            <h1>Bileet (<c:out value="${user.name}" />)</h1>
-            <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');"><div id="goBack">&lt;</div></a>
-            <a href="#" onClick="openPopupDialog();"><div id="addDrinkerButton">+</div></a>
+        <div class="header">
+            <div class="headerButton headerButtonLeft" id="goBack"><a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">&lt;</a></div>
+            <h1><c:out value="${user.name}" /></h1>
+        </div>
+        
+        <!-- stupid css not able to center vertically properly -->
+        <table style="height:200px; width:99%; margin-left:auto; margin-right:auto; margin-top:10px; margin-bottom:10px;">
+            <tr style="width:100%;">
+                <td class="userButton"></td>
+            </tr>
+        </table>
+        
+        <div class="header">
+            <div class="headerButton headerButtonRight" id="addDrinkerButton"><a href="#" onClick="openAddDrinkerPopupDialog();">+</a></div>
+            <h1>Sun bileet</h1>
         </div>
 
         <div id="body">

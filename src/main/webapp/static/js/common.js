@@ -1,21 +1,10 @@
 function fix_the_fucking_css() {
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
-    $("#addDrinkerButton").height($("#header").height() - 8);
-    $("#addDrinkerButton").css("font-size", $("#addDrinkerButton").height() + 'px');
-    $("#addDrinkerButton").width($("#addDrinkerButton").height());
-
-    $("#goBack").height($("#header").height() - 8);
-    $("#goBack").css("font-size", $("#goBack").height() + 'px');
-    $("#goBack").width($("#goBack").height());
-
-    $("#graphButton").height($("#header").height() - 8);
-    $("#graphButton").css("font-size", $("#graphButton").height() + 'px');
-    $("#graphButton").width($("#goBack").height());
     
     $(".party").width($("#body").width() - 10 + 'px');
 }
 
-function openPopupDialog() {
+function openAddDrinkerPopupDialog() {
     var left = Math.floor(($(window).width() - $("#addDrinkerDialog").width()) / 2);
     var top = Math.floor(($(window).height() - $("#addDrinkerDialog").height()) / 3);
 
