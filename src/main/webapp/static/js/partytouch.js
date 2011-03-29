@@ -101,6 +101,7 @@ function createAndFillGrid(data) {
             if (colorIndex >= users.length) continue;
             
             var newElement = $('<td>');
+            newElement.addClass('userButton');
             newElement.attr("width", width);
             var user = users[colorIndex];
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
