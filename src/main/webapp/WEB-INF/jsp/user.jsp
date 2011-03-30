@@ -36,8 +36,15 @@
     </head>
     <body>
         <div class="header">
-            <div class="headerButton headerButtonLeft" id="goBack"><a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">&lt;</a></div>
-            <h1><c:out value="${user.name}" /></h1>
+            <div class="headerButton headerButtonLeft" id="goBack">
+                <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">&lt;</a>
+            </div>
+            <div class="headerButton headerButtonRight" id="configureButton">
+                <a href="#" onClick="alert('Tähän ehkä asetusten säätönappi');">c</a>
+            </div>
+            <div class="headerTextDiv">
+                <h1><c:out value="${user.name}" /></h1>
+            </div>
         </div>
         
         <!-- stupid css not able to center vertically properly -->
@@ -49,7 +56,9 @@
         
         <div class="header">
             <div class="headerButton headerButtonRight" id="addDrinkerButton"><a href="#" onClick="openAddDrinkerPopupDialog();">+</a></div>
-            <h1>Sun bileet</h1>
+            <div class="headerTextDiv">
+                <h1>Sun bileet</h1>
+            </div>
         </div>
 
         <div id="body">
