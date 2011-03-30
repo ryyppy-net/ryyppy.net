@@ -46,11 +46,12 @@ td.userButton {
     display:table-cell;
     vertical-align:middle;
     margin: 5px;
-    border: 4px #aaaaaa;
+    border: 2px solid #000000;
     border-radius: 5px;
-    text-align: center;
     font-size: 1em;
     text-align:center;
+    color: #000000;
+    font-variant: small-caps;
 }
 
 div.drinker {
@@ -188,7 +189,17 @@ div#graphButton {
     background-color: #dd318a;
 }
 
-.header {
-    text-align: center;
+div#configureButton {
+    background-color: #65E6E4;
 }
 
+.header {
+    text-align: center;
+    background-color: #252525;
+}
+
+.headerTextDiv {
+    margin-left: auto;
+    margin-right: auto;
+    width: 33%;
+}
