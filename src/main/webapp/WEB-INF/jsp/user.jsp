@@ -36,12 +36,11 @@
     </head>
     <body>
         <div class="header">
-            <div class="headerButton headerButtonLeft" id="goBack">
-                <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">&lt;</a>
-            </div>
-            <div class="headerButton headerButtonRight" id="configureButton">
-                <a href="#" onClick="alert('Tähän ehkä asetusten säätönappi');">c</a>
-            </div>
+            <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">
+                <div class="headerButton headerButtonLeft" id="goBack">
+                    &lt;
+                </div>
+            </a>
             <div class="headerTextDiv">
                 <h1><c:out value="${user.name}" /></h1>
             </div>
@@ -55,7 +54,9 @@
         </table>
         
         <div class="header">
-            <div class="headerButton headerButtonRight" id="addDrinkerButton"><a href="#" onClick="openAddDrinkerPopupDialog();">+</a></div>
+            <a href="#" onClick="openAddDrinkerPopupDialog();">
+                <div class="headerButton headerButtonRight" id="addDrinkerButton">+</div>
+            </a>
             <div class="headerTextDiv">
                 <h1>Sun bileet</h1>
             </div>

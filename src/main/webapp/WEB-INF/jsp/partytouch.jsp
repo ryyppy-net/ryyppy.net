@@ -55,9 +55,9 @@
 
     <body>
         <div class="header">
-            <div class="headerButton headerButtonLeft" id="goBack"><a href="http://localhost:8080/ui/user">&lt;</a></div>
-            <div class="headerButton headerButtonLeft" id="graphButton"><a href="#" onClick="openGraphDialog();">g</a></div>
-            <div class="headerButton headerButtonRight" id="addDrinkerButton"><a href="#" onClick="openAddDrinkerPopupDialog();">+</a></div>
+            <a href="http://localhost:8080/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
+            <a href="#" onClick="openGraphDialog();"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
+            <a href="#" onClick="openAddDrinkerPopupDialog();"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.id}" /></a></h1>
             </div>
