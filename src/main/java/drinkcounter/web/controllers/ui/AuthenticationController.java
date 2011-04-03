@@ -110,6 +110,5 @@ public class AuthenticationController {
         }
         urlBuilder.append("/ui/openId?is_return=true");
         return urlBuilder.toString();
-//        return request.getServerName()"http://localhost:8080/ui/openId?is_return=true";
     }
 }
