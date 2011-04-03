@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.UserService;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class PartyController {
 
     @Autowired private DrinkCounterService drinkCounterService;
+    @Autowired private UserService userService;
 
     @RequestMapping("/viewParty")
     public ModelAndView viewParty(@RequestParam("id") String partyId, @RequestParam(value="kick", required=false) String toKick){
@@ -27,7 +29,7 @@ public class PartyController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", drinkCounterService.getParty(partyId));
-        mav.addObject("allUsers", drinkCounterService.listUsers());
+        mav.addObject("allUsers", userService.listUsers());
         mav.addObject("users", drinkCounterService.listUsersByParty(partyId));
         return mav;
     }
@@ -37,7 +39,7 @@ public class PartyController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("partytouch");
         mav.addObject("party", drinkCounterService.getParty(partyId));
-        mav.addObject("allUsers", drinkCounterService.listUsers());
+        mav.addObject("allUsers", userService.listUsers());
         mav.addObject("users", drinkCounterService.listUsersByParty(partyId));
         return mav;
     }
@@ -60,7 +62,7 @@ public class PartyController {
             user.setSex(User.Sex.valueOf(sex));
             user.setWeight(weight);
             user.setGuest(true);
-            drinkCounterService.addUser(user);
+            userService.addUser(user);
             drinkCounterService.linkUserToParty(user.getId(), partyId);
             return "redirect:viewParty?id=" + partyId;
     }

@@ -32,11 +32,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component
-public class RegistrationService {
-	private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
+public class AuthenticationService {
+	private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     private ConsumerManager consumerManager;
 
-    public RegistrationService() {
+    public AuthenticationService() {
         try {
             consumerManager = new ConsumerManager();
             consumerManager.setAssociations(new InMemoryConsumerAssociationStore());
