@@ -55,7 +55,7 @@
 
     <body>
         <div class="header">
-            <a href="http://localhost:8080/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
+            <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
             <a href="#" onClick="openGraphDialog();"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
             <a href="#" onClick="openAddDrinkerPopupDialog();"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
             <div class="headerTextDiv">
