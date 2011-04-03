@@ -54,7 +54,7 @@
         </table>
         
         <div class="header">
-            <a href="#" onClick="openAddDrinkerPopupDialog();">
+            <a href="#" onClick="toggleAddDrinkerDialog();">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton">+</div>
             </a>
             <div class="headerTextDiv">

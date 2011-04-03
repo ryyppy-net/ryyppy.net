@@ -31,7 +31,7 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerFields();" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <th>Sukupuoli</th>
@@ -44,7 +44,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="text" name="weight" onBlur="checkDrinkerFields();" /></td>
+                        <td><input id="drinkerWeight" type="text" name="weight" onchange="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>

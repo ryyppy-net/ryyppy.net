@@ -4,17 +4,23 @@ function fix_the_fucking_css() {
     $(".party").width($("#body").width() - 10 + 'px');
 }
 
-function openAddDrinkerPopupDialog() {
+function toggleAddDrinkerDialog() {
+    if ($('#addDrinkerDialog').css("display") == 'none')
+        openAddDrinkerDialog();
+    else
+        closeAddDrinkerDialog();
+}
+
+function openAddDrinkerDialog() {
     var left = Math.floor(($(window).width() - $("#addDrinkerDialog").width()) / 2);
     var top = Math.floor(($(window).height() - $("#addDrinkerDialog").height()) / 3);
 
-    $('#addDrinkerDialog').css('display', 'block')
-                            .css('left', left)
-                            .css('top', top);
+    $('#addDrinkerDialog').css('left', left).css('top', top);
+    $('#addDrinkerDialog').show(300);
 }
 
 function closeAddDrinkerDialog() {
-    $('#addDrinkerDialog').css('display', 'none');
+    $('#addDrinkerDialog').hide(300);
 }
 
 var colors = [

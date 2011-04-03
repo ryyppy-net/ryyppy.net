@@ -28,7 +28,14 @@
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
         <script type="text/javascript">
             function closeGraphDialog() {
-                $('#graphDialog').css('display', 'none');
+                $('#graphDialog').hide(300);
+            }
+            
+            function toggleGraphDialog() {
+                if ($('#graphDialog').css("display") == 'none')
+                    openGraphDialog();
+                else
+                    closeGraphDialog();
             }
             
             function openGraphDialog() {
@@ -36,19 +43,19 @@
                 var top = Math.floor(($(window).height() - $("#graphDialog").height()) / 3);
 
                 var dialog = $('#graphDialog');
-                dialog.css('display', 'block').css('left', left).css('top', top);
-                
-                // TODO clean up
-                var persons = [];
-<c:forEach items="${users}" var="user">
-                persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
-</c:forEach>
-                    
-                $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
+                dialog.css('left', left).css('top', top).show(300, function() {
+                    // TODO clean up
+                    var persons = [];
+    <c:forEach items="${users}" var="user">
+                    persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
+    </c:forEach>
 
-                if (plot == null) {
-                    render('groupGraph', persons);
-                } 
+                    $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
+
+                    if (plot == null) {
+                        render('groupGraph', persons);
+                    } 
+                });
             }
         </script>
     </head>
@@ -56,8 +63,8 @@
     <body>
         <div class="header">
             <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
-            <a href="#" onClick="openGraphDialog();"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
-            <a href="#" onClick="openAddDrinkerPopupDialog();"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
+            <a href="#" onClick="toggleGraphDialog();"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
+            <a href="#" onClick="toggleAddDrinkerDialog();"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.id}" /></a></h1>
             </div>
@@ -103,7 +110,7 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerFields();" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <th>Sukupuoli</th>
@@ -116,7 +123,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="text" name="weight" onBlur="checkDrinkerFields();" /></td>
+                        <td><input id="drinkerWeight" type="text" name="weight" onkeyup="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
