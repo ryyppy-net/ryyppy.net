@@ -11,6 +11,13 @@
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
 
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        
+        <script type="text/javascript">
+            function manualLogin() {
+                $("#manualLogin").show(300);
+                $("#openId").focus();
+            }
+        </script>
     </head>
 
 <body>
@@ -31,22 +38,29 @@
                         <img src="/static/images/steam-icon2.png" style="border:none"/>
                     </a>
                 </td>
+                <td>
+                    <a href="#manualLogin" onclick="manualLogin()">
+                        <img src="/static/images/openid.png" style="border:none"/>
+                    </a>
+                </td>
             </tr>
         </table>
 
-        <h2>Manuaalinen OpenID-kirjautuminen</h2>
+        <div id="manualLogin" style="display: none;">
+            <h2>Manuaalinen OpenID-kirjautuminen</h2>
 
-        <form id="form" method="POST" action="<c:url value="authenticate" />">
-            <input name="openid" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
-                
-            <div id="apNappula">
-                <a href="#" onClick="$('#form').get(0).submit();"
-                    onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"
-                    onmouseout="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo.png');">
-                    <img id="submitButton" src="/static/images/kirjaudu_pullo.png" />
-                </a>
-            </div>
-        </form>
+            <form id="form" method="POST" action="<c:url value="authenticate" />">
+                <input name="openid" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
+
+                <div id="apNappula">
+                    <a href="#" onClick="$('#form').get(0).submit();"
+                        onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"
+                        onmouseout="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo.png');">
+                        <img id="submitButton" src="/static/images/kirjaudu_pullo.png" />
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>
