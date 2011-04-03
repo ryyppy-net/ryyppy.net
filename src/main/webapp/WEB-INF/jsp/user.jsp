@@ -63,12 +63,15 @@
 
         <div id="body">
             <c:forEach items="${parties}" var="party">
-                <div class="party">
-                    <span style="margin: 5px;">
-                        <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
-                        <a href="${viewPartyUrl}"><c:out value="${party.id}" /></a>
-                    </span>
-                </div>
+                <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
+
+                <a href="${viewPartyUrl}">
+                    <div class="party">
+                        <span style="margin: 5px;">
+                            <c:out value="${party.id}" />
+                        </span>
+                    </div>
+                </a>
             </c:forEach>
         </div>
 
