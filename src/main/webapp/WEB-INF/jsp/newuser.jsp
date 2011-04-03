@@ -17,7 +17,7 @@
             <table>
                 <tr>
                     <td>Nimi</td>
-                    <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerName();" /></td>
+                    <td><input id="drinkerName" type="text" name="name" onBlur="checkDrinkerFields();" /></td>
                 </tr>
                 <tr>
                     <td>Sukupuoli</td>
@@ -30,10 +30,10 @@
                 </tr>
                 <tr>
                     <td>Paino</td>
-                    <td><input type="text" name="weight" /></td>
+                    <td><input id="drinkerWeight" type="text" name="weight" onBlur="checkDrinkerFields();" /></td>
                 </tr>
             </table>
-            <input type="submit" value="Lisää bilettäjä" />
+            <input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" />
         </form>
     </body>
 </html>
