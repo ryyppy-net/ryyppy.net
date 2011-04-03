@@ -1,12 +1,12 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationService;
 import drinkcounter.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.openid4java.discovery.DiscoveryInformation;
 import org.openid4java.message.AuthRequest;
@@ -34,15 +34,15 @@ public class AuthenticationController {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     @RequestMapping("/authenticate")
-    public String authenticate(HttpSession session, @RequestParam("openid") String openId) {
+    public String authenticate(HttpSession session, @RequestParam("openid") String openId, HttpServletRequest request) {
         log.info("Authenticating " + openId);
         try {
             DiscoveryInformation disco = registrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
             session.setAttribute(DISCOVERYINFORMATION, disco);
 
-            AuthRequest request = registrationService.createOpenIdAuthRequest(disco, getReturnToUrl());
+            AuthRequest authRequest = registrationService.createOpenIdAuthRequest(disco, getReturnToUrl(request));
 
-            return "redirect:" + request.getDestinationUrl(true);
+            return "redirect:" + authRequest.getDestinationUrl(true);
         } catch (Exception ex) {
             log.error("Error authenticating OpenId", ex);
             return "redirect: vituiksmeniautentikointi";
@@ -70,7 +70,7 @@ public class AuthenticationController {
     }
     
     @RequestMapping("/openId")
-    public String openId(HttpSession session, ServletRequest request) {
+    public String openId(HttpSession session, HttpServletRequest request) {
         Map<String, String> pageParameters = new HashMap<String, String>();
         Map shitmap = request.getParameterMap();
         // shitty hack
@@ -84,7 +84,7 @@ public class AuthenticationController {
             String isReturn = (String)pageParameters.get("is_return");
             if (isReturn != null && isReturn.equals("true")) {
                 DiscoveryInformation discoveryInformation = (DiscoveryInformation)session.getAttribute("discoveryInformation");
-                openId = registrationService.processReturn(discoveryInformation, pageParameters, getReturnToUrl());
+                openId = registrationService.processReturn(discoveryInformation, pageParameters, getReturnToUrl(request));
             }
         }
 
@@ -100,8 +100,16 @@ public class AuthenticationController {
         return "redirect:user";
     }
 
-    public String getReturnToUrl() {
+    public String getReturnToUrl(HttpServletRequest request) {
         // TODO: fix hardcoding
-        return "http://localhost:8080/ui/openId?is_return=true";
+        StringBuilder urlBuilder = new StringBuilder("http://");
+        urlBuilder.append(request.getServerName());
+        if(request.getServerPort() != 80){
+            urlBuilder.append(":");
+            urlBuilder.append(Integer.toString(request.getServerPort()));
+        }
+        urlBuilder.append("/ui/openId?is_return=true");
+        return urlBuilder.toString();
+//        return request.getServerName()"http://localhost:8080/ui/openId?is_return=true";
     }
 }
