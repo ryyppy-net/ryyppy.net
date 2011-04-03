@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +65,7 @@ public class APIController {
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
         User user = userService.getUser(userId);
-        
-        int intervalMs = 5 * 60 * 1000;
+        int intervalMs = 2 * 60 * 1000;
         
         DateTime now = new DateTime();
         DateTime start = now.minusMinutes(300);

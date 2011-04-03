@@ -89,11 +89,13 @@ public class User extends AbstractEntity{
         alcoholCalculator.calculateDrink(drink.getTimeStamp());
     }
 
+    // This could be done in client side, if optimization is needed
     @Transient
     public float getPromilles(){
         return alcoholCalculator.getAlcoholAmountAt(new Date()) / (sex.factor * weight);
     }
 
+    // This could be done in client side, if optimization is needed
     public List<Float> getPromillesAtInterval(Date start, Date end, int intervalMs) {
         List<Float> list = new ArrayList<Float>();
         for (long i = start.getTime(); i  <= end.getTime(); i += intervalMs) {
@@ -103,6 +105,7 @@ public class User extends AbstractEntity{
         return list;
     }
 
+    // This could be done in client side, if optimization is needed
     @Transient
     public float getBloodAlcoholGrams() {
         return alcoholCalculator.getAlcoholAmountAt(new Date());
@@ -161,6 +164,7 @@ public class User extends AbstractEntity{
 
     /**
      * When was the user sober last time? Accuracy is 15 minutes :P
+     * This could be done in client side, if optimization is needed
      * @return Time when user was last sober
      */
     @Transient
