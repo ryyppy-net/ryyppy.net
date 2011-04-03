@@ -6,32 +6,91 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
+        <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/common.js"></script>
+        
+        <!-- hack -->
+        <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.min.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
+        <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
+        <script type="text/javascript" src="/static/js/userbutton.js"></script>
+        
+        <script type="text/javascript">
+            var userButton = null;
+            
+            $(document).ready(function() {
+                //fix_the_fucking_css();
+
+                $('.party').each(function(index) {
+                    $(this).css('background-color', colors[index]);
+                });
+                
+                userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
+                userButton.update();
+                //setInterval(function() {userButton.update()}, 1000);
+            });
+        </script>
+        <title>Bileet</title>
     </head>
     <body>
-        Terve <c:out value="${user.name}" />.
+        <div class="header">
+            <div class="headerButton headerButtonLeft" id="goBack">
+                <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">&lt;</a>
+            </div>
+            <div class="headerButton headerButtonRight" id="configureButton">
+                <a href="#" onClick="alert('Tähän ehkä asetusten säätönappi');">c</a>
+            </div>
+            <div class="headerTextDiv">
+                <h1><c:out value="${user.name}" /></h1>
+            </div>
+        </div>
         
-        <a href="logout">Kirjaudu ulos.</a>
+        <!-- stupid css not able to center vertically properly -->
+        <table style="height:200px; width:99%; margin-left:auto; margin-right:auto; margin-top:10px; margin-bottom:10px;">
+            <tr style="width:100%;">
+                <td class="userButton"></td>
+            </tr>
+        </table>
         
-        <h1>Minun bileet!</h1>
-        <ul>
+        <div class="header">
+            <div class="headerButton headerButtonRight" id="addDrinkerButton"><a href="#" onClick="openAddDrinkerPopupDialog();">+</a></div>
+            <div class="headerTextDiv">
+                <h1>Sun bileet</h1>
+            </div>
+        </div>
+
+        <div id="body">
             <c:forEach items="${parties}" var="party">
-                <li>
-                    <c:url var="viewPartyUrl" value="viewParty?id=${party.id}" />
-                    <a href="${viewPartyUrl}"><c:out value="${party.id}" /></a>
-                </li>
+                <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
+
+                <a href="${viewPartyUrl}">
+                    <div class="party">
+                        <span style="margin: 5px;">
+                            <c:out value="${party.id}" />
+                        </span>
+                    </div>
+                </a>
             </c:forEach>
-        </ul>
-        <br>
-        <form method="POST" action="<c:url value="addParty" />">
-            <input type="hidden" name="userId" value="${user.id}" />
+        </div>
+
+        <div id="addDrinkerDialog">
+            <span style="float: right;"><a href="#" onClick="closeAddDrinkerDialog();">X</a></span>
+
             <h2>Uudet bileet</h2>
-            <table>
-                <tr>
-                    <td>Nimi</td><td><input type="text" name="name" /></td>
-                </tr>
-            </table>
-            <input type="submit" value="Luo bileet" />
-        </form>
+
+            <form method="POST" action="<c:url value="addParty" />">
+                <input type="hidden" name="userId" value="${user.id}" />
+                <table>
+                    <tr>
+                        <th>Nimi</th><td><input type="text" name="name" /></td>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th><td><input type="submit" value="Luo bileet" /></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
     </body>
 </html>

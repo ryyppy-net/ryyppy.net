@@ -56,6 +56,14 @@ public class APIController {
         return Integer.toString(user.getTotalDrinks());
     }
     
+    @RequestMapping("/users/{userId}")
+    public @ResponseBody byte[] userXml(@PathVariable String userId) throws IOException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        partyMarshaller.marshallUser(userId, baos);
+        byte[] bytesXml = baos.toByteArray();
+        return bytesXml;
+    }
+    
     @RequestMapping("/users/{userId}/show-history")
     public ResponseEntity<byte[]> showHistory(@PathVariable String userId) throws IOException{
         HttpHeaders headers = new HttpHeaders();

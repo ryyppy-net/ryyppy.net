@@ -1,5 +1,6 @@
 var datas = [];
 var placeholder;
+var placeid;
 var options = {
     lines: { show: true },
     crosshair: { mode: "x" },
@@ -11,8 +12,9 @@ var plot;
 var updateLegendTimeout = null;
 var latestPosition = null;
 
-$(document).ready(function() {
-    placeholder = $("#graph");
+function render(place, persons) {
+    placeid = place;
+    placeholder = $('#' + placeid);
     placeholder.bind("plothover",  function (event, pos, item) {
         latestPosition = pos;
         if (!updateLegendTimeout)
@@ -25,8 +27,7 @@ $(document).ready(function() {
         var person = persons[i];
         getData(person);
     }
-    
-});
+}
 
 function getData(person) {
     var url = person[1];
@@ -53,7 +54,7 @@ function gotData(name, data) {
     parsed = {label: name, data: histories};
     datas.push(parsed);
     
-    $("#graph .legendLabel").each(function () {
+    $("#"+ placeid +" .legendLabel").each(function () {
         // fix the widths so they don't jump around
         $(this).css('width', $(this).width());
     });
@@ -88,6 +89,6 @@ function updateLegend() {
         else
             y = p1[1] + (p2[1] - p1[1]) * (pos.x - p1[0]) / (p2[0] - p1[0]);
 
-        $("#graph .legendLabel").eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(2)));
+        $("#"+ placeid +" .legendLabel").eq(i).text(series.label.replace(/=.*/, "= " + y.toFixed(2)));
     }
 }
