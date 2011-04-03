@@ -13,7 +13,7 @@
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                openAddDrinkerPopupDialog();
+                openAddDrinkerDialog();
             });
         </script>
     </head>
