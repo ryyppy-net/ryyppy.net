@@ -1,13 +1,3 @@
-function openAddDrinkerDialog() {
-    $('#addDrinkerDialog').css('display', 'block')
-                            .css('left', '50px')
-                            .css('top', '50px');
-}
-
-function closeAddDrinkerDialog() {
-    $('#addDrinkerDialog').css('display', 'none');
-}
-
 function checkDrinkerFields() {
     var success = true;
     

@@ -48,7 +48,7 @@ public class PartyController {
     public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") String userId){
         Party party = drinkCounterService.startParty(partyName);
         drinkCounterService.linkUserToParty(userId, party.getId());
-        return "redirect:viewParty?id="+partyName;
+        return "redirect:partytouch?id="+partyName;
     }
    
     @RequestMapping("/addAnonymousUser")

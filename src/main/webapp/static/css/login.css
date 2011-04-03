@@ -1,107 +1,68 @@
 body {
-	margin-left:auto;
-	margin-right:auto;
+    margin-left:auto;
+    margin-right:auto;
+    background-color: #252525;
 }
 
 #login {
-        position: relative;
-	width:400px;
-	height:370px;
-	z-index:1;
-	background-image: url("/static/images/taustaloota.png");
-	background-repeat: no-repeat;
-	margin-left:auto;
-	margin-right:auto;
-	margin-top:50px;
+    background-color: #000000;
+    border: 3px solid #505050;
+    border-radius: 10px;
+    position: relative;
+    width: 420px;
+    z-index:1;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top:50px;
+    padding: 5px;
+    color: #ffffff;
 }
 
-#loginText {
-	position:relative;
-	top: 20px;
-	width:340px;
-	height:63px;
-	z-index:1;
-	margin-left:auto;
-	margin-right:auto;
+#login h2 {
+    margin-bottom: 10px;
+    font-size: 1.4em;
 }
 
-#altLogin {
-	position:relative;
-	top: 30px;
-	width:340px;
-	height:106px;
-	z-index:1;
-	margin-left:auto;
-	margin-right:auto;
-	background-image: url("/static/images/tai_jollain.png");
-	background-repeat: no-repeat;
-	background-position: center;
+#login table {
+    border-spacing: 10px;
+    margin-bottom: 10px;
+}
+
+#login a {
+    color: #ffffff;
+    text-decoration: none;
 }
 
 #apNappula {
-	position:relative;
-	left: 213px;
-	width:191px;
-	height:67px;
-	z-index:2;
-	}
-	
+    height:67px;
+    z-index:2;
+}
+
+#apNappula img {
+    float: right;
+    border: none;
+}
+
 #apLogo {
-	width:600px;
-	height:236px;
-	background-image: url("/static/images/logo.png");
-	background-repeat: no-repeat;
-	background-position: center;
-	margin-left:auto;
-	margin-right:auto;
-	margin-top:50px;
-}
-
-#tekstilaatikko {
-	position:relative;
-	margin-top:35px;
-	width:250px;
-	height:50px;
-	margin-left:auto;
-	margin-right:auto;
-	z-index:2;
-        border-collapse: collapse;
-        border-spacing: 0;
-}
-
-label  { position:absolute; 
-         padding: 6px;
-         top:4px;
-         left:0;
-         width:100%;
-         color: #333;
-	 font-size: 16px;
-         font-family: "Arial", "Helvetica", sans-serif;
-         text-align: right;
+    width:600px;
+    height:236px;
+    background-image: url("/static/images/logo.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top:50px;
 }
 
 #openId {
-        padding: 6px;
-	width:inherit;
-        color: #333;
-	font-size: 16px;
-	font-family: "Arial", "Helvetica", sans-serif;
+    padding: 6px;
+    width:300px;
+    color: #333;
+    font-size: 16px;
+    font-family: "Arial", "Helvetica", sans-serif;
 }
 
-#apGoogleIcon {
-	position:relative;
-	left:100px;
-	top:50px;
-	width:50px;
-	height:50px;
-	z-index:3;
-	border: none;
+table {
+    margin-left:auto;
+    margin-right:auto;
 }
-
-#apSteam {
-	position:relative;
-	left:200px;
-	width:50px;
-	height:50px;
-	z-index:3;
-}    

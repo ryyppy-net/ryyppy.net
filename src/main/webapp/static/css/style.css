@@ -1,13 +1,31 @@
 body {
     padding: 0px;
     margin: 0px;
+    background-color: #505050;
 }
 
 h1 {
-    background-color: #F56991;
-    color: #d32308;
+    background-color: #252525;
+    color: #ffffff;
     margin: 0px;
     padding: 5px;
+    text-shadow: #6a6a6a 2px 2px 0px;
+    font-variant: small-caps;
+}
+
+h1 > a {
+    background-color: #252525;
+    color: #ffffff;
+    margin: 0px;
+    padding: 5px;
+    text-shadow: #6a6a6a 2px 2px 0px;
+    font-variant: small-caps;
+}
+
+h2 {
+    text-shadow: #6a6a6a 2px 2px 0px;
+    font-variant: small-caps;
+    margin: 0px;
 }
 
 table#drinkers {
@@ -18,11 +36,22 @@ table#drinkers {
 
 td {
     margin: 5px;
-    border: 4px outset #aaaaaa;
+    border: 4px #aaaaaa;
+    border-radius: 5px;
     text-align: center;
     font-size: 1em;
-    background-repeat:no-repeat;
-    background-position:center;
+}
+
+td.userButton {
+    display:table-cell;
+    vertical-align:middle;
+    margin: 5px;
+    border: 2px solid #000000;
+    border-radius: 5px;
+    font-size: 1em;
+    text-align:center;
+    color: #000000;
+    font-variant: small-caps;
 }
 
 div.drinker {
@@ -44,8 +73,133 @@ span.details {
     font-size: 133%;
 }
 
+div.party {
+    margin: 5px;
+    font-size: 2.0em;
+    border-radius: 5px;
+    background-color: #50b93e;
+    color: #000000;
+}
+
+div.party a {
+    text-decoration: none;
+    color: #000000;
+}
+
+div#graphDialog {
+    padding: 5px;
+    width: 400px;
+    height: 300px;
+    border: 3px solid #505050;
+    border-radius: 10px;
+    background-color: #252525;
+    color: #ffffff;
+    display: none;
+    position: absolute;
+}
+
+div#graphDialog a {
+    color: #ffffff;
+    text-decoration: none;
+    z-index: 666;
+}
+
 div#addDrinkerDialog {
     padding: 5px;
-    border: 1px solid #000000;
-    background-color: #ffffff;
+    border: 3px solid #505050;
+    border-radius: 10px;
+    background-color: #252525;
+    color: #ffffff;
+    display: none;
+    position: absolute;
+}
+
+div#addDrinkerDialog table {
+    width: 100%;
+}
+
+div#addDrinkerDialog th {
+    text-align: left;
+    width: 25%;
+    font-variant: small-caps;
+}
+
+div#addDrinkerDialog td {
+    text-align: right;
+    width: 75%;
+}
+
+td input, td select {
+    width: 100%;
+    background-color: #505050;
+    color: #ffffff;
+}
+
+td input[type=submit] {
+    width: 50%;
+}
+
+div#addDrinkerDialog a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+
+
+
+/* header stuff */
+.headerButton {
+    margin: 4px;
+    color: #ffffff;
+    border: 1px solid #0c0c0c;
+    border-radius: 5px;
+    font-weight: bold;
+    text-shadow: #6a6a6a 3px 3px 2px;
+    
+    background-color: #252525;
+    font-variant: small-caps;
+    font-size: 2em;
+    
+    width: 1em;
+    background-color: #50b93e;
+}
+
+.headerButton a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.headerButtonLeft {
+    float: left;
+}
+
+.headerButtonRight {
+    float: right;
+}
+
+div#addDrinkerButton {
+    background-color: #50b93e;
+}
+
+div#goBack {
+    background-color: #e60d0f;
+}
+
+div#graphButton {
+    background-color: #dd318a;
+}
+
+div#configureButton {
+    background-color: #65E6E4;
+}
+
+.header {
+    text-align: center;
+    background-color: #252525;
+}
+
+.headerTextDiv {
+    margin-left: auto;
+    margin-right: auto;
+    width: 33%;
 }
