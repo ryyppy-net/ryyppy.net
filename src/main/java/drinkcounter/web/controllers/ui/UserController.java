@@ -6,9 +6,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
+import drinkcounter.model.Party;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  *
@@ -25,16 +31,21 @@ public class UserController {
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight, 
+            @RequestParam("email") String email, 
             HttpSession session){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
             throw new RuntimeException("gtfo");
+        
+        if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
+            throw new RuntimeException("illegal arguments");
 
         User user = new User();
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
         user.setOpenId(openId);
+        user.setEmail(email);
         userService.addUser(user);
         return "redirect:user";
     }
@@ -73,5 +84,48 @@ public class UserController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("newuser");
         return mav;
+    }
+    
+    @RequestMapping("/checkEmail")
+    public ResponseEntity<byte[]> checkEmail(HttpSession session, @RequestParam("email") String email){
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        if (openId == null)
+            throw new RuntimeException("gtfo");
+        
+        String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "text/plain;charset=utf-8");
+        return new ResponseEntity<byte[]>(data.getBytes(), headers, HttpStatus.OK);
+    }
+    
+    @RequestMapping("/getUserByEmail")
+    public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        if (openId == null)
+            throw new RuntimeException("gtfo");
+        
+        String data = "";
+        if (!userService.emailIsCorrect(email))
+            data = "0";
+        
+        User user = userService.getUserByEmail(email);
+        if (user == null)
+            data = "0";
+        else {
+            List<Party> parties = user.getParties();
+            data = user.getId();
+            for (Party p : parties) {
+                if (p.getId().equals(partyId)) {
+                    // user is already in party
+                    data = "0";
+                    break;
+                }
+            }
+        }
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "text/plain;charset=utf-8");
+        return new ResponseEntity<byte[]>(data.getBytes(), headers, HttpStatus.OK);
     }
 }

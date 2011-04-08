@@ -70,6 +70,8 @@ public class PartyController {
     @RequestMapping("/linkUserToParty")
     public String linkUserToParty(@RequestParam("partyId") String partyId,
             @RequestParam("userId") String userId){
+                if (userId == null || userId.length() == 0)
+                    throw new RuntimeException("Invalid arguments");
             drinkCounterService.linkUserToParty(userId, partyId);
             return "redirect:viewParty?id="+partyId;
     }

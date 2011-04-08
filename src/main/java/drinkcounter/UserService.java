@@ -22,4 +22,8 @@ public interface UserService {
     User getUserByOpenId(String openId);
 
     void deleteUser(String userId);
+    
+    boolean emailIsCorrect(String email);
+    
+    User getUserByEmail(String email);
 }

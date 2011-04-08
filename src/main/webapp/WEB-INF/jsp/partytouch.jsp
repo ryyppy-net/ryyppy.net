@@ -87,19 +87,19 @@
             <h2>Lisää rekisteröitynyt käyttäjä</h2>
             <form method="post" action="<c:url value="linkUserToParty" />">
                 <input type="hidden" name="partyId" value="${party.id}" />
+                <input type="hidden" id="userId" name="userId" />
+                
                 <table>
                     <tr>
-                        <th>Nimi</th>
+                        <th>Sähköpostiosoite</th>
                         <td>
-                        <select name="userId">
-                            <c:forEach items="${allUsers}" var="user">
-                                <option value="${user.id}"><c:out value="${user.name}" /></option>
-                            </c:forEach>
-                        </select>
-                    </td></tr>
+                            <input type="text" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
+                        </td>
+                        <td style="display:none;width:24px;height:24px;" id="emailCorrect"></td>
+                    </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td><input type="submit" value="Lisää bilettäjä" onClick="forceRefresh();" /></td>
+                        <td colspan="2"><input id="linkUserButton" type="submit" value="Lisää bilettäjä" disabled="disabled" onClick="forceRefresh();" /></td>
                     </tr>
                 </table>
             </form>

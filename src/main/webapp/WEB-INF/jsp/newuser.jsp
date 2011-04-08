@@ -31,11 +31,16 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields();" /></td>
+                        <td colspan="2"><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields();" /></td>
+                    </tr>
+                    <tr>
+                        <th>Sähköposti</th>
+                        <td><input id="email" type="text" name="email" onchange="checkEmail($(this).val()); checkDrinkerFields();" /></td>
+                        <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
                         <th>Sukupuoli</th>
-                        <td>
+                        <td colspan="2">
                             <select name="sex">
                                 <option value="MALE">Mies</option>
                                 <option value="FEMALE">Nainen</option>
@@ -44,11 +49,11 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="text" name="weight" onchange="checkDrinkerFields();" /></td>
+                        <td colspan="2"><input id="drinkerWeight" type="text" name="weight" onchange="checkDrinkerFields();" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td><input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" /></td>
+                        <td colspan="2"><input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" /></td>
                     </tr>
                 </table>
             </form>
