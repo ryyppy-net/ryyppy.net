@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  *
@@ -80,4 +82,27 @@ public class UserServiceImpl implements UserService{
     public User getUserByOpenId(String openId) {
         return userDAO.findByOpenId(openId);
     }
+    
+    @Override
+    public boolean emailIsCorrect(String email) {
+        if (email == null || email.length() == 0) return false;
+        
+        final String expression = "^[\\w\\-]([\\.\\w])+[\\w]+@([\\w\\-]+\\.)+[A-Z]{2,4}$"; 
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);  
+        Matcher matcher = pattern.matcher(email);  
+        return matcher.matches();
+    }
+    
+    @Override
+    public User getUserByEmail(String email) {
+        if (email == null || email.length() == 0) return null;
+
+        List<User> list = listUsers();
+        for (User u : list) {
+            if (u.getEmail().equalsIgnoreCase(email)) {
+                return u;
+            }
+        }
+        return null;
+    }    
 }

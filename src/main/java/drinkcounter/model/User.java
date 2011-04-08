@@ -41,6 +41,7 @@ public class User extends AbstractEntity{
         }
     }
 
+    private String email;
     private List<Party> parties;
     private String name;
     private float weight = 70;
@@ -212,5 +213,13 @@ public class User extends AbstractEntity{
             if (drink.getTimeStamp() == null) continue;
             alcoholCalculator.calculateDrink(drink.getTimeStamp());
         }
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
