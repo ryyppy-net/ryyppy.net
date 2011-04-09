@@ -4,13 +4,15 @@ import com.csvreader.CsvWriter;
 import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
+import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
+import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,12 +39,17 @@ public class APIController {
 
     @Autowired
     private DrinkCounterService drinkCounterService;
+    
+    @Autowired
+    private AuthenticationChecks authenticationChecks;
 
     @Autowired
     private UserService userService;
 
     @RequestMapping("/parties/{partyId}")
-    public @ResponseBody byte[] printXml(@PathVariable String partyId) throws IOException{
+    public @ResponseBody byte[] printXml(HttpSession session, @PathVariable String partyId) throws IOException{
+        authenticationChecks.checkRightsForParty((String)session.getAttribute(AuthenticationController.OPENID), partyId);
+        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshall(partyId, baos);
         byte[] bytesXml = baos.toByteArray();
@@ -50,14 +57,16 @@ public class APIController {
     }
 
     @RequestMapping("/users/{userId}/add-drink")
-    public @ResponseBody String addDrink(@PathVariable String userId){
+    public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId){
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userId);
         drinkCounterService.addDrink(userId);
         User user = userService.getUser(userId);
         return Integer.toString(user.getTotalDrinks());
     }
     
     @RequestMapping("/users/{userId}")
-    public @ResponseBody byte[] userXml(@PathVariable String userId) throws IOException{
+    public @ResponseBody byte[] userXml(HttpSession session, @PathVariable String userId) throws IOException{
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userId);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshallUser(userId, baos);
         byte[] bytesXml = baos.toByteArray();
@@ -65,7 +74,8 @@ public class APIController {
     }
     
     @RequestMapping("/users/{userId}/show-history")
-    public ResponseEntity<byte[]> showHistory(@PathVariable String userId) throws IOException{
+    public ResponseEntity<byte[]> showHistory(HttpSession session, @PathVariable String userId) throws IOException{
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userId);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

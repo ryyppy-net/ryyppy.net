@@ -5,7 +5,6 @@ import drinkcounter.authentication.AuthenticationService;
 import drinkcounter.model.User;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.openid4java.discovery.DiscoveryInformation;
@@ -45,7 +44,7 @@ public class AuthenticationController {
             return "redirect:" + authRequest.getDestinationUrl(true);
         } catch (Exception ex) {
             log.error("Error authenticating OpenId", ex);
-            return "redirect: vituiksmeniautentikointi";
+            return "redirect: error";
         }
     }
     
@@ -89,7 +88,7 @@ public class AuthenticationController {
         }
 
         if (openId == null)
-              return "redirect:vituiksman";
+              return "redirect:error";
         
         session.setAttribute(OPENID, openId);
 
@@ -111,4 +110,8 @@ public class AuthenticationController {
         urlBuilder.append("/ui/openId?is_return=true");
         return urlBuilder.toString();
     }
+    
+    
+
+
 }

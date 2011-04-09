@@ -14,7 +14,6 @@ import org.openid4java.discovery.Identifier;
 import org.openid4java.message.AuthRequest;
 import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.ParameterList;
-import org.openid4java.message.sreg.SRegRequest;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,13 +110,7 @@ public class AuthenticationService {
 		try {
 			// Create the AuthRequest object
 			ret = consumerManager.authenticate(discoveryInformation, returnToUrl);
-			// Create the Simple Registration Request
-			SRegRequest sRegRequest = SRegRequest.createFetchRequest();
-			sRegRequest.addAttribute("email", false);
-			sRegRequest.addAttribute("fullname", false);
-			sRegRequest.addAttribute("dob", false);
-			sRegRequest.addAttribute("postcode", false);
-			ret.addExtension(sRegRequest);
+
 			
 		} catch (Exception e) {
 			String message = "Exception occurred while building AuthRequest object!";
