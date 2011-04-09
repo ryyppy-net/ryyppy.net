@@ -40,7 +40,7 @@ public class PartyMarshaller {
     @Autowired
     private UserService userService;
 
-    public void marshall(String partyId, OutputStream out){
+    public void marshall(int partyId, OutputStream out){
         try {
             Party party = service.getParty(partyId);
             
@@ -50,7 +50,7 @@ public class PartyMarshaller {
             Node rootNode = d.createElement("party");
             d.appendChild(rootNode);
             Node idNode = d.createElement("id");
-            idNode.setTextContent(party.getId());
+            idNode.setTextContent(Integer.toString(party.getId()));
             rootNode.appendChild(idNode);
             Node partyNameNode = d.createElement("name");
             partyNameNode.setTextContent(party.getName());
@@ -76,7 +76,7 @@ public class PartyMarshaller {
      private Node createUserNode(Document doc, User user) {
         Node userNode = doc.createElement("user");
 
-        userNode.appendChild(createTextContentElement("id", user.getId(), doc));
+        userNode.appendChild(createTextContentElement("id", Integer.toString(user.getId()), doc));
         userNode.appendChild(createTextContentElement("name", user.getName(), doc));
         userNode.appendChild(createTextContentElement("alcoholInPromilles", Float.toString(user.getPromilles()), doc));
         userNode.appendChild(createTextContentElement("totalDrinks", Integer.toString(user.getTotalDrinks()), doc));
@@ -109,7 +109,7 @@ public class PartyMarshaller {
         return element;
     }
 
-    public void marshallUser(String userId, ByteArrayOutputStream out) {
+    public void marshallUser(int userId, ByteArrayOutputStream out) {
         try {
             User user = userService.getUser(userId);
 

@@ -17,11 +17,11 @@ public interface UserService {
 
     User addUser(User user);
 
-    User getUser(String userid);
+    User getUser(int userId);
 
     User getUserByOpenId(String openId);
 
-    void deleteUser(String userId);
+    void deleteUser(int userId);
     
     boolean emailIsCorrect(String email);
     

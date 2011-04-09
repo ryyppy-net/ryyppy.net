@@ -5,7 +5,7 @@
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Alkoholilaskuri</title>
+        <title><c:out value="${party.name}" /></title>
         <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
         
         <script type="text/javascript">
@@ -66,7 +66,7 @@
             <a href="#" onClick="toggleGraphDialog();"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
             <a href="#" onClick="toggleAddDrinkerDialog();"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
             <div class="headerTextDiv">
-                <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.id}" /></a></h1>
+                <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
             </div>
         </div>
 
@@ -110,7 +110,7 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields();" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(false);" /></td>
                     </tr>
                     <tr>
                         <th>Sukupuoli</th>
@@ -123,7 +123,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="text" name="weight" onkeyup="checkDrinkerFields();" /></td>
+                        <td><input id="drinkerWeight" type="text" name="weight" onkeyup="checkDrinkerFields(false);" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>

@@ -47,21 +47,25 @@ public class UserServiceImpl implements UserService{
     @Override
     @Transactional
     public User addUser(User user) {
+        if (!user.isGuest())
+            user.setEmail(user.getEmail().toLowerCase());
         userDAO.save(user);
         log.info("User with name {} was added", user.getName());
         return user;
     }
 
     @Override
-    public User getUser(String userId) {
-        return userDAO.readByPrimaryKey(Integer.parseInt(userId));
+    public User getUser(int userId) {
+        return userDAO.readByPrimaryKey(userId);
     }
 
-    // can't we use CASCADE
     @Override
     @Transactional
-    public void deleteUser(String userId) {
+    public void deleteUser(int userId) {
         User user = getUser(userId);
+        
+        /*
+         * Does this cascade automatically? Test if these are needed
         List<Drink> drinks = drinkDAO.findByDrinker(user);
         for (Drink drink : drinks) {
             drinkDAO.delete(drink);
@@ -74,12 +78,17 @@ public class UserServiceImpl implements UserService{
                 party.getParticipants().remove(user);
             }
         }
+         * 
+         */
 
         userDAO.delete(user);
     }
 
     @Override
     public User getUserByOpenId(String openId) {
+        if (openId == null || openId.length() == 0)
+            throw new IllegalArgumentException("openId");
+
         return userDAO.findByOpenId(openId);
     }
     
@@ -96,13 +105,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User getUserByEmail(String email) {
         if (email == null || email.length() == 0) return null;
-
-        List<User> list = listUsers();
-        for (User u : list) {
-            if (u.getEmail().equalsIgnoreCase(email)) {
-                return u;
-            }
-        }
-        return null;
+        
+        return userDAO.findByEmail(email.toLowerCase());
     }    
 }

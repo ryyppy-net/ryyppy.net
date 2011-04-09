@@ -33,19 +33,16 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     @Transactional
-    public Party startParty(String identifier) {
-        if(StringUtils.isBlank(identifier)){
-            throw new IllegalArgumentException("Party id cannot be empty");
+    public Party startParty(String partyName) {
+        if(StringUtils.isBlank(partyName)){
+            throw new IllegalArgumentException("Party name cannot be empty");
         }
-        Party existingParty = partyDao.findById(identifier);
-        if(existingParty != null){
-            throw new IllegalArgumentException("Party id must be unique");
-        }
+
         Party party = new Party();
-        party.setId(identifier);
+        party.setName(partyName);
         partyDao.save(party);
 
-        log.info("Party {} was started!", identifier);
+        log.info("Party {}, id {} was started!", partyName, party.getId());
         return party;
     }
 
@@ -61,20 +58,20 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    public Party getParty(String identifier) {
-        return partyDao.findById(identifier);
+    public Party getParty(int partyId) {
+        return partyDao.readByPrimaryKey(partyId);
     }
 
     @Override
-    public List<User> listUsersByParty(String partyIdentifier) {
-        return new LinkedList<User>(getParty(partyIdentifier).getParticipants());
+    public List<User> listUsersByParty(int partyId) {
+        return new LinkedList<User>(getParty(partyId).getParticipants());
     }
     
     @Override
     @Transactional
-    public void linkUserToParty(String userId, String partyIdentifier) {
+    public void linkUserToParty(int userId, int partyIdentifier) {
         Party party = getParty(partyIdentifier);
-        User user = userDAO.readByPrimaryKey(Integer.parseInt(userId));
+        User user = userDAO.readByPrimaryKey(userId);
         party.addParticipant(user);
         partyDao.save(party);
         log.info("User with name {} was added to party {}", user.getName(), party.getName());
@@ -82,9 +79,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     @Transactional
-    public void unlinkUserFromParty(String partyId, String toKick) {
+    public void unlinkUserFromParty(int userId, int partyId) {
         Party party = getParty(partyId);
-        User user = userDAO.readByPrimaryKey(Integer.parseInt(toKick));
+        User user = userDAO.readByPrimaryKey(userId);
         party.removeParticipant(user);
         partyDao.save(party);
         log.info("User with name {} was added to party {}", user.getName(), party.getName());
@@ -92,8 +89,8 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     @Transactional
-    public void addDrink(String userIdentifier) {
-        User user = userDAO.readByPrimaryKey(Integer.parseInt(userIdentifier));
+    public void addDrink(int userIdentifier) {
+        User user = userDAO.readByPrimaryKey(userIdentifier);
         Drink drink = new Drink();
         drink.setDrinker(user);
         drink.setTimeStamp(new Date());
@@ -105,8 +102,8 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    public List<Drink> getDrinks(String userIdentifier) {
-        User user = userDAO.readByPrimaryKey(Integer.parseInt(userIdentifier));
+    public List<Drink> getDrinks(int userIdentifier) {
+        User user = userDAO.readByPrimaryKey(userIdentifier);
         return drinkDao.findByDrinker(user);
     }
 }

@@ -13,5 +13,5 @@ import org.synyx.hades.dao.GenericDao;
  * @author Toni
  */
 public interface PartyDAO extends GenericDao<Party, Integer> {
-    Party findById(String id);
+    Party findByName(String name);
 }

@@ -72,8 +72,8 @@ public class User extends AbstractEntity{
     }
 
     @Transient
-    public String getId(){
-        return getStoreKey().toString();
+    public int getId(){
+        return getStoreKey();
     }
 
     @ManyToMany(mappedBy="participants")

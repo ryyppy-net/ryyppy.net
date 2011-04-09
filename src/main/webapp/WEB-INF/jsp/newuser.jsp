@@ -31,11 +31,11 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td colspan="2"><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields();" /></td>
+                        <td colspan="2"><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields(true);" /></td>
                     </tr>
                     <tr>
                         <th>Sähköposti</th>
-                        <td><input id="email" type="text" name="email" onchange="checkEmail($(this).val()); checkDrinkerFields();" /></td>
+                        <td><input id="email" type="text" name="email" onchange="checkEmail($(this).val()); checkDrinkerFields(true);" /></td>
                         <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
@@ -49,7 +49,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td colspan="2"><input id="drinkerWeight" type="text" name="weight" onchange="checkDrinkerFields();" /></td>
+                        <td colspan="2"><input id="drinkerWeight" type="text" name="weight" onchange="checkDrinkerFields(true);" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>

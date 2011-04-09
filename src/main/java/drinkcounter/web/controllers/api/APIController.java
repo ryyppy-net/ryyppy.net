@@ -48,41 +48,45 @@ public class APIController {
 
     @RequestMapping("/parties/{partyId}")
     public @ResponseBody byte[] printXml(HttpSession session, @PathVariable String partyId) throws IOException{
-        authenticationChecks.checkRightsForParty((String)session.getAttribute(AuthenticationController.OPENID), partyId);
+        int id = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty((String)session.getAttribute(AuthenticationController.OPENID), id);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshall(partyId, baos);
+        partyMarshaller.marshall(id, baos);
         byte[] bytesXml = baos.toByteArray();
         return bytesXml;
     }
 
     @RequestMapping("/users/{userId}/add-drink")
     public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId){
-        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userId);
-        drinkCounterService.addDrink(userId);
-        User user = userService.getUser(userId);
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
+        drinkCounterService.addDrink(id);
+        User user = userService.getUser(id);
         return Integer.toString(user.getTotalDrinks());
     }
     
     @RequestMapping("/users/{userId}")
     public @ResponseBody byte[] userXml(HttpSession session, @PathVariable String userId) throws IOException{
-        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userId);
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshallUser(userId, baos);
+        partyMarshaller.marshallUser(id, baos);
         byte[] bytesXml = baos.toByteArray();
         return bytesXml;
     }
     
     @RequestMapping("/users/{userId}/show-history")
     public ResponseEntity<byte[]> showHistory(HttpSession session, @PathVariable String userId) throws IOException{
-        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userId);
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
-        User user = userService.getUser(userId);
+        User user = userService.getUser(id);
         int intervalMs = 2 * 60 * 1000;
         
         DateTime now = new DateTime();

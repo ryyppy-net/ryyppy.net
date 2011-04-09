@@ -17,17 +17,15 @@ import java.util.List;
 public interface DrinkCounterService {
 
     // Party methods
-    Party startParty(String identifier);
+    Party startParty(String name);
     void updateParty(Party party);
     List<Party> listParties();
-    Party getParty(String identifier);
-    void linkUserToParty(String userId, String partyIdentifier);
-    void unlinkUserFromParty(String partyId, String toKick);
-    List<User> listUsersByParty(String partyIdentifier);
-
-    
+    Party getParty(int partyId);
+    void linkUserToParty(int userId, int partyId);
+    void unlinkUserFromParty(int userId, int partyId);
+    List<User> listUsersByParty(int partyId);
 
     // Drinks
-    List<Drink> getDrinks(String userIdentifier);
-    void addDrink(String userIdentifier);
+    List<Drink> getDrinks(int userId);
+    void addDrink(int userId);
 }
