@@ -44,7 +44,7 @@ public class AuthenticationController {
             return "redirect:" + authRequest.getDestinationUrl(true);
         } catch (Exception ex) {
             log.error("Error authenticating OpenId", ex);
-            return "redirect: error";
+            return "redirect:/ui/loginerror";
         }
     }
     
@@ -88,7 +88,7 @@ public class AuthenticationController {
         }
 
         if (openId == null)
-              return "redirect:error";
+              return "redirect:/ui/loginerror";
         
         session.setAttribute(OPENID, openId);
 
@@ -110,8 +110,9 @@ public class AuthenticationController {
         urlBuilder.append("/ui/openId?is_return=true");
         return urlBuilder.toString();
     }
-    
-    
 
-
+    @RequestMapping("/loginerror")
+    public String loginerror() {
+        return "loginerror";
+    }
 }
