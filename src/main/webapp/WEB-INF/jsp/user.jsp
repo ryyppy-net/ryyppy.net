@@ -65,14 +65,20 @@
         <div id="body">
             <c:forEach items="${parties}" var="party">
                 <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
+                <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${user.id}" />
 
-                <a href="${viewPartyUrl}">
-                    <div class="party">
+                <div class="party">
+                    <a href="${viewPartyUrl}">
                         <span style="margin: 5px;">
-                            <c:out value="${party.id}" />
+                            <c:out value="${party.name}" />
                         </span>
+                    </a>
+                    <a href="${leavePartyUrl}">
+                        <span style="float:right; margin-right: 5px;">
+                            x
+                        </span>
+                    </a>
                     </div>
-                </a>
             </c:forEach>
         </div>
 
