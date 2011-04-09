@@ -55,6 +55,32 @@ public class UserController {
         return "redirect:user";
     }
 
+    @RequestMapping("/modifyUser")
+    public String modifyUser(
+            @RequestParam("userId") String userId,
+            @RequestParam("name") String name,
+            @RequestParam("sex") String sex,
+            @RequestParam("weight") float weight, 
+            @RequestParam("email") String email, 
+            HttpSession session){
+                
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        int uid = Integer.parseInt(userId);
+        authenticationChecks.checkLowLevelRightsToUser(openId, uid);
+        
+        if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
+            throw new IllegalArgumentException();
+
+        User user = userService.getUser(uid);
+        user.setName(name);
+        user.setSex(User.Sex.valueOf(sex));
+        user.setWeight(weight);
+        user.setOpenId(openId);
+        user.setEmail(email);
+        userService.updateUser(user);
+        return "redirect:user";
+    }
+
     @RequestMapping("/addDrink")
     public String addDrink(HttpSession session, @RequestParam("id") String userId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);

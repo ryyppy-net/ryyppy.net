@@ -27,35 +27,17 @@
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
         <script type="text/javascript">
-            function closeGraphDialog() {
-                $('#graphDialog').hide(300);
-            }
-            
-            function toggleGraphDialog() {
-                if ($('#graphDialog').css("display") == 'none')
-                    openGraphDialog();
-                else
-                    closeGraphDialog();
-            }
-            
-            function openGraphDialog() {
-                var left = Math.floor(($(window).width() - $("#graphDialog").width()) / 2);
-                var top = Math.floor(($(window).height() - $("#graphDialog").height()) / 3);
-
-                var dialog = $('#graphDialog');
-                dialog.css('left', left).css('top', top).show(300, function() {
+            function graphDialogOpened() {
                     // TODO clean up
-                    var persons = [];
-    <c:forEach items="${users}" var="user">
-                    persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
-    </c:forEach>
-
-                    $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
-
-                    if (plot == null) {
-                        render('groupGraph', persons);
-                    } 
-                });
+                var persons = [];
+<c:forEach items="${users}" var="user">
+                persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
+</c:forEach>
+                var dialog = $('#graphDialog');
+                $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
+                if (plot == null) {
+                    render('groupGraph', persons);
+                } 
             }
         </script>
     </head>
@@ -63,8 +45,8 @@
     <body>
         <div class="header">
             <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
-            <a href="#" onClick="toggleGraphDialog();"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
-            <a href="#" onClick="toggleAddDrinkerDialog();"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
+            <a href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened);"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
+            <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
             </div>
@@ -76,13 +58,13 @@
         </div>
             
         <div id="graphDialog">
-            <span style="float: right;"><a href="#" onClick="closeGraphDialog();">X</a></span>
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#graphDialog'));">X</a></span>
             <div style="margin-top: 13px;" id="groupGraph">
             </div>
         </div>
 
-        <div id="addDrinkerDialog">
-            <span style="float: right;"><a href="#" onClick="closeAddDrinkerDialog();">X</a></span>
+        <div id="addDrinkerDialog" class="popupDialog">
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
 
             <h2>Lisää rekisteröitynyt käyttäjä</h2>
             <form method="post" action="<c:url value="linkUserToParty" />">
@@ -106,7 +88,7 @@
 
             <h2>Lisää vieras</h2>
             <form method="post" action="<c:url value="addAnonymousUser" />">
-                  <input type="hidden" name="partyId" value="${party.id}" />
+                <input type="hidden" name="partyId" value="${party.id}" />
                 <table>
                     <tr>
                         <th>Nimi</th>
@@ -123,7 +105,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="text" name="weight" onkeyup="checkDrinkerFields(false);" /></td>
+                        <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>

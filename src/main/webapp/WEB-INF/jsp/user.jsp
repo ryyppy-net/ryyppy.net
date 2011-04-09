@@ -16,6 +16,7 @@
         <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
+        <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         
         <script type="text/javascript">
             var userButton = null;
@@ -41,6 +42,11 @@
                     &lt;
                 </div>
             </a>
+            <a href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail);">
+                <div class="headerButton headerButtonRight" id="configureButton">
+                    c
+                </div>
+            </a>
             <div class="headerTextDiv">
                 <h1><c:out value="${user.name}" /></h1>
             </div>
@@ -54,7 +60,7 @@
         </table>
         
         <div class="header">
-            <a href="#" onClick="toggleAddDrinkerDialog();">
+            <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton">+</div>
             </a>
             <div class="headerTextDiv">
@@ -82,8 +88,8 @@
             </c:forEach>
         </div>
 
-        <div id="addDrinkerDialog">
-            <span style="float: right;"><a href="#" onClick="closeAddDrinkerDialog();">X</a></span>
+        <div id="addDrinkerDialog" class="popupDialog">
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
 
             <h2>Uudet bileet</h2>
 
@@ -95,6 +101,44 @@
                     </tr>
                     <tr>
                         <th>&nbsp;</th><td><input type="submit" value="Luo bileet" /></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+                
+        <div id="configureDrinkerDialog" class="popupDialog">
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinkerDialog'));">X</a></span>
+
+            <h2>Muokkaa tietojasi</h2>
+
+            <form method="post" action="<c:url value="modifyUser" />">
+                <input type="hidden" name="userId" value="${user.id}" />                
+                <table>
+                    <tr>
+                        <th>Nimi</th>
+                        <td colspan="2"><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields(true);" value="<c:out value='${user.name}' />" /></td>
+                    </tr>
+                    <tr>
+                        <th>Sähköposti</th>
+                        <td><input id="email" type="text" name="email" value="<c:out value='${user.email}' />" onchange="checkEmail($(this).val(), '<c:out value='${user.email}'/>'); checkDrinkerFields(true);" /></td>
+                        <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th>Sukupuoli</th>
+                        <td colspan="2">
+                            <select name="sex">
+                                <option <c:if test="${user.sex == 'MALE'}">selected="selected"</c:if> value="MALE">Mies</option>
+                                <option <c:if test="${user.sex == 'FEMALE'}">selected="selected"</c:if> value="FEMALE">Nainen</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Paino</th>
+                        <td colspan="2"><input value="<c:out value='${user.weight}' />" id="drinkerWeight" type="password" name="weight" onchange="checkDrinkerFields(true);" /></td>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <td colspan="2"><input id="submitButton" type="submit" value="Tallenna" disabled="disabled" /></td>
                     </tr>
                 </table>
             </form>
