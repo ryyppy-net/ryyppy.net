@@ -210,3 +210,7 @@ div#configureButton {
     margin-right: auto;
     width: 33%;
 }
+
+div#kickDrinkerButton {
+    background-color: #e60d0f;
+}
