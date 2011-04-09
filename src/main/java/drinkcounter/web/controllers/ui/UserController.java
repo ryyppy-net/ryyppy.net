@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
+import drinkcounter.authentication.AuthenticationChecks;
+import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Party;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -26,6 +28,8 @@ public class UserController {
     @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
 
+    @Autowired private AuthenticationChecks authenticationChecks;
+    
     @RequestMapping("/addUser")
     public String addUser(
             @RequestParam("name") String name,
@@ -33,12 +37,13 @@ public class UserController {
             @RequestParam("weight") float weight, 
             @RequestParam("email") String email, 
             HttpSession session){
+                
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
-            throw new RuntimeException("gtfo");
+            throw new NotLoggedInException();
         
         if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
-            throw new RuntimeException("illegal arguments");
+            throw new IllegalArgumentException();
 
         User user = new User();
         user.setName(name);
@@ -51,7 +56,10 @@ public class UserController {
     }
 
     @RequestMapping("/addDrink")
-    public String addDrink(@RequestParam("id") String userId){
+    public String addDrink(HttpSession session, @RequestParam("id") String userId){
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        authenticationChecks.checkHighLevelRightsToUser(openId, userId);
+        
         drinkCounterService.addDrink(userId);
         return "redirect:parties";
     }
@@ -59,12 +67,9 @@ public class UserController {
     @RequestMapping("/user")
     public ModelAndView userPage(HttpSession session){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        if (openId == null)
-            throw new RuntimeException("gtfo");
+        authenticationChecks.checkLogin(openId);
         
         User user = userService.getUserByOpenId(openId);
-        if (user == null)
-            throw new RuntimeException("gtfo");
         
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
@@ -79,7 +84,7 @@ public class UserController {
     public ModelAndView newUser(HttpSession session){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
-            throw new RuntimeException("gtfo");
+            throw new NotLoggedInException();
         
         ModelAndView mav = new ModelAndView();
         mav.setViewName("newuser");
@@ -90,10 +95,10 @@ public class UserController {
     public ResponseEntity<byte[]> checkEmail(HttpSession session, @RequestParam("email") String email){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
-            throw new RuntimeException("gtfo");
-        
+            throw new NotLoggedInException();
+
         String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         return new ResponseEntity<byte[]>(data.getBytes(), headers, HttpStatus.OK);
@@ -102,9 +107,8 @@ public class UserController {
     @RequestMapping("/getUserByEmail")
     public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        if (openId == null)
-            throw new RuntimeException("gtfo");
-        
+        authenticationChecks.checkRightsForParty(openId, partyId);
+
         String data = "";
         if (!userService.emailIsCorrect(email))
             data = "0";
@@ -113,6 +117,7 @@ public class UserController {
         if (user == null)
             data = "0";
         else {
+            // TODO optimize
             List<Party> parties = user.getParties();
             data = user.getId();
             for (Party p : parties) {
