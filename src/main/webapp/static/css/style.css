@@ -8,6 +8,11 @@ a {
     text-decoration: none;
 }
 
+li > a, p > a {
+    color: #000000;
+}
+
+
 h1 {
     background-color: #252525;
     color: #ffffff;
