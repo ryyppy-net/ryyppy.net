@@ -76,7 +76,7 @@
         <location>/WEB-INF/jsp/error.jsp</location>
     </error-page>
     <error-page>
-        <exception-type>NotLoggedInException</exception-type>
+        <exception-type>drinkcounter.authentication.NotLoggedInException</exception-type>
         <location>/WEB-INF/jsp/login.jsp</location>
     </error-page>
     <error-page>
