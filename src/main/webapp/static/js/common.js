@@ -4,23 +4,23 @@ function fix_the_fucking_css() {
     $(".party").width($("#body").width() - 10 + 'px');
 }
 
-function toggleAddDrinkerDialog() {
-    if ($('#addDrinkerDialog').css("display") == 'none')
-        openAddDrinkerDialog();
+function toggleDialog(dialog, opened, closed) {
+    if (dialog.css("display") == 'none')
+        openDialog(dialog, opened);
     else
-        closeAddDrinkerDialog();
+        closeDialog(dialog, closed);
 }
 
-function openAddDrinkerDialog() {
-    var left = Math.floor(($(window).width() - $("#addDrinkerDialog").width()) / 2);
-    var top = Math.floor(($(window).height() - $("#addDrinkerDialog").height()) / 3);
+function openDialog(dialog, opened) {
+    var left = Math.floor(($(window).width() - dialog.width()) / 2);
+    var top = Math.floor(($(window).height() - dialog.height()) / 3);
 
-    $('#addDrinkerDialog').css('left', left).css('top', top);
-    $('#addDrinkerDialog').show(300);
+    dialog.css('left', left).css('top', top);
+    dialog.show(300, opened);
 }
 
-function closeAddDrinkerDialog() {
-    $('#addDrinkerDialog').hide(300);
+function closeDialog(dialog) {
+    dialog.hide(300, closed);
 }
 
 var colors = [

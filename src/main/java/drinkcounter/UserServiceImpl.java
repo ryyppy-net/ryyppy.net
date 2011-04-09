@@ -32,6 +32,12 @@ public class UserServiceImpl implements UserService{
     @Autowired UserDAO userDAO;
     @Autowired DrinkDAO drinkDAO;
 
+    @Override
+    @Transactional
+    public void updateUser(User user) {
+        userDAO.save(user);
+    }
+
     // this doesn't return include anonymous users
     @Override
     public List<User> listUsers() {

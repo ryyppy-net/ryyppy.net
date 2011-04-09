@@ -13,7 +13,7 @@
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript">
             $(document).ready(function() {
-                openAddDrinkerDialog();
+                openDialog($("#addDrinkerDialog"));
             });
         </script>
     </head>
@@ -22,12 +22,12 @@
             <h1>Tervetuloa!</h2>
         </div>
 
-        <div id="addDrinkerDialog" style="width: 400px;">
+        <div id="addDrinkerDialog" class="popupDialog">
             <h2>Rekisteröinti</h2>
 
             <p>Olet näemmä ensimmäistä kertaa tällä sivulla. Ole hyvä ja täytä allaolevat tiedot, niin aletaan ryyppäämään!</p>
 
-            <form method="post" action="<c:url value="addUser" />">
+            <form method="post" action="addUser">
                 <table>
                     <tr>
                         <th>Nimi</th>
@@ -49,7 +49,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td colspan="2"><input id="drinkerWeight" type="text" name="weight" onchange="checkDrinkerFields(true);" /></td>
+                        <td colspan="2"><input id="drinkerWeight" type="password" name="weight" onchange="checkDrinkerFields(true);" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>

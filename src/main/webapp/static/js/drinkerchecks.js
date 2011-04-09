@@ -16,9 +16,13 @@ function checkDrinkerFields(checkEmail) {
     button.attr("disabled", success ? "" : "disabled");
 }
 
-function checkEmail(email) {
+function checkEmail(email, exclude) {
     $("#emailCorrect").css("display", "block");
     $("#emailCorrect").html("<img src='/static/images/loading.gif' alt='loading...' />").addClass("error");
+    if (email === exclude) {
+        $("#emailCorrect").html("<img src='/static/images/yes.png' alt='email is ok' />").removeClass("error");
+        return;
+    }
     $.get('checkEmail?email=' + email, function(data) {
         if (data === '1')
             $("#emailCorrect").html("<img src='/static/images/yes.png' alt='email is ok' />").removeClass("error");
