@@ -48,12 +48,12 @@ public class PartyController {
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int pid = Integer.parseInt(partyId);
         authenticationChecks.checkRightsForParty(openId, pid);
+        User user = userService.getUserByOpenId(openId);
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("partytouch");
         mav.addObject("party", drinkCounterService.getParty(pid));
-        mav.addObject("allUsers", userService.listUsers());
-        mav.addObject("users", drinkCounterService.listUsersByParty(pid));
+        mav.addObject("user", user);
         return mav;
     }
 

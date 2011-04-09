@@ -30,8 +30,8 @@
             function graphDialogOpened() {
                     // TODO clean up
                 var persons = [];
-<c:forEach items="${users}" var="user">
-                persons.push(['${user.name}', '/API/users/${user.id}/show-history']);
+<c:forEach items="${party.participants}" var="participant">
+                persons.push(['${user.name}', '/API/users/${participant.id}/show-history']);
 </c:forEach>
                 var dialog = $('#graphDialog');
                 $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
@@ -47,6 +47,7 @@
             <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
             <a href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened);"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
             <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
+            <a href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton">k</div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
             </div>
@@ -114,6 +115,21 @@
                 </table>
             </form>
         </div>
+                
+        <div style="width:300px;" id="kickDrinkerDialog" class="popupDialog">
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#kickDrinkerDialog'));">X</a></span>
+
+            <h2>Poista käyttäjä bileistä</h2>
+            <ul>
+                <c:forEach var="participant" items="${party.participants}">
+                    <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${participant.id}" />
+                    <c:if test="${participant.id != user.id}">
+                        <li><a href="${leavePartyUrl}"><c:out value="${participant.name}" /> </a></li>
+                    </c:if>
+                </c:forEach>
+            </ul>
+        </div>
+                
     </body>
 </html>
 
