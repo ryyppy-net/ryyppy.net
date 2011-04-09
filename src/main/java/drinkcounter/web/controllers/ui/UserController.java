@@ -58,9 +58,10 @@ public class UserController {
     @RequestMapping("/addDrink")
     public String addDrink(HttpSession session, @RequestParam("id") String userId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkHighLevelRightsToUser(openId, userId);
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser(openId, id);
         
-        drinkCounterService.addDrink(userId);
+        drinkCounterService.addDrink(id);
         return "redirect:parties";
     }
     
@@ -107,7 +108,8 @@ public class UserController {
     @RequestMapping("/getUserByEmail")
     public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkRightsForParty(openId, partyId);
+        int id = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(openId, id);
 
         String data = "";
         if (!userService.emailIsCorrect(email))
@@ -119,9 +121,9 @@ public class UserController {
         else {
             // TODO optimize
             List<Party> parties = user.getParties();
-            data = user.getId();
+            data = Integer.toString(user.getId());
             for (Party p : parties) {
-                if (p.getId().equals(partyId)) {
+                if (p.getId() == id) {
                     // user is already in party
                     data = "0";
                     break;

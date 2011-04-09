@@ -18,7 +18,7 @@ public class AuthenticationChecks {
         userService = us;
     }
     
-    public void checkRightsForParty(String openId, String partyId) {
+    public void checkRightsForParty(String openId, int partyId) {
         if (openId == null)
             throw new NotLoggedInException();
         
@@ -29,14 +29,14 @@ public class AuthenticationChecks {
         // TODO optimize by query
         List<Party> parties = user.getParties();
         for (Party p : parties) {
-            if (p.getId().equals(partyId)) {
+            if (p.getId() == partyId) {
                 return;
             }
         }
         throw new NotEnoughRightsException();
     }
 
-    public void checkHighLevelRightsToUser(String openId, String userId) {
+    public void checkHighLevelRightsToUser(String openId, int userId) {
         if (openId == null)
             throw new NotLoggedInException();
         
@@ -44,21 +44,21 @@ public class AuthenticationChecks {
         if (user == null)
             throw new NotLoggedInException();
         
-        if (user.getId().equals(userId)) return;
+        if (user.getId() == userId) return;
         
         //TODO optimize
         List<Party> parties = user.getParties();
         for (Party p : parties) {
             List<User> participants = p.getParticipants();
             for (User u : participants) {
-                if (u.getId().equals(userId))
+                if (u.getId() == userId)
                     return;
             }
         }
         throw new NotEnoughRightsException();
     }
 
-    public void checkLowLevelRightsToUser(String openId, String userId) {
+    public void checkLowLevelRightsToUser(String openId, int userId) {
         if (openId == null)
             throw new NotLoggedInException();
         
@@ -66,7 +66,7 @@ public class AuthenticationChecks {
         if (user == null)
             throw new NotLoggedInException();
         
-        if (user.getId().equals(userId)) return;
+        if (user.getId() == userId) return;
         throw new NotEnoughRightsException();
     }
 

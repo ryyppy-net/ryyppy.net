@@ -40,7 +40,7 @@ public class AuthenticationCheckTest {
         user3.setStoreKey(3);
 
         Party party = new Party();
-        party.setId("party1");
+        party.setStoreKey(1);
         party.addParticipant(user);
         party.addParticipant(user2);
         List<Party> parties = new ArrayList<Party>();
@@ -49,7 +49,7 @@ public class AuthenticationCheckTest {
         user2.setParties(parties);
         
         Party party2 = new Party();
-        party2.setId("party2");
+        party2.setStoreKey(2);
         party2.addParticipant(user3);
         List<Party> parties2 = new ArrayList<Party>();
         parties2.add(party2);
@@ -63,11 +63,11 @@ public class AuthenticationCheckTest {
     
     @Test
     public void testCheckRightsForParty() {
-        authenticationChecks.checkRightsForParty(openId, "party1");
+        authenticationChecks.checkRightsForParty(openId, 1);
         
         Exception e = null;
         try {
-            authenticationChecks.checkRightsForParty(openId, "party2");
+            authenticationChecks.checkRightsForParty(openId, 2);
         } catch (NotEnoughRightsException ex) {
             e = ex;
         }
@@ -76,12 +76,12 @@ public class AuthenticationCheckTest {
     
     @Test
     public void testCheckHighLevelRightsToUser() {
-        authenticationChecks.checkHighLevelRightsToUser(openId, "1");
-        authenticationChecks.checkHighLevelRightsToUser(openId, "2");
+        authenticationChecks.checkHighLevelRightsToUser(openId, 1);
+        authenticationChecks.checkHighLevelRightsToUser(openId, 2);
         
         Exception e = null;
         try {
-            authenticationChecks.checkHighLevelRightsToUser(openId, "3");
+            authenticationChecks.checkHighLevelRightsToUser(openId, 3);
         } catch (NotEnoughRightsException ex) {
             e = ex;
         }
@@ -90,11 +90,11 @@ public class AuthenticationCheckTest {
     
     @Test
     public void testCheckLowLevelRightsToUser() {
-        authenticationChecks.checkLowLevelRightsToUser(openId, "1");
+        authenticationChecks.checkLowLevelRightsToUser(openId, 1);
         
         Exception e = null;
         try {
-            authenticationChecks.checkLowLevelRightsToUser(openId, "3");
+            authenticationChecks.checkLowLevelRightsToUser(openId, 3);
         } catch (NotEnoughRightsException ex) {
             e = ex;
         }
@@ -102,7 +102,7 @@ public class AuthenticationCheckTest {
         
         e = null;
         try {
-            authenticationChecks.checkLowLevelRightsToUser(openId, "2");
+            authenticationChecks.checkLowLevelRightsToUser(openId, 2);
         } catch (NotEnoughRightsException ex) {
             e = ex;
         }

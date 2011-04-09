@@ -28,40 +28,44 @@ public class PartyController {
     @RequestMapping("/viewParty")
     public ModelAndView viewParty(HttpSession session, @RequestParam("id") String partyId, @RequestParam(value="kick", required=false) String toKick){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkRightsForParty(openId, partyId);
+
+        int pid = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(openId, pid);
         
         if (toKick != null)
-            drinkCounterService.unlinkUserFromParty(partyId, toKick);
+            drinkCounterService.unlinkUserFromParty(Integer.parseInt(toKick), pid);
         
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
-        mav.addObject("party", drinkCounterService.getParty(partyId));
+        mav.addObject("party", drinkCounterService.getParty(pid));
         mav.addObject("allUsers", userService.listUsers());
-        mav.addObject("users", drinkCounterService.listUsersByParty(partyId));
+        mav.addObject("users", drinkCounterService.listUsersByParty(pid));
         return mav;
     }
 
     @RequestMapping("/partytouch")
     public ModelAndView partyTouch(HttpSession session, @RequestParam("id") String partyId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkRightsForParty(openId, partyId);
+        int pid = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(openId, pid);
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("partytouch");
-        mav.addObject("party", drinkCounterService.getParty(partyId));
+        mav.addObject("party", drinkCounterService.getParty(pid));
         mav.addObject("allUsers", userService.listUsers());
-        mav.addObject("users", drinkCounterService.listUsersByParty(partyId));
+        mav.addObject("users", drinkCounterService.listUsersByParty(pid));
         return mav;
     }
 
     @RequestMapping("/addParty")
     public String addParty(HttpSession session, @RequestParam("name") String partyName, @RequestParam("userId") String userId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkLowLevelRightsToUser(openId, userId);
+        int uid = Integer.parseInt(userId);
+        authenticationChecks.checkLowLevelRightsToUser(openId, uid);
         
         Party party = drinkCounterService.startParty(partyName);
-        drinkCounterService.linkUserToParty(userId, party.getId());
-        return "redirect:partytouch?id="+partyName;
+        drinkCounterService.linkUserToParty(uid, party.getId());
+        return "redirect:partytouch?id="+party.getId();
     }
    
     @RequestMapping("/addAnonymousUser")
@@ -71,7 +75,8 @@ public class PartyController {
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkRightsForParty(openId, partyId);
+        int pid = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(openId, pid);
         
         User user = new User();
         user.setName(name);
@@ -79,18 +84,20 @@ public class PartyController {
         user.setWeight(weight);
         user.setGuest(true);
         userService.addUser(user);
-        drinkCounterService.linkUserToParty(user.getId(), partyId);
-        return "redirect:viewParty?id=" + partyId;
+        drinkCounterService.linkUserToParty(user.getId(), pid);
+        return "redirect:partytouch?id=" + partyId;
     }
     
     @RequestMapping("/linkUserToParty")
     public String linkUserToParty(HttpSession session, @RequestParam("partyId") String partyId,
             @RequestParam("userId") String userId){
+                
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkRightsForParty(openId, partyId);
-                if (userId == null || userId.length() == 0)
-                    throw new RuntimeException("Invalid arguments");
-            drinkCounterService.linkUserToParty(userId, partyId);
-            return "redirect:viewParty?id="+partyId;
+        int pid = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(openId, pid);
+        if (userId == null || userId.length() == 0)
+            throw new RuntimeException("Invalid arguments");
+        drinkCounterService.linkUserToParty(Integer.parseInt(userId), pid);
+        return "redirect:partytouch?id="+partyId;
     }
 }

@@ -1,4 +1,4 @@
-function checkDrinkerFields() {
+function checkDrinkerFields(checkEmail) {
     var success = true;
     
     var drinkerName = $('#drinkerName').val();
@@ -9,7 +9,7 @@ function checkDrinkerFields() {
     if (drinkerWeight.length == 0 || drinkerWeight != parseFloat(drinkerWeight))
         success = false;
     
-    if ($("#emailCorrect").hasClass("error"))
+    if (checkEmail && $("#emailCorrect").hasClass("error"))
         success = false;
     
     var button = $("#submitButton");
