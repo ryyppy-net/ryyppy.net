@@ -94,10 +94,25 @@ public class PartyController {
                 
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int pid = Integer.parseInt(partyId);
+        int uid = Integer.parseInt(userId);
         authenticationChecks.checkRightsForParty(openId, pid);
-        if (userId == null || userId.length() == 0)
-            throw new RuntimeException("Invalid arguments");
-        drinkCounterService.linkUserToParty(Integer.parseInt(userId), pid);
+        authenticationChecks.checkHighLevelRightsToUser(openId, uid);
+        drinkCounterService.linkUserToParty(uid, pid);
         return "redirect:partytouch?id="+partyId;
+    }
+
+    @RequestMapping("/removeUserFromParty")
+    public String removeUserFromParty(HttpSession session, @RequestParam("partyId") String partyId,
+            @RequestParam("userId") String userId){
+                
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        int pid = Integer.parseInt(partyId);
+        int uid = Integer.parseInt(userId);
+        authenticationChecks.checkRightsForParty(openId, pid);
+        authenticationChecks.checkHighLevelRightsToUser(openId, uid);
+        drinkCounterService.unlinkUserFromParty(uid, pid);
+        
+        // TODO: return to where you came from
+        return "redirect:user";
     }
 }
