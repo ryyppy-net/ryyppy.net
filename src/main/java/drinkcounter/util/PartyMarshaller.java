@@ -83,10 +83,12 @@ public class PartyMarshaller {
         
         if (user.getDrinks().size() > 0) {
             Drink lastDrink = user.getDrinks().get(user.getDrinks().size() - 1);
-            userNode.appendChild(createTextContentElement("lastDrink", new DateTime(lastDrink.getTimeStamp()).toString(), doc));
+            long millis = System.currentTimeMillis() - lastDrink.getTimeStamp().getTime();
+            String seconds = Long.toString(millis / 1000);
+            userNode.appendChild(createTextContentElement("idle", seconds, doc));
         }
         else
-            userNode.appendChild(createTextContentElement("lastDrink", new DateTime().toString(), doc));
+            userNode.appendChild(createTextContentElement("idle", "0", doc));
         
         return userNode;
     }

@@ -43,8 +43,7 @@ function UserButton(userId, element, color) {
         var alcohol = xml.find('alcoholInPromilles').text();
         var drinks = xml.find('totalDrinks').text();
 
-        var lastDrink = new Date(formatDateString(xml.find('lastDrink').text()));
-        var idletime = new Date().getTime() - lastDrink.getTime();
+        var idletime = xml.find('idle').text();
 
         this.setTexts(name, alcohol, drinks, idletime);
     }
@@ -54,7 +53,7 @@ function UserButton(userId, element, color) {
         
         var html = '<span class="name">' + name + '</span><br />'
         html += '<span class="details">' + Number(alcohol).toFixed(2) + ' \u2030<br />';
-        html += drinks + " drinks <br /> idle: " + String(Math.floor(idletime / 1000 / 60)) + " min</span>";
+        html += drinks + " drinks <br /> idle: " + String(Math.floor(idletime / 60)) + " min</span>";
 
         div.html(html);
     }
@@ -121,18 +120,4 @@ function UserButton(userId, element, color) {
     }
 
     this.buildHtml();
-}
-
-function formatDateString(dateString) {
-    var re = new RegExp("([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}).[0-9]{3}([+|-])([0-9]{2}):[0-9]{2}");
-    var m = re.exec(dateString);
-    var lastDrinkStr = "";
-
-    var perkele = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-    if (m != null) {
-        lastDrinkStr = m[3] + " " + perkele[parseInt(m[2])] + " " + m[1] + " " + m[4] + ":" + m[5] + ":" + m[6] + " GMT" + m[7] + m[8] + "00";
-    }
-
-    return lastDrinkStr;
 }
