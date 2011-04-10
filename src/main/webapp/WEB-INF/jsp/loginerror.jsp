@@ -6,7 +6,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Virhe</title>
+        <title>Ryyppy.net - Virhe sisäänkirjautumisessa!</title>
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
  
@@ -21,7 +21,7 @@
         <p>Mahdollisia syitä:</p>
         <ul>
             <li>kirjoitit OpenId-tunnuksesi väärin</li>
-            <li>OpenId-palveluntarjoajasi ei ole OpenID 2.0-standardin mukainen</li>
+            <li>OpenID-palveluntarjoajasi ei ole OpenID 2.0 -standardin mukainen</li>
             <li>tyrit kirjautumisesi OpenID-palveluntarjoajasi kanssa</li>
             <li>järjestelmässä on bugi, <a href="mailto:info@ryyppy.net">kerro siitä meille</a></li>
             <li>töhötit jotain muuta</li>
