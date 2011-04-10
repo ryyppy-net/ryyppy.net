@@ -1,1 +1,9 @@
-Ei tiedetä edes missä ajetaan, ei voi viedä tuotantoon
+0. Kysy Tonilta SSH-avain Amazon-palvelimelle, jos sinulla ei jo ole.
+1. Tee NetBeansillä war-tiedosto ryyppy.netistä
+    - Aja Build projektille NetBeansissä ja hae target-hakemistosta war
+2. Kopioi war-tiedosto palvelimelle kotihakemistoon
+3. Siirrä palvelimella oleva war-tiedosto polkuun tomcat/webapps/ROOT.war
+4. Jos tomcat kaatuu, se pitää käynnistää uudestaan.
+    - Kokeile toimiiko sudo tomcat/bin/shutdown.sh
+    - Jos ei, tapa kill-komennolla
+    - Käynnistä uudestaan sudo tomcat/bin/startup.sh
