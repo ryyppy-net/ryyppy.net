@@ -30,7 +30,7 @@
                 
                 userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
                 userButton.update();
-                //setInterval(function() {userButton.update()}, 1000);
+                setInterval(function() {userButton.update()}, 60 * 1000);
             });
         </script>
         <title>Bileet</title>
