@@ -96,7 +96,7 @@ public class PartyController {
         int pid = Integer.parseInt(partyId);
         int uid = Integer.parseInt(userId);
         authenticationChecks.checkRightsForParty(openId, pid);
-        authenticationChecks.checkHighLevelRightsToUser(openId, uid);
+//        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
         drinkCounterService.linkUserToParty(uid, pid);
         return "redirect:partytouch?id="+partyId;
     }

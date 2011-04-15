@@ -7,6 +7,7 @@ function UserButton(userId, element, color) {
     this.timeScale = 5 * 60 * 60 * 1000;
     this.userId = userId;
     this.clicked = false;
+    this.onDrunk = null;
     
     this.graphOptions = {
         crosshair: {mode: null},
@@ -30,7 +31,6 @@ function UserButton(userId, element, color) {
     }
 
     this.update = function() {
-        // fucking javascript, plz fix this
         var fuckthis = this;
         
         $.get(userUrl.replace('_userid_', this.userId), function(data) {fuckthis.dataLoaded(data);} );
@@ -53,7 +53,11 @@ function UserButton(userId, element, color) {
         
         var html = '<span class="name">' + name + '</span><br />'
         html += '<span class="details">' + Number(alcohol).toFixed(2) + ' \u2030<br />';
-        html += drinks + " drinks <br /> idle: " + String(Math.floor(idletime / 60)) + " min</span>";
+        if (drinks == 1)
+            html += drinks + " annos <br />";
+        else
+            html += drinks + " annosta <br />";
+        html += "juomatta: " + String(Math.floor(idletime / 60)) + " min</span>";
 
         div.html(html);
     }
@@ -111,13 +115,15 @@ function UserButton(userId, element, color) {
         $.get(addDrinkUrl.replace('_userid_', this.userId), function() {
             fuckthis.update();
             fuckthis.element.fadeTo('slow', 1.0, function() {fuckthis.clicked = false;});
-           // fuckthis.css('border-style', 'outset');
+            // fuckthis.css('border-style', 'outset');
+            if (fuckthis.onDrunk)
+               fuckthis.onDrunk(fuckthis.userId);
         });
 
         // this.element.css('border-style', 'inset');
         this.element.fadeTo('slow', 0.5);
         playSound();
     }
-
+    
     this.buildHtml();
 }

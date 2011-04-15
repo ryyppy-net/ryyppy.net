@@ -11,6 +11,7 @@
         <script type="text/javascript">
             // global urls
             var dataUrl = '/API/parties/${party.id}/';
+            var updateInterval = 2 * 60 * 1000;
         </script>
         
         <script type="text/javascript" src="/static/js/jquery.js"></script>
@@ -23,23 +24,44 @@
         
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
-        <script type="text/javascript" src="/static/js/partytouch.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
         <script type="text/javascript">
+            var graph = null;
+            var graphInterval = null;
+            var graphVisible = false;
+            
+            function updateGroupGraph() {
+                if (graph != null && graphVisible)
+                    graph.update();
+            }
+            
             function graphDialogOpened() {
-                    // TODO clean up
-                var persons = [];
-<c:forEach items="${party.participants}" var="participant">
-                persons.push(['${user.name}', '/API/users/${participant.id}/show-history']);
-</c:forEach>
+                graphVisible = true;
+                var element = $('#groupGraph');
                 var dialog = $('#graphDialog');
-                $('#groupGraph').css('width', dialog.css('width')).css('height', dialog.css('height'));
-                if (plot == null) {
-                    render('groupGraph', persons);
-                } 
+                element.css('width', dialog.css('width')).css('height', (parseInt(dialog.css('height'), 0) - 10) + 'px');
+                
+                if (graph == null) {
+                    var users = [];
+<c:forEach items="${party.participants}" var="participant">
+                    users.push({name: '${participant.name}', id:'${participant.id}'});
+</c:forEach>
+                    graph = new GroupGraph(users, element);
+                }
+                graph.options.legend = { position:'nw' };
+                updateGroupGraph();
+                if (!graphInterval)
+                    graphInterval = setInterval(updateGroupGraph, updateInterval);
+            }
+
+            function graphDialogClosed() {
+                graphVisible = false;
+                if (graphInterval)
+                    graphInterval = clearInterval(graphInterval);
             }
         </script>
+        <script type="text/javascript" src="/static/js/partytouch.js"></script>
         <script type="text/javascript">
 
           var _gaq = _gaq || [];
@@ -57,10 +79,10 @@
 
     <body>
         <div class="header">
-            <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack">&lt;</div></a>
-            <a href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened);"><div class="headerButton headerButtonLeft" id="graphButton">g</div></a>
-            <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton">+</div></a>
-            <a href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton">k</div></a>
+            <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
+            <a href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
+            <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
+            <a href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
             </div>
@@ -137,7 +159,7 @@
                 <c:forEach var="participant" items="${party.participants}">
                     <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${participant.id}" />
                     <c:if test="${participant.id != user.id}">
-                        <li><a href="${leavePartyUrl}"><c:out value="${participant.name}" /> </a></li>
+                        <li><a href="#" onClick="if (confirm('Poistetaanko ${participant.name} bileistä?')) $.get('${leavePartyUrl}', function() {location.reload(true);});"><c:out value="${participant.name}" /> </a></li>
                     </c:if>
                 </c:forEach>
             </ul>

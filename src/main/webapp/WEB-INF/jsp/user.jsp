@@ -52,12 +52,10 @@
         <div class="header">
             <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">
                 <div class="headerButton headerButtonLeft" id="goBack">
-                    &lt;
                 </div>
             </a>
             <a href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail);">
                 <div class="headerButton headerButtonRight" id="configureButton">
-                    c
                 </div>
             </a>
             <div class="headerTextDiv">
@@ -74,7 +72,7 @@
         
         <div class="header">
             <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));">
-                <div class="headerButton headerButtonRight" id="addDrinkerButton">+</div>
+                <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
             <div class="headerTextDiv">
                 <h1>Sun bileet</h1>
@@ -92,10 +90,8 @@
                             <c:out value="${party.name}" />
                         </span>
                     </a>
-                    <a href="${leavePartyUrl}">
-                        <span style="float:right; margin-right: 5px;">
-                            x
-                        </span>
+                    <a onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
+                        <img src="/static/images/x.png" style="float:right; margin-right: 5px;" />
                     </a>
                     </div>
             </c:forEach>
