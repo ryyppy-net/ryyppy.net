@@ -11,7 +11,7 @@ $(document).ready(function() {
     setInterval(function() {if (needsRefreshing == true) forceRefresh();}, 1000);
     
     // update data every two minutes
-    setInterval(function() {get_data(updateGrid);}, 2 * 60 * 1000);
+    setInterval(function() {get_data(updateGrid);}, updateInterval);
 });
 
 $(window).resize(function() {
@@ -105,6 +105,7 @@ function createAndFillGrid(data) {
             newElement.attr("width", width);
             var user = users[colorIndex];
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
+            ub.onDrunk = updateGroupGraph;
             userButtons.push(ub);
 
             $('#row' + i).append(newElement);

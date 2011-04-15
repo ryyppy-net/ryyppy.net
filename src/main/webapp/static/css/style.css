@@ -157,19 +157,21 @@ div.popupDialog a {
 
 /* header stuff */
 .headerButton {
-    margin: 4px;
+    margin: 3px;
     color: #ffffff;
     border: 1px solid #0c0c0c;
-    border-radius: 5px;
+    border-radius: 8px;
     font-weight: bold;
     text-shadow: #6a6a6a 3px 3px 2px;
     
-    background-color: #252525;
     font-variant: small-caps;
     font-size: 2em;
     
-    width: 1em;
+    width: 40px;
+    height: 40px;
     background-color: #50b93e;
+    background-repeat: no-repeat;
+    background-position: center center;
 }
 
 .headerButton a {
@@ -184,22 +186,6 @@ div.popupDialog a {
     float: right;
 }
 
-div#addDrinkerButton {
-    background-color: #50b93e;
-}
-
-div#goBack {
-    background-color: #e60d0f;
-}
-
-div#graphButton {
-    background-color: #dd318a;
-}
-
-div#configureButton {
-    background-color: #65E6E4;
-}
-
 .header {
     text-align: center;
     background-color: #252525;
@@ -211,6 +197,32 @@ div#configureButton {
     width: 33%;
 }
 
+div#addDrinkerButton {
+    background-color: #50b93e;
+    background-image: url("/static/images/plus.png");
+}
+
+div#goBack {
+    background-color: #e60d0f;
+    background-image: url("/static/images/back.png");
+}
+
+div#graphButton {
+    background-color: #dd318a;
+    background-image: url("/static/images/chart.png");
+}
+
+div#configureButton {
+    background-color: #65E6E4;
+    background-image: url("/static/images/jakari.png");
+}
+
 div#kickDrinkerButton {
     background-color: #e60d0f;
+    background-image: url("/static/images/kieltomerkki.png");
+}
+
+div#closeButton {
+    background-color: #e60d0f;
+    background-image: url("/static/images/x.png");
 }

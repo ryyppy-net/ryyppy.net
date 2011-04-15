@@ -19,7 +19,7 @@ function openDialog(dialog, opened) {
     dialog.show(300, opened);
 }
 
-function closeDialog(dialog) {
+function closeDialog(dialog, closed) {
     dialog.hide(300, closed);
 }
 

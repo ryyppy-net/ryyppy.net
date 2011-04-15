@@ -1,4 +1,4 @@
-0. Kysy Tonilta SSH-avain Amazon-palvelimelle, jos sinulla ei jo ole.
+0. Kysy Tonilta SSH-avain Amazon-palvelimelle (ryyppy.net, username ec2-user), jos sinulla ei jo ole.
 1. Tee NetBeansillä war-tiedosto ryyppy.netistä
     - Aja Build projektille NetBeansissä ja hae target-hakemistosta war
 2. Kopioi war-tiedosto palvelimelle kotihakemistoon
