@@ -27,7 +27,7 @@ function UserButton(userId, element, color) {
         var div = $('<div>');
         div.attr('id', 'info' + userId);
         this.element.append(div);
-        this.setTexts("Loading", 0, 0, 0);
+        this.setTexts("Ladataan", 0, 0, 0);
     }
 
     this.update = function() {
@@ -53,11 +53,15 @@ function UserButton(userId, element, color) {
         
         var html = '<span class="name">' + name + '</span><br />'
         html += '<span class="details">' + Number(alcohol).toFixed(2) + ' \u2030<br />';
-        if (drinks == 1)
-            html += drinks + " annos <br />";
-        else
-            html += drinks + " annosta <br />";
-        html += "juomatta: " + String(Math.floor(idletime / 60)) + " min</span>";
+        if (drinks == 0) {
+            html += "paina tästä juodaksesi";
+        } else {
+            if (drinks == 1)
+                html += drinks + " annos <br />";
+            else
+                html += drinks + " annosta <br />";
+            html += "juomatta: " + String(Math.floor(idletime / 60)) + " min</span>";
+        }
 
         div.html(html);
     }
