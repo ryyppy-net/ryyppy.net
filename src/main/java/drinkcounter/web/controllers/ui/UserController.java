@@ -145,7 +145,7 @@ public class UserController {
         if (user == null)
             data = "0";
         else {
-            // TODO optimize
+            // TODO optimize by query
             List<Party> parties = user.getParties();
             data = Integer.toString(user.getId());
             for (Party p : parties) {

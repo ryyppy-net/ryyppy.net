@@ -72,7 +72,7 @@
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
             <div class="headerTextDiv">
-                <h1>Sun bileet</h1>
+                <h1>Sinun bileet</h1>
             </div>
         </div>
 
