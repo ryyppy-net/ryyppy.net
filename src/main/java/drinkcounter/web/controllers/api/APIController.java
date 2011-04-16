@@ -92,10 +92,6 @@ public class APIController {
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
         String format = "YYYY-MM-dd";
 
-        // testing
-        drinksPerDay.put("2011-01-31", 8);
-        drinksPerDay.put("2011-02-01", 6);
-
         for (Drink d : drinks) {
             // TODO time zones?
             Calendar c = Calendar.getInstance();
