@@ -5,13 +5,18 @@ import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
+import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -76,6 +81,54 @@ public class APIController {
         return bytesXml;
     }
     
+    @RequestMapping("/users/{userId}/drinks")
+    public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable String userId) throws IOException{
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkLowLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
+
+        User user = userService.getUser(id);
+        List<Drink> drinks = user.getDrinks();
+
+        Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
+        String format = "YYYY-MM-dd";
+
+        // testing
+        drinksPerDay.put("2011-01-31", 8);
+        drinksPerDay.put("2011-02-01", 6);
+
+        for (Drink d : drinks) {
+            // TODO time zones?
+            Calendar c = Calendar.getInstance();
+            DateTime dt = new DateTime(d.getTimeStamp());
+            String s = dt.toString(format);
+
+            Integer i = 0;
+            if (drinksPerDay.containsKey(s))
+                i = drinksPerDay.get(s);
+            i += 1;
+            drinksPerDay.put(s, i);
+        }
+
+        String today = new DateTime().toString(format);
+        if (!drinksPerDay.containsKey(today))
+            drinksPerDay.put(today, 0);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "text/plain;charset=utf-8");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        csvWriter.writeRecord(new String[]{"Time", "Drinks"});
+
+        for (Entry<String, Integer> p : drinksPerDay.entrySet()) {
+            DateTime dt = new DateTime(p.getKey());
+            csvWriter.writeRecord(new String[]{Long.toString(dt.getMillis()), p.getValue().toString()});
+        }
+
+        csvWriter.close();
+        byte[] bytes = baos.toByteArray();
+        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
+    }
+
     @RequestMapping("/users/{userId}/show-history")
     public ResponseEntity<byte[]> showHistory(HttpSession session, @PathVariable String userId) throws IOException{
         int id = Integer.parseInt(userId);
@@ -96,7 +149,7 @@ public class APIController {
         DateTime time = start;
         for (Float f : history) {
             csvWriter.writeRecord(
-                    new String[]{time.toString(), Float.toString(f)}
+                    new String[]{Long.toString(time.getMillis()), Float.toString(f)}
             );
             time = time.plusMillis(intervalMs);
         }

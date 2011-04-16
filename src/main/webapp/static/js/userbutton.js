@@ -3,6 +3,7 @@ var historyUrl = '/API/users/_userid_/show-history';
 var userUrl = '/API/users/_userid_/';
 
 function UserButton(userId, element, color) {
+    var that = this;
     this.alcoholScale = 3;
     this.timeScale = 5 * 60 * 60 * 1000;
     this.userId = userId;
@@ -17,8 +18,7 @@ function UserButton(userId, element, color) {
     
     this.element = element;
 
-    var fuckthis = this;
-    this.element.click(function () {fuckthis.buttonClick();} );
+    this.element.click(function () {that.buttonClick();} );
     
     this.buildHtml = function() {
         this.element.attr('id', 'user' + this.userId);
@@ -31,10 +31,8 @@ function UserButton(userId, element, color) {
     }
 
     this.update = function() {
-        var fuckthis = this;
-        
-        $.get(userUrl.replace('_userid_', this.userId), function(data) {fuckthis.dataLoaded(data);} );
-        $.get(historyUrl.replace('_userid_', this.userId), function(data) {fuckthis.historyLoaded(data);} );
+        $.get(userUrl.replace('_userid_', this.userId), function(data) {that.dataLoaded(data);} );
+        $.get(historyUrl.replace('_userid_', this.userId), function(data) {that.historyLoaded(data);} );
     }
 
     this.dataLoaded = function(data) {
@@ -77,7 +75,7 @@ function UserButton(userId, element, color) {
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
-            var history = [new Date(columns[0]).getTime() + timezoneoffset, Number(columns[1])];
+            var history = [columns[0] + timezoneoffset, Number(columns[1])];
             histories.push(history);
         }
 
@@ -114,14 +112,12 @@ function UserButton(userId, element, color) {
             return;
         this.clicked = true;
         
-        var fuckthis = this;
-
         $.get(addDrinkUrl.replace('_userid_', this.userId), function() {
-            fuckthis.update();
-            fuckthis.element.fadeTo('slow', 1.0, function() {fuckthis.clicked = false;});
-            // fuckthis.css('border-style', 'outset');
-            if (fuckthis.onDrunk)
-               fuckthis.onDrunk(fuckthis.userId);
+            that.update();
+            that.element.fadeTo('slow', 1.0, function() {that.clicked = false;});
+            // that.css('border-style', 'outset');
+            if (that.onDrunk)
+               that.onDrunk(that.userId);
         });
 
         // this.element.css('border-style', 'inset');

@@ -152,6 +152,17 @@ div.popupDialog a {
     color: #ffffff;
 }
 
+div.userHistoryContainer {
+    background-color:#E6A465;
+    margin-top:10px;
+    margin-left:auto;
+    margin-right:auto;
+    height: 300px;
+    width: 95%;
+    border-radius:8px;
+    padding:20px;
+}
+
 
 
 
