@@ -1,13 +1,14 @@
 var historyUrl = '/API/users/_userid_/show-history';
 
 function GroupGraph(users, element) {
+    var that = this;
     this.datas = [];
     this.element = element;
     this.options = {
         lines: { show: true },
         crosshair: { mode: "x" },
         grid: { hoverable: true, autoHighlight: false },
-        yaxis: { min: 0, max:5 },
+        yaxis: { min: 0, max: 5 },
         xaxis: { mode: "time", timeformat: "%H:%M" }
     };
     this.updateLegendTimeout = null;
@@ -15,16 +16,14 @@ function GroupGraph(users, element) {
     this.plot = null;
     this.users = users;
     
-    var fuckthis = this;
     this.element.bind("plothover",  function (event, pos, item) {
-        fuckthis.latestPosition = pos;
-        if (!fuckthis.updateLegendTimeout)
-            fuckthis.updateLegendTimeout = setTimeout(function() { fuckthis.updateLegend(); }, 50);
+        that.latestPosition = pos;
+        if (!that.updateLegendTimeout)
+            that.updateLegendTimeout = setTimeout(function() { that.updateLegend(); }, 50);
     });
 
     this.update = function() {
         this.render();
-        var fuckthis = this;
         
         for (var i in this.users) {
             var user = this.users[i];
@@ -33,7 +32,7 @@ function GroupGraph(users, element) {
     }
     
     this.getData = function(user) {
-        $.get(historyUrl.replace('_userid_', user.id), function(data) { fuckthis.gotData(user, data); } );
+        $.get(historyUrl.replace('_userid_', user.id), function(data) { that.gotData(user, data); } );
     }
     
     this.render = function() {
@@ -51,7 +50,7 @@ function GroupGraph(users, element) {
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
-            var history = [new Date(columns[0]).getTime() + timezoneoffset, Number(columns[1])];
+            var history = [columns[0] + timezoneoffset, Number(columns[1])];
             histories.push(history);
         }
         var newname = user.name + ' = 0.00';

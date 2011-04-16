@@ -16,6 +16,7 @@
         <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
+        <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
         
         <script type="text/javascript">
             var userButton = null;
@@ -30,6 +31,13 @@
                 userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
                 userButton.update();
                 setInterval(function() {userButton.update()}, 60 * 1000);
+
+                var user = { id: ${user.id}, name: '${user.name}' };
+                
+                var element = $('#historyGraph');
+                var graph = new UserHistoryGraph(user, element);
+                graph.options.legend = { position:'nw' };
+                graph.update();
             });
         </script>
         <title>Bileet</title>
@@ -67,7 +75,7 @@
             </tr>
         </table>
         
-        <div class="header">
+        <div class="header" style="margin-top: 2em;">
             <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
@@ -94,6 +102,14 @@
             </c:forEach>
         </div>
 
+        <div class="header" style="margin-top: 2em;">
+            <div class="headerTextDiv">
+                <h1>Historia</h1>
+            </div>
+        </div>
+        <div class="userHistoryContainer">
+            <div id="historyGraph" style="height: 300px;"></div>
+        </div>
         <div id="addDrinkerDialog" class="popupDialog">
             <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
 
