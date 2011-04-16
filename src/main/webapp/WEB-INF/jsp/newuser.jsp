@@ -41,29 +41,32 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td colspan="2"><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields(true);" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields(true);" /></td>
+                        <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <th>Sähköposti</th>
                         <td><input id="email" type="text" name="email" onchange="checkEmail($(this).val()); checkDrinkerFields(true);" /></td>
-                        <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
+                        <td id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
                         <th>Sukupuoli</th>
-                        <td colspan="2">
+                        <td>
                             <select name="sex">
                                 <option value="MALE">Mies</option>
                                 <option value="FEMALE">Nainen</option>
                             </select>
                         </td>
+                        <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td colspan="2"><input id="drinkerWeight" type="password" name="weight" onchange="checkDrinkerFields(true);" /></td>
+                        <td><input id="drinkerWeight" type="password" name="weight" onchange="checkDrinkerFields(true);" /></td>
+                        <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td colspan="2"><input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" /></td>
+                        <td><input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" /></td>
                     </tr>
                 </table>
             </form>
