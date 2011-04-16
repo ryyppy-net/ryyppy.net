@@ -50,8 +50,9 @@ public class AuthenticationController {
     
     @RequestMapping("/checklogin")
     public String checkLogin(HttpSession session) {
-        if (session.getAttribute(OPENID) != null)
+        if (session.getAttribute(OPENID) != null && (userService.getUserByOpenId((String)session.getAttribute(OPENID)) != null)) {
             return "redirect:user";
+        }
         return "redirect:login";
     }
     
