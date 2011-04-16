@@ -6,6 +6,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <title><c:out value="${party.name}" /></title>
         
         <script type="text/javascript">
@@ -15,6 +16,7 @@
         </script>
         
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
@@ -79,10 +81,10 @@
 
     <body>
         <div class="header">
-            <a href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
-            <a href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
-            <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
-            <a href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
+            <a class="headerButtonA" title="Takaisin" href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
+            <a class="headerButtonA" title="Näytä graafi" href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
+            <a class="headerButtonA" title="Lisää bilettäjä" href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
+            <a class="headerButtonA" title="Poista bilettäjä" href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
             </div>
