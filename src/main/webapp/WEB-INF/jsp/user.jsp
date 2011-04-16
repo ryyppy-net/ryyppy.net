@@ -1,11 +1,10 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-   "http://www.w3.org/TR/html4/loose.dtd">
-<!doctype html>
+<!DOCTYPE html>
+
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
@@ -35,7 +34,6 @@
         </script>
         <title>Bileet</title>
         <script type="text/javascript">
-
           var _gaq = _gaq || [];
           _gaq.push(['_setAccount', 'UA-22483744-1']);
           _gaq.push(['_trackPageview']);
@@ -45,7 +43,6 @@
             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
           })();
-
         </script>
     </head>
     <body>
@@ -91,7 +88,7 @@
                         </span>
                     </a>
                     <a onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
-                        <img src="/static/images/x.png" style="float:right; margin-right: 5px;" />
+                        <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
                     </a>
                     </div>
             </c:forEach>
@@ -106,17 +103,21 @@
                 <input type="hidden" name="userId" value="${user.id}" />
                 <table>
                     <tr>
-                        <th>Nimi</th><td><input type="text" name="name" /></td>
+                        <th>Nimi</th>
+                        <td><input type="text" name="name" /></td>
                     </tr>
                     <tr>
-                        <th>&nbsp;</th><td><input type="submit" value="Luo bileet" /></td>
+                        <th>&nbsp;</th>
+                        <td><input type="submit" value="Luo bileet" /></td>
                     </tr>
                 </table>
             </form>
         </div>
                 
         <div id="configureDrinkerDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinkerDialog'));">X</a></span>
+            <span style="float: right;">
+                <a href="#" onClick="closeDialog($('#configureDrinkerDialog'));">X</a>
+            </span>
 
             <h2>Muokkaa tietojasi</h2>
 
