@@ -121,7 +121,6 @@ public class PartyMarshaller {
 
             Node rootNode = createUserNode(d, user);
             d.appendChild(rootNode);
-            rootNode.appendChild(createDrinksNode(d, user.getDrinks())); // TODO remove this if you cannot think about anything else to optimize
             
             StreamResult streamResult = new StreamResult(out);
             TransformerFactory tf = TransformerFactory.newInstance();

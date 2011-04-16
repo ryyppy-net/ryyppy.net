@@ -99,7 +99,6 @@ public class AuthenticationController {
     }
 
     public String getReturnToUrl(HttpServletRequest request) {
-        // TODO: fix hardcoding
         StringBuilder urlBuilder = new StringBuilder("http://");
         urlBuilder.append(request.getServerName());
         if(request.getServerPort() != 80){

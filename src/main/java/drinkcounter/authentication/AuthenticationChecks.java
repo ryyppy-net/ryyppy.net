@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class AuthenticationChecks {
     @Autowired
-    private UserService userService; // stupid autowiring isn't working
+    private UserService userService;
     
     public void setUserService(UserService us) {
         userService = us;
@@ -46,7 +46,7 @@ public class AuthenticationChecks {
         
         if (user.getId() == userId) return;
         
-        //TODO optimize
+        //TODO optimize by query
         List<Party> parties = user.getParties();
         for (Party p : parties) {
             List<User> participants = p.getParticipants();
