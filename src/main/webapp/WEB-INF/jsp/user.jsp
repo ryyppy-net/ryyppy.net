@@ -6,7 +6,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
         
         <!-- hack -->
@@ -22,7 +24,7 @@
             var userButton = null;
             
             $(document).ready(function() {
-                //fix_the_fucking_css();
+                fix_the_fucking_css();
 
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
@@ -55,11 +57,11 @@
     </head>
     <body>
         <div class="header">
-            <a href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">
+            <a class="headerButtonA" title="Kirjaudu ulos" href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">
                 <div class="headerButton headerButtonLeft" id="goBack">
                 </div>
             </a>
-            <a href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail);">
+            <a class="headerButtonA" title="Asetukset" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail);">
                 <div class="headerButton headerButtonRight" id="configureButton">
                 </div>
             </a>
@@ -76,7 +78,7 @@
         </table>
         
         <div class="header" style="margin-top: 2em;">
-            <a href="#" onClick="toggleDialog($('#addDrinkerDialog'));">
+            <a class="headerButtonA" title="Lisää bileet" href="#" onClick="toggleDialog($('#addDrinkerDialog'));">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
             <div class="headerTextDiv">
@@ -95,7 +97,7 @@
                             <c:out value="${party.name}" />
                         </span>
                     </a>
-                    <a onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
+                    <a class="headerButtonA" title="Poistu bileistä" onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
                         <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
                     </a>
                     </div>

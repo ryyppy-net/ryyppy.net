@@ -2,6 +2,15 @@ function fix_the_fucking_css() {
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
     
     $(".party").width($("#body").width() - 10 + 'px');
+
+    addToolTips();
+}
+
+function addToolTips() {
+    $(".headerButtonA").tooltip({
+	delay: 500,
+	showURL: false
+    });
 }
 
 function toggleDialog(dialog, opened, closed) {
