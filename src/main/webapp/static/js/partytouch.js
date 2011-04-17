@@ -86,6 +86,10 @@ function updateGrid(data) {
     updateButtons();
 }
 
+function onUserDrunk() {
+    updateGroupGraph();
+}
+
 function createAndFillGrid(data) {
     $('#drinkers').html('');
     users = parse_data(data);
@@ -103,9 +107,10 @@ function createAndFillGrid(data) {
             var newElement = $('<td>');
             newElement.addClass('userButton');
             newElement.attr("width", width);
-            var user = users[colorIndex];
+            var user = users[colorIndex].id;
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
-            ub.onDrunk = updateGroupGraph;
+            ub.onDrunk = onUserDrunk;
+            ub.onDataLoaded = onButtonDataUpdated;
             userButtons.push(ub);
 
             $('#row' + i).append(newElement);
@@ -116,8 +121,26 @@ function createAndFillGrid(data) {
     updateButtons();
 }
 
-function updateButtons() {
+function onButtonDataUpdated() {
+    var max = 1;
+
     for (var i in userButtons) {
+        var userButton = userButtons[i];
+        var a = userButton.alcohol;
+        if (Number(a) >= Number(max))
+            max = a;
+    }
+
+    max = Math.floor(max) + 1;
+
+    for (i in userButtons) {
+        userButton = userButtons[i];
+        userButton.setMaxY(max);
+    }
+}
+
+function updateButtons() {
+    for (i in userButtons) {
         var userButton = userButtons[i];
         userButton.update();
     }
@@ -127,9 +150,9 @@ function parse_data(data) {
     var users = [];
     $(data).find('user').each(function() {
         var part = $(this);
-        var userId = part.find('id').text();
+        var user = {id: part.find('id').text(), alcohol: part.find('alcoholInPromilles').text()};
 
-        users.push(userId);
+        users.push(user);
     });
     return users;
 }

@@ -68,10 +68,14 @@ public class UserController {
         int uid = Integer.parseInt(userId);
         authenticationChecks.checkLowLevelRightsToUser(openId, uid);
         
-        if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
+        User user = userService.getUser(uid);
+
+        if (!user.getEmail().equalsIgnoreCase(email) && (!userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null))
             throw new IllegalArgumentException();
 
-        User user = userService.getUser(uid);
+        if (name == null || name.length() == 0 || weight < 1)
+            throw new IllegalArgumentException();
+
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);

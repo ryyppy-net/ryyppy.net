@@ -8,7 +8,7 @@ function GroupGraph(users, element) {
         lines: { show: true },
         crosshair: { mode: "x" },
         grid: { hoverable: true, autoHighlight: false },
-        yaxis: { min: 0, max: 5 },
+        yaxis: { min: 0 },
         xaxis: { mode: "time", timeformat: "%H:%M" }
     };
     this.updateLegendTimeout = null;
