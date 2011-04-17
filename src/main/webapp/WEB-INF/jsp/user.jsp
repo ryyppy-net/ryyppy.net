@@ -61,7 +61,7 @@
                 <div class="headerButton headerButtonLeft" id="goBack">
                 </div>
             </a>
-            <a class="headerButtonA" title="Asetukset" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail);">
+            <a class="headerButtonA" title="Asetukset" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail); $('#drinkerName').focus();">
                 <div class="headerButton headerButtonRight" id="configureButton">
                 </div>
             </a>
@@ -78,7 +78,7 @@
         </table>
         
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="Lisää bileet" href="#" onClick="toggleDialog($('#addDrinkerDialog'));">
+            <a class="headerButtonA" title="Lisää bileet" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
             <div class="headerTextDiv">
@@ -122,7 +122,7 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td><input type="text" name="name" /></td>
+                        <td><input id="nameInput" type="text" name="name" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
