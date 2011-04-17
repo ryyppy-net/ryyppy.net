@@ -1,10 +1,12 @@
 package drinkcounter.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.Temporal;
 import javax.persistence.Transient;
 
 /**
@@ -15,6 +17,16 @@ import javax.persistence.Transient;
 public class Party extends AbstractEntity{
     private List<User> participants;
     private String name;
+    private Date startTime;
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
+
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    public Date getStartTime() {
+        return this.startTime;
+    }
 
     public String getName(){
         return name;

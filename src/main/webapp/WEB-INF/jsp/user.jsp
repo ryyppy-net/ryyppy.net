@@ -96,6 +96,9 @@
                         <span style="margin: 5px;">
                             <c:out value="${party.name}" />
                         </span>
+                        <span id="partyStartTime">
+                            Alkamisaika: <c:out value="${party.startTime}" />
+                        </span>
                     </a>
                     <a class="headerButtonA" title="Poistu bileistä" onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
                         <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />

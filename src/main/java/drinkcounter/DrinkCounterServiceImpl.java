@@ -40,6 +40,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
         Party party = new Party();
         party.setName(partyName);
+        party.setStartTime(new Date());
         partyDao.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());
