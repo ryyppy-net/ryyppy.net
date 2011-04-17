@@ -15,8 +15,21 @@
 ">
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreResourceNotFound" value="true" />
         <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_FALLBACK" />
-        <property name="locations" value="classpath:drinkcounter/jdbc.properties"/>
+        <!--
+        *** Database configuration files ***
+            jdbc-dev.properties points to local development settings.
+            jdbc.properties points to production settings and those override values in development files.
+            In production you have to find a way to get the jdbc.properties file to the classpath
+            Maybe this setup could be replaced with jndi?
+        -->
+        <property name="locations">
+            <list>
+                <value>classpath:drinkcounter/jdbc-dev.properties</value>
+                <value>classpath:drinkcounter/jdbc.properties</value>
+            </list>
+        </property>
     </bean>
     <context:component-scan base-package="drinkcounter"/>
     <context:component-scan base-package="drinkcounter.authentication"/>

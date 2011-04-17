@@ -62,20 +62,23 @@ function UserButton(userId, element, color) {
 
     this.setTexts = function(name, alcohol, drinks, idletime) {
         var div = $('#info' + userId);
-        
-        var html = '<span class="name">' + name + '</span><br />'
-        html += '<span class="details">' + Number(alcohol).toFixed(2) + ' \u2030<br />';
+        div.html('');
+        div.append($('<span class="name"></span>').text(name))
+        div.append($('<br />'))
+        div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'))
+        div.append($('<br />'))
+
         if (drinks == 0) {
-            html += "paina tästä juodaksesi";
+            div.append($('<span class="details"></span>').text('paina tästä juodaksesi'))
         } else {
             if (drinks == 1)
-                html += drinks + " annos <br />";
+                div.append($('<span class="details"></span>').text(drinks + ' annos'))
             else
-                html += drinks + " annosta <br />";
-            html += "juomatta: " + String(Math.floor(idletime / 60)) + " min</span>";
-        }
+                div.append($('<span class="details"></span>').text(drinks + ' annosta'))
 
-        div.html(html);
+            div.append($('<br />'))
+            div.append($('<span class="details"></span>').text("juomatta: " + String(Math.floor(idletime / 60)) + ' min'))
+        }
     }
 
     this.historyLoaded = function(data) {

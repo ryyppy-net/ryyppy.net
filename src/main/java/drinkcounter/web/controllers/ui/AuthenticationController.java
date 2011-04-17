@@ -26,7 +26,6 @@ public class AuthenticationController {
     public static final String OPENID = "openId";
     public static final String DISCOVERYINFORMATION = "discoveryInformation";
 
-//    @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
     @Autowired private AuthenticationService registrationService;
 
@@ -87,14 +86,20 @@ public class AuthenticationController {
             }
         }
 
-        if (openId == null)
-              return "redirect:/ui/loginerror";
+        if (openId == null){
+            log.warn("User login failed because of null openId, redirecting to error view");
+            return "redirect:/ui/loginerror";
+        }
+              
         
         session.setAttribute(OPENID, openId);
 
         User user = userService.getUserByOpenId(openId);
-        if (user == null)
+        if (user == null){
+            log.info("OpenId {} doesn't have a user yet, redirecting to registration", openId);
             return "redirect:newuser";
+        }
+        log.info("User {} logged in", user.getName());
         
         return "redirect:user";
     }
