@@ -83,7 +83,7 @@
         <div class="header">
             <a class="headerButtonA" title="Takaisin" href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
             <a class="headerButtonA" title="Näytä graafi" href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
-            <a class="headerButtonA" title="Lisää bilettäjä" href="#" onClick="toggleDialog($('#addDrinkerDialog'));"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
+            <a class="headerButtonA" title="Lisää bilettäjä" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#emailInput').focus();"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
             <a class="headerButtonA" title="Poista bilettäjä" href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
@@ -113,7 +113,7 @@
                     <tr>
                         <th>Sähköpostiosoite</th>
                         <td>
-                            <input type="text" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
+                            <input id="emailInput" type="text" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
                         </td>
                         <td id="emailCorrect"></td>
                     </tr>

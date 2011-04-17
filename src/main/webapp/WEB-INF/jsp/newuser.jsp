@@ -13,6 +13,7 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 openDialog($("#addDrinkerDialog"));
+                $("#drinkerName").focus();
             });
         </script>
         <script type="text/javascript">
