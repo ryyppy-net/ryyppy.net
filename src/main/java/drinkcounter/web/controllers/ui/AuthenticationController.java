@@ -26,7 +26,6 @@ public class AuthenticationController {
     public static final String OPENID = "openId";
     public static final String DISCOVERYINFORMATION = "discoveryInformation";
 
-//    @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
     @Autowired private AuthenticationService registrationService;
 
