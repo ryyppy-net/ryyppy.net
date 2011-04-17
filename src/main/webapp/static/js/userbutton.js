@@ -9,10 +9,13 @@ function UserButton(userId, element, color) {
     this.userId = userId;
     this.clicked = false;
     this.onDrunk = null;
+    this.alcohol = 0;
+    this.onDataLoaded = null;
+    this.series = null;
     
     this.graphOptions = {
         crosshair: {mode: null},
-        yaxis: {min: 0, max: 5},
+        yaxis: {min: 0},
         xaxis: {mode: "time", timeformat: "%H:%M"}
     };
     
@@ -30,6 +33,14 @@ function UserButton(userId, element, color) {
         this.setTexts("Ladataan", 0, 0, 0);
     }
 
+    this.setMaxY = function(max) {
+        var old = this.graphOptions.yaxis.max;
+        if (old != max) {
+            this.graphOptions.yaxis.max = max;
+            this.renderGraph();
+        }
+    }
+
     this.update = function() {
         $.get(userUrl.replace('_userid_', this.userId), function(data) {that.dataLoaded(data);} );
         $.get(historyUrl.replace('_userid_', this.userId), function(data) {that.historyLoaded(data);} );
@@ -40,10 +51,13 @@ function UserButton(userId, element, color) {
         var name = xml.find('name').text();
         var alcohol = xml.find('alcoholInPromilles').text();
         var drinks = xml.find('totalDrinks').text();
-
         var idletime = xml.find('idle').text();
 
+        this.alcohol = alcohol;
+
         this.setTexts(name, alcohol, drinks, idletime);
+        if (this.onDataLoaded != null)
+            this.onDataLoaded(data);
     }
 
     this.setTexts = function(name, alcohol, drinks, idletime) {
@@ -80,11 +94,12 @@ function UserButton(userId, element, color) {
         }
 
         var series = {data: histories, color: 'rgb(0, 0, 0)'};
+        this.series = [series];
 
-        this.renderGraph(series);
+        this.renderGraph();
     }
 
-    this.renderGraph = function(series) {
+    this.renderGraph = function() {
         var newElement = $('#graph' + this.userId);
         if (newElement.length == 0) {
             newElement = $('<div>');
@@ -103,8 +118,11 @@ function UserButton(userId, element, color) {
             
             this.element.append(newElement);
         }
-        
-        $.plot(newElement, [series], this.graphOptions);
+
+        if (this.series == null)
+            return;
+
+        $.plot(newElement, this.series, this.graphOptions);
     }
 
     this.buttonClick = function() {

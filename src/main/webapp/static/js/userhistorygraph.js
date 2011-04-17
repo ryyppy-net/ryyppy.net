@@ -56,6 +56,11 @@ function UserHistoryGraph(user, element) {
             $(this).css('width', $(this).width());
         });
         this.render();
+
+        if (this.latestPosition == null) {
+            this.latestPosition = {x: Number(histories[histories.length - 1][0]), y: 1 };
+            this.updateLegend();
+        }
     }
 
     this.updateLegend = function() {
