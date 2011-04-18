@@ -126,9 +126,13 @@ function onButtonDataUpdated() {
 
     for (var i in userButtons) {
         var userButton = userButtons[i];
-        var a = userButton.alcohol;
-        if (Number(a) >= Number(max))
-            max = a;
+        if (userButton.series == null) continue;
+        for (var j in userButton.series[0].data) {
+            var d = userButton.series[0].data[j];
+            var a = d[1];
+            if (Number(a) >= Number(max))
+                max = a;
+        }
     }
 
     max = Math.floor(max) + 1;
