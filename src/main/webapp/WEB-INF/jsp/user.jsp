@@ -44,7 +44,14 @@
             });
 
             function onButtonDataUpdated() {
-                var max = Math.floor(Number(userButton.alcohol)) + 1;
+                var max = 0;
+                for (var j in userButton.series[0].data) {
+                    var d = userButton.series[0].data[j];
+                    var a = d[1];
+                    if (Number(a) >= Number(max))
+                        max = a;
+                }
+                max = Math.floor(max) + 1;
                 userButton.setMaxY(max);
             }
         </script>

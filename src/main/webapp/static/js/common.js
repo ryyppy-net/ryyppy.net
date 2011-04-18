@@ -65,7 +65,7 @@ String.prototype.format = function() {
 };
 
 function playSound() {
-    var filename = "/static/sounds/" + Math.floor(Math.random() * 8 + 1) + ".wav.ogg";
+    var filename = "/static/sounds/" + Math.floor(Math.random() * 7 + 1) + ".wav.ogg";
     var snd = new Audio(filename);
     snd.play();
 }
