@@ -31,6 +31,7 @@
                 });
                 
                 userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
+                userButton.onDataLoaded = onButtonDataUpdated;
                 userButton.update();
                 setInterval(function() {userButton.update()}, 60 * 1000);
 
@@ -41,6 +42,11 @@
                 graph.options.legend = { position:'nw' };
                 graph.update();
             });
+
+            function onButtonDataUpdated() {
+                var max = Math.floor(Number(userButton.alcohol)) + 1;
+                userButton.setMaxY(max);
+            }
         </script>
         <title>Bileet</title>
         <script type="text/javascript">

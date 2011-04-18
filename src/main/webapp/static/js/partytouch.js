@@ -122,7 +122,7 @@ function createAndFillGrid(data) {
 }
 
 function onButtonDataUpdated() {
-    var max = 1;
+    var max = 0;
 
     for (var i in userButtons) {
         var userButton = userButtons[i];
