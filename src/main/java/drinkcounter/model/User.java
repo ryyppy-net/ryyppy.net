@@ -33,6 +33,10 @@ import javax.persistence.Transient;
 @Entity
 public class User extends AbstractEntity{
 
+    public void removeDrink(Drink drink) {
+        getDrinks().remove(drink);
+    }
+
     public enum Sex {
         MALE(0.75f), FEMALE(0.66f);
         public float factor;

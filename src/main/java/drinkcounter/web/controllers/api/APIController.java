@@ -62,6 +62,17 @@ public class APIController {
         return bytesXml;
     }
 
+    @RequestMapping("/users/{userId}/show-drinks")
+    public @ResponseBody byte[] showDrinks(HttpSession session, @PathVariable String userId) throws IOException{
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkLowLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        partyMarshaller.marshallDrinks(id, baos);
+        byte[] bytesXml = baos.toByteArray();
+        return bytesXml;
+    }
+
     @RequestMapping("/users/{userId}/add-drink")
     public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId){
         int id = Integer.parseInt(userId);

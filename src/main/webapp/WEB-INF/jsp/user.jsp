@@ -44,6 +44,8 @@
             });
 
             function onButtonDataUpdated() {
+                if (userButton.series == null) return;
+
                 var max = 0;
                 for (var j in userButton.series[0].data) {
                     var d = userButton.series[0].data[j];
@@ -53,6 +55,21 @@
                 }
                 max = Math.floor(max) + 1;
                 userButton.setMaxY(max);
+            }
+
+            function removeDrinkDialogOpened() {
+                $.get("/API/users/${user.id}/show-drinks", gotDrinkData);
+            }
+
+            function gotDrinkData(data) {
+                $("#drinksList").html("");
+                $(data).find('drink').each(function() {
+                    var li = $('<li>');
+                    var id = $(this).find('id').text();
+                    var timestamp = $(this).find('timestamp').text();
+                    li.html('<a href="#" onclick="$.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', removeDrinkDialogOpened);">' + timestamp + '</a>');
+                    $("#drinksList").append(li);
+                });
             }
         </script>
         <title>Bileet</title>
@@ -121,6 +138,7 @@
         </div>
 
         <div class="header" style="margin-top: 2em;">
+            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#removeDrinkDialog'), removeDrinkDialogOpened);"><div class="headerButton headerButtonRight" id="removeDrinkButton"></div></a>
             <div class="headerTextDiv">
                 <h1>Historia</h1>
             </div>
@@ -128,6 +146,15 @@
         <div class="userHistoryContainer">
             <div id="historyGraph" style="height: 300px;"></div>
         </div>
+        <div id="removeDrinkDialog" class="popupDialog">
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#removeDrinkDialog'));">X</a></span>
+
+            <h2>Poista juoma</h2>
+
+            <ul id="drinksList">
+           </ul>
+        </div>
+
         <div id="addDrinkerDialog" class="popupDialog">
             <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
 
