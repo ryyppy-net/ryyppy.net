@@ -256,3 +256,13 @@ div#closeButton {
 input[disabled] {
     background-color: red;
 }
+
+.undo {
+    background-color: purple;
+    position: absolute;
+    display: none;
+}
+
+.undo h1 {
+    color: white;
+}

@@ -1,4 +1,5 @@
 var addDrinkUrl = '/API/users/_userid_/add-drink';
+var removeDrinkUrl = '/API/users/_userid_/remove-drink/_drinkid_'
 var historyUrl = '/API/users/_userid_/show-history';
 var userUrl = '/API/users/_userid_/';
 
@@ -131,19 +132,50 @@ function UserButton(userId, element, color) {
     this.buttonClick = function() {
         if (this.clicked)
             return;
+
         this.clicked = true;
         
-        $.get(addDrinkUrl.replace('_userid_', this.userId), function() {
-            that.update();
-            that.element.fadeTo('slow', 1.0, function() {that.clicked = false;});
-            // that.css('border-style', 'outset');
-            if (that.onDrunk)
-               that.onDrunk(that.userId);
-        });
+        $.get(addDrinkUrl.replace('_userid_', this.userId), function(data) {
+            var drinkUndone = false;
+            var drinkId = data;
 
-        // this.element.css('border-style', 'inset');
-        this.element.fadeTo('slow', 0.5);
-        playSound();
+            var undoLink = $('<a>');
+            undoLink.text('Undo');
+            undoLink.click(function() {
+                var u = removeDrinkUrl.replace('_userid_', that.userId).replace('_drinkid_', drinkId);
+                $.get(u);
+                drinkUndone = true;
+            });
+
+            var newElement = $('<div>');
+            newElement.attr('id', 'undo' + that.userId);
+            newElement.attr('class', 'undo');
+            newElement.append('h1').text('Juoma lisätty');
+            var width = parseFloat(that.element.css('width')) * 0.9;
+            var height = parseFloat(that.element.css('height')) * 0.9;
+            var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
+            var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
+            newElement.css('width', width);
+            newElement.css('height', height);
+            newElement.css('left', left);
+            newElement.css('top', top);
+
+            newElement.append(undoLink);
+            that.element.append(newElement);
+
+            playSound();
+
+            $('#undo' + that.userId).fadeIn(500).delay(5000).fadeOut(500, function() {
+                that.clicked = false;
+
+                if (!drinkUndone) {
+                    that.update();
+                    if (that.onDrunk) {
+                       that.onDrunk(that.userId);
+                    }
+                }
+            });
+        });
     }
     
     this.buildHtml();

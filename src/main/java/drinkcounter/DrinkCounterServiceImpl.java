@@ -90,7 +90,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     @Transactional
-    public void addDrink(int userIdentifier) {
+    public int addDrink(int userIdentifier) {
         User user = userDAO.readByPrimaryKey(userIdentifier);
         Drink drink = new Drink();
         drink.setDrinker(user);
@@ -100,6 +100,8 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         
         drinkDao.save(drink);
         log.info("User {} has drunk a drink", user.getName());
+
+        return drink.getId();
     }
 
     @Override
