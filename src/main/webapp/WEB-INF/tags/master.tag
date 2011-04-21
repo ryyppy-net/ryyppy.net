@@ -1,5 +1,6 @@
 <%@tag description="Master page" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@attribute name="customHead" fragment="true" %>
 <%@attribute name="title" rtexprvalue="true" %>
 
@@ -8,6 +9,7 @@
 </c:if>
 
 <!DOCTYPE html>
+<!-- Ryyppy.net versio: <fmt:message key="application.version" /> -->
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
