@@ -1,10 +1,17 @@
 <%@tag description="Master page" pageEncoding="UTF-8"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@attribute name="customHead" fragment="true" %>
+<%@attribute name="title" rtexprvalue="true" %>
+
+<c:if test="${empty title}" >
+    <c:set var="title" value="Ryyppy.net" />
+</c:if>
+
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Ryyppy.net</title>
+        <title><c:out value="${title}"/></title>
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
         <script type="text/javascript" src="/static/js/jquery.js"></script>
 
