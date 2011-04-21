@@ -27,6 +27,6 @@ public interface DrinkCounterService {
 
     // Drinks
     List<Drink> getDrinks(int userId);
-    void addDrink(int userId);
+    int addDrink(int userId);
     public void removeDrinkFromUser(int userId, int drinkId);
 }
