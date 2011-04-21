@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <t:master title="${party.name}">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
@@ -138,12 +139,19 @@
 
             <h2>Poista käyttäjä bileistä</h2>
             <ul>
-                <c:forEach var="participant" items="${party.participants}">
-                    <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${participant.id}" />
-                    <c:if test="${participant.id != user.id}">
-                        <li><a href="#" onClick="if (confirm('Poistetaanko ${participant.name} bileistä?')) $.get('${leavePartyUrl}', function() {location.reload(true);});"><c:out value="${participant.name}" /> </a></li>
-                    </c:if>
-                </c:forEach>
+                <c:choose>
+                    <c:when test="${fn:length(party.participants) < 2}">
+                        <li>Ei potkittavia juojia</li>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="participant" items="${party.participants}">
+                            <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${participant.id}" />
+                            <c:if test="${participant.id != user.id}">
+                                <li><a href="#" onClick="if (confirm('Poistetaanko ${participant.name} bileistä?')) $.get('${leavePartyUrl}', function() {location.reload(true);});"><c:out value="${participant.name}" /> </a></li>
+                            </c:if>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
             </ul>
         </div>
     </jsp:body>

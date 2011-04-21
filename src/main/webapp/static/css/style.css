@@ -16,6 +16,14 @@ li > a, p > a {
     width: 400px;
 }
 
+#kickDrinkerDialog {
+    width: 400px;
+}
+
+#removeDrinkDialog {
+    width: 400px;
+}
+
 h1 {
     background-color: #252525;
     color: #ffffff;
