@@ -57,15 +57,26 @@
                 $.get("/API/users/${user.id}/show-drinks", gotDrinkData);
             }
 
+            function removeDrinkDialogClosed() {
+                location.reload(true);
+            }
+
             function gotDrinkData(data) {
                 $("#drinksList").html("");
+                var count = 0;
                 $(data).find('drink').each(function() {
+                    count++;
                     var li = $('<li>');
                     var id = $(this).find('id').text();
                     var timestamp = $(this).find('timestamp').text();
-                    li.html('<a href="#" onclick="$.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', removeDrinkDialogOpened);">' + timestamp + '</a>');
+                    li.html('<a href="#" onclick="$.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', removeDrinkDialogOpened);">Juoma-aika: ' + timestamp + '</a>');
                     $("#drinksList").append(li);
                 });
+                if (count == 0) {
+                    var li = $('<li>');
+                    li.html('Ei lisättyjä juomia');
+                    $("#drinksList").append(li);
+                }
             }
         </script>
     </jsp:attribute>
@@ -122,7 +133,7 @@
         </div>
 
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#removeDrinkDialog'), removeDrinkDialogOpened);"><div class="headerButton headerButtonRight" id="removeDrinkButton"></div></a>
+            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#removeDrinkDialog'), removeDrinkDialogOpened, removeDrinkDialogClosed);"><div class="headerButton headerButtonRight" id="removeDrinkButton"></div></a>
             <div class="headerTextDiv">
                 <h1>Historia</h1>
             </div>
@@ -131,7 +142,7 @@
             <div id="historyGraph" style="height: 300px;"></div>
         </div>
         <div id="removeDrinkDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#removeDrinkDialog'));">X</a></span>
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#removeDrinkDialog'), removeDrinkDialogClosed);">X</a></span>
 
             <h2>Poista juoma</h2>
 
