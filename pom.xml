@@ -22,6 +22,22 @@
     </properties>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>drinkcounter/version.properties</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -210,6 +226,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    
+
 	
     <repositories>
         <repository>
