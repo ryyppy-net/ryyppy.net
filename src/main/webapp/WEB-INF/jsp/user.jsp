@@ -160,11 +160,11 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td colspan="2"><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields(true);" value="<c:out value='${user.name}' />" /></td>
+                        <td colspan="2"><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" value="<c:out value='${user.name}' />" /></td>
                     </tr>
                     <tr>
                         <th>Sähköposti</th>
-                        <td><input id="email" type="text" name="email" value="<c:out value='${user.email}' />" onchange="checkEmail($(this).val(), '<c:out value='${user.email}'/>'); checkDrinkerFields(true);" /></td>
+                        <td><input id="email" type="text" name="email" value="<c:out value='${user.email}' />" onkeyup="checkEmail($(this).val(), '<c:out value='${user.email}'/>'); checkDrinkerFields(true);" /></td>
                         <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
@@ -178,11 +178,11 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td colspan="2"><input value="<c:out value='${user.weight}' />" id="drinkerWeight" type="password" name="weight" onchange="checkDrinkerFields(true);" /></td>
+                        <td colspan="2"><input value="<c:out value='${user.weight}' />" id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td colspan="2"><input id="submitButton" type="submit" value="Tallenna" disabled="disabled" /></td>
+                        <td colspan="2"><input id="submitButton" type="submit" value="Tallenna" /></td>
                     </tr>
                 </table>
             </form>
