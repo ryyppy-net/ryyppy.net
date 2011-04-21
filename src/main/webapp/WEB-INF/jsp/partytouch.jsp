@@ -86,7 +86,7 @@
             <a class="headerButtonA" title="Lisää bilettäjä" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#emailInput').focus();"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
             <a class="headerButtonA" title="Poista bilettäjä" href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
             <div class="headerTextDiv">
-                <h1 id="topic"><a href="viewParty?id=<c:out value="${party.id}" />"><c:out value="${party.name}" /></a></h1>
+                <h1 id="topic"><c:out value="${party.name}" /></h1>
             </div>
         </div>
 

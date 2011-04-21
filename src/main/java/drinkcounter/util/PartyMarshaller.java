@@ -99,7 +99,8 @@ public class PartyMarshaller {
         for (Drink drink : drinks) {
             Node drinkNode = d.createElement("drink");
             DateTime dateTime = new DateTime(drink.getTimeStamp());
-            drinkNode.appendChild(createTextContentElement("timestamp", dateTime.toString(), d));
+            drinkNode.appendChild(createTextContentElement("id", Integer.toString(drink.getId()), d));
+            drinkNode.appendChild(createTextContentElement("timestamp", dateTime.toString("dd.MM.yyyy HH:mm"), d));
             drinksNode.appendChild(drinkNode);
         }
         return drinksNode;
@@ -109,6 +110,35 @@ public class PartyMarshaller {
         Element element = document.createElement(name);
         element.setTextContent(content);
         return element;
+    }
+
+    public void marshallDrinks(int userId, OutputStream out){
+        try {
+            User user = userService.getUser(userId);
+
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+            DocumentBuilder b = f.newDocumentBuilder();
+            Document d = b.newDocument();
+            Node rootNode = d.createElement("user");
+            d.appendChild(rootNode);
+
+            Node idNode = d.createElement("id");
+            idNode.setTextContent(Integer.toString(user.getId()));
+            rootNode.appendChild(idNode);
+
+            rootNode.appendChild(createDrinksNode(d, user.getDrinks()));
+
+            StreamResult streamResult = new StreamResult(out);
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer serializer = tf.newTransformer();
+            serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+            serializer.transform(new DOMSource(d), streamResult);
+        } catch (TransformerException ex) {
+            throw new RuntimeException(ex);
+        } catch (ParserConfigurationException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public void marshallUser(int userId, ByteArrayOutputStream out) {
