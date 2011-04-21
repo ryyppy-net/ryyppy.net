@@ -42,12 +42,12 @@
                 <table>
                     <tr>
                         <th>Nimi</th>
-                        <td><input id="drinkerName" type="text" name="name" onchange="checkDrinkerFields(true);" /></td>
+                        <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" /></td>
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <th>Sähköposti</th>
-                        <td><input id="email" type="text" name="email" onchange="checkEmail($(this).val()); checkDrinkerFields(true);" /></td>
+                        <td><input id="email" type="text" name="email" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" /></td>
                         <td id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
@@ -62,12 +62,12 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="password" name="weight" onchange="checkDrinkerFields(true);" /></td>
+                        <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" /></td>
                         <td>&nbsp;</td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td><input id="submitButton" type="submit" value="Lisää bilettäjä" disabled="disabled" /></td>
+                        <td><input id="submitButton" type="submit" value="Lisää bilettäjä" /></td>
                     </tr>
                 </table>
             </form>

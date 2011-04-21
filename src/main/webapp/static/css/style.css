@@ -247,3 +247,7 @@ div#closeButton {
     background-color: #e60d0f;
     background-image: url("/static/images/x.png");
 }
+
+input[disabled] {
+    background-color: red;
+}
