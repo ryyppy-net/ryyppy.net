@@ -95,6 +95,16 @@ public class UserController {
         return "redirect:parties";
     }
     
+    @RequestMapping("/removeDrink")
+    public String removeDrink(HttpSession session, @RequestParam("userId") String userId, @RequestParam("drinkId") String drinkId){
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkLowLevelRightsToUser(openId, id);
+
+        drinkCounterService.removeDrinkFromUser(id, Integer.parseInt(drinkId));
+        return "redirect:user";
+    }
+
     @RequestMapping("/user")
     public ModelAndView userPage(HttpSession session){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);

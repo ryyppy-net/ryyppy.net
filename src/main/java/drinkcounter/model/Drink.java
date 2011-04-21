@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
 
 /**
  *
@@ -30,7 +31,10 @@ public class Drink extends AbstractEntity {
         timeStamp = new Date();
     }
 
-
+    @Transient
+    public int getId(){
+        return getStoreKey();
+    }
 
     @ManyToOne(fetch=FetchType.LAZY)
     public User getDrinker() {

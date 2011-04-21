@@ -243,6 +243,11 @@ div#kickDrinkerButton {
     background-image: url("/static/images/kieltomerkki.png");
 }
 
+div#removeDrinkButton {
+    background-color: #e60d0f;
+    background-image: url("/static/images/kieltomerkki.png");
+}
+
 div#closeButton {
     background-color: #e60d0f;
     background-image: url("/static/images/x.png");

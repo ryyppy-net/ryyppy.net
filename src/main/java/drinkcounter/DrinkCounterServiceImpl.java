@@ -107,4 +107,12 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         User user = userDAO.readByPrimaryKey(userIdentifier);
         return drinkDao.findByDrinker(user);
     }
+
+    @Override
+    public void removeDrinkFromUser(int userId, int drinkId) {
+        User user = userDAO.readByPrimaryKey(userId);
+        Drink drink = drinkDao.readByPrimaryKey(drinkId);
+        user.removeDrink(drink);
+        userDAO.save(user);
+    }
 }
