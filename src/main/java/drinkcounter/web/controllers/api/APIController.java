@@ -88,6 +88,7 @@ public class APIController {
         authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userIdInt);
         int drinkIdInt = Integer.parseInt(drinkId);
         drinkCounterService.removeDrinkFromUser(userIdInt, drinkIdInt);
+        log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userIdInt));
         return "";
     }
     

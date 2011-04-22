@@ -266,9 +266,12 @@ input[disabled] {
 }
 
 .undo {
-    background-color: purple;
+    background-color: #000000;
+    color: #ffffff;
     position: absolute;
     display: none;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
 }
 
 .undo h1 {
