@@ -150,15 +150,16 @@ function UserButton(userId, element, color) {
             var newElement = $('<div>');
             newElement.attr('id', 'undo' + that.userId);
             newElement.attr('class', 'undo');
-            newElement.append('h1').text('Juoma lisätty');
-            var width = parseFloat(that.element.css('width')) * 0.9;
-            var height = parseFloat(that.element.css('height')) * 0.9;
+            var width = parseFloat(that.element.css('width'));
+            var height = parseFloat(that.element.css('height'));
             var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
             var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
             newElement.css('width', width);
             newElement.css('height', height);
             newElement.css('left', left);
             newElement.css('top', top);
+
+            newElement.append('h1').text('Juoma lisätty');
 
             newElement.append(undoLink);
             that.element.append(newElement);
