@@ -24,7 +24,7 @@ function forceRefresh() {
     get_party_data(createAndFillGrid);
 }
 
-function determine_layout(n) {
+function determineLayout(n) {
     var best = [0, 0];
     var initial = Math.ceil(Math.sqrt(n));
     var square_candidate = initial * initial;
@@ -93,7 +93,7 @@ function createAndFillGrid(data) {
     $('#drinkers').html('');
     users = parse_data(data);
     
-    var layout = determine_layout(users.length);
+    var layout = determineLayout(users.length);
     layout = pivot_layout_if_necessary(layout);
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
