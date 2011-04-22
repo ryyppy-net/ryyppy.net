@@ -43,7 +43,7 @@ function determineLayout(n) {
     return best;
 }
 
-function pivot_layout_if_necessary(layout) {
+function pivotLayoutIfNecessary(layout) {
     var layout_aspect = layout[0] < layout[1];
     var window_aspect = $(window).width() < $(window).height();
     if (layout_aspect != window_aspect) {
@@ -94,7 +94,7 @@ function createAndFillGrid(data) {
     users = parse_data(data);
     
     var layout = determineLayout(users.length);
-    layout = pivot_layout_if_necessary(layout);
+    layout = pivotLayoutIfNecessary(layout);
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
     for (var i = 0; i < layout[1]; i++) {
