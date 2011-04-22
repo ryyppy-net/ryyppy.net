@@ -143,7 +143,7 @@
                     <a class="headerButtonA" title="Poistu bileistä" onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
                         <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
                     </a>
-                    </div>
+                </div>
             </c:forEach>
         </div>
 
