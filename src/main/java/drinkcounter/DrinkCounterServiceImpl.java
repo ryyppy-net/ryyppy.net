@@ -114,14 +114,16 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    @Transactional
     public void removeDrinkFromUser(int userId, int drinkId) {
         User user = userDAO.readByPrimaryKey(userId);
         Drink drink = drinkDao.readByPrimaryKey(drinkId);
         user.removeDrink(drink);
-        userDAO.save(user);
+        drinkDao.delete(drink);
     }
 
     @Override
+    @Transactional
     public void addDrinkToDate(int userId, String date) {
         DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
         DateTime dt = parser.parseDateTime(date);

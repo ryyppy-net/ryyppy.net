@@ -39,6 +39,7 @@ public class User extends AbstractEntity{
 
     public void removeDrink(Drink drink) {
         getDrinks().remove(drink);
+        drink.setDrinker(null);
     }
 
     public enum Sex {
