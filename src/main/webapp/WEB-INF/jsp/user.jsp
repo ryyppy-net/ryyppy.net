@@ -128,7 +128,7 @@
 
         <div id="body">
             <c:forEach items="${parties}" var="party">
-                <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
+                <c:url var="viewPartyUrl" value="party?id=${party.id}" />
                 <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${user.id}" />
 
                 <div class="party">

@@ -43,15 +43,15 @@ public class PartyController {
         return mav;
     }
 
-    @RequestMapping("/partytouch")
-    public ModelAndView partyTouch(HttpSession session, @RequestParam("id") String partyId){
+    @RequestMapping("/party")
+    public ModelAndView party(HttpSession session, @RequestParam("id") String partyId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int pid = Integer.parseInt(partyId);
         authenticationChecks.checkRightsForParty(openId, pid);
         User user = userService.getUserByOpenId(openId);
 
         ModelAndView mav = new ModelAndView();
-        mav.setViewName("partytouch");
+        mav.setViewName("party");
         mav.addObject("party", drinkCounterService.getParty(pid));
         mav.addObject("user", user);
         return mav;
@@ -65,7 +65,7 @@ public class PartyController {
         
         Party party = drinkCounterService.startParty(partyName);
         drinkCounterService.linkUserToParty(uid, party.getId());
-        return "redirect:partytouch?id="+party.getId();
+        return "redirect:party?id="+party.getId();
     }
    
     @RequestMapping("/addAnonymousUser")
@@ -85,7 +85,7 @@ public class PartyController {
         user.setGuest(true);
         userService.addUser(user);
         drinkCounterService.linkUserToParty(user.getId(), pid);
-        return "redirect:partytouch?id=" + partyId;
+        return "redirect:party?id=" + partyId;
     }
     
     @RequestMapping("/linkUserToParty")
@@ -98,7 +98,7 @@ public class PartyController {
         authenticationChecks.checkRightsForParty(openId, pid);
 //        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
         drinkCounterService.linkUserToParty(uid, pid);
-        return "redirect:partytouch?id="+partyId;
+        return "redirect:party?id="+partyId;
     }
 
     @RequestMapping("/removeUserFromParty")
