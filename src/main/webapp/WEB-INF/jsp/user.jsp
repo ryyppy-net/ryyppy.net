@@ -75,7 +75,7 @@
                     var li = $('<li>');
                     var id = $(this).find('id').text();
                     var timestamp = $(this).find('timestamp').text();
-                    li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/configureDrinks?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + timestamp + '</a>');
+                    li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + timestamp + '</a>');
                     $("#drinksList").append(li);
                 });
                 if (count == 0) {
