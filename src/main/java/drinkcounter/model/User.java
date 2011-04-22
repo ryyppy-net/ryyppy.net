@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -137,6 +139,7 @@ public class User extends AbstractEntity{
         this.sex = sex;
     }
 
+    @Enumerated(EnumType.STRING)
     public Sex getSex() {
         return sex;
     }
