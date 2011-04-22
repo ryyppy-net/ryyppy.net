@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService{
     public boolean emailIsCorrect(String email) {
         if (email == null || email.length() == 0) return false;
         
-        final String expression = "^[\\w\\-]([\\.\\w])+[\\w]+@([\\w\\-]+\\.)+[A-Z]{2,4}$"; 
+        final String expression = "^(.+)@(.+)\\.(.+)$"; 
         Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);  
         Matcher matcher = pattern.matcher(email);  
         return matcher.matches();
