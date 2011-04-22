@@ -18,6 +18,8 @@
 package drinkcounter.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -211,6 +213,14 @@ public class User extends AbstractEntity{
      * @param drinks the drinks to set
      */
     public void setDrinks(List<Drink> drinks) {
+        // TODO make query for this and remove sorting
+        Collections.sort(drinks, new Comparator<Drink>() {
+            @Override
+            public int compare(Drink o1, Drink o2) {
+                return o1.getTimeStamp().compareTo(o2.getTimeStamp());
+            }
+        });
+
         this.drinks = drinks;
         alcoholCalculator.reset();
         for (Drink drink : drinks) {
