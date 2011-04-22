@@ -1,9 +1,10 @@
 0. Kysy Tonilta SSH-avain Amazon-palvelimelle (ryyppy.net, username ec2-user), jos sinulla ei jo ole.
-1. Tee NetBeansillä war-tiedosto ryyppy.netistä
-    - Aja Build projektille NetBeansissä ja hae target-hakemistosta war
-2. Kopioi war-tiedosto palvelimelle kotihakemistoon
-3. Siirrä palvelimella oleva war-tiedosto polkuun tomcat/webapps/ROOT.war
-4. Jos tomcat kaatuu, se pitää käynnistää uudestaan.
+1. Aja mavenilla release, eli mvn release:prepare
+2. Vastaa kysymyksiin oletusasetuksilla, versionumeroa voi tietty kasvattaa enemmän kuin oletuksena tulee jos on isompi muutos
+3. Aja mvn release:perform. Lopputuloksena target-hakemistossa pitäisi olla war-tiedosto.
+4. Kopioi war-tiedosto palvelimelle kotihakemistoon
+5. Siirrä palvelimella oleva war-tiedosto polkuun tomcat/webapps/ROOT.war
+6. Jos tomcat kaatuu, se pitää käynnistää uudestaan.
     - Kokeile toimiiko sudo tomcat/bin/shutdown.sh
     - Jos ei, tapa kill-komennolla
     - Käynnistä uudestaan sudo tomcat/bin/startup.sh
