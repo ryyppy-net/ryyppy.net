@@ -17,7 +17,7 @@ function UserButton(userId, element, color) {
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
-        xaxis: {mode: "time", timeformat: "%H:%M"}
+        xaxis: {mode: "time", timeformat: "%H:%M", show:true}
     };
     
     this.element = element;
@@ -93,7 +93,7 @@ function UserButton(userId, element, color) {
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
-            var history = [columns[0] + timezoneoffset, Number(columns[1])];
+            var history = [Number(columns[0]) + timezoneoffset, Number(columns[1])];
             histories.push(history);
         }
 

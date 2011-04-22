@@ -8,7 +8,7 @@ function UserHistoryGraph(user, element) {
         crosshair: { mode: "x" },
         grid: { hoverable: true, autoHighlight: false },
         yaxis: { min: 0, show:true},
-        xaxis: { mode: "time", timeformat: "%y-%0m-%0d", minTickSize: [1, "day"], show:true, transform: function (v) { return (v == 0) ? null : v; } },
+        xaxis: { mode: "time", timeformat: "%y-%0m-%0d", minTickSize: [1, "day"], show:true },
         lines: { show: false },
         points: { show: false },
         bars: { show: true, barWidth: 24 * 60 * 60 * 1000, align: "center" }
