@@ -28,6 +28,6 @@ public interface DrinkCounterService {
     // Drinks
     List<Drink> getDrinks(int userId);
     int addDrink(int userId);
-    public void removeDrinkFromUser(int userId, int drinkId);
-   public void addDrinkToDate(int id, String date);
+    void removeDrinkFromUser(int userId, int drinkId);
+    void addDrinkToDate(int id, String date);
 }

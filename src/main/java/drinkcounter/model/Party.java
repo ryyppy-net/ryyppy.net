@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Temporal;
-import javax.persistence.Transient;
 
 /**
  *
@@ -36,13 +36,11 @@ public class Party extends AbstractEntity{
         this.name = name;
     }
 
-    @Transient
-    public int getId(){
-        return getStoreKey();
-    }
-
     @ManyToMany
-    @JoinTable(name="participants")
+    @JoinTable(name="participants", 
+            joinColumns={@JoinColumn(name="party_id")}
+            ,inverseJoinColumns={@JoinColumn(name="participant_id")}
+            )
     public List<User> getParticipants() {
         if(participants == null){
             participants =  new ArrayList<User>();
