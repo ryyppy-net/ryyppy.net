@@ -115,7 +115,7 @@ function createAndFillGrid(data) {
             $('#row' + i).append(newElement);
         }
     }
-    fix_the_fucking_css();
+    fixTheFuckingCss();
     
     updateButtons();
 }
