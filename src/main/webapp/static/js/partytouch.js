@@ -11,7 +11,7 @@ $(document).ready(function() {
     setInterval(function() {if (needsRefreshing == true) forceRefresh();}, 1000);
     
     // update data every two minutes
-    setInterval(function() {get_party_data(updateGrid);}, updateInterval);
+    setInterval(function() {getPartyData(updateGrid);}, updateInterval);
 });
 
 $(window).resize(function() {
@@ -21,7 +21,7 @@ $(window).resize(function() {
 function forceRefresh() {
     needsRefreshing = false;
     $('#drinkers').html('');
-    get_party_data(createAndFillGrid);
+    getPartyData(createAndFillGrid);
 }
 
 function determineLayout(n) {
@@ -53,7 +53,7 @@ function pivotLayoutIfNecessary(layout) {
     return layout;
 }
 
-function get_party_data(callback) {
+function getPartyData(callback) {
     $.get(dataUrl, callback);
 }
 
