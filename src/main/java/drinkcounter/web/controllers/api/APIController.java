@@ -77,9 +77,19 @@ public class APIController {
     public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId){
         int id = Integer.parseInt(userId);
         authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
-        drinkCounterService.addDrink(id);
+        int drinkId = drinkCounterService.addDrink(id);
         User user = userService.getUser(id);
-        return Integer.toString(user.getTotalDrinks());
+        return Integer.toString(drinkId);
+    }
+
+    @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
+    public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId, @PathVariable String drinkId){
+        int userIdInt = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userIdInt);
+        int drinkIdInt = Integer.parseInt(drinkId);
+        drinkCounterService.removeDrinkFromUser(userIdInt, drinkIdInt);
+        log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userIdInt));
+        return "";
     }
     
     @RequestMapping("/users/{userId}")

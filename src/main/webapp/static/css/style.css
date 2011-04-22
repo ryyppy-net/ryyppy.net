@@ -16,6 +16,14 @@ li > a, p > a {
     width: 400px;
 }
 
+#kickDrinkerDialog {
+    width: 400px;
+}
+
+#configureDrinksDialog {
+    width: 600px;
+}
+
 h1 {
     background-color: #252525;
     color: #ffffff;
@@ -243,9 +251,9 @@ div#kickDrinkerButton {
     background-image: url("/static/images/kieltomerkki.png");
 }
 
-div#removeDrinkButton {
-    background-color: #e60d0f;
-    background-image: url("/static/images/kieltomerkki.png");
+div#configureDrinksButton {
+    background-color: #65E6E4;
+    background-image: url("/static/images/jakari.png");
 }
 
 div#closeButton {
@@ -255,4 +263,29 @@ div#closeButton {
 
 input[disabled] {
     background-color: red;
+}
+
+.undo {
+    background-color: #000000;
+    color: #ffffff;
+    position: absolute;
+    display: none;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+}
+
+.undo h1 {
+    background-color: #000000;
+    color: white;
+    font-size: 200%;
+    margin-bottom: 5px;
+}
+
+.undo div {
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
 }

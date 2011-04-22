@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService{
         User user = getUser(userId);
         
         /*
-         * Does this cascade automatically? Test if these are needed
+         * TODO Does this cascade automatically? Test if these are needed
         List<Drink> drinks = drinkDAO.findByDrinker(user);
         for (Drink drink : drinks) {
             drinkDAO.delete(drink);
