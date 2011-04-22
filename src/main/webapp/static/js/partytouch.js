@@ -75,7 +75,7 @@ function areSame(list1, list2) {
 }
 
 function updateGrid(data) {
-    var newdata = parse_data(data);
+    var newdata = parseData(data);
     
     if (!areSame(newdata, users)) {
         forceRefresh();
@@ -91,7 +91,7 @@ function onUserDrunk() {
 
 function createAndFillGrid(data) {
     $('#drinkers').html('');
-    users = parse_data(data);
+    users = parseData(data);
     
     var layout = determineLayout(users.length);
     layout = pivotLayoutIfNecessary(layout);
@@ -149,7 +149,7 @@ function updateButtons() {
     }
 }
 
-function parse_data(data) {
+function parseData(data) {
     var users = [];
     $(data).find('user').each(function() {
         var part = $(this);
