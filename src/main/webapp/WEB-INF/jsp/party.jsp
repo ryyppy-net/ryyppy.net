@@ -126,7 +126,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" /></td>
+                        <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" autocomplete="off" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
