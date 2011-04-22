@@ -23,7 +23,7 @@
             var userButton = null;
             
             $(document).ready(function() {
-                fix_the_fucking_css();
+                fixTheFuckingCss();
 
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
