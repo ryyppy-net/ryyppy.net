@@ -83,7 +83,7 @@ public class APIController {
     }
 
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
-    public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId, @PathVariable String drinkId){
+    public @ResponseBody String removeDrinkFromUser(HttpSession session, @PathVariable String userId, @PathVariable String drinkId){
         int userIdInt = Integer.parseInt(userId);
         authenticationChecks.checkHighLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), userIdInt);
         int drinkIdInt = Integer.parseInt(drinkId);
