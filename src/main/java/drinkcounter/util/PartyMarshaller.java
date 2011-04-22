@@ -13,6 +13,7 @@ import drinkcounter.model.Party;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.ListIterator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -96,7 +97,13 @@ public class PartyMarshaller {
     private Node createDrinksNode(Document d, List<Drink> drinks){
         Node drinksNode = d.createElement("drinks");
         drinksNode.appendChild(createTextContentElement("count", Integer.toString(drinks.size()), d));
-        for (Drink drink : drinks) {
+
+        ListIterator<Drink> iter = drinks.listIterator(drinks.size());
+        int i = 0;
+        while (iter.hasPrevious()) {
+            if (i > 10) break;
+            i++;
+            Drink drink = iter.previous();
             Node drinkNode = d.createElement("drink");
             DateTime dateTime = new DateTime(drink.getTimeStamp());
             drinkNode.appendChild(createTextContentElement("id", Integer.toString(drink.getId()), d));

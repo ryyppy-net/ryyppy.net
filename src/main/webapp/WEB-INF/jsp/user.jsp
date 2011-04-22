@@ -4,8 +4,12 @@
 <t:master title="Bileet">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" />
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
+        <script type="text/javascript" src="/static/js/jquery-ui-1.8.11.custom.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.ui.datepicker-fi.js"></script>
         
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
@@ -15,7 +19,6 @@
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
-        
         <script type="text/javascript">
             var userButton = null;
             
@@ -53,11 +56,14 @@
                 userButton.setMaxY(max);
             }
 
-            function removeDrinkDialogOpened() {
+            function configureDrinksDialogOpened() {
                 $.get("/API/users/${user.id}/show-drinks", gotDrinkData);
+                $("#time").datetimepicker($.datepicker.regional['fi']);
+                $("#time").datetimepicker("option", {maxDate: 0});
+                $("#time").datetimepicker("setDate", new Date());
             }
 
-            function removeDrinkDialogClosed() {
+            function configureDrinksDialogClosed() {
                 location.reload(true);
             }
 
@@ -69,7 +75,7 @@
                     var li = $('<li>');
                     var id = $(this).find('id').text();
                     var timestamp = $(this).find('timestamp').text();
-                    li.html('<a href="#" onclick="$.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', removeDrinkDialogOpened);">Juoma-aika: ' + timestamp + '</a>');
+                    li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + timestamp + '</a>');
                     $("#drinksList").append(li);
                 });
                 if (count == 0) {
@@ -77,6 +83,15 @@
                     li.html('Ei lisättyjä juomia');
                     $("#drinksList").append(li);
                 }
+            }
+
+            function checkTimeField() {
+                var success = false;
+                var time = $("#time").datetimepicker("getDate");
+                if (time != null && time <= new Date()) success = true;
+
+                var button = $("#submitTime");
+                button.attr("disabled", success ? "" : "disabled");
             }
         </script>
     </jsp:attribute>
@@ -133,7 +148,7 @@
         </div>
 
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#removeDrinkDialog'), removeDrinkDialogOpened, removeDrinkDialogClosed);"><div class="headerButton headerButtonRight" id="removeDrinkButton"></div></a>
+            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);"><div class="headerButton headerButtonRight" id="configureDrinksButton"></div></a>
             <div class="headerTextDiv">
                 <h1>Historia</h1>
             </div>
@@ -141,13 +156,23 @@
         <div class="userHistoryContainer">
             <div id="historyGraph" style="height: 300px;"></div>
         </div>
-        <div id="removeDrinkDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#removeDrinkDialog'), removeDrinkDialogClosed);">X</a></span>
+        <div id="configureDrinksDialog" class="popupDialog">
+            <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinksDialog'), configureDrinksDialogClosed);">X</a></span>
 
-            <h2>Poista juoma</h2>
+            <div style="float:left">
+                <h2>Lisää juoma ajanhetkelle</h2>
+                <form method="POST" action="<c:url value="addDrinkToDate" />">
+                    <input type="hidden" name="userId" value="${user.id}" />
+                    <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
+                    <input type="submit" value="Lisää" id="submitTime" />
+                </form>
+            </div>
 
-            <ul id="drinksList">
-           </ul>
+            <div style="float:right">
+                <h2>Poista juoma</h2>
+                <ul id="drinksList">
+                </ul>
+            </div>
         </div>
 
         <div id="addDrinkerDialog" class="popupDialog">
