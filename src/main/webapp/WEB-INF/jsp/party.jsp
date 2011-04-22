@@ -6,6 +6,8 @@
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+        
         <script type="text/javascript">
             // global urls
             var dataUrl = '/API/parties/${party.id}/';
