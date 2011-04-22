@@ -9,12 +9,30 @@
                 $("#manualLogin").show(300);
                 $("#openId").focus();
             }
+            
+            $(document).ready(function() {
+                repaint();
+            });
+            
+            $(window).resize(function() {
+                repaint();
+            });
+            
+            function repaint() {
+                var windowWidth = $(window).width();
+                var bestWidth = Math.min(600, windowWidth - 20);
+                $("#logoContainer").width(bestWidth);
+                $("#login").width(bestWidth);
+            }
         </script>
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
     </jsp:attribute>
     
     <jsp:body>
+        <div id="logoContainer">
+            <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
+        </div>
         
-        <div id="apLogo"></div>
         <div id="login">
             <h2>Kirjaudu jonkin OpenID-palvelun avulla</h2>
 
