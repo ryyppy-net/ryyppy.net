@@ -24,6 +24,7 @@ import java.util.ListIterator;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 /**
@@ -31,6 +32,7 @@ import javax.persistence.Transient;
  * @author Toni, Lauri
  */
 @Entity
+@Table(name="Users")
 public class User extends AbstractEntity{
 
     public void removeDrink(Drink drink) {
@@ -73,11 +75,6 @@ public class User extends AbstractEntity{
 
     public String getOpenId() {
         return openId;
-    }
-
-    @Transient
-    public int getId(){
-        return getStoreKey();
     }
 
     @ManyToMany(mappedBy="participants")
@@ -201,7 +198,7 @@ public class User extends AbstractEntity{
     /**
      * @return the drinks
      */
-    @OneToMany
+    @OneToMany(mappedBy="drinker")
     public List<Drink> getDrinks() {
         return drinks;
     }
