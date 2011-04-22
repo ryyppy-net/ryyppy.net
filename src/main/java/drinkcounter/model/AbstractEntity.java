@@ -17,15 +17,15 @@ import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class AbstractEntity implements Serializable {
-    private Integer storeKey;
+    private Integer id;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    public Integer getStoreKey() {
-        return storeKey;
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    public Integer getId() {
+        return id;
     }
 
-    public void setStoreKey(Integer key) {
-        this.storeKey = key;
+    public void setId(Integer key) {
+        this.id = key;
     }
 }
