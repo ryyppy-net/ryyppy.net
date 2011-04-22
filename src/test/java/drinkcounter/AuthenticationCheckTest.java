@@ -31,16 +31,16 @@ public class AuthenticationCheckTest {
         authenticationChecks = new AuthenticationChecks();
         
         user = new User();
-        user.setStoreKey(1);
+        user.setId(1);
 
         user2 = new User();
-        user2.setStoreKey(2);
+        user2.setId(2);
         
         user3 = new User();
-        user3.setStoreKey(3);
+        user3.setId(3);
 
         Party party = new Party();
-        party.setStoreKey(1);
+        party.setId(1);
         party.addParticipant(user);
         party.addParticipant(user2);
         List<Party> parties = new ArrayList<Party>();
@@ -49,7 +49,7 @@ public class AuthenticationCheckTest {
         user2.setParties(parties);
         
         Party party2 = new Party();
-        party2.setStoreKey(2);
+        party2.setId(2);
         party2.addParticipant(user3);
         List<Party> parties2 = new ArrayList<Party>();
         parties2.add(party2);

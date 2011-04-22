@@ -31,11 +31,6 @@ public class Drink extends AbstractEntity {
         timeStamp = new Date();
     }
 
-    @Transient
-    public int getId(){
-        return getStoreKey();
-    }
-
     @ManyToOne(fetch=FetchType.LAZY)
     public User getDrinker() {
         return drinker;
