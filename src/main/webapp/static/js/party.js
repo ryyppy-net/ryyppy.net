@@ -11,7 +11,7 @@ $(document).ready(function() {
     setInterval(function() {if (needsRefreshing == true) forceRefresh();}, 1000);
     
     // update data every two minutes
-    setInterval(function() {get_data(updateGrid);}, updateInterval);
+    setInterval(function() {getPartyData(updateGrid);}, updateInterval);
 });
 
 $(window).resize(function() {
@@ -21,10 +21,10 @@ $(window).resize(function() {
 function forceRefresh() {
     needsRefreshing = false;
     $('#drinkers').html('');
-    get_data(createAndFillGrid);
+    getPartyData(createAndFillGrid);
 }
 
-function determine_layout(n) {
+function determineLayout(n) {
     var best = [0, 0];
     var initial = Math.ceil(Math.sqrt(n));
     var square_candidate = initial * initial;
@@ -43,7 +43,7 @@ function determine_layout(n) {
     return best;
 }
 
-function pivot_layout_if_necessary(layout) {
+function pivotLayoutIfNecessary(layout) {
     var layout_aspect = layout[0] < layout[1];
     var window_aspect = $(window).width() < $(window).height();
     if (layout_aspect != window_aspect) {
@@ -53,8 +53,7 @@ function pivot_layout_if_necessary(layout) {
     return layout;
 }
 
-// gets party data 
-function get_data(callback) {
+function getPartyData(callback) {
     $.get(dataUrl, callback);
 }
 
@@ -76,7 +75,7 @@ function areSame(list1, list2) {
 }
 
 function updateGrid(data) {
-    var newdata = parse_data(data);
+    var newdata = parseData(data);
     
     if (!areSame(newdata, users)) {
         forceRefresh();
@@ -92,10 +91,10 @@ function onUserDrunk() {
 
 function createAndFillGrid(data) {
     $('#drinkers').html('');
-    users = parse_data(data);
+    users = parseData(data);
     
-    var layout = determine_layout(users.length);
-    layout = pivot_layout_if_necessary(layout);
+    var layout = determineLayout(users.length);
+    layout = pivotLayoutIfNecessary(layout);
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
     for (var i = 0; i < layout[1]; i++) {
@@ -116,7 +115,7 @@ function createAndFillGrid(data) {
             $('#row' + i).append(newElement);
         }
     }
-    fix_the_fucking_css();
+    fixTheFuckingCss();
     
     updateButtons();
 }
@@ -150,7 +149,7 @@ function updateButtons() {
     }
 }
 
-function parse_data(data) {
+function parseData(data) {
     var users = [];
     $(data).find('user').each(function() {
         var part = $(this);

@@ -58,7 +58,7 @@
                     graphInterval = clearInterval(graphInterval);
             }
         </script>
-        <script type="text/javascript" src="/static/js/partytouch.js"></script>
+        <script type="text/javascript" src="/static/js/party.js"></script>
     </jsp:attribute>
     <jsp:body>
         <div class="header">
