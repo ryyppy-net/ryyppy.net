@@ -95,6 +95,16 @@ public class UserController {
         return "redirect:parties";
     }
     
+    @RequestMapping("/addDrinkToDate")
+    public String addDrinkToDate(HttpSession session, @RequestParam("userId") String userId, @RequestParam("date") String date){
+        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
+        int id = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser(openId, id);
+
+        drinkCounterService.addDrinkToDate(id, date);
+        return "redirect:user";
+    }
+
     @RequestMapping("/removeDrink")
     public String removeDrink(HttpSession session, @RequestParam("userId") String userId, @RequestParam("drinkId") String drinkId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
