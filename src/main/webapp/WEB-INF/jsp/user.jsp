@@ -225,7 +225,7 @@
                     </tr>
                     <tr>
                         <th>Paino</th>
-                        <td colspan="2"><input value="<c:out value='${user.weight}' />" id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" /></td>
+                        <td colspan="2"><input value="<c:out value='${user.weight}' />" id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" autocomplete="off" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
