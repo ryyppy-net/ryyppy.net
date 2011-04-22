@@ -140,11 +140,14 @@ function UserButton(userId, element, color) {
             var drinkId = data;
 
             var undoLink = $('<a>');
-            undoLink.text('Undo');
+            var undoDiv = $('<div>').text('Peru juoma');
+
+            undoLink.append(undoDiv);
             undoLink.click(function() {
                 var u = removeDrinkUrl.replace('_userid_', that.userId).replace('_drinkid_', drinkId);
                 $.get(u);
                 drinkUndone = true;
+                undoDiv.css('background-color', 'red');
             });
 
             var newElement = $('<div>');
@@ -159,7 +162,8 @@ function UserButton(userId, element, color) {
             newElement.css('left', left);
             newElement.css('top', top);
 
-            newElement.append('h1').text('Juoma lisätty');
+            var title = $('<h1>').text('Juoma lisätty');
+            newElement.append(title);
 
             newElement.append(undoLink);
             that.element.append(newElement);
@@ -175,6 +179,8 @@ function UserButton(userId, element, color) {
                        that.onDrunk(that.userId);
                     }
                 }
+
+                newElement.remove();
             });
         });
     }

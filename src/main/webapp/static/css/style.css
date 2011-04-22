@@ -275,5 +275,17 @@ input[disabled] {
 }
 
 .undo h1 {
+    background-color: #000000;
     color: white;
+    font-size: 200%;
+    margin-bottom: 5px;
+}
+
+.undo div {
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 5px;
 }
