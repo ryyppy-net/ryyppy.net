@@ -1,4 +1,4 @@
-function fix_the_fucking_css() {
+function fixTheFuckingCss() {
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
     
     $(".party").width($("#body").width() - 10 + 'px');

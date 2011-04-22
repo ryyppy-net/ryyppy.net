@@ -23,7 +23,7 @@
             var userButton = null;
             
             $(document).ready(function() {
-                fix_the_fucking_css();
+                fixTheFuckingCss();
 
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
@@ -128,7 +128,7 @@
 
         <div id="body">
             <c:forEach items="${parties}" var="party">
-                <c:url var="viewPartyUrl" value="partytouch?id=${party.id}" />
+                <c:url var="viewPartyUrl" value="party?id=${party.id}" />
                 <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${user.id}" />
 
                 <div class="party">
