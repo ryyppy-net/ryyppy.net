@@ -53,7 +53,7 @@
                     </select><br />
 
                     <label for="drinkerWeight">Paino</label><br />
-                    <input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" /><br />
+                    <input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" autocomplete="off" /><br />
 
                     <input id="submitButton" type="submit" value="Lisää bilettäjä" />
                 </form>
