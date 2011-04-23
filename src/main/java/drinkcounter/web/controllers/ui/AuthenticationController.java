@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
+import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationService;
 import drinkcounter.model.User;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -26,6 +28,7 @@ public class AuthenticationController {
     public static final String OPENID = "openId";
     public static final String DISCOVERYINFORMATION = "discoveryInformation";
 
+    @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
     @Autowired private AuthenticationService registrationService;
 
@@ -56,8 +59,10 @@ public class AuthenticationController {
     }
     
     @RequestMapping("/login")
-    public String login() {
-        return "login";
+    public ModelAndView login() {
+        ModelAndView mav = new ModelAndView("login");
+        mav.addObject("totalDrinkCount", drinkCounterService.getTotalDrinkCount());
+        return mav;
     }
     
     @RequestMapping("/logout")
