@@ -57,7 +57,7 @@ function UserHistoryGraph(user, element) {
         }
 
         var newname = '66.66.6666 = 66 annosta';
-        this.series = [{label: newname, data: histories}];
+        this.series = [{color:"rgb(0, 0, 0)", label: newname, data: histories}];
 
         $("#"+ this.element.attr('id') +" .legendLabel").each(function () {
             // fix the widths so they don't jump around
