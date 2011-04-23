@@ -126,13 +126,10 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public void addDrinkToDate(int userId, String date) {
-        DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
+        DateTimeZone dtz = DateTimeZone.forID("Europe/Helsinki"); // TODO fix hard coded time zones
+        DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").withZone(dtz);
         DateTime dt = parser.parseDateTime(date);
 
-        DateTimeZone dtz = DateTimeZone.forID("Europe/Helsinki"); // TODO fix hard coded time zones
-        int offset = dtz.getOffset(new Date().getTime());
-        dt.plus(offset);
-        
         if (dt.isAfterNow()) throw new IllegalArgumentException(date);
 
         User user = userDAO.readByPrimaryKey(userId);

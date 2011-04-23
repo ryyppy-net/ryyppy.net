@@ -46,8 +46,9 @@ function UserHistoryGraph(user, element) {
             var timestamp = Number(columns[0]);
             var drinks = Number(columns[1]);
 
-            //var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-            if (timestamp == 0) timestamp = -0.1;
+            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+            timestamp = timestamp + timezoneoffset;
+            if (drinks == 0) drinks = -0.1;
             var history = [timestamp, drinks];
             histories.push(history);
         }
