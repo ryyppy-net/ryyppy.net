@@ -73,6 +73,10 @@
                     </div>
                 </form>
             </div>
+
+            <p>
+                <iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FRyyppynet%2F151477181585164&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font&amp;colorscheme=dark&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe>
+            </p>
             
             <p>
                 <iframe id="youtube" title="YouTube video player" src="http://www.youtube.com/embed/A6JWd3-yzCM" frameborder="0" allowfullscreen></iframe>
