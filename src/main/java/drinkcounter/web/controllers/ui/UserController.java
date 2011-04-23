@@ -157,6 +157,7 @@ public class UserController {
     
     @RequestMapping("/getUserByEmail")
     public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
+        System.out.println(email);
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(partyId);
         authenticationChecks.checkRightsForParty(openId, id);
