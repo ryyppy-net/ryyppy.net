@@ -64,21 +64,21 @@ function UserButton(userId, element, color) {
     this.setTexts = function(name, alcohol, drinks, idletime) {
         var div = $('#info' + userId);
         div.html('');
-        div.append($('<span class="name"></span>').text(name))
-        div.append($('<br />'))
-        div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'))
-        div.append($('<br />'))
+        div.append($('<span class="name"></span>').text(name));
+        div.append($('<br />'));
+        div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'));
+        div.append($('<br />'));
 
         if (drinks == 0) {
-            div.append($('<span class="details"></span>').text('paina tästä juodaksesi'))
+            div.append($('<span class="details"></span>').text('paina tästä juodaksesi'));
         } else {
             if (drinks == 1)
-                div.append($('<span class="details"></span>').text(drinks + ' annos'))
+                div.append($('<span class="details"></span>').text(drinks + ' annos'));
             else
-                div.append($('<span class="details"></span>').text(drinks + ' annosta'))
+                div.append($('<span class="details"></span>').text(drinks + ' annosta'));
 
-            div.append($('<br />'))
-            div.append($('<span class="details"></span>').text("juomatta: " + String(Math.floor(idletime / 60)) + ' min'))
+            div.append($('<br />'));
+            div.append($('<span class="details"></span>').text("juomatta: " + formatTime(idletime)));
         }
     }
 
@@ -186,4 +186,21 @@ function UserButton(userId, element, color) {
     }
     
     this.buildHtml();
+}
+
+function formatTime(time) {
+    var days = Math.floor(time / (60 * 60 * 24));
+    time -= days * (60 * 60 * 24);
+    var hours = Math.floor(time / (60 * 60));
+    time -= hours * (60 * 60);
+    var minutes = Math.floor(time / 60);
+
+    var string = "";
+    string += (days > 0) ? String(days) + " d " : "";
+    string += (hours > 0) ? String(hours) + " h " : "";
+    string += (minutes > 0) ? String(minutes) + " min " : "";
+
+    if (string.length == 0) string += "0 min";
+
+    return string;
 }
