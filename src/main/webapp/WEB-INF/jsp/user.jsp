@@ -19,6 +19,7 @@
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
+        <script type="text/javascript" src="/static/js/date.js"></script>
         <script type="text/javascript">
             var userButton = null;
             
@@ -67,6 +68,10 @@
                 location.reload(true);
             }
 
+            function formatDate(date) {
+                return date.toString('yyyy-mm-dd HH:MM');
+            }
+
             function gotDrinkData(data) {
                 $("#drinksList").html("");
                 var count = 0;
@@ -74,8 +79,15 @@
                     count++;
                     var li = $('<li>');
                     var id = $(this).find('id').text();
-                    var timestamp = $(this).find('timestamp').text();
-                    li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + timestamp + '</a>');
+                    var timestamp = Number($(this).find('timestamp').text());
+
+                    var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+                    console.log(timestamp);
+                    timestamp = timestamp + timezoneoffset;
+                    console.log(timestamp);
+                    var date = formatDate(new Date(timestamp));
+
+                    li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + date + '</a>');
                     $("#drinksList").append(li);
                 });
                 if (count == 0) {
@@ -137,7 +149,7 @@
                             <c:out value="${party.name}" />
                         </span>
                         <span id="partyStartTime">
-                            Alkamisaika: <c:out value="${party.startTime}" />
+                            Alkamisaika: <script type="text/javascript">document.write(formatDate(new Date('<c:out value="${party.startTime}" />')));</script>
                         </span>
                     </a>
                     <a class="headerButtonA" title="Poistu bileistä" onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">

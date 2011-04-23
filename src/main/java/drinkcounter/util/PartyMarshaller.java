@@ -106,8 +106,9 @@ public class PartyMarshaller {
             Drink drink = iter.previous();
             Node drinkNode = d.createElement("drink");
             DateTime dateTime = new DateTime(drink.getTimeStamp());
+
             drinkNode.appendChild(createTextContentElement("id", Integer.toString(drink.getId()), d));
-            drinkNode.appendChild(createTextContentElement("timestamp", dateTime.toString("dd.MM.yyyy HH:mm"), d));
+            drinkNode.appendChild(createTextContentElement("timestamp", Long.toString(dateTime.toInstant().getMillis()), d));
             drinksNode.appendChild(drinkNode);
         }
         return drinksNode;
