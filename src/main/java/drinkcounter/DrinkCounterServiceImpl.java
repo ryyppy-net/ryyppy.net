@@ -143,4 +143,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         drinkDao.save(drink);
         log.info("User {} has drunk a drink at {}", user.getName(), dt.toString());
     }
+
+    @Override
+    public long getTotalDrinkCount() {
+        return drinkDao.count();
+    }
 }
