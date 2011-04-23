@@ -12,13 +12,14 @@ import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,8 +116,10 @@ public class APIController {
 
         for (Drink d : drinks) {
             // TODO time zones?
-            Calendar c = Calendar.getInstance();
             DateTime dt = new DateTime(d.getTimeStamp());
+            DateTimeZone dtz = DateTimeZone.forID("Europe/Helsinki"); // TODO fix hard coded time zones
+            int offset = dtz.getOffset(new Date().getTime());
+            dt.plus(offset);
             String s = dt.toString(format);
 
             Integer i = 0;

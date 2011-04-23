@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -127,6 +128,10 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public void addDrinkToDate(int userId, String date) {
         DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm");
         DateTime dt = parser.parseDateTime(date);
+
+        DateTimeZone dtz = DateTimeZone.forID("Europe/Helsinki"); // TODO fix hard coded time zones
+        int offset = dtz.getOffset(new Date().getTime());
+        dt.plus(offset);
         
         if (dt.isAfterNow()) throw new IllegalArgumentException(date);
 
@@ -137,5 +142,10 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         user.drink(drink);
         drinkDao.save(drink);
         log.info("User {} has drunk a drink at {}", user.getName(), dt.toString());
+    }
+
+    @Override
+    public long getTotalDrinkCount() {
+        return drinkDao.count();
     }
 }
