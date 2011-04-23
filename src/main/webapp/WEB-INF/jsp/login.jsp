@@ -23,6 +23,8 @@
                 var bestWidth = Math.min(600, windowWidth - 20);
                 $("#logoContainer").width(bestWidth);
                 $("#login").width(bestWidth);
+                $("#youtube").width(bestWidth);
+                $("#youtube").height(bestWidth / (640 / 390));
             }
         </script>
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
@@ -71,6 +73,10 @@
                     </div>
                 </form>
             </div>
+            
+            <p>
+                <iframe id="youtube" title="YouTube video player" src="http://www.youtube.com/embed/A6JWd3-yzCM" frameborder="0" allowfullscreen></iframe>
+            </p>
         </div>
     </jsp:body>
 </t:master>
