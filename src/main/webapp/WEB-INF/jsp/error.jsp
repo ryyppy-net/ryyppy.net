@@ -1,14 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:master title="Virhe">
+<t:master title="Ryyppy.net - Virhe!">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
-        <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/login.js"></script>
     </jsp:attribute>
     <jsp:body>
-        <div id="apLogo"></div>
-        <div id="login">
+        <div id="logoContainer">
+            <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
+        </div>
+        
+        <div class="login" style="text-align:left;">
             <h2>Virhe tapahtui!</h2>
             <p>Mahdollisia syitä:</p>
             <ul>
