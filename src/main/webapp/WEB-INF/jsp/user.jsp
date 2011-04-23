@@ -69,7 +69,7 @@
             }
 
             function formatDate(date) {
-                return date.toString('yyyy-mm-dd HH:MM');
+                return date.toString('yyyy-MM-dd HH:mm');
             }
 
             function gotDrinkData(data) {
@@ -81,10 +81,6 @@
                     var id = $(this).find('id').text();
                     var timestamp = Number($(this).find('timestamp').text());
 
-                    var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-                    console.log(timestamp);
-                    timestamp = timestamp + timezoneoffset;
-                    console.log(timestamp);
                     var date = formatDate(new Date(timestamp));
 
                     li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + date + '</a>');
@@ -149,7 +145,7 @@
                             <c:out value="${party.name}" />
                         </span>
                         <span id="partyStartTime">
-                            Alkamisaika: <script type="text/javascript">document.write(formatDate(new Date('<c:out value="${party.startTime}" />')));</script>
+                            Alkamisaika: <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
                         </span>
                     </a>
                     <a class="headerButtonA" title="Poistu bileistä" onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
