@@ -4,11 +4,14 @@
 <t:master title="Ryyppy.net - Virhe sisäänkirjautumisessa!">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
+        <script type="text/javascript" src="/static/js/login.js"></script>
     </jsp:attribute>
     <jsp:body>
-        <div id="apLogo"></div>
+        <div id="logoContainer">
+            <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
+        </div>
     
-        <div id="login">
+        <div class="login" style="text-align:left;">
             <h2>Virhe sisäänkirjautumisessa!</h2>
             <p>Mahdollisia syitä:</p>
             <ul>
