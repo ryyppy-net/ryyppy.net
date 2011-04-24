@@ -1,5 +1,6 @@
 package drinkcounter;
 
+import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.authentication.NotEnoughRightsException;
@@ -54,20 +55,24 @@ public class AuthenticationCheckTest {
         List<Party> parties2 = new ArrayList<Party>();
         parties2.add(party2);
         user3.setParties(parties2);
-        
-        UserService userService = mock(UserService.class);
-        when(userService.getUserByOpenId(openId)).thenReturn(user);
-
-        ((AuthenticationChecks)authenticationChecks).setUserService(userService);
+        CurrentUser currentUser = mock(CurrentUser.class);
+        when(currentUser.getUser()).thenReturn(user);
+        authenticationChecks.setCurrentUser(currentUser);
     }
     
     @Test
+    public void testNothing(){
+        
+    }
+          
+    
+    @Test
     public void testCheckRightsForParty() {
-        authenticationChecks.checkRightsForParty(openId, 1);
+        authenticationChecks.checkRightsForParty(1);
         
         Exception e = null;
         try {
-            authenticationChecks.checkRightsForParty(openId, 2);
+            authenticationChecks.checkRightsForParty(2);
         } catch (NotEnoughRightsException ex) {
             e = ex;
         }
@@ -76,36 +81,36 @@ public class AuthenticationCheckTest {
     
     @Test
     public void testCheckHighLevelRightsToUser() {
-        authenticationChecks.checkHighLevelRightsToUser(openId, 1);
-        authenticationChecks.checkHighLevelRightsToUser(openId, 2);
+        authenticationChecks.checkHighLevelRightsToUser( 1);
+        authenticationChecks.checkHighLevelRightsToUser(2);
         
         Exception e = null;
         try {
-            authenticationChecks.checkHighLevelRightsToUser(openId, 3);
+            authenticationChecks.checkHighLevelRightsToUser(3);
         } catch (NotEnoughRightsException ex) {
             e = ex;
         }
         assertNotNull(e);
     }
     
-//    @Test
-//    public void testCheckLowLevelRightsToUser() {
-//        authenticationChecks.checkLowLevelRightsToUser(openId, 1);
-//        
-//        Exception e = null;
-//        try {
-//            authenticationChecks.checkLowLevelRightsToUser(openId, 3);
-//        } catch (NotEnoughRightsException ex) {
-//            e = ex;
-//        }
-//        assertNotNull(e);
-//        
-//        e = null;
-//        try {
-//            authenticationChecks.checkLowLevelRightsToUser(openId, 2);
-//        } catch (NotEnoughRightsException ex) {
-//            e = ex;
-//        }
-//        assertNotNull(e);
-//    }
+    @Test
+    public void testCheckLowLevelRightsToUser() {
+        authenticationChecks.checkLowLevelRightsToUser(1);
+        
+        Exception e = null;
+        try {
+            authenticationChecks.checkLowLevelRightsToUser(3);
+        } catch (NotEnoughRightsException ex) {
+            e = ex;
+        }
+        assertNotNull(e);
+        
+        e = null;
+        try {
+            authenticationChecks.checkLowLevelRightsToUser(2);
+        } catch (NotEnoughRightsException ex) {
+            e = ex;
+        }
+        assertNotNull(e);
+    }
 }

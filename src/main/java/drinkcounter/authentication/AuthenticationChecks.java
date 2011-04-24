@@ -11,23 +11,19 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author murgo
  */
 public class AuthenticationChecks {
-    @Autowired
-    private UserService userService;
     
     @Autowired
     private CurrentUser currentUser;
-    
-    public void setUserService(UserService us) {
-        userService = us;
+
+    public void setCurrentUser(CurrentUser currentUser) {
+        this.currentUser = currentUser;
     }
     
-    public void checkRightsForParty(String openId, int partyId) {
-        if (openId == null)
+    public void checkRightsForParty(int partyId) {
+        User user = currentUser.getUser();
+        if (user == null){
             throw new NotLoggedInException();
-        
-        User user = userService.getUserByOpenId(openId);
-        if (user == null)
-            throw new NotLoggedInException();
+        }
         
         // TODO optimize by query
         List<Party> parties = user.getParties();
@@ -39,13 +35,12 @@ public class AuthenticationChecks {
         throw new NotEnoughRightsException();
     }
 
-    public void checkHighLevelRightsToUser(String openId, int userId) {
-        if (openId == null)
-            throw new NotLoggedInException();
+    public void checkHighLevelRightsToUser(int userId) {
         
-        User user = userService.getUserByOpenId(openId);
-        if (user == null)
+        User user = currentUser.getUser();
+        if (user == null){
             throw new NotLoggedInException();
+        }
         
         if (user.getId() == userId) return;
         
