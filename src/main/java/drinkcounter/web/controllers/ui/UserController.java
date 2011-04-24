@@ -101,7 +101,7 @@ public class UserController {
         int id = Integer.parseInt(userId);
         authenticationChecks.checkHighLevelRightsToUser(openId, id);
 
-        drinkCounterService.addDrinkToDate(id, date);
+        drinkCounterService.addDrinkToDate(id, date, (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET));
         return "redirect:user";
     }
 

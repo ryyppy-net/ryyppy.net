@@ -27,6 +27,7 @@ public class AuthenticationController {
     
     public static final String OPENID = "openId";
     public static final String DISCOVERYINFORMATION = "discoveryInformation";
+    public static final String TIMEZONEOFFSET = "timeZoneOffset";
 
     @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
@@ -35,11 +36,12 @@ public class AuthenticationController {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     @RequestMapping("/authenticate")
-    public String authenticate(HttpSession session, @RequestParam("openid") String openId, HttpServletRequest request) {
+    public String authenticate(HttpSession session, @RequestParam(required=false, defaultValue="0", value="timezone") String timezone, @RequestParam("openid") String openId, HttpServletRequest request) {
         log.info("Authenticating " + openId);
         try {
             DiscoveryInformation disco = registrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
             session.setAttribute(DISCOVERYINFORMATION, disco);
+            session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezone));
 
             AuthRequest authRequest = registrationService.createOpenIdAuthRequest(disco, getReturnToUrl(request));
 

@@ -29,6 +29,7 @@ public interface DrinkCounterService {
     List<Drink> getDrinks(int userId);
     int addDrink(int userId);
     void removeDrinkFromUser(int userId, int drinkId);
-    void addDrinkToDate(int id, String date);
+    void addDrinkToDate(int id, String date, double timezoneOffset);
     long getTotalDrinkCount();
+
 }

@@ -29,12 +29,16 @@
             <table>
                 <tr>
                     <td>
-                        <a href="authenticate?openid=https://www.google.com/accounts/o8/id">
+                        <script type="text/javascript">
+                            document.write('<a href="authenticate?openid=https://www.google.com/accounts/o8/id&timezone=' + new Date().getTimezoneOffset() + '">');
+                        </script>
                             <img src="/static/images/google-icon.png" style="border:none" alt="Google" />
                         </a>
                     </td>
                     <td>
-                        <a href="authenticate?openid=https://steamcommunity.com/openid/">
+                        <script type="text/javascript">
+                            document.write('<a href="authenticate?openid=https://steamcommunity.com/openid/&timezone=' + new Date().getTimezoneOffset() + '">');
+                        </script>
                             <img src="/static/images/steam-icon2.png" style="border:none" alt="Steam" />
                         </a>
                     </td>
@@ -50,6 +54,9 @@
                 <h2>Manuaalinen OpenID-kirjautuminen</h2>
 
                 <form id="form" method="POST" action="<c:url value="authenticate" />">
+                    <script type="text/javascript">
+                        document.write('<input type="hidden" name="timezone" value="' + new Date().getTimezoneOffset() + '" />');
+                    </script>
                     <input name="openid" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
 
                     <div id="apNappula">

@@ -156,7 +156,7 @@
         </div>
 
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);"><div class="headerButton headerButtonRight" id="configureDrinksButton"></div></a>
+            <a class="headerButtonA" title="Lisää/poista vanhoja juomia" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);"><div class="headerButton headerButtonRight" id="configureDrinksButton"></div></a>
             <div class="headerTextDiv">
                 <h1>Historia</h1>
             </div>
