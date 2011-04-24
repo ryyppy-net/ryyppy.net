@@ -19,6 +19,7 @@
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.framework.version>3.0.5.RELEASE</spring.framework.version>
     </properties>
 
     <build>
@@ -136,34 +137,27 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>org.springframework.context</artifactId>
-                <version>3.0.5.RELEASE</version>
+                <version>${spring.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>org.springframework.aop</artifactId>
-                <version>3.0.5.RELEASE</version>
+                <version>${spring.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>org.springframework.jdbc</artifactId>
-                <version>3.0.5.RELEASE</version>
+                <version>${spring.framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>org.springframework.orm</artifactId>
-                <version>3.0.5.RELEASE</version>
+                <version>${spring.framework.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.openid4java</groupId>
-            <artifactId>openid4java</artifactId>
-            <version>0.9.5</version>
-        </dependency>
-
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
@@ -171,26 +165,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.synyx.hades</groupId>
-            <artifactId>org.synyx.hades</artifactId>
-            <version>2.0.2.RELEASE</version>
-        </dependency>
-
-        <dependency>
             <groupId>net.sourceforge.javacsv</groupId>
             <artifactId>javacsv</artifactId>
             <version>2.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>3.0.5.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-            <version>3.0.5.RELEASE</version>
         </dependency>
         
         <dependency>
@@ -217,6 +194,37 @@
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
             <version>1.4</version>
+        </dependency>
+        
+        <!-- Spring framework -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        
+        <!-- Authentication and security -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-openid</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.openid4java</groupId>
+            <artifactId>openid4java</artifactId>
+            <version>0.9.5</version>
         </dependency>
 
         <!-- Servlet api -->
@@ -270,6 +278,11 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>3.6.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.synyx.hades</groupId>
+            <artifactId>org.synyx.hades</artifactId>
+            <version>2.0.2.RELEASE</version>
         </dependency>
 
         <!-- Test libraries -->
