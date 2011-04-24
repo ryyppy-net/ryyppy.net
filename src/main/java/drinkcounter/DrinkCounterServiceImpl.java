@@ -125,8 +125,8 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     @Transactional
-    public void addDrinkToDate(int userId, String date) {
-        DateTimeZone dtz = DateTimeZone.forID("Europe/Helsinki"); // TODO fix hard coded time zones
+    public void addDrinkToDate(int userId, String date, double timezoneOffset) {
+        DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
         DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").withZone(dtz);
         DateTime dt = parser.parseDateTime(date);
 
