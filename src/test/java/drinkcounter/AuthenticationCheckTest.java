@@ -61,12 +61,6 @@ public class AuthenticationCheckTest {
     }
     
     @Test
-    public void testNothing(){
-        
-    }
-          
-    
-    @Test
     public void testCheckRightsForParty() {
         authenticationChecks.checkRightsForParty(1);
         
