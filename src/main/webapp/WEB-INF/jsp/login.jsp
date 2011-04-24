@@ -10,6 +10,11 @@
                 $("#manualLogin").show(300);
                 $("#openId").focus();
             }
+            
+            function login(openId){
+                $('#openId').val(openId)
+                $('#form').submit()
+            }
         </script>
         <script type="text/javascript" src="/static/js/login.js"></script>
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
@@ -35,14 +40,10 @@
             <table>
                 <tr>
                     <td>
-                        <a href="authenticate?openid=https://www.google.com/accounts/o8/id">
-                            <img src="/static/images/google-icon.png" style="border:none" alt="Google" />
-                        </a>
+                        <img style="cursor: pointer" onclick="login('https://www.google.com/accounts/o8/id')" src="/static/images/google-icon.png" style="border:none" alt="Google" />
                     </td>
                     <td>
-                        <a href="authenticate?openid=https://steamcommunity.com/openid/">
-                            <img src="/static/images/steam-icon2.png" style="border:none" alt="Steam" />
-                        </a>
+                        <img style="cursor: pointer" onclick="login('https://steamcommunity.com/openid/')" src="/static/images/steam-icon2.png" style="border:none" alt="Steam" />
                     </td>
                     <td>
                         <a href="#manualLogin" onclick="manualLogin()">
@@ -54,10 +55,8 @@
 
             <div id="manualLogin" style="display: none;">
                 <h2><spring:message code="login.login_manual"/></h2>
-
-                <form id="form" method="POST" action="<c:url value="authenticate" />">
-                    <input name="openid" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
-
+                <form id="form" method="POST" action="<c:url value="/j_spring_openid_security_check" />">
+                    <input name="openid_identifier" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
                     <div id="apNappula">
                         <a href="#" onClick="$('#form').get(0).submit();"
                            onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"

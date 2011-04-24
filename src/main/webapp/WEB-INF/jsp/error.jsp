@@ -14,7 +14,7 @@
         
         <div class="login" style="text-align:left;">
             <h2> <spring:message code="error.title" /></h2>
-            <p><spring:message code="error.resons" /></p>
+            <p><spring:message code="error.reasons" /></p>
             <ul>
                 <li><spring:message code="error.list.unauthorized" /></li>
                 <li><spring:message code="error.list.page_doesnt_exist" /></li>
