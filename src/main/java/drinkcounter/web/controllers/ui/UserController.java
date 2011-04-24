@@ -9,6 +9,7 @@ import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Party;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.openid.OpenIDAuthenticationToken;
+import org.springframework.security.openid.OpenIDAuthenticationToken;
 
 /**
  *
@@ -24,11 +31,15 @@ import org.springframework.http.ResponseEntity;
  */
 @Controller
 public class UserController {
+    public static final String OPENID_CREDENTIAL_KEY = "USER_OPENID_CREDENTIAL";
+    
     
     @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
 
     @Autowired private AuthenticationChecks authenticationChecks;
+    @Autowired private UserDetailsService userDetailsService;
+    
     
     @RequestMapping("/addUser")
     public String addUser(
@@ -44,7 +55,7 @@ public class UserController {
         
         if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
             throw new IllegalArgumentException();
-
+        
         User user = new User();
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
@@ -52,7 +63,17 @@ public class UserController {
         user.setOpenId(openId);
         user.setEmail(email);
         userService.addUser(user);
+        authenticate(user);
         return "redirect:user";
+    }
+    
+    private void authenticate(User user){
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getOpenId());
+        OpenIDAuthenticationToken authentication = new OpenIDAuthenticationToken(userDetails, 
+                Collections.singleton(new GrantedAuthorityImpl("ROLE_USER")), 
+                user.getOpenId(),
+                Collections.EMPTY_LIST);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @RequestMapping("/modifyUser")

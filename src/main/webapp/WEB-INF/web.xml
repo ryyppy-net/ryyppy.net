@@ -7,6 +7,7 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             classpath:drinkcounter/applicationContext.xml
+            WEB-INF/security-context.xml
         </param-value>
     </context-param>
     <listener>
@@ -58,6 +59,15 @@
     <filter-mapping>
         <filter-name>encodingFilter</filter-name>
         <url-pattern>/ui/*</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
     <servlet>
         <servlet-name>API</servlet-name>
