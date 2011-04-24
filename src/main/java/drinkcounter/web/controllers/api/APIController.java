@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,8 +115,10 @@ public class APIController {
         String format = "YYYY-MM-dd";
 
         for (Drink d : drinks) {
-            // TODO time zones?
             DateTime dt = new DateTime(d.getTimeStamp());
+            double timezoneOffset = (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
+            DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
+            dt = dt.toDateTime(dtz);
             String s = dt.toString(format);
 
             Integer i = 0;
