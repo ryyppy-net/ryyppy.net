@@ -65,6 +65,7 @@ public class UserController {
         user.setEmail(email);
         userService.addUser(user);
         authenticate(user);
+        session.removeAttribute(AuthenticationController.OPENID);
         return "redirect:user";
     }
     
@@ -107,9 +108,8 @@ public class UserController {
 
     @RequestMapping("/addDrink")
     public String addDrink(HttpSession session, @RequestParam("id") String userId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(openId, id);
+        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
         
         drinkCounterService.addDrink(id);
         return "redirect:parties";
@@ -117,9 +117,8 @@ public class UserController {
     
     @RequestMapping("/addDrinkToDate")
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") String userId, @RequestParam("date") String date){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(openId, id);
+        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
 
         drinkCounterService.addDrinkToDate(id, date);
         return "redirect:user";
@@ -127,7 +126,6 @@ public class UserController {
 
     @RequestMapping("/removeDrink")
     public String removeDrink(HttpSession session, @RequestParam("userId") String userId, @RequestParam("drinkId") String drinkId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
         authenticationChecks.checkLowLevelRightsToUser(id);
 
@@ -161,9 +159,6 @@ public class UserController {
     
     @RequestMapping("/checkEmail")
     public ResponseEntity<byte[]> checkEmail(HttpSession session, @RequestParam("email") String email){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        if (openId == null)
-            throw new NotLoggedInException();
 
         String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
 
@@ -174,9 +169,8 @@ public class UserController {
     
     @RequestMapping("/getUserByEmail")
     public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(openId, id);
+        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), id);
 
         String data = "";
         if (!userService.emailIsCorrect(email))
