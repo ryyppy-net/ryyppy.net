@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+       xmlns:beans="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+          http://www.springframework.org/schema/security
+          http://www.springframework.org/schema/security/spring-security-3.0.3.xsd
+">
+    <http>
+        <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/static/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/ui/adduser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/**" access="ROLE_USER" />
+        <openid-login login-page="/ui/login" authentication-failure-handler-ref="userNotRegisteredHandler" />
+        <logout logout-url="/ui/logout" />
+    </http>
+    
+    <beans:bean class="drinkcounter.authentication.UserDetailsServiceImpl" />
+    <beans:bean id="userNotRegisteredHandler" class="drinkcounter.authentication.UserNotRegisteredFailureHandler">
+        <beans:property name="registrationURL" value="/ui/newuser" />
+        <beans:property name="defaultFailureUrl" value="/ui/login" />
+    </beans:bean>
+    
+    <authentication-manager>
+    </authentication-manager>
+</beans:beans>

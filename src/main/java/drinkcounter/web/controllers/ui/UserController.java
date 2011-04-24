@@ -7,8 +7,10 @@ import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
+import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Party;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.openid.OpenIDAuthenticationToken;
 
 /**
  *
@@ -24,11 +31,16 @@ import org.springframework.http.ResponseEntity;
  */
 @Controller
 public class UserController {
+    public static final String OPENID_CREDENTIAL_KEY = "USER_OPENID_CREDENTIAL";
+    
     
     @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
 
     @Autowired private AuthenticationChecks authenticationChecks;
+    @Autowired private UserDetailsService userDetailsService;
+    @Autowired private CurrentUser currentUser;
+    
     
     @RequestMapping("/addUser")
     public String addUser(
@@ -44,7 +56,7 @@ public class UserController {
         
         if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
             throw new IllegalArgumentException();
-
+        
         User user = new User();
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
@@ -52,7 +64,18 @@ public class UserController {
         user.setOpenId(openId);
         user.setEmail(email);
         userService.addUser(user);
+        authenticate(user);
+        session.removeAttribute(AuthenticationController.OPENID);
         return "redirect:user";
+    }
+    
+    private void authenticate(User user){
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getOpenId());
+        OpenIDAuthenticationToken authentication = new OpenIDAuthenticationToken(userDetails, 
+                Collections.singleton(new GrantedAuthorityImpl("ROLE_USER")), 
+                user.getOpenId(),
+                Collections.EMPTY_LIST);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @RequestMapping("/modifyUser")
@@ -64,9 +87,8 @@ public class UserController {
             @RequestParam("email") String email, 
             HttpSession session){
                 
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int uid = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(openId, uid);
+        authenticationChecks.checkLowLevelRightsToUser( uid);
         
         User user = userService.getUser(uid);
 
@@ -79,7 +101,6 @@ public class UserController {
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
-        user.setOpenId(openId);
         user.setEmail(email);
         userService.updateUser(user);
         return "redirect:user";
@@ -87,9 +108,8 @@ public class UserController {
 
     @RequestMapping("/addDrink")
     public String addDrink(HttpSession session, @RequestParam("id") String userId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(openId, id);
+        authenticationChecks.checkHighLevelRightsToUser(id);
         
         drinkCounterService.addDrink(id);
         return "redirect:parties";
@@ -97,9 +117,8 @@ public class UserController {
     
     @RequestMapping("/addDrinkToDate")
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") String userId, @RequestParam("date") String date){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(openId, id);
+        authenticationChecks.checkHighLevelRightsToUser(id);
 
         drinkCounterService.addDrinkToDate(id, date);
         return "redirect:user";
@@ -107,9 +126,8 @@ public class UserController {
 
     @RequestMapping("/removeDrink")
     public String removeDrink(HttpSession session, @RequestParam("userId") String userId, @RequestParam("drinkId") String drinkId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(openId, id);
+        authenticationChecks.checkLowLevelRightsToUser(id);
 
         drinkCounterService.removeDrinkFromUser(id, Integer.parseInt(drinkId));
         return "redirect:user";
@@ -117,10 +135,7 @@ public class UserController {
 
     @RequestMapping("/user")
     public ModelAndView userPage(HttpSession session){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkLogin(openId);
-        
-        User user = userService.getUserByOpenId(openId);
+        User user = currentUser.getUser();
         
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
@@ -144,9 +159,6 @@ public class UserController {
     
     @RequestMapping("/checkEmail")
     public ResponseEntity<byte[]> checkEmail(HttpSession session, @RequestParam("email") String email){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        if (openId == null)
-            throw new NotLoggedInException();
 
         String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
 
@@ -157,9 +169,8 @@ public class UserController {
     
     @RequestMapping("/getUserByEmail")
     public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(openId, id);
+        authenticationChecks.checkRightsForParty(id);
 
         String data = "";
         if (!userService.emailIsCorrect(email))

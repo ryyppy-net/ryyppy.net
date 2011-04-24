@@ -1,3 +1,3 @@
 <%
-response.sendRedirect("ui/checklogin");
+response.sendRedirect("ui/user");
 %>
