@@ -17,10 +17,14 @@
     <jsp:body>
         <div id="logoContainer">
             <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
+            
+            <p>
+                Jo <c:out value="${totalDrinkCount}" /> juomaa juotu!
+            </p>
         </div>
         
         <div class="login">
-            <h2>Kirjaudu jonkin OpenID-palvelun avulla</h2>
+            <h2>Kirjaudu OpenID-tunnuksillasi</h2>
 
             <table>
                 <tr>
@@ -59,17 +63,20 @@
             </div>
         </div>
         <div class="login">
-
-            <p style="margin-top: 20px;">
-                <iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FRyyppynet%2F151477181585164&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font&amp;colorscheme=dark&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe>
+            <h2>Mikäs se sellainen ryyppy.net on?</h2>
+            
+            <p>
+                Ryyppy.net on bile-elämän Sports Tracker! Nyt voit helposti pysyä juomisistasi kärryillä. Voit myös perustaa palveluun bileitä ja kutsua kaverisikin.
             </p>
             
             <p>
-                <iframe id="youtube" title="YouTube video player" src="http://www.youtube.com/embed/A6JWd3-yzCM" frameborder="0" allowfullscreen></iframe>
+                Katso <a href="http://www.youtube.com/embed/A6JWd3-yzCM">esittelyvideomme</a> YouTubesta!
             </p>
-
-            <p>
-                Yhteensä juomia juotu: <c:out value="${totalDrinkCount}" />
+        </div>
+                    
+        <div style="text-align: center;">
+            <p style="margin-top: 20px;">
+                <iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FRyyppynet%2F151477181585164&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font&amp;colorscheme=dark&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe>
             </p>
         </div>
     </jsp:body>
