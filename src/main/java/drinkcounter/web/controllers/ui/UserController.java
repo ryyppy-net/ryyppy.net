@@ -7,6 +7,7 @@ import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
+import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Party;
 import java.util.Collections;
@@ -38,6 +39,7 @@ public class UserController {
 
     @Autowired private AuthenticationChecks authenticationChecks;
     @Autowired private UserDetailsService userDetailsService;
+    @Autowired private CurrentUser currentUser;
     
     
     @RequestMapping("/addUser")
@@ -84,9 +86,8 @@ public class UserController {
             @RequestParam("email") String email, 
             HttpSession session){
                 
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int uid = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(openId, uid);
+        authenticationChecks.checkLowLevelRightsToUser( uid);
         
         User user = userService.getUser(uid);
 
@@ -99,7 +100,6 @@ public class UserController {
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
-        user.setOpenId(openId);
         user.setEmail(email);
         userService.updateUser(user);
         return "redirect:user";
@@ -129,7 +129,7 @@ public class UserController {
     public String removeDrink(HttpSession session, @RequestParam("userId") String userId, @RequestParam("drinkId") String drinkId){
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(openId, id);
+        authenticationChecks.checkLowLevelRightsToUser(id);
 
         drinkCounterService.removeDrinkFromUser(id, Integer.parseInt(drinkId));
         return "redirect:user";
@@ -137,10 +137,7 @@ public class UserController {
 
     @RequestMapping("/user")
     public ModelAndView userPage(HttpSession session){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        authenticationChecks.checkLogin(openId);
-        
-        User user = userService.getUserByOpenId(openId);
+        User user = currentUser.getUser();
         
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");

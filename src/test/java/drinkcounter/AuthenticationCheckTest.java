@@ -88,37 +88,24 @@ public class AuthenticationCheckTest {
         assertNotNull(e);
     }
     
-    @Test
-    public void testCheckLowLevelRightsToUser() {
-        authenticationChecks.checkLowLevelRightsToUser(openId, 1);
-        
-        Exception e = null;
-        try {
-            authenticationChecks.checkLowLevelRightsToUser(openId, 3);
-        } catch (NotEnoughRightsException ex) {
-            e = ex;
-        }
-        assertNotNull(e);
-        
-        e = null;
-        try {
-            authenticationChecks.checkLowLevelRightsToUser(openId, 2);
-        } catch (NotEnoughRightsException ex) {
-            e = ex;
-        }
-        assertNotNull(e);
-    }
-    
-    @Test
-    public void testCheckLogin() {
-        authenticationChecks.checkLogin(openId);
-        
-        Exception e = null;
-        try {
-            authenticationChecks.checkLogin("lollerskate");
-        } catch (NotLoggedInException ex) {
-            e = ex;
-        }
-        assertNotNull(e);
-    }
+//    @Test
+//    public void testCheckLowLevelRightsToUser() {
+//        authenticationChecks.checkLowLevelRightsToUser(openId, 1);
+//        
+//        Exception e = null;
+//        try {
+//            authenticationChecks.checkLowLevelRightsToUser(openId, 3);
+//        } catch (NotEnoughRightsException ex) {
+//            e = ex;
+//        }
+//        assertNotNull(e);
+//        
+//        e = null;
+//        try {
+//            authenticationChecks.checkLowLevelRightsToUser(openId, 2);
+//        } catch (NotEnoughRightsException ex) {
+//            e = ex;
+//        }
+//        assertNotNull(e);
+//    }
 }

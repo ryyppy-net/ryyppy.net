@@ -29,13 +29,14 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         if(user == null){
             throw new UsernameNotFoundException("User with openid "+openId+" doesn't exist", openId);
         }
-        return new org.springframework.security.core.userdetails.User(user.getOpenId(), 
+        return new DrinkcounterUserDetails(user.getOpenId(), 
                 "", 
                 true, 
                 true, 
                 true, 
                 true, 
-                Collections.singleton(new GrantedAuthorityImpl("ROLE_USER")));
+                Collections.singleton(new GrantedAuthorityImpl("ROLE_USER")),
+                user.getId());
     }
     
 }

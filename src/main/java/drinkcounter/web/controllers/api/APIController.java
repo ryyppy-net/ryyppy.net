@@ -64,7 +64,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/show-drinks")
     public @ResponseBody byte[] showDrinks(HttpSession session, @PathVariable String userId) throws IOException{
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
+        authenticationChecks.checkLowLevelRightsToUser(id);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshallDrinks(id, baos);
@@ -104,7 +104,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable String userId) throws IOException{
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser((String)session.getAttribute(AuthenticationController.OPENID), id);
+        authenticationChecks.checkLowLevelRightsToUser(id);
 
         User user = userService.getUser(id);
         List<Drink> drinks = user.getDrinks();
