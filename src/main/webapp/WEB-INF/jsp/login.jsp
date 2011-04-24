@@ -12,8 +12,8 @@
             }
             
             function login(openId){
-                $('#openId').val(openId)
-                $('#form').submit()
+                $('#openId').val(openId);
+                $('#form').submit();
             }
         </script>
         <script type="text/javascript" src="/static/js/login.js"></script>
@@ -39,13 +39,9 @@
                 <tr>
                     <td>
                         <img style="cursor: pointer" onclick="login('https://www.google.com/accounts/o8/id')" src="/static/images/google-icon.png" style="border:none" alt="Google" />
-                            document.write('<a href="authenticate?openid=https://www.google.com/accounts/o8/id&timezone=' + new Date().getTimezoneOffset() + '">');
-                        </script>
                     </td>
                     <td>
                         <img style="cursor: pointer" onclick="login('https://steamcommunity.com/openid/')" src="/static/images/steam-icon2.png" style="border:none" alt="Steam" />
-                            document.write('<a href="authenticate?openid=https://steamcommunity.com/openid/&timezone=' + new Date().getTimezoneOffset() + '">');
-                        </script>
                     </td>
                     <td>
                         <a href="#manualLogin" onclick="manualLogin()">
@@ -58,10 +54,7 @@
             <div id="manualLogin" style="display: none;">
                 <h2><spring:message code="login.login_manual"/></h2>
                 <form id="form" method="POST" action="<c:url value="/j_spring_openid_security_check" />">
-                    <input name="openid_identifier" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
-                    <script type="text/javascript">
-                        document.write('<input type="hidden" name="timezone" value="' + new Date().getTimezoneOffset() + '" />');
-                    </script>
+                    <input name="openid_identifier" type="text" maxlength="100" id="openId" />
                     <div id="apNappula">
                         <a href="#" onClick="$('#form').get(0).submit();"
                            onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"

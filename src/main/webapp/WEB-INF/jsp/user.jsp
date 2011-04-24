@@ -2,7 +2,7 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<t:master title="Bileet">
+<t:master>
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" />
@@ -157,7 +157,7 @@
         </div>
 
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="<spring:message code="user.remove_drinks"/>" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);">
+            <a class="headerButtonA" title="<spring:message code="user.add_or_remove_drinks"/>" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);">
                 <div class="headerButton headerButtonRight" id="configureDrinksButton"></div>
             </a>
             <div class="headerTextDiv">

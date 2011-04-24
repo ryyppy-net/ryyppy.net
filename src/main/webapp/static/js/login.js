@@ -1,10 +1,15 @@
 $(document).ready(function() {
     repaint();
+    sendTimezone();
 });
 
 $(window).resize(function() {
     repaint();
 });
+
+function sendTimezone() {
+    $.get("timezone/" + new Date().getTimezoneOffset());
+}
 
 function repaint() {
     var windowWidth = $(window).width();

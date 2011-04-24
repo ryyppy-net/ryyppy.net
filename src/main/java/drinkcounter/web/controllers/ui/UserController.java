@@ -50,6 +50,9 @@ public class UserController {
             @RequestParam("email") String email, 
             HttpSession session){
                 
+        if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null)
+            session.setAttribute(AuthenticationController.TIMEZONEOFFSET, new Double(0));
+
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         if (openId == null)
             throw new NotLoggedInException();
