@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="Uusi juoja">
     <jsp:attribute name="customHead">
         <script type="text/javascript" src="/static/js/common.js"></script>
@@ -29,33 +29,33 @@
     </jsp:attribute>
     <jsp:body>
         <div id="header">
-            <h1>Tervetuloa!</h1>
+            <h1><spring:message code="newuser.welcome" /></h1>
         </div>
 
         <div id="container">
             <div id="registration" class="dialog marginAuto">
-                <h2>Rekisteröinti</h2>
+                <h2><spring:message code="newuser.title" /></h2>
 
-                <p>Olet näemmä ensimmäistä kertaa tällä sivulla. Ole hyvä ja täytä allaolevat tiedot, niin aletaan ryyppäämään!</p>
+                <p><spring:message code="newuser.first_timer" /></p>
 
                 <form method="post" action="addUser">
-                    <label for="drinkerName">Nimi</label><br />
+                    <label for="drinkerName"><spring:message code="form.name" /></label><br />
                     <input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" /><br />
 
-                    <label for="email">Sähköposti</label><br />
+                    <label for="email"><spring:message code="form.email" /></label><br />
                     <input id="email" type="text" name="email" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
                     <span id="emailCorrect">&nbsp;</span><br />
 
-                    <label for="sex">Sukupuoli</label><br />
+                    <label for="sex"><spring:message code="form.sex" /></label><br />
                     <select name="sex">
-                        <option value="MALE">Mies</option>
-                        <option value="FEMALE">Nainen</option>
+                        <option value="MALE"><spring:message code="form.male" /></option>
+                        <option value="FEMALE"><spring:message code="form.female" /></option>
                     </select><br />
 
-                    <label for="drinkerWeight">Paino</label><br />
+                    <label for="drinkerWeight"><spring:message code="form.weight" /></label><br />
                     <input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" autocomplete="off" /><br />
 
-                    <input id="submitButton" type="submit" value="Lisää bilettäjä" />
+                    <input id="submitButton" type="submit" value="<spring:message code="form.add_drinker" />" />
                 </form>
             </div>
         </div>

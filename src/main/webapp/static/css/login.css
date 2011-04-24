@@ -77,3 +77,8 @@ table {
     margin-left:auto;
     margin-right:auto;
 }
+
+#langSelection {
+    font-size: 14px;
+    color: #AAA;
+}

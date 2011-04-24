@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="Ryyppy.net - Virhe!">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
@@ -12,15 +13,18 @@
         </div>
         
         <div class="login" style="text-align:left;">
-            <h2>Virhe tapahtui!</h2>
-            <p>Mahdollisia syitä:</p>
+            <h2> <spring:message code="error.title" /></h2>
+            <p><spring:message code="error.resons" /></p>
             <ul>
-                <li>sinulla ei riitä oikeudet yrittämällesi sivulle</li>
-                <li>yritit mennä sivulle, jota ei ole olemassa</li>
-                <li>järjestelmässä on bugi, <a href="mailto:info@ryyppy.net">kerro siitä meille</a></li>
-                <li>töhötit jotain muuta</li>
+                <li><spring:message code="error.list.unauthorized" /></li>
+                <li><spring:message code="error.list.page_doesnt_exist" /></li>
+                <li><spring:message code="error.list.bug" /> <a href="mailto:info@ryyppy.net"><spring:message code="error.list.tell_us" /></a></li>
+                <li><spring:message code="error.list.you_fucked_up" /></li>
             </ul>
-            <p>Jatka <a href="/ui/checklogin">etusivulle</a> ja kokeile uudelleen.</p>
+            <p><spring:message code="error.continue" />
+                <a href="/ui/checklogin"><spring:message code="error.to_frontpage" /></a> 
+                <spring:message code="error.try_again" />
+            </p>
         </div>
     </jsp:body>
 </t:master>
