@@ -31,7 +31,7 @@ public class PartyController {
     public ModelAndView viewParty(HttpSession session, @RequestParam("id") String partyId, @RequestParam(value="kick", required=false) String toKick){
 
         int pid = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), pid);
+        authenticationChecks.checkRightsForParty(pid);
         
         if (toKick != null)
             drinkCounterService.unlinkUserFromParty(Integer.parseInt(toKick), pid);
@@ -47,7 +47,7 @@ public class PartyController {
     @RequestMapping("/party")
     public ModelAndView party(HttpSession session, @RequestParam("id") String partyId){
         int pid = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), pid);
+        authenticationChecks.checkRightsForParty(pid);
         User user = currentUser.getUser();
 
         ModelAndView mav = new ModelAndView();
@@ -74,7 +74,7 @@ public class PartyController {
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight){
         int pid = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), pid);
+        authenticationChecks.checkRightsForParty(pid);
         
         User user = new User();
         user.setName(name);
@@ -92,7 +92,7 @@ public class PartyController {
                 
         int pid = Integer.parseInt(partyId);
         int uid = Integer.parseInt(userId);
-        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), pid);
+        authenticationChecks.checkRightsForParty(pid);
 //        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
         drinkCounterService.linkUserToParty(uid, pid);
         return "redirect:party?id="+partyId;
@@ -105,8 +105,8 @@ public class PartyController {
         String openId = currentUser.getUser().getOpenId();
         int pid = Integer.parseInt(partyId);
         int uid = Integer.parseInt(userId);
-        authenticationChecks.checkRightsForParty(openId, pid);
-        authenticationChecks.checkHighLevelRightsToUser(openId, uid);
+        authenticationChecks.checkRightsForParty(pid);
+        authenticationChecks.checkHighLevelRightsToUser(uid);
         drinkCounterService.unlinkUserFromParty(uid, pid);
         
         // TODO: return to where you came from

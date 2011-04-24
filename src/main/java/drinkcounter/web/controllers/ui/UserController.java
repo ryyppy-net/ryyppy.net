@@ -109,7 +109,7 @@ public class UserController {
     @RequestMapping("/addDrink")
     public String addDrink(HttpSession session, @RequestParam("id") String userId){
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkHighLevelRightsToUser(id);
         
         drinkCounterService.addDrink(id);
         return "redirect:parties";
@@ -118,7 +118,7 @@ public class UserController {
     @RequestMapping("/addDrinkToDate")
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") String userId, @RequestParam("date") String date){
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkHighLevelRightsToUser(id);
 
         drinkCounterService.addDrinkToDate(id, date);
         return "redirect:user";
@@ -170,7 +170,7 @@ public class UserController {
     @RequestMapping("/getUserByEmail")
     public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
         int id = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkRightsForParty(id);
 
         String data = "";
         if (!userService.emailIsCorrect(email))

@@ -50,14 +50,11 @@ public class APIController {
 
     @Autowired
     private UserService userService;
-    
-    @Autowired
-    private CurrentUser currentUser;
 
     @RequestMapping("/parties/{partyId}")
     public @ResponseBody byte[] printXml(HttpSession session, @PathVariable String partyId) throws IOException{
         int id = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkRightsForParty(id);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshall(id, baos);
@@ -79,7 +76,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/add-drink")
     public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId){
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkHighLevelRightsToUser(id);
         int drinkId = drinkCounterService.addDrink(id);
         User user = userService.getUser(id);
         return Integer.toString(drinkId);
@@ -88,7 +85,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
     public @ResponseBody String removeDrinkFromUser(HttpSession session, @PathVariable String userId, @PathVariable String drinkId){
         int userIdInt = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), userIdInt);
+        authenticationChecks.checkHighLevelRightsToUser( userIdInt);
         int drinkIdInt = Integer.parseInt(drinkId);
         drinkCounterService.removeDrinkFromUser(userIdInt, drinkIdInt);
         log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userIdInt));
@@ -98,7 +95,7 @@ public class APIController {
     @RequestMapping("/users/{userId}")
     public @ResponseBody byte[] userXml(HttpSession session, @PathVariable String userId) throws IOException{
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkHighLevelRightsToUser( id);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshallUser(id, baos);
         byte[] bytesXml = baos.toByteArray();
@@ -151,7 +148,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/show-history")
     public ResponseEntity<byte[]> showHistory(HttpSession session, @PathVariable String userId) throws IOException{
         int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(currentUser.getUser().getOpenId(), id);
+        authenticationChecks.checkHighLevelRightsToUser(id);
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
