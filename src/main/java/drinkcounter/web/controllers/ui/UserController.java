@@ -23,7 +23,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.openid.OpenIDAuthenticationToken;
-import org.springframework.security.openid.OpenIDAuthenticationToken;
 
 /**
  *
