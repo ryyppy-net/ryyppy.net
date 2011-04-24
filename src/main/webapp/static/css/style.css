@@ -72,6 +72,7 @@ td.userButton {
     text-align:center;
     color: #000000;
     font-variant: small-caps;
+    cursor: pointer;
 }
 
 div.drinker {
@@ -285,6 +286,7 @@ input[disabled] {
     display: none;
     border: 2px solid #ffffff;
     border-radius: 5px;
+    cursor: auto;
 }
 
 .undo h1 {
@@ -301,4 +303,5 @@ input[disabled] {
     margin-left: auto;
     margin-right: auto;
     padding: 20px;
+    cursor: pointer;
 }
