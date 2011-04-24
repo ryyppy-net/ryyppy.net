@@ -14,6 +14,9 @@ public class AuthenticationChecks {
     @Autowired
     private UserService userService;
     
+    @Autowired
+    private CurrentUser currentUser;
+    
     public void setUserService(UserService us) {
         userService = us;
     }
@@ -58,24 +61,13 @@ public class AuthenticationChecks {
         throw new NotEnoughRightsException();
     }
 
-    public void checkLowLevelRightsToUser(String openId, int userId) {
-        if (openId == null)
+    public void checkLowLevelRightsToUser(int userId) {
+        User user = currentUser.getUser();
+        if(user == null){
             throw new NotLoggedInException();
-        
-        User user = userService.getUserByOpenId(openId);
-        if (user == null)
-            throw new NotLoggedInException();
+        }
         
         if (user.getId() == userId) return;
         throw new NotEnoughRightsException();
-    }
-
-    public void checkLogin(String openId) {
-        if (openId == null)
-            throw new NotLoggedInException();
-        
-        User user = userService.getUserByOpenId(openId);
-        if (user == null)
-            throw new NotLoggedInException();
     }
 }

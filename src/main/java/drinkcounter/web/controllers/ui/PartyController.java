@@ -3,6 +3,7 @@ package drinkcounter.web.controllers.ui;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
+import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import javax.servlet.http.HttpSession;
@@ -22,6 +23,7 @@ public class PartyController {
 
     @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
+    @Autowired private CurrentUser currentUser;
 
     @Autowired private AuthenticationChecks authenticationChecks;
 
@@ -48,7 +50,7 @@ public class PartyController {
         String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int pid = Integer.parseInt(partyId);
         authenticationChecks.checkRightsForParty(openId, pid);
-        User user = userService.getUserByOpenId(openId);
+        User user = currentUser.getUser();
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
@@ -59,9 +61,8 @@ public class PartyController {
 
     @RequestMapping("/addParty")
     public String addParty(HttpSession session, @RequestParam("name") String partyName, @RequestParam("userId") String userId){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
         int uid = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(openId, uid);
+        authenticationChecks.checkLowLevelRightsToUser(uid);
         
         Party party = drinkCounterService.startParty(partyName);
         drinkCounterService.linkUserToParty(uid, party.getId());
