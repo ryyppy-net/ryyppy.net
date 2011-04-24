@@ -82,3 +82,8 @@ table {
     font-size: 14px;
     color: #AAA;
 }
+
+.langSelection a {
+    color: #ffffff;
+    text-decoration: underline;
+}
