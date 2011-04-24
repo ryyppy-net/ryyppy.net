@@ -17,6 +17,7 @@
         <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/adduser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/ui/timezone/*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="ROLE_USER" />
         <openid-login login-page="/ui/login" authentication-failure-handler-ref="userNotRegisteredHandler" />
         <logout logout-url="/ui/logout" />
