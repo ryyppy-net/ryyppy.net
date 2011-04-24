@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
@@ -19,13 +20,18 @@
             <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
             
             <p>
-                Jo <c:out value="${totalDrinkCount}" /> juomaa juotu!
+                <spring:message code="login.already"/>
+                <c:out value="${totalDrinkCount}" />
+                <spring:message code="login.drinks"/>
             </p>
+            <div class="langSelection">
+                <a href="?lang=en">In English</a> | <a href="?lang=fi">Suomeksi</a>
+            </div>
         </div>
         
         <div class="login">
-            <h2>Kirjaudu OpenID-tunnuksillasi</h2>
-
+            <h2> <spring:message code="login.login_title" /> </h2>
+            
             <table>
                 <tr>
                     <td>
@@ -47,7 +53,7 @@
             </table>
 
             <div id="manualLogin" style="display: none;">
-                <h2>Manuaalinen OpenID-kirjautuminen</h2>
+                <h2><spring:message code="login.login_manual"/></h2>
 
                 <form id="form" method="POST" action="<c:url value="authenticate" />">
                     <input name="openid" type="text" maxlength="100" id="openId" value="OPENID-TUNNUS" onFocus="$('#openId').val('');" />
@@ -63,14 +69,16 @@
             </div>
         </div>
         <div class="login">
-            <h2>Mikäs se sellainen ryyppy.net on?</h2>
+            <h2><spring:message code="login.info.title" /></h2>
             
             <p>
-                Ryyppy.net on bile-elämän Sports Tracker! Nyt voit helposti pysyä juomisistasi kärryillä. Voit myös perustaa palveluun bileitä ja kutsua kaverisikin.
+                <spring:message code="login.info.content" />
             </p>
             
             <p>
-                Katso <a href="http://www.youtube.com/embed/A6JWd3-yzCM">esittelyvideomme</a> YouTubesta!
+                <spring:message code="login.info.watch" />
+                <a href="http://www.youtube.com/embed/A6JWd3-yzCM"><spring:message code="login.info.video" /></a>
+                <spring:message code="login.info.youtube" />
             </p>
         </div>
                     

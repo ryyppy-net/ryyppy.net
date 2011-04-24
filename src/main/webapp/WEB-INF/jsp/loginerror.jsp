@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="Ryyppy.net - Virhe sisäänkirjautumisessa!">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
@@ -12,16 +13,21 @@
         </div>
     
         <div class="login" style="text-align:left;">
-            <h2>Virhe sisäänkirjautumisessa!</h2>
-            <p>Mahdollisia syitä:</p>
+            <h2><spring:message code="loginerror.title" /></h2>
+            <p><spring:message code="loginerror.reasons" /></p>
             <ul>
-                <li>kirjoitit OpenId-tunnuksesi väärin</li>
-                <li>OpenID-palveluntarjoajasi ei ole OpenID 2.0 -standardin mukainen</li>
-                <li>tyrit kirjautumisesi OpenID-palveluntarjoajasi kanssa</li>
-                <li>järjestelmässä on bugi, <a href="mailto:info@ryyppy.net">kerro siitä meille</a></li>
-                <li>töhötit jotain muuta</li>
-            </ul>
-            <p>Jatka <a href="/ui/checklogin">etusivulle</a> ja kokeile uudelleen.</p>
+                <li><spring:message code="loginerror.list.bad_openid" /></li>
+                <li><spring:message code="loginerror.list.no_2_0_standard" /></li>
+                <li><spring:message code="loginerror.list.login_failed" /></li>
+                <li><spring:message code="loginerror.list.bug" />
+                    <a href="mailto:info@ryyppy.net"><spring:message code="loginerror.list.tell_us" /></a></li>
+                <li><spring:message code="loginerror.list.you_fucked_up" /></li>
+            </ul> 
+            <p>
+                <spring:message code="loginerror.continue" />
+                <a href="/ui/checklogin"><spring:message code="loginerror.to_frontpage" /></a>
+                <spring:message code="loginerror.try_again" />
+            </p>
         </div>
     </jsp:body>
 </t:master>

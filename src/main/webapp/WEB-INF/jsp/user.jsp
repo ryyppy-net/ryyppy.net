@@ -1,6 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="Bileet">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
@@ -105,11 +106,11 @@
     </jsp:attribute>
     <jsp:body>
         <div class="header">
-            <a class="headerButtonA" title="Kirjaudu ulos" href="logout" onClick="return confirm('Haluatko varmasti kirjautua ulos?');">
+            <a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');">
                 <div class="headerButton headerButtonLeft" id="goBack">
                 </div>
             </a>
-            <a class="headerButtonA" title="Asetukset" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail); $('#drinkerName').focus();">
+            <a class="headerButtonA" title="<spring:message code="user.settings"/>" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail); $('#drinkerName').focus();">
                 <div class="headerButton headerButtonRight" id="configureButton">
                 </div>
             </a>
@@ -126,11 +127,11 @@
         </table>
         
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="Lisää bileet" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
+            <a class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
             <div class="headerTextDiv">
-                <h1>Bileesi</h1>
+                <h1><spring:message code="user.your_parties"/></h1>
             </div>
         </div>
 
@@ -145,10 +146,10 @@
                             <c:out value="${party.name}" />
                         </span>
                         <span id="partyStartTime">
-                            Alkamisaika: <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
+                            <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
                         </span>
                     </a>
-                    <a class="headerButtonA" title="Poistu bileistä" onClick="return confirm('Haluatko varmasti lähteä bileistä?');" href="${leavePartyUrl}">
+                        <a class="headerButtonA" title="<spring:message code="user.exit_dialog.title"/>" onClick="return confirm('<spring:message code="user.exit_dialog.msg"/>');" href="${leavePartyUrl}">
                         <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
                     </a>
                 </div>
@@ -156,9 +157,11 @@
         </div>
 
         <div class="header" style="margin-top: 2em;">
-            <a class="headerButtonA" title="Poista juomia" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);"><div class="headerButton headerButtonRight" id="configureDrinksButton"></div></a>
+            <a class="headerButtonA" title="<spring:message code="user.remove_drinks"/>" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);">
+                <div class="headerButton headerButtonRight" id="configureDrinksButton"></div>
+            </a>
             <div class="headerTextDiv">
-                <h1>Historia</h1>
+                <h1><spring:message code="user.history"/></h1>
             </div>
         </div>
         <div class="userHistoryContainer">
@@ -168,7 +171,7 @@
             <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinksDialog'), configureDrinksDialogClosed);">X</a></span>
 
             <div style="float:left">
-                <h2>Lisää juoma ajanhetkelle</h2>
+                <h2><spring:message code="user.add_drinks_at"/></h2>
                 <form method="POST" action="<c:url value="addDrinkToDate" />">
                     <input type="hidden" name="userId" value="${user.id}" />
                     <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
@@ -177,7 +180,7 @@
             </div>
 
             <div style="float:right">
-                <h2>Poista juoma</h2>
+                <h2><spring:message code="user.remove_drink"/></h2>
                 <ul id="drinksList">
                 </ul>
             </div>
@@ -186,18 +189,18 @@
         <div id="addDrinkerDialog" class="popupDialog">
             <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
 
-            <h2>Uudet bileet</h2>
+            <h2><spring:message code="user.new_party"/></h2>
 
             <form method="POST" action="<c:url value="addParty" />">
                 <input type="hidden" name="userId" value="${user.id}" />
                 <table>
                     <tr>
-                        <th>Nimi</th>
+                        <th><spring:message code="form.name"/></th>
                         <td><input id="nameInput" type="text" name="name" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td><input type="submit" value="Luo bileet" /></td>
+                        <td><input type="submit" value="<spring:message code="form.create_party"/>" /></td>
                     </tr>
                 </table>
             </form>
@@ -208,36 +211,36 @@
                 <a href="#" onClick="closeDialog($('#configureDrinkerDialog'));">X</a>
             </span>
 
-            <h2>Muokkaa tietojasi</h2>
+            <h2><spring:message code="user.edit"/></h2>
 
             <form method="post" action="<c:url value="modifyUser" />">
                 <input type="hidden" name="userId" value="${user.id}" />                
                 <table>
                     <tr>
-                        <th>Nimi</th>
+                        <th><spring:message code="form.name"/></th>
                         <td colspan="2"><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" value="<c:out value='${user.name}' />" /></td>
                     </tr>
                     <tr>
-                        <th>Sähköposti</th>
+                        <th><spring:message code="form.email"/></th>
                         <td><input id="email" type="text" name="email" value="<c:out value='${user.email}' />" onkeyup="checkEmail($(this).val(), '<c:out value='${user.email}'/>'); checkDrinkerFields(true);" /></td>
                         <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
-                        <th>Sukupuoli</th>
+                        <th><spring:message code="form.sex"/></th>
                         <td colspan="2">
                             <select name="sex">
-                                <option <c:if test="${user.sex == 'MALE'}">selected="selected"</c:if> value="MALE">Mies</option>
-                                <option <c:if test="${user.sex == 'FEMALE'}">selected="selected"</c:if> value="FEMALE">Nainen</option>
+                                <option <c:if test="${user.sex == 'MALE'}">selected="selected"</c:if> value="MALE"><spring:message code="form.male"/></option>
+                                <option <c:if test="${user.sex == 'FEMALE'}">selected="selected"</c:if> value="FEMALE"><spring:message code="form.female"/></option>
                             </select>
                         </td>
                     </tr>
                     <tr>
-                        <th>Paino</th>
+                        <th><spring:message code="form.weight"/></th>
                         <td colspan="2"><input value="<c:out value='${user.weight}' />" id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" autocomplete="off" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
-                        <td colspan="2"><input id="submitButton" type="submit" value="Tallenna" /></td>
+                        <td colspan="2"><input id="submitButton" type="submit" value="<spring:message code="form.save"/>" /></td>
                     </tr>
                 </table>
             </form>
