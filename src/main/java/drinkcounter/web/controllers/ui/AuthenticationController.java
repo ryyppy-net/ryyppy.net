@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -36,12 +37,11 @@ public class AuthenticationController {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     @RequestMapping("/authenticate")
-    public String authenticate(HttpSession session, @RequestParam(required=false, defaultValue="0", value="timezone") String timezone, @RequestParam("openid") String openId, HttpServletRequest request) {
+    public String authenticate(HttpSession session, @RequestParam("openid") String openId, HttpServletRequest request) {
         log.info("Authenticating " + openId);
         try {
             DiscoveryInformation disco = registrationService.performDiscoveryOnUserSuppliedIdentifier(openId);
             session.setAttribute(DISCOVERYINFORMATION, disco);
-            session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezone));
 
             AuthRequest authRequest = registrationService.createOpenIdAuthRequest(disco, getReturnToUrl(request));
 
@@ -51,7 +51,12 @@ public class AuthenticationController {
             return "redirect:/ui/loginerror";
         }
     }
-    
+
+    @RequestMapping("/timezone/{timezoneOffset}")
+    public void receiveTimezone(HttpSession session,  @PathVariable String timezoneOffset) {
+        session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezoneOffset));
+    }
+
     @RequestMapping("/checklogin")
     public String checkLogin(HttpSession session) {
         if (session.getAttribute(OPENID) != null && (userService.getUserByOpenId((String)session.getAttribute(OPENID)) != null)) {
