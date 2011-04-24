@@ -52,6 +52,13 @@ body {
     margin-top: 10px;
     margin-left: auto;
     margin-right: auto;
+    text-align: center;
+}
+
+#logoContainer p {
+    color: #ffffff;
+    font-variant: small-caps;
+    font-size: 125%;
 }
 
 #logo {
