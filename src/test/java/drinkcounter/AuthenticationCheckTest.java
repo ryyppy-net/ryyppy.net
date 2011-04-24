@@ -1,8 +1,6 @@
 package drinkcounter;
 
 import drinkcounter.authentication.CurrentUser;
-import drinkcounter.authentication.AuthenticationChecks;
-import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.authentication.NotEnoughRightsException;
 import drinkcounter.model.Party;
 import java.util.ArrayList;
