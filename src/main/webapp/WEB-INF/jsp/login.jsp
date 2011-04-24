@@ -20,9 +20,7 @@
             <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
             
             <p>
-                <spring:message code="login.already"/>
-                <c:out value="${totalDrinkCount}" />
-                <spring:message code="login.drinks"/>
+                <spring:message code="login.already_n_drinks" arguments="${totalDrinkCount}" />
             </p>
             <div class="langSelection">
                 <a href="?lang=en">In English</a> | <a href="?lang=fi">Suomeksi</a>
