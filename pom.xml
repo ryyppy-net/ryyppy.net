@@ -217,6 +217,12 @@
         
         <dependency>
             <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-openid</artifactId>
             <version>${spring.framework.version}</version>
         </dependency>
