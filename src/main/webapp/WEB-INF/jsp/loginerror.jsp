@@ -20,7 +20,7 @@
                 <li><spring:message code="loginerror.list.no_2_0_standard" /></li>
                 <li><spring:message code="loginerror.list.login_failed" /></li>
                 <li><spring:message code="loginerror.list.bug" />
-                    <a href="mailto:info@ryyppy.net"><spring:message code="loginerror.list.tell_us" /></a></li>
+                    <a href="mailto:ryyppy.net@gmail.com"><spring:message code="loginerror.list.tell_us" /></a></li>
                 <li><spring:message code="loginerror.list.you_fucked_up" /></li>
             </ul> 
             <p>
