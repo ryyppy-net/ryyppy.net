@@ -42,12 +42,12 @@ public class UserTest {
     // Drink course 1:
     // - One beer (0.33 ml, 4.7%) 30 minutes ago
     private static final float MAN_80_DRINK_COURSE_1 = 0.1f;
-    private static final float MAN_110_DRINK_COURSE_1 = 0.0f;
+    private static final float MAN_110_DRINK_COURSE_1 = 0.1f;
     private static final float WOMAN_60_DRINK_COURSE_1 = 0.2f;
     private static final float WOMAN_90_DRINK_COURSE_1 = 0.1f;
 
     public void drinkCourse1(User user) {
-        drinkADrinkNMinutesAgo(user, 30);
+        drinkXDrinksNMinutesAgo(user, 1, 30);
     }
     
     @Test
@@ -75,18 +75,14 @@ public class UserTest {
     }
 
     // Drink course 2:
-    // - One beer (0.33 ml, 4.7%) 60 minutes ago
-    // - One beer (0.33 ml, 4.7%) 40 minutes ago
-    // - One beer (0.33 ml, 4.7%) 20 minutes ago
-    private static final float MAN_80_DRINK_COURSE_2 = 0.4f;
+    // - Three beers (0.33 ml, 4.7%) an hour ago
+    private static final float MAN_80_DRINK_COURSE_2 = 0.5f;
     private static final float MAN_110_DRINK_COURSE_2 = 0.3f;
-    private static final float WOMAN_60_DRINK_COURSE_2 = 0.7f;
-    private static final float WOMAN_90_DRINK_COURSE_2 = 0.4f;
+    private static final float WOMAN_60_DRINK_COURSE_2 = 0.8f;
+    private static final float WOMAN_90_DRINK_COURSE_2 = 0.5f;
     
     public void drinkCourse2(User user) {
-        drinkADrinkNMinutesAgo(user, 60);
-        drinkADrinkNMinutesAgo(user, 40);
-        drinkADrinkNMinutesAgo(user, 20);
+        drinkXDrinksNMinutesAgo(user, 3, 60);
     }
     
     @Test
@@ -114,24 +110,14 @@ public class UserTest {
     }
 
     // Drink course 3:
-    // - One beer (0.33 ml, 4.7%) 180 minutes ago
-    // - One beer (0.33 ml, 4.7%) 160 minutes ago
-    // - One beer (0.33 ml, 4.7%) 140 minutes ago
-    // - One beer (0.33 ml, 4.7%) 120 minutes ago
-    // - One beer (0.33 ml, 4.7%) 100 minutes ago
-    // - One beer (0.33 ml, 4.7%) 80 minutes ago
-    private static final float MAN_80_DRINK_COURSE_3 = 0.9f;
-    private static final float MAN_110_DRINK_COURSE_3 = 0.6f;
-    private static final float WOMAN_60_DRINK_COURSE_3 = 1.5f;
-    private static final float WOMAN_90_DRINK_COURSE_3 = 0.9f;
+    // - Six beers (0.33 ml, 4.7%) three hours ago
+    private static final float MAN_80_DRINK_COURSE_3 = 0.8f;
+    private static final float MAN_110_DRINK_COURSE_3 = 0.5f;
+    private static final float WOMAN_60_DRINK_COURSE_3 = 1.4f;
+    private static final float WOMAN_90_DRINK_COURSE_3 = 0.8f;
     
     public void drinkCourse3(User user) {
-        drinkADrinkNMinutesAgo(user, 180);
-        drinkADrinkNMinutesAgo(user, 160);
-        drinkADrinkNMinutesAgo(user, 140);
-        drinkADrinkNMinutesAgo(user, 120);
-        drinkADrinkNMinutesAgo(user, 100);
-        drinkADrinkNMinutesAgo(user, 80);
+        drinkXDrinksNMinutesAgo(user, 6, 180);
     }
     
     @Test
@@ -158,10 +144,82 @@ public class UserTest {
         assertEquals(WOMAN_90_DRINK_COURSE_3, woman90.getPromilles(), TOLERANCE);
     }  
     
+    // Drink course 4:
+    // - 24 beers (0.33 ml, 4.7%) 8 hours ago
+    private static final float MAN_80_DRINK_COURSE_4 = 3.7f;
+    private static final float MAN_110_DRINK_COURSE_4 = 2.4f;
+    private static final float WOMAN_60_DRINK_COURSE_4 = 6.1f;
+    private static final float WOMAN_90_DRINK_COURSE_4 = 3.6f;
+
+    public void drinkCourse4(User user) {
+        drinkXDrinksNMinutesAgo(user, 24, 8 * 60);
+    }
+
+    @Test
+    public void testPromilles_man80_drinkCourse4() {
+        drinkCourse4(man80);
+        assertEquals(MAN_80_DRINK_COURSE_4, man80.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_man110_drinkCourse4() {
+        drinkCourse4(man110);
+        assertEquals(MAN_110_DRINK_COURSE_4, man110.getPromilles(), TOLERANCE);
+    }
+
+    @Test
+    public void testPromilles_woman60_drinkCourse4() {
+        drinkCourse4(woman60);
+        assertEquals(WOMAN_60_DRINK_COURSE_4, woman60.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_woman90_drinkCourse4() {
+        drinkCourse4(woman90);
+        assertEquals(WOMAN_90_DRINK_COURSE_4, woman90.getPromilles(), TOLERANCE);
+    }
+    
+    // Drink course 5:
+    // - 24 beers (0.33 ml, 4.7%) 16 hours ago
+    private static final float MAN_80_DRINK_COURSE_5 = 2.7f;
+    private static final float MAN_110_DRINK_COURSE_5 = 1.4f;
+    private static final float WOMAN_60_DRINK_COURSE_5 = 4.8f;
+    private static final float WOMAN_90_DRINK_COURSE_5 = 2.4f;
+
+    public void drinkCourse5(User user) {
+        drinkXDrinksNMinutesAgo(user, 24, 16 * 60);
+    }
+
+    @Test
+    public void testPromilles_man80_drinkCourse5() {
+        drinkCourse5(man80);
+        assertEquals(MAN_80_DRINK_COURSE_5, man80.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_man110_drinkCourse5() {
+        drinkCourse5(man110);
+        assertEquals(MAN_110_DRINK_COURSE_5, man110.getPromilles(), TOLERANCE);
+    }
+
+    @Test
+    public void testPromilles_woman60_drinkCourse5() {
+        drinkCourse5(woman60);
+        assertEquals(WOMAN_60_DRINK_COURSE_5, woman60.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_woman90_drinkCourse5() {
+        drinkCourse5(woman90);
+        assertEquals(WOMAN_90_DRINK_COURSE_5, woman90.getPromilles(), TOLERANCE);
+    }
+    
     // Helper functions
-    public void drinkADrinkNMinutesAgo(User user, int minutes) {
-        Drink drink = new Drink();
-        drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate());
-        user.drink(drink);        
+    public void drinkXDrinksNMinutesAgo(User user, int drinks, int minutes) {
+        for (int i = 0; i < drinks; i++) {
+            Drink drink = new Drink();
+            drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate());
+            user.drink(drink);
+        }
     }
 }
