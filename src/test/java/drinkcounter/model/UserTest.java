@@ -1,5 +1,6 @@
 package drinkcounter.model;
 
+import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.Before;
@@ -220,6 +221,37 @@ public class UserTest {
             Drink drink = new Drink();
             drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate());
             user.drink(drink);
+        }
+    }
+
+    @Test
+    public void testBurnrate() {
+        User user = new User();
+        user.setWeight(100.0f);
+
+        User user2 = new User();
+        user2.setWeight(10.0f);
+
+        for (int i = 0; i < 30; i++) {
+            user.drink(new Drink());
+        }
+
+        user2.drink(new Drink());
+        user2.drink(new Drink());
+        user2.drink(new Drink());
+
+        DateTime now = new DateTime();
+        DateTime end = now.plusHours(24);
+
+        List<Float> user1promilles = user.getPromillesAtInterval(now.toDate(), end.toDate(), 10000);
+        List<Float> user2promilles = user2.getPromillesAtInterval(now.toDate(), end.toDate(), 10000);
+
+        int len1 = user1promilles.size();
+
+        for (int i = 0; i < len1; i++) {
+            float p1 = user1promilles.get(i);
+            float p2 = user2promilles.get(i);
+            assertEquals(p1, p2, 0.01);
         }
     }
 }

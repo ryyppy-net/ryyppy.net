@@ -58,7 +58,7 @@ public class User extends AbstractEntity{
     private float weight = 70;
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
-    private AlcoholCalculator alcoholCalculator = new AlcoholCalculator(weight);
+    private AlcoholCalculator alcoholCalculator;
     private String openId;
 
     /**
@@ -93,17 +93,20 @@ public class User extends AbstractEntity{
 
     public void drink(Drink drink){
         getDrinks().add(drink);
-        alcoholCalculator.calculateDrink(drink.getTimeStamp());
+        if (alcoholCalculator != null)
+            alcoholCalculator.calculateDrink(drink.getTimeStamp());
     }
 
     // This could be done in client side, if optimization is needed
     @Transient
     public float getPromilles(){
+        initializeAlcoholCalculatorIfNeeded();
         return alcoholCalculator.getAlcoholAmountAt(new Date()) / (sex.factor * weight);
     }
 
     // This could be done in client side, if optimization is needed
     public List<Float> getPromillesAtInterval(Date start, Date end, int intervalMs) {
+        initializeAlcoholCalculatorIfNeeded();
         List<Float> list = new ArrayList<Float>();
         for (long i = start.getTime(); i  <= end.getTime(); i += intervalMs) {
             list.add(alcoholCalculator.getAlcoholAmountAt(new Date(i)) / (sex.factor * weight));
@@ -115,6 +118,7 @@ public class User extends AbstractEntity{
     // This could be done in client side, if optimization is needed
     @Transient
     public float getBloodAlcoholGrams() {
+        initializeAlcoholCalculatorIfNeeded();
         return alcoholCalculator.getAlcoholAmountAt(new Date());
     }
 
@@ -132,7 +136,8 @@ public class User extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
-        alcoholCalculator.setWeight(this.weight);
+        if (alcoholCalculator != null)
+            alcoholCalculator.setWeight(this.weight);
     }
 
     public void setSex(Sex sex) {
@@ -177,6 +182,7 @@ public class User extends AbstractEntity{
      */
     @Transient
     private Date getTimeWhenUserLastSober(){
+        initializeAlcoholCalculatorIfNeeded();
         // TODO optimize
         final int maxMinutes = 10080;
         final int interval = 15;
@@ -223,11 +229,6 @@ public class User extends AbstractEntity{
         });
 
         this.drinks = drinks;
-        alcoholCalculator.reset();
-        for (Drink drink : drinks) {
-            if (drink.getTimeStamp() == null) continue;
-            alcoholCalculator.calculateDrink(drink.getTimeStamp());
-        }
     }
 
     public String getEmail() {
@@ -236,5 +237,15 @@ public class User extends AbstractEntity{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    private void initializeAlcoholCalculatorIfNeeded() {
+        if (alcoholCalculator == null) {
+            alcoholCalculator = new AlcoholCalculator(weight);
+            for (Drink drink : drinks) {
+                if (drink.getTimeStamp() == null) continue;
+                alcoholCalculator.calculateDrink(drink.getTimeStamp());
+            }
+        }
     }
 }
