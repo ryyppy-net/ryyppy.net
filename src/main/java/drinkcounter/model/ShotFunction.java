@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drinkcounter.model;
 
 import java.util.Date;
@@ -28,9 +23,9 @@ public class ShotFunction {
     public double getCutter() { return cutter; }
     public void setCutter(double c) { cutter = c; }
 
-    public double calc(long seconds)
+    public double calc(long milliseconds)
     {
-        double result = a * seconds + b;
+        double result = a * milliseconds + b;
 
         if (result > increment)
             return 0;
