@@ -41,7 +41,6 @@ public class UserController {
     @Autowired private UserDetailsService userDetailsService;
     @Autowired private CurrentUser currentUser;
     
-    
     @RequestMapping("/addUser")
     public String addUser(
             @RequestParam("name") String name,
@@ -162,7 +161,6 @@ public class UserController {
     
     @RequestMapping("/checkEmail")
     public ResponseEntity<byte[]> checkEmail(HttpSession session, @RequestParam("email") String email){
-
         String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
 
         HttpHeaders headers = new HttpHeaders();
