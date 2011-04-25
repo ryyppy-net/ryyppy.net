@@ -91,25 +91,25 @@ public class UserTest {
     
     @Test
     public void testPromilles_man80_drinkCourse2() {
-        drinkCourse1(man80);
+        drinkCourse2(man80);
         assertEquals(MAN_80_DRINK_COURSE_2, man80.getPromilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_man110_drinkCourse2() {
-        drinkCourse1(man110);
+        drinkCourse2(man110);
         assertEquals(MAN_110_DRINK_COURSE_2, man110.getPromilles(), TOLERANCE);
     }
 
     @Test
     public void testPromilles_woman60_drinkCourse2() {
-        drinkCourse1(woman60);
+        drinkCourse2(woman60);
         assertEquals(WOMAN_60_DRINK_COURSE_2, woman60.getPromilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_woman90_drinkCourse2() {
-        drinkCourse1(woman90);
+        drinkCourse2(woman90);
         assertEquals(WOMAN_90_DRINK_COURSE_2, woman90.getPromilles(), TOLERANCE);
     }
 
