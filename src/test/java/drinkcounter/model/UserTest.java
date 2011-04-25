@@ -1,88 +1,167 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drinkcounter.model;
 
-import java.util.List;
 import org.joda.time.DateTime;
-import java.util.ArrayList;
 import org.junit.Test;
+import org.junit.Before;
 import static org.junit.Assert.*;
 
-/**
- *
- * @author Toni
- */
 public class UserTest {
+    private User man80 = new User();
+    private User man110 = new User();
+    private User woman60 = new User();
+    private User woman90 = new User();
+
+    private static final float TOLERANCE = 0.1f;
+
+    @Before
+    public void setUp () {
+        man80.setWeight(80);
+        man80.setSex(User.Sex.MALE);
+
+        man110.setWeight(110);
+        man110.setSex(User.Sex.MALE);
+
+        woman60.setWeight(60);
+        woman60.setSex(User.Sex.FEMALE);
+
+        woman90.setWeight(90);
+        woman90.setSex(User.Sex.FEMALE);
+    }
+
+    // Basic tests
     @Test
-    public void testBloodAlcohol(){
+    public void testBloodAlcohol() {
         User user = new User();
         Drink drink = new Drink();
         user.drink(drink);
         assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, user.getBloodAlcoholGrams(), 0.1f);
     }
-    
-    @Test
-    public void testPromilles() {
-        User user = new User();
-        
-        Drink drink1 = new Drink();
-        drink1.setTimeStamp(new DateTime().minusMinutes(90).toDate());
-        Drink drink2 = new Drink();
-        drink2.setTimeStamp(new DateTime().minusMinutes(60).toDate());
-        Drink drink3 = new Drink();
-        drink3.setTimeStamp(new DateTime().minusMinutes(30).toDate());
 
-        ArrayList<Drink> al = new ArrayList<Drink>();
-        al.add(drink1);
-        al.add(drink2);
-        al.add(drink3);
-        
-        user.setDrinks(al);
-        assertEquals(0.49, user.getPromilles(), 0.01);
+    // DRINK COURSES:
+    
+    // Drink course 1:
+    // - One beer (0.33 ml, 4.7%) 30 minutes ago
+    private static final float MAN_80_DRINK_COURSE_1 = 0.1f;
+    private static final float MAN_110_DRINK_COURSE_1 = 0.0f;
+    private static final float WOMAN_60_DRINK_COURSE_1 = 0.2f;
+    private static final float WOMAN_90_DRINK_COURSE_1 = 0.1f;
+
+    public void drinkCourse1(User user) {
+        drinkADrinkNMinutesAgo(user, 30);
     }
     
     @Test
-    public void testDrinking() {
-        User user = new User();
-        user.drink(new Drink());
-        user.drink(new Drink());
-        user.drink(new Drink());
-        user.drink(new Drink());
-        user.drink(new Drink());
-
-        assertEquals(1.143, user.getPromilles(), 0.01);
+    public void testPromilles_man80_drinkCourse1() {
+        drinkCourse1(man80);
+        assertEquals(MAN_80_DRINK_COURSE_1, man80.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_man110_drinkCourse1() {
+        drinkCourse1(man110);
+        assertEquals(MAN_110_DRINK_COURSE_1, man110.getPromilles(), TOLERANCE);
     }
 
     @Test
-    public void testBurnrate() {
-        User user = new User();
-        user.setWeight(100.0f);
+    public void testPromilles_woman60_drinkCourse1() {
+        drinkCourse1(woman60);
+        assertEquals(WOMAN_60_DRINK_COURSE_1, woman60.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_woman90_drinkCourse1() {
+        drinkCourse1(woman90);
+        assertEquals(WOMAN_90_DRINK_COURSE_1, woman90.getPromilles(), TOLERANCE);
+    }
 
-        User user2 = new User();
-        user.setWeight(10.0f);
+    // Drink course 2:
+    // - One beer (0.33 ml, 4.7%) 60 minutes ago
+    // - One beer (0.33 ml, 4.7%) 40 minutes ago
+    // - One beer (0.33 ml, 4.7%) 20 minutes ago
+    private static final float MAN_80_DRINK_COURSE_2 = 0.4f;
+    private static final float MAN_110_DRINK_COURSE_2 = 0.3f;
+    private static final float WOMAN_60_DRINK_COURSE_2 = 0.7f;
+    private static final float WOMAN_90_DRINK_COURSE_2 = 0.4f;
+    
+    public void drinkCourse2(User user) {
+        drinkADrinkNMinutesAgo(user, 60);
+        drinkADrinkNMinutesAgo(user, 40);
+        drinkADrinkNMinutesAgo(user, 20);
+    }
+    
+    @Test
+    public void testPromilles_man80_drinkCourse2() {
+        drinkCourse1(man80);
+        assertEquals(MAN_80_DRINK_COURSE_2, man80.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_man110_drinkCourse2() {
+        drinkCourse1(man110);
+        assertEquals(MAN_110_DRINK_COURSE_2, man110.getPromilles(), TOLERANCE);
+    }
 
-        for (int i = 0; i < 30; i++) {
-            user.drink(new Drink());
-        }
+    @Test
+    public void testPromilles_woman60_drinkCourse2() {
+        drinkCourse1(woman60);
+        assertEquals(WOMAN_60_DRINK_COURSE_2, woman60.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_woman90_drinkCourse2() {
+        drinkCourse1(woman90);
+        assertEquals(WOMAN_90_DRINK_COURSE_2, woman90.getPromilles(), TOLERANCE);
+    }
 
-        user2.drink(new Drink());
-        user2.drink(new Drink());
-        user2.drink(new Drink());
+    // Drink course 3:
+    // - One beer (0.33 ml, 4.7%) 180 minutes ago
+    // - One beer (0.33 ml, 4.7%) 160 minutes ago
+    // - One beer (0.33 ml, 4.7%) 140 minutes ago
+    // - One beer (0.33 ml, 4.7%) 120 minutes ago
+    // - One beer (0.33 ml, 4.7%) 100 minutes ago
+    // - One beer (0.33 ml, 4.7%) 80 minutes ago
+    private static final float MAN_80_DRINK_COURSE_3 = 0.9f;
+    private static final float MAN_110_DRINK_COURSE_3 = 0.6f;
+    private static final float WOMAN_60_DRINK_COURSE_3 = 1.5f;
+    private static final float WOMAN_90_DRINK_COURSE_3 = 0.9f;
+    
+    public void drinkCourse3(User user) {
+        drinkADrinkNMinutesAgo(user, 180);
+        drinkADrinkNMinutesAgo(user, 160);
+        drinkADrinkNMinutesAgo(user, 140);
+        drinkADrinkNMinutesAgo(user, 120);
+        drinkADrinkNMinutesAgo(user, 100);
+        drinkADrinkNMinutesAgo(user, 80);
+    }
+    
+    @Test
+    public void testPromilles_man80_drinkCourse3() {
+        drinkCourse3(man80);
+        assertEquals(MAN_80_DRINK_COURSE_3, man80.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_man110_drinkCourse3() {
+        drinkCourse3(man110);
+        assertEquals(MAN_110_DRINK_COURSE_3, man110.getPromilles(), TOLERANCE);
+    }
 
-        DateTime now = new DateTime();
-        DateTime end = now.plusHours(24);
-
-        List<Float> user1promilles = user.getPromillesAtInterval(now.toDate(), end.toDate(), 10000);
-        List<Float> user2promilles = user2.getPromillesAtInterval(now.toDate(), end.toDate(), 10000);
-
-        int len1 = user1promilles.size();
-        int len2 = user2promilles.size();
-
-        for (int i = 0; i < len1; i++) {
-            assertEquals(user1promilles.get(i), user2promilles.get(i), 0.01);
-        }
+    @Test
+    public void testPromilles_woman60_drinkCourse3() {
+        drinkCourse3(woman60);
+        assertEquals(WOMAN_60_DRINK_COURSE_3, woman60.getPromilles(), TOLERANCE);
+    }
+    
+    @Test
+    public void testPromilles_woman90_drinkCourse3() {
+        drinkCourse3(woman90);
+        assertEquals(WOMAN_90_DRINK_COURSE_3, woman90.getPromilles(), TOLERANCE);
+    }  
+    
+    // Helper functions
+    public void drinkADrinkNMinutesAgo(User user, int minutes) {
+        Drink drink = new Drink();
+        drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate());
+        user.drink(drink);        
     }
 }
