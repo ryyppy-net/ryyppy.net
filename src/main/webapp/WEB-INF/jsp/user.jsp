@@ -84,12 +84,12 @@
 
                     var date = formatDate(new Date(timestamp));
 
-                    li.html('<a href="#" onclick="if (confirm(\'Haluatko varmasti poistaa juoman?\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);">Juoma-aika: ' + date + '</a>');
+                    li.html('<a href="#" onclick="if (confirm(\'<spring:message code="user.remove_drink.confirm"/>\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);"><spring:message code="user.drink_time"/>: ' + date + '</a>');
                     $("#drinksList").append(li);
                 });
                 if (count == 0) {
                     var li = $('<li>');
-                    li.html('Ei lisättyjä juomia');
+                    li.html('<spring:message code="user.no_drinks"/>');
                     $("#drinksList").append(li);
                 }
             }

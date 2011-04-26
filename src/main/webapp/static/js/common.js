@@ -106,3 +106,47 @@ function getPositionTop(el){
     while(el) { pT += el.offsetTop; el = el.offsetParent; }
     return pT;
 }
+
+function getMessage( code )
+{
+    var msg = MESSAGES[getCookie('org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE')][code];
+    if ( !msg )
+        return 'No found';
+    else 
+        return msg;
+}
+
+var MESSAGES = new Array();
+MESSAGES['en'] = new Array();
+MESSAGES['fi'] = new Array();
+
+MESSAGES['en']['click_me'] = 'Click here to drink';
+MESSAGES['en']['portion'] = ' portion';
+MESSAGES['en']['portions'] = ' portions';
+MESSAGES['en']['idle'] = 'Idle ';
+MESSAGES['en']['cancel_drink'] = 'Cancel drink';
+MESSAGES['en']['loading'] = 'Loading...';
+MESSAGES['en']['drink_added'] = "Drink added";
+
+MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
+MESSAGES['fi']['portion'] = ' annos';
+MESSAGES['fi']['portions'] = ' annosta';
+MESSAGES['fi']['idle'] = 'Juomatta ';
+MESSAGES['fi']['cancel_drink'] = 'Peru juoma';
+MESSAGES['fi']['loading'] = 'Ladataan...';
+MESSAGES['fi']['drink_added'] = "Juoma lisätty";
+
+function getCookie( cookie_name )
+{
+    var i, name, value;
+    var cookie_array = document.cookie.split(";");
+    for ( i = 0; i < cookie_array.length; i++ )
+    {
+        name = cookie_array[i].substr( 0, cookie_array[i].indexOf("=") );
+        value = cookie_array[i].substr( cookie_array[i].indexOf("=") + 1 );
+        name = name.replace( /^\s+|\s+$/g, "" ); 
+        if ( name == cookie_name )
+            return unescape(value);
+    }
+    return 'fi';
+}
