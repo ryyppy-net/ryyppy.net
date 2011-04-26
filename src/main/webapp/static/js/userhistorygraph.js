@@ -57,7 +57,7 @@ function UserHistoryGraph(user, element) {
             histories.splice(0, 0, [histories[0][0] - 30 * 24 * 60 * 60 * 1000, -0.1]);
         }
 
-        var newname = '66.66.6666 = 66 annosta';
+        var newname = '66.66.6666 = 66 ' + getMessage('portions');
         this.series = [{color:"rgb(0, 0, 0)", label: newname, data: histories}];
 
         $("#"+ this.element.attr('id') +" .legendLabel").each(function () {
@@ -98,11 +98,11 @@ function UserHistoryGraph(user, element) {
             if (found) {
                 var d = new Date(pos.x + 12 * 60 * 60 * 1000);
                 var s = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
-                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s + ": " + Math.round(series.data[j][1]) + " annosta");
+                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s + ": " + Math.round(series.data[j][1]) + getMessage('portions'));
             } else {
                 var d2 = new Date(pos.x + 12 * 60 * 60 * 1000);
                 var s2 = d2.getDate() + "." + (d2.getMonth() + 1) + "." + d2.getFullYear();
-                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s2 + ": 0 annosta");
+                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s2 + ": 0 " + getMessage('portions'));
             }
         }
     }

@@ -1,5 +1,5 @@
 var addDrinkUrl = '/API/users/_userid_/add-drink';
-var removeDrinkUrl = '/API/users/_userid_/remove-drink/_drinkid_'
+var removeDrinkUrl = '/API/users/_userid_/remove-drink/_drinkid_';
 var historyUrl = '/API/users/_userid_/show-history';
 var userUrl = '/API/users/_userid_/';
 
@@ -31,7 +31,7 @@ function UserButton(userId, element, color) {
         var div = $('<div>');
         div.attr('id', 'info' + userId);
         this.element.append(div);
-        this.setTexts("Ladataan", 0, 0, 0);
+        this.setTexts(getMessage('loading'), 0, 0, 0);
     }
 
     this.setMaxY = function(max) {
@@ -69,16 +69,21 @@ function UserButton(userId, element, color) {
         div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'));
         div.append($('<br />'));
 
+        var click_me_msg = getMessage('click_me');
+        var portion_msg = getMessage('portion');
+        var portions_msg = getMessage('portions');
+        var idle_msg = getMessage('idle');
+        
         if (drinks == 0) {
-            div.append($('<span class="details"></span>').text('paina tästä juodaksesi'));
+            div.append($('<span class="details"></span>').text(click_me_msg));
         } else {
             if (drinks == 1)
-                div.append($('<span class="details"></span>').text(drinks + ' annos'));
+                div.append($('<span class="details"></span>').text(drinks + portion_msg));
             else
-                div.append($('<span class="details"></span>').text(drinks + ' annosta'));
+                div.append($('<span class="details"></span>').text(drinks + portions_msg));
 
             div.append($('<br />'));
-            div.append($('<span class="details"></span>').text("juomatta: " + formatTime(idletime)));
+            div.append($('<span class="details"></span>').text(idle_msg + formatTime(idletime)));
         }
     }
 
@@ -140,7 +145,7 @@ function UserButton(userId, element, color) {
             var drinkId = data;
 
             var undoLink = $('<a>');
-            var undoDiv = $('<div>').text('Peru juoma');
+            var undoDiv = $('<div>').text(getMessage('cancel_drink'));
 
             undoLink.append(undoDiv);
             undoLink.click(function() {
@@ -162,7 +167,7 @@ function UserButton(userId, element, color) {
             newElement.css('left', left);
             newElement.css('top', top);
 
-            var title = $('<h1>').text('Juoma lisätty');
+            var title = $('<h1>').text(getMessage('drink_added'));
             newElement.append(title);
 
             newElement.append(undoLink);
