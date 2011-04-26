@@ -2,16 +2,12 @@
 <beans:beans xmlns="http://www.springframework.org/schema/security"
        xmlns:beans="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:aop="http://www.springframework.org/schema/aop"
-       xmlns:context="http://www.springframework.org/schema/context"
 
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
           http://www.springframework.org/schema/security
           http://www.springframework.org/schema/security/spring-security-3.0.3.xsd
 ">
-    <http>
+    <http entry-point-ref="openIdEntryPoint">
         <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/static/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
@@ -19,16 +15,50 @@
         <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/timezone/*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="ROLE_USER" />
-        <openid-login login-page="/ui/login" authentication-failure-handler-ref="userNotRegisteredHandler" />
+        <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
         <logout logout-url="/ui/logout" />
     </http>
     
-    <beans:bean class="drinkcounter.authentication.UserDetailsServiceImpl" />
+    <!-- OpenId -->
+    <beans:bean id="openIdEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <beans:property name="loginFormUrl" value="/ui/login" />
+    </beans:bean>
+    <beans:bean id="openIdAuthFilter" class="org.springframework.security.openid.OpenIDAuthenticationFilter">
+        <beans:property name="filterProcessesUrl" value="/ui/openId"/>
+        <beans:property name="authenticationManager" ref="authenticationManager"/>
+        <beans:property name="authenticationFailureHandler" ref="userNotRegisteredHandler"/>
+        <beans:property name="authenticationSuccessHandler">
+            <beans:bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+                <beans:property name="defaultTargetUrl" value="/"/>
+            </beans:bean>
+        </beans:property>
+        <beans:property name="returnToUrlParameters">
+            <beans:set>
+                <beans:value>is_return</beans:value>
+            </beans:set>
+        </beans:property>
+        <beans:property name="realmMapping">
+            <beans:map>
+                <beans:entry key="http://localhost:8080/ui/openId?is_return=true" value="http://localhost:8080/ui/openId?is_return=true" />
+                <beans:entry key="http://ryyppy.net/ui/openId?is_return=true" value="http://ryyppy.net/ui/openId?is_return=true" />
+            </beans:map>
+        </beans:property>
+        <beans:property name="consumer">
+            <beans:bean class="org.springframework.security.openid.OpenID4JavaConsumer"/>
+        </beans:property>
+    </beans:bean>
+    
+    <beans:bean id="openIdAuthProvider" class="org.springframework.security.openid.OpenIDAuthenticationProvider">
+        <beans:property name="userDetailsService" ref="userDetailsService" />
+    </beans:bean>
+    
+    <beans:bean id="userDetailsService" class="drinkcounter.authentication.UserDetailsServiceImpl" />
     <beans:bean id="userNotRegisteredHandler" class="drinkcounter.authentication.UserNotRegisteredFailureHandler">
         <beans:property name="registrationURL" value="/ui/newuser" />
         <beans:property name="defaultFailureUrl" value="/ui/login" />
     </beans:bean>
     
-    <authentication-manager>
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="openIdAuthProvider"/>
     </authentication-manager>
 </beans:beans>

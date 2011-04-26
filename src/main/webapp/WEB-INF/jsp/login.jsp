@@ -53,7 +53,7 @@
 
             <div id="manualLogin" style="display: none;">
                 <h2><spring:message code="login.login_manual"/></h2>
-                <form id="form" method="POST" action="<c:url value="/j_spring_openid_security_check" />">
+                <form id="form" method="POST" action="<c:url value="/ui/openId?is_return=true" />">
                     <input name="openid_identifier" type="text" maxlength="100" id="openId" />
                     <div id="apNappula">
                         <a href="#" onClick="$('#form').get(0).submit();"
