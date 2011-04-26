@@ -18,7 +18,7 @@
             <ul>
                 <li><spring:message code="error.list.unauthorized" /></li>
                 <li><spring:message code="error.list.page_doesnt_exist" /></li>
-                <li><spring:message code="error.list.bug" /> <a href="mailto:info@ryyppy.net"><spring:message code="error.list.tell_us" /></a></li>
+                <li><spring:message code="error.list.bug" /> <a href="mailto:ryyppy.net@gmail.com"><spring:message code="error.list.tell_us" /></a></li>
                 <li><spring:message code="error.list.you_fucked_up" /></li>
             </ul>
             <p><spring:message code="error.continue" />
