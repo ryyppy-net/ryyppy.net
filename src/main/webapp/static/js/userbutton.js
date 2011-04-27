@@ -109,6 +109,9 @@ function UserButton(userId, element, color) {
     }
 
     this.renderGraph = function() {
+        if (this.element.height() < 150) return;
+        if (this.element.width() < 200) return;
+        
         var newElement = $('#graph' + this.userId);
         if (newElement.length == 0) {
             newElement = $('<div>');
