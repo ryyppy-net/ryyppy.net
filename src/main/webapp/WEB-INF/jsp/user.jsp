@@ -6,6 +6,9 @@
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" />
+        
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+        
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.11.custom.min.js"></script>
@@ -102,6 +105,20 @@
                 var button = $("#submitTime");
                 button.attr("disabled", success ? "" : "disabled");
             }
+
+            $(document).ready(function() {
+                repaint();
+            });
+            
+            $(window).resize(function() {
+                repaint();
+            });
+            
+            function repaint() {
+                var windowWidth = $(window).width();
+                var bestWidth = windowWidth - 10;
+                $("#userButtonTable").width(bestWidth);
+            }
         </script>
     </jsp:attribute>
     <jsp:body>
@@ -120,8 +137,8 @@
         </div>
         
         <!-- stupid css not able to center vertically properly -->
-        <table style="height:200px; width:99%; margin-left:auto; margin-right:auto; margin-top:10px; margin-bottom:10px;">
-            <tr style="width:100%;">
+        <table id="userButtonTable" style="height:200px;  margin-left:auto; margin-right:auto; margin-top:10px; margin-bottom:10px;">
+            <tr>
                 <td class="userButton"></td>
             </tr>
         </table>
