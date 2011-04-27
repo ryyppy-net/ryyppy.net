@@ -60,6 +60,22 @@
                 if (graphInterval)
                     graphInterval = clearInterval(graphInterval);
             }
+            
+            $(document).ready(function() {
+                repaint();
+            });
+            
+            $(window).resize(function() {
+                repaint();
+            });
+            
+            function repaint() {
+                var windowWidth = $(window).width();
+                var bestWidth = Math.min(600, windowWidth - 20);
+                $("#addDrinkerDialog").width(bestWidth);
+
+                $("#addDrinkerDialog").css('top', Math.max($("#addDrinkerDialog").css('top'), 0));
+            }
         </script>
         <script type="text/javascript" src="/static/js/party.js"></script>
     </jsp:attribute>
@@ -67,7 +83,7 @@
         <div class="header">
             <a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
             <a class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
-            <a class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#emailInput').focus();"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
+            <a class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#emailInput').focus(); repaint();"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
             <a class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><c:out value="${party.name}" /></h1>
