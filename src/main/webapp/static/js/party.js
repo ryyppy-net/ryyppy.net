@@ -1,24 +1,13 @@
-var needsRefreshing = false;
-var users;
-var inProgress = [];
-var userButtons = [];
-
-var graph = null;
-var graphInterval = null;
-var graphVisible = false;
-
-var updateInterval = 2 * 60 * 1000;
-
-function updateGroupGraph() {
-    if (graph != null && graphVisible)
-        graph.update();
-}
-
-function graphDialogClosed() {
-    graphVisible = false;
-    if (graphInterval)
-        graphInterval = clearInterval(graphInterval);
-}
+var RyyppyNet = {
+    needsRefreshing: false,
+    users: [],
+    inProgress: [],
+    userButtons: [],
+    graph: null,
+    graphInterval: null,
+    graphVisible: false,
+    updateInterval: 2 * 60 * 1000
+};
 
 $(document).ready(function() {
     repaint();
@@ -48,12 +37,22 @@ function initializeButtons() {
     $('#closeKickDrinkerDialogButton').click(function() {
         closeDialog($('#kickDrinkerDialog'));
     });
-
 }
 
 $(window).resize(function() {
     repaint();
 });
+
+function updateGroupGraph() {
+    if (RyyppyNet.graph != null && RyyppyNet.graphVisible)
+        RyyppyNet.graph.update();
+}
+
+function graphDialogClosed() {
+    RyyppyNet.graphVisible = false;
+    if (RyyppyNet.graphInterval)
+        RyyppyNet.graphInterval = clearInterval(RyyppyNet.graphInterval);
+}
 
 function repaint() {
     var windowWidth = $(window).width();
@@ -68,18 +67,18 @@ $(document).ready(function() {
     forceRefresh();
     
     // if resized, refresh
-    setInterval(function() {if (needsRefreshing == true) forceRefresh();}, 1000);
+    setInterval(function() {if (RyyppyNet.needsRefreshing == true) forceRefresh();}, 1000);
     
     // update data every two minutes
-    setInterval(function() {getPartyData(updateGrid);}, updateInterval);
+    setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
 });
 
 $(window).resize(function() {
-    needsRefreshing = true;
+    RyyppyNet.needsRefreshing = true;
 });
 
 function forceRefresh() {
-    needsRefreshing = false;
+    RyyppyNet.needsRefreshing = false;
     $('#drinkers').html('');
     getPartyData(createAndFillGrid);
 }
@@ -137,7 +136,7 @@ function areSame(list1, list2) {
 function updateGrid(data) {
     var newdata = parseData(data);
     
-    if (!areSame(newdata, users)) {
+    if (!areSame(newdata, RyyppyNet.users)) {
         forceRefresh();
         return;
     }
@@ -151,9 +150,9 @@ function onUserDrunk() {
 
 function createAndFillGrid(data) {
     $('#drinkers').html('');
-    users = parseData(data);
+    RyyppyNet.users = parseData(data);
     
-    var layout = determineLayout(users.length);
+    var layout = determineLayout(RyyppyNet.users.length);
     layout = pivotLayoutIfNecessary(layout);
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
@@ -161,16 +160,16 @@ function createAndFillGrid(data) {
         $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
         for (var j = 0; j < layout[0]; j++) {
             var colorIndex = i*layout[0] + j;
-            if (colorIndex >= users.length) continue;
+            if (colorIndex >= RyyppyNet.users.length) continue;
             
             var newElement = $('<td>');
             newElement.addClass('userButton');
             newElement.attr("width", width);
-            var user = users[colorIndex].id;
+            var user = RyyppyNet.users[colorIndex].id;
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
             ub.onDrunk = onUserDrunk;
             ub.onDataLoaded = onButtonDataUpdated;
-            userButtons.push(ub);
+            RyyppyNet.userButtons.push(ub);
 
             $('#row' + i).append(newElement);
         }
@@ -183,8 +182,8 @@ function createAndFillGrid(data) {
 function onButtonDataUpdated() {
     var max = 0;
 
-    for (var i in userButtons) {
-        var userButton = userButtons[i];
+    for (var i in RyyppyNet.userButtons) {
+        var userButton = RyyppyNet.userButtons[i];
         if (userButton.series == null) continue;
         for (var j in userButton.series[0].data) {
             var d = userButton.series[0].data[j];
@@ -196,15 +195,15 @@ function onButtonDataUpdated() {
 
     max = Math.floor(max) + 1;
 
-    for (i in userButtons) {
-        userButton = userButtons[i];
+    for (i in RyyppyNet.userButtons) {
+        userButton = RyyppyNet.userButtons[i];
         userButton.setMaxY(max);
     }
 }
 
 function updateButtons() {
-    for (i in userButtons) {
-        var userButton = userButtons[i];
+    for (i in RyyppyNet.userButtons) {
+        var userButton = RyyppyNet.userButtons[i];
         userButton.update();
     }
 }
