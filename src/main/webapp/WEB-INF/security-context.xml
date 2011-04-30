@@ -14,7 +14,7 @@
         <intercept-url pattern="/ui/adduser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/timezone/*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/favicon.ico" access="permitAll"/>
+        <intercept-url pattern="/favicon.ico" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="ROLE_USER" />
         <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
         <logout logout-url="/ui/logout" />
