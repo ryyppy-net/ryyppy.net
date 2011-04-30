@@ -12,7 +12,7 @@ public class UserTest {
     private User woman60 = new User();
     private User woman90 = new User();
 
-    private static final float TOLERANCE = 0.1f;
+    private static final float TOLERANCE = 0.05f;
 
     @Before
     public void setUp () {
