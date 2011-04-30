@@ -63,7 +63,34 @@
             
             $(document).ready(function() {
                 repaint();
+                
+                initializeButtons();
             });
+            
+            function initializeButtons() {
+                $('#graphButtonLink').click(function() {
+                    toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);
+                });
+                $('#addDrinkerButtonLink').click(function() {
+                    toggleDialog($('#addDrinkerDialog'));
+                    $('#emailInput').focus();
+                    repaint();
+                });
+                $('#kickDrinkerButtonLink').click(function() {
+                    toggleDialog($('#kickDrinkerDialog'));
+                });
+                
+                $('#closeAddDrinkerDialogButton').click(function() {
+                    closeDialog($('#addDrinkerDialog'));
+                });
+                $('#closeGraphDialogButton').click(function() {
+                    closeDialog($('#graphDialog'));
+                });
+                $('#closeKickDrinkerDialogButton').click(function() {
+                    closeDialog($('#kickDrinkerDialog'));
+                });
+                
+            }
             
             $(window).resize(function() {
                 repaint();
@@ -82,27 +109,25 @@
     <jsp:body>
         <div class="header">
             <a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
-            <a class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#" onClick="toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
-            <a class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#emailInput').focus(); repaint();"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
-            <a class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#" onClick="toggleDialog($('#kickDrinkerDialog'));"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
+            <a id="graphButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
+            <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
+            <a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><c:out value="${party.name}" /></h1>
             </div>
         </div>
 
         <div id="body">
-            <table id="drinkers">
-            </table>
+            <table id="drinkers"></table>
         </div>
             
         <div id="graphDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#graphDialog'));">X</a></span>
-            <div style="margin-top: 13px;" id="groupGraph">
-            </div>
+            <span class="closeButton"><a id="closeGraphDialogButton" href="#">X</a></span>
+            <div style="margin-top: 13px;" id="groupGraph"></div>
         </div>
 
         <div id="addDrinkerDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
+            <span class="closeButton"><a id="closeAddDrinkerDialogButton" href="#">X</a></span>
 
             <h2><spring:message code="party.add_drinker.registered"/></h2>
             <form method="post" action="<c:url value="linkUserToParty" />">
@@ -153,8 +178,8 @@
             </form>
         </div>
                 
-        <div style="width:300px;" id="kickDrinkerDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#kickDrinkerDialog'));">X</a></span>
+        <div id="kickDrinkerDialog" class="popupDialog">
+            <span class="closeButton"><a id="closeKickDrinkerDialogButton" href="#">X</a></span>
 
             <h2><spring:message code="party.remove_drinker"/></h2>
             <ul>
