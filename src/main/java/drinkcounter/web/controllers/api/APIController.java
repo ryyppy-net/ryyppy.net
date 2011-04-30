@@ -176,4 +176,39 @@ public class APIController {
         byte[] bytes = baos.toByteArray();
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
+
+    @RequestMapping("/parties/{partyId}/get-history")
+    public ResponseEntity<byte[]> getPartyHistory(HttpSession session, @PathVariable String partyId) throws IOException {
+        int id = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(id);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        csvWriter.writeRecord(new String[]{"UserID", "Time", "Alcohol"});
+
+        DateTime now = new DateTime();
+        DateTime start = now.minusMinutes(300);
+        int intervalMs = 2 * 60 * 1000;
+        
+        List<User> users = drinkCounterService.listUsersByParty(id);
+        
+        for (User user : users) {
+            List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
+
+            DateTime time = start;
+            for (Float f : history) {
+                csvWriter.writeRecord(
+                        new String[]{Integer.toString(user.getId()), Long.toString(time.getMillis()), Float.toString(f)}
+                );
+                time = time.plusMillis(intervalMs);
+            }
+        }
+        csvWriter.close();
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "text/plain;charset=utf-8");
+        
+        byte[] bytes = baos.toByteArray();
+        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
+    }
 }
