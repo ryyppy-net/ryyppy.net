@@ -305,3 +305,7 @@ input[disabled] {
     padding: 20px;
     cursor: pointer;
 }
+
+.closeButton {
+    float: right;
+}
