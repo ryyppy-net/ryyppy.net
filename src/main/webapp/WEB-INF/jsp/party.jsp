@@ -29,31 +29,30 @@
 
         <script type="text/javascript">
             function graphDialogOpened() {
-                graphVisible = true;
+                RyyppyNet.graphVisible = true;
                 var element = $('#groupGraph');
                 var dialog = $('#graphDialog');
                 element.css('width', dialog.css('width')).css('height', (parseInt(dialog.css('height'), 0) - 10) + 'px');
                 
-                if (graph == null) {
-                    var users = [];
+                if (RyyppyNet.graph == null) {
 <c:forEach items="${party.participants}" var="participant">
-                    users.push({name: '${participant.name}', id:'${participant.id}'});
+                    RyyppyNet.users.push({name: '${participant.name}', id:'${participant.id}'});
 </c:forEach>
-                    graph = new GroupGraph(users, element);
+                    RyyppyNet.graph = new GroupGraph(RyyppyNet.users, element);
                 }
-                graph.options.legend = { position:'nw' };
+                RyyppyNet.graph.options.legend = { position:'nw' };
                 updateGroupGraph();
-                if (!graphInterval)
-                    graphInterval = setInterval(updateGroupGraph, updateInterval);
+                if (!RyyppyNet.graphInterval)
+                    RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
             }
         </script>
     </jsp:attribute>
     <jsp:body>
         <div class="header">
-            <a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div class="headerButton headerButtonLeft" id="goBack"></div></a>
-            <a id="graphButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#"><div class="headerButton headerButtonLeft" id="graphButton"></div></a>
-            <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div class="headerButton headerButtonRight" id="addDrinkerButton"></div></a>
-            <a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div class="headerButton headerButtonRight" id="kickDrinkerButton"></div></a>
+            <a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div id="goBack" class="headerButton headerButtonLeft"></div></a>
+            <a id="graphButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#"><div id="graphButton" class="headerButton headerButtonLeft"></div></a>
+            <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a>
+            <a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a>
             <div class="headerTextDiv">
                 <h1 id="topic"><c:out value="${party.name}" /></h1>
             </div>
