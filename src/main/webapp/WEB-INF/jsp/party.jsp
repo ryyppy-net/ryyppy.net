@@ -12,7 +12,6 @@
         <script type="text/javascript">
             // global urls
             var dataUrl = '/API/parties/${party.id}/';
-            var updateInterval = 2 * 60 * 1000;
         </script>
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         
@@ -26,16 +25,9 @@
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
+        <script type="text/javascript" src="/static/js/party.js"></script>
+
         <script type="text/javascript">
-            var graph = null;
-            var graphInterval = null;
-            var graphVisible = false;
-            
-            function updateGroupGraph() {
-                if (graph != null && graphVisible)
-                    graph.update();
-            }
-            
             function graphDialogOpened() {
                 graphVisible = true;
                 var element = $('#groupGraph');
@@ -54,57 +46,7 @@
                 if (!graphInterval)
                     graphInterval = setInterval(updateGroupGraph, updateInterval);
             }
-
-            function graphDialogClosed() {
-                graphVisible = false;
-                if (graphInterval)
-                    graphInterval = clearInterval(graphInterval);
-            }
-            
-            $(document).ready(function() {
-                repaint();
-                
-                initializeButtons();
-            });
-            
-            function initializeButtons() {
-                $('#graphButtonLink').click(function() {
-                    toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);
-                });
-                $('#addDrinkerButtonLink').click(function() {
-                    toggleDialog($('#addDrinkerDialog'));
-                    $('#emailInput').focus();
-                    repaint();
-                });
-                $('#kickDrinkerButtonLink').click(function() {
-                    toggleDialog($('#kickDrinkerDialog'));
-                });
-                
-                $('#closeAddDrinkerDialogButton').click(function() {
-                    closeDialog($('#addDrinkerDialog'));
-                });
-                $('#closeGraphDialogButton').click(function() {
-                    closeDialog($('#graphDialog'));
-                });
-                $('#closeKickDrinkerDialogButton').click(function() {
-                    closeDialog($('#kickDrinkerDialog'));
-                });
-                
-            }
-            
-            $(window).resize(function() {
-                repaint();
-            });
-            
-            function repaint() {
-                var windowWidth = $(window).width();
-                var bestWidth = Math.min(600, windowWidth - 20);
-                $("#addDrinkerDialog").width(bestWidth);
-
-                $("#addDrinkerDialog").css('top', Math.max($("#addDrinkerDialog").css('top'), 0));
-            }
         </script>
-        <script type="text/javascript" src="/static/js/party.js"></script>
     </jsp:attribute>
     <jsp:body>
         <div class="header">
