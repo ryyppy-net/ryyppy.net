@@ -140,7 +140,7 @@
         <!-- stupid css not able to center vertically properly -->
         <table id="userButtonTable">
             <tr>
-                <td class="userButton"></td>
+                <td class="userButton roundedCornersBordered"></td>
             </tr>
         </table>
         
@@ -158,7 +158,7 @@
                 <c:url var="viewPartyUrl" value="party?id=${party.id}" />
                 <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${user.id}" />
 
-                <div class="party">
+                <div class="party roundedCornersBordered">
                     <div class="marginBox">
                         <a href="${viewPartyUrl}">
                             <span>
@@ -186,7 +186,7 @@
         </div>
 
         <div id="userHistoryContainer">
-            <div id="historyGraph"></div>
+            <div id="historyGraph" class="roundedCornersBordered"></div>
         </div>
             
         <div id="configureDrinksDialog" class="popupDialog">
