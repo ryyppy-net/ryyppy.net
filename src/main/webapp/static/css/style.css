@@ -174,15 +174,8 @@ div.popupDialog a {
     color: #ffffff;
 }
 
-div.userHistoryContainer {
-    background-color:#E6A465;
-    margin-top:10px;
-    margin-left:auto;
-    margin-right:auto;
-    height: 300px;
-    width: 95%;
-    border-radius:8px;
-    padding:20px;
+#userHistoryContainer {
+    padding: 5px;
 }
 
 #emailCorrect {
@@ -322,6 +315,13 @@ input[disabled] {
 
 #historyGraph {
     height: 300px;
+    background-color:#E6A465;
+    margin: 5px;
+    margin-top:10px;
+    margin-left:auto;
+    margin-right:auto;
+    height: 300px;
+    border-radius:8px;
 }
 
 .marginBox {
