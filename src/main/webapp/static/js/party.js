@@ -164,6 +164,7 @@ function createAndFillGrid(data) {
             
             var newElement = $('<td>');
             newElement.addClass('userButton');
+            newElement.addClass('roundedCornersBordered');
             newElement.attr("width", width);
             var user = RyyppyNet.users[colorIndex].id;
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
