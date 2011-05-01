@@ -234,6 +234,10 @@ div.userHistoryContainer {
     background-color: #252525;
 }
 
+.headerMargin {
+    margin-top: 20px;
+}
+
 .headerTextDiv {
     margin-left: auto;
     margin-right: auto;
@@ -308,4 +312,18 @@ input[disabled] {
 
 .closeButton {
     float: right;
+}
+
+#userButtonTable {
+    height:200px;
+    margin-left: auto;
+    margin-right:auto;
+}
+
+#historyGraph {
+    height: 300px;
+}
+
+.marginBox {
+    padding: 5px;
 }
