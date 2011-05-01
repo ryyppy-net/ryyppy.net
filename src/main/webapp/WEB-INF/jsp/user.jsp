@@ -118,6 +118,7 @@
                 var windowWidth = $(window).width();
                 var bestWidth = windowWidth - 10;
                 $("#userButtonTable").width(bestWidth);
+                $("#userHistoryContainer").width(bestWidth);
             }
         </script>
     </jsp:attribute>
@@ -184,7 +185,7 @@
             </div>
         </div>
 
-        <div class="userHistoryContainer">
+        <div id="userHistoryContainer">
             <div id="historyGraph"></div>
         </div>
             
