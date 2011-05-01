@@ -77,6 +77,14 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public void linkUserToParty(int userId, int partyIdentifier) {
         Party party = getParty(partyIdentifier);
         User user = userDAO.readByPrimaryKey(userId);
+        
+        for (User current : getParty(party.getId()).getParticipants()) {
+            if (current.getId() == user.getId()) {
+                log.info("User with name {} was already added to party {}. Skipping", user.getName(), party.getName());
+                return;
+            }
+        }
+        
         party.addParticipant(user);
         partyDao.save(party);
         log.info("User with name {} was added to party {}", user.getName(), party.getName());
