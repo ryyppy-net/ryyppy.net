@@ -1,3 +1,7 @@
+/* RESET */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outline:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+
 body {
     padding: 0px;
     margin: 0px;
@@ -31,6 +35,7 @@ h1 {
     padding: 5px;
     text-shadow: #6a6a6a 2px 2px 0px;
     font-variant: small-caps;
+    font-size: 2.0em;
 }
 
 h1 > a {
@@ -51,7 +56,8 @@ h2 {
 table#drinkers {
     height: 100%;
     width: 100%;
-    border-spacing: 7px;
+    border-spacing: 5px;
+    border-collapse: separate;
 }
 
 td.userButton {
@@ -89,8 +95,12 @@ span.details {
     font-size: 133%;
 }
 
+div.body {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 div.party {
-    margin: 5px;
     font-size: 2.0em;
     border-radius: 5px;
     background-color: #50b93e;
@@ -220,6 +230,8 @@ div.popupDialog a {
 .header {
     text-align: center;
     background-color: #252525;
+    height: 48px;
+    margin-bottom: 5px;
 }
 
 .headerMargin {
@@ -311,8 +323,6 @@ input[disabled] {
 #historyGraph {
     height: 300px;
     background-color:#E6A465;
-    margin: 5px;
-    margin-top:10px;
     margin-left:auto;
     margin-right:auto;
     height: 300px;
@@ -320,4 +330,8 @@ input[disabled] {
 
 .marginBox {
     padding: 5px;
+}
+
+canvas {
+    margin: 5px;
 }
