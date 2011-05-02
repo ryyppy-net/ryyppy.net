@@ -126,7 +126,7 @@ MESSAGES['en']['portions'] = ' portions';
 MESSAGES['en']['idle'] = 'Idle ';
 MESSAGES['en']['cancel_drink'] = 'Cancel drink';
 MESSAGES['en']['loading'] = 'Loading...';
-MESSAGES['en']['drink_added'] = "Drink added";
+MESSAGES['en']['drink_added'] = "Adding a drink...";
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
 MESSAGES['fi']['portion'] = ' annos';
@@ -134,7 +134,7 @@ MESSAGES['fi']['portions'] = ' annosta';
 MESSAGES['fi']['idle'] = 'Juomatta ';
 MESSAGES['fi']['cancel_drink'] = 'Peru juoma';
 MESSAGES['fi']['loading'] = 'Ladataan...';
-MESSAGES['fi']['drink_added'] = "Juoma lisätty";
+MESSAGES['fi']['drink_added'] = "Juomaa lisätään...";
 
 function getCookie( cookie_name )
 {
