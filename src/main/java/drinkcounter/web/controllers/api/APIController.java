@@ -5,7 +5,6 @@ import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
-import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;

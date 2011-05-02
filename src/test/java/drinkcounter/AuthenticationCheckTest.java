@@ -77,7 +77,12 @@ public class AuthenticationCheckTest {
     
     @Test
     public void testCheckHighLevelRightsToUser() {
-        authenticationChecks.checkHighLevelRightsToUser( 1);
+        DrinkCounterService drinkCounterService = mock(DrinkCounterService.class);
+        when(drinkCounterService.isUserParticipant(1, user2.getId())).thenReturn(true);
+        when(drinkCounterService.isUserParticipant(1, user3.getId())).thenReturn(false);
+        authenticationChecks.setDrinkCounterService(drinkCounterService);
+        
+        authenticationChecks.checkHighLevelRightsToUser(1);
         authenticationChecks.checkHighLevelRightsToUser(2);
         
         Exception e = null;

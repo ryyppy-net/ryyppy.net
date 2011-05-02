@@ -1,14 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drinkcounter;
 
 import drinkcounter.dao.DrinkDAO;
 import drinkcounter.dao.UserDAO;
-import drinkcounter.model.Drink;
-import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +31,7 @@ public class UserServiceImpl implements UserService{
         userDAO.save(user);
     }
 
-    // this doesn't return include anonymous users
+    // this doesn't include anonymous users
     @Override
     public List<User> listUsers() {
         List<User> list = userDAO.readAll();
