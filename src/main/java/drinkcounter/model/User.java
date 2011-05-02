@@ -130,10 +130,12 @@ public class User extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
+        AlcoholServiceImpl.getInstance().initializeUser(this);
     }
 
     public void setSex(Sex sex) {
         this.sex = sex;
+        AlcoholServiceImpl.getInstance().initializeUser(this);
     }
 
     @Enumerated(EnumType.STRING)
