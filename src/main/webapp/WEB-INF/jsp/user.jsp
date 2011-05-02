@@ -118,7 +118,8 @@
                 var windowWidth = $(window).width();
                 var bestWidth = windowWidth - 15;
                 $("#userButtonTable").width(bestWidth);
-                $("#userHistoryContainer").width(bestWidth - 20);
+                $(".party").width(bestWidth);
+                $("#historyGraph").width(bestWidth - 35);
             }
         </script>
     </jsp:attribute>
@@ -138,11 +139,13 @@
         </div>
         
         <!-- stupid css not able to center vertically properly -->
-        <table id="userButtonTable">
-            <tr>
-                <td class="userButton roundedCornersBordered"></td>
-            </tr>
-        </table>
+        <div class="body">
+            <table id="userButtonTable">
+                <tr>
+                    <td class="userButton roundedCornersBordered"></td>
+                </tr>
+            </table>
+        </div>
         
         <div class="header headerMargin">
             <a class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
@@ -153,7 +156,7 @@
             </div>
         </div>
 
-        <div id="body">
+        <div class="body">
             <c:forEach items="${parties}" var="party">
                 <c:url var="viewPartyUrl" value="party?id=${party.id}" />
                 <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${user.id}" />
@@ -185,7 +188,7 @@
             </div>
         </div>
 
-        <div id="userHistoryContainer">
+        <div class="body">
             <div id="historyGraph" class="roundedCornersBordered"></div>
         </div>
             
