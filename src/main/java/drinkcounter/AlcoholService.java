@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface AlcoholService {
+    void initializeUser(User user);
     void drinkAdded(User user, Drink drink);
     void drinkRemoved(User user, Drink drink);
     float getPromilles(User user);

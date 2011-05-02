@@ -19,8 +19,9 @@ public class AlcoholServiceImpl implements AlcoholService {
 
     }
 
-    private void initializeUser(User user) {
-        if (user.getId() == null) throw new IllegalStateException();
+    @Override
+    public void initializeUser(User user) {
+        if (user.getId() == null) return;
         AlcoholCalculator alc;
         synchronized(maplock) {
             if (!alcoholCalculators.containsKey(user.getId())) {
