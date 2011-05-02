@@ -103,6 +103,12 @@ span.details {
 div.body {
     margin-left: auto;
     margin-right: auto;
+    width: 100%;
+}
+
+div.body div, div.body table {
+    margin-left: auto;
+    margin-right: auto;    
 }
 
 div.party {
@@ -182,10 +188,6 @@ td input[type=submit] {
 
 div.popupDialog a {
     color: #ffffff;
-}
-
-#userHistoryContainer {
-    padding: 5px;
 }
 
 #emailCorrect {
@@ -321,8 +323,6 @@ input[disabled] {
 
 #userButtonTable {
     height:200px;
-    margin-left: auto;
-    margin-right:auto;
 }
 
 #historyGraph {
