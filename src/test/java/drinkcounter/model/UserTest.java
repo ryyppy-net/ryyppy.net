@@ -1,5 +1,7 @@
 package drinkcounter.model;
 
+import drinkcounter.AlcoholServiceImpl;
+import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -18,21 +20,28 @@ public class UserTest {
     public void setUp () {
         man80.setWeight(80);
         man80.setSex(User.Sex.MALE);
+        man80.setId(1);
 
         man110.setWeight(110);
         man110.setSex(User.Sex.MALE);
+        man110.setId(2);
 
         woman60.setWeight(60);
         woman60.setSex(User.Sex.FEMALE);
+        woman60.setId(3);
 
         woman90.setWeight(90);
         woman90.setSex(User.Sex.FEMALE);
+        woman90.setId(4);
+
+        AlcoholServiceImpl.getInstance().reset();
     }
 
     // Basic tests
     @Test
     public void testBloodAlcohol() {
         User user = new User();
+        user.setId(5);
         Drink drink = new Drink();
         user.drink(drink);
         assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, user.getBloodAlcoholGrams(), 0.1f);
@@ -228,9 +237,11 @@ public class UserTest {
     public void testBurnrate() {
         User user = new User();
         user.setWeight(100.0f);
+        user.setId(1);
 
         User user2 = new User();
         user2.setWeight(10.0f);
+        user2.setId(2);
 
         for (int i = 0; i < 30; i++) {
             user.drink(new Drink());

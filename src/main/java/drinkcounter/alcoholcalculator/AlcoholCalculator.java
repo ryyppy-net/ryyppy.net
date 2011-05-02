@@ -1,6 +1,7 @@
 // probably the wrong package for this, feel free to move
-package drinkcounter.model;
+package drinkcounter.alcoholcalculator;
 
+import drinkcounter.model.Drink;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,9 +19,7 @@ public class AlcoholCalculator {
 
     private final List<ShotFunction> functions = new LinkedList<ShotFunction>();
 
-    private ShotFunction lastAddedFunction = null;
-
-    AlcoholCalculator(float weight) {
+    public AlcoholCalculator(float weight) {
         setWeight(weight);
     }
     
@@ -30,7 +29,6 @@ public class AlcoholCalculator {
     
     public void reset() {
         functions.clear();
-        lastAddedFunction = null;
     }
     
     /**
@@ -42,17 +40,17 @@ public class AlcoholCalculator {
         return (float)calculate(time);
     }
     
-    public void calculateDrink(Date stamp) {
-        double p = calculate(stamp);
+    public void calculateDrink(Drink drink) {
+        double p = calculate(drink.getTimeStamp());
         
         // If there is still alcohol to burn, then the last function will be "disabled" with a cutter
-        if (p > 0 && lastAddedFunction != null) {
-            lastAddedFunction.setCutter(p);
+        int size = functions.size();
+        if (p > 0 && size > 0) {
+            functions.get(size - 1).setCutter(p);
         }
 
-        ShotFunction newFunction = new ShotFunction(stamp, burnRate, p + STANDARD_DRINK_ALCOHOL_GRAMS);
+        ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, p + STANDARD_DRINK_ALCOHOL_GRAMS);
         functions.add(newFunction);
-        lastAddedFunction = newFunction;
     }
     
     // best function name ever
