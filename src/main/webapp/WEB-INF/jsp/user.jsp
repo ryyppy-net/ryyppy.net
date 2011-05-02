@@ -116,9 +116,9 @@
             
             function repaint() {
                 var windowWidth = $(window).width();
-                var bestWidth = windowWidth - 10;
+                var bestWidth = windowWidth - 15;
                 $("#userButtonTable").width(bestWidth);
-                $("#userHistoryContainer").width(bestWidth);
+                $("#userHistoryContainer").width(bestWidth - 20);
             }
         </script>
     </jsp:attribute>
