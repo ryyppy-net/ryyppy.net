@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -28,8 +29,9 @@ public class AuthenticationController {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
     @RequestMapping("/timezone/{timezoneOffset}")
-    public void receiveTimezone(HttpSession session,  @PathVariable String timezoneOffset) {
+    public @ResponseBody String receiveTimezone(HttpSession session,  @PathVariable String timezoneOffset) {
         session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezoneOffset));
+        return null;
     }
 
     @RequestMapping("/checklogin")
