@@ -17,6 +17,7 @@
 
 package drinkcounter.model;
 
+import drinkcounter.AlcoholServiceImpl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,6 +43,26 @@ public class User extends AbstractEntity{
     public void removeDrink(Drink drink) {
         getDrinks().remove(drink);
         drink.setDrinker(null);
+        AlcoholServiceImpl.getInstance().drinkRemoved(this, drink);
+    }
+
+    @Transient
+    public float getPromilles() {
+        return AlcoholServiceImpl.getInstance().getPromilles(this);
+    }
+
+    @Transient
+    public int getTotalDrinks() {
+        return AlcoholServiceImpl.getInstance().getTotalDrinks(this);
+    }
+
+    public List<Float> getPromillesAtInterval(Date startTime, Date endTime, int intervalMs) {
+        return AlcoholServiceImpl.getInstance().getPromillesAtInterval(this, startTime, endTime, intervalMs);
+    }
+
+    @Transient
+    public float getBloodAlcoholGrams() {
+        return AlcoholServiceImpl.getInstance().getBloodAlcoholGrams(this);
     }
 
     public enum Sex {
@@ -58,7 +79,6 @@ public class User extends AbstractEntity{
     private float weight = 70;
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
-    private AlcoholCalculator alcoholCalculator;
     private String openId;
 
     /**
@@ -92,34 +112,8 @@ public class User extends AbstractEntity{
     }
 
     public void drink(Drink drink){
+        AlcoholServiceImpl.getInstance().drinkAdded(this, drink);
         getDrinks().add(drink);
-        if (alcoholCalculator != null)
-            alcoholCalculator.calculateDrink(drink.getTimeStamp());
-    }
-
-    // This could be done in client side, if optimization is needed
-    @Transient
-    public float getPromilles(){
-        initializeAlcoholCalculatorIfNeeded();
-        return alcoholCalculator.getAlcoholAmountAt(new Date()) / (sex.factor * weight);
-    }
-
-    // This could be done in client side, if optimization is needed
-    public List<Float> getPromillesAtInterval(Date start, Date end, int intervalMs) {
-        initializeAlcoholCalculatorIfNeeded();
-        List<Float> list = new ArrayList<Float>();
-        for (long i = start.getTime(); i  <= end.getTime(); i += intervalMs) {
-            list.add(alcoholCalculator.getAlcoholAmountAt(new Date(i)) / (sex.factor * weight));
-        }
-
-        return list;
-    }
-
-    // This could be done in client side, if optimization is needed
-    @Transient
-    public float getBloodAlcoholGrams() {
-        initializeAlcoholCalculatorIfNeeded();
-        return alcoholCalculator.getAlcoholAmountAt(new Date());
     }
 
     /**
@@ -136,8 +130,6 @@ public class User extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
-        if (alcoholCalculator != null)
-            alcoholCalculator.setWeight(this.weight);
     }
 
     public void setSex(Sex sex) {
@@ -149,20 +141,7 @@ public class User extends AbstractEntity{
         return sex;
     }
 
-    /**
-     * What is this i don't even.
-     * As far as I understand, this doesn't return total drinks like the name implies
-     * but how many drinks has the user drunk since he was last sober
-     * @return
-     */
-    @Transient
-    public int getTotalDrinks(){
-        if (getDrinks().isEmpty()) return 0;
-        Date soberTime = getTimeWhenUserLastSober();
-        return drinksSince(soberTime);
-    }
-
-    private int drinksSince(Date date){
+    public int drinksSince(Date date){
         int count = 0;
         // iterate from last to first
         ListIterator<Drink> iterator = drinks.listIterator(drinks.size());
@@ -173,30 +152,6 @@ public class User extends AbstractEntity{
             count++;
         }
         return count;
-    }
-
-    /**
-     * When was the user sober last time? Accuracy is 15 minutes :P
-     * This could be done in client side, if optimization is needed
-     * @return Time when user was last sober
-     */
-    @Transient
-    private Date getTimeWhenUserLastSober(){
-        initializeAlcoholCalculatorIfNeeded();
-        // TODO optimize
-        final int maxMinutes = 10080;
-        final int interval = 15;
-
-        long time = new Date().getTime();
-
-        for (int i= 0; i < maxMinutes; i += interval) {
-            float a = alcoholCalculator.getAlcoholAmountAt(new Date(time));
-            if (a < 0.01) {
-                break;
-            }
-            time -= interval * 60 * 1000;
-        }
-        return new Date(time);
     }
 
     public boolean isGuest() {
@@ -237,15 +192,5 @@ public class User extends AbstractEntity{
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    private void initializeAlcoholCalculatorIfNeeded() {
-        if (alcoholCalculator == null) {
-            alcoholCalculator = new AlcoholCalculator(weight);
-            for (Drink drink : drinks) {
-                if (drink.getTimeStamp() == null) continue;
-                alcoholCalculator.calculateDrink(drink.getTimeStamp());
-            }
-        }
     }
 }

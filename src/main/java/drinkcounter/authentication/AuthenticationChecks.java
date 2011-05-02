@@ -23,6 +23,10 @@ public class AuthenticationChecks {
     public void setCurrentUser(CurrentUser currentUser) {
         this.currentUser = currentUser;
     }
+
+    public void setDrinkCounterService(DrinkCounterService drinkCounterService) {
+        this.drinkCounterService = drinkCounterService;
+    }
     
     public void checkRightsForParty(int partyId) {
         User user = currentUser.getUser();
