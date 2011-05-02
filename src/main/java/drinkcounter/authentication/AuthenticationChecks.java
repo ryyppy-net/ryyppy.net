@@ -1,6 +1,8 @@
 package drinkcounter.authentication;
 
+import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
+import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.util.List;
@@ -14,7 +16,10 @@ public class AuthenticationChecks {
     
     @Autowired
     private CurrentUser currentUser;
-
+    
+    @Autowired
+    private DrinkCounterService drinkCounterService;
+    
     public void setCurrentUser(CurrentUser currentUser) {
         this.currentUser = currentUser;
     }
@@ -25,14 +30,9 @@ public class AuthenticationChecks {
             throw new NotLoggedInException();
         }
         
-        // TODO optimize by query
-        List<Party> parties = user.getParties();
-        for (Party p : parties) {
-            if (p.getId() == partyId) {
-                return;
-            }
+        if(!drinkCounterService.isUserParticipant(partyId, user.getId())){
+            throw new NotEnoughRightsException();
         }
-        throw new NotEnoughRightsException();
     }
 
     public void checkHighLevelRightsToUser(int userId) {

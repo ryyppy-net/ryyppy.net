@@ -153,4 +153,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public long getTotalDrinkCount() {
         return drinkDao.count();
     }
+
+    @Override
+    public boolean isUserParticipant(int partyId, int userId) {
+        return partyDao.countUserParticipations(partyId, userId) > 0;
+    }
 }
