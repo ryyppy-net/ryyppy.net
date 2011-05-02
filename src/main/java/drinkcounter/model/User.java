@@ -19,8 +19,6 @@ package drinkcounter.model;
 
 import drinkcounter.AlcoholServiceImpl;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
@@ -176,6 +174,7 @@ public class User extends AbstractEntity{
 
     /**
      * Must be sorted by time ascending
+     * TODO when bored, create index for this, or better yet use named queries when needed
      * @param drinks the drinks to set
      */
     public void setDrinks(List<Drink> drinks) {

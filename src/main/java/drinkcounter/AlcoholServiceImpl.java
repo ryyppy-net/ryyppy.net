@@ -13,9 +13,9 @@ public class AlcoholServiceImpl implements AlcoholService {
 
     private final Map<Integer, AlcoholCalculator> alcoholCalculators = new HashMap<Integer, AlcoholCalculator>();
     private final Object maplock = new Object();
-    private static AlcoholService instance;
+    private final static AlcoholService instance = new AlcoholServiceImpl();
 
-    protected AlcoholServiceImpl() {
+    private AlcoholServiceImpl() {
 
     }
 
@@ -57,7 +57,6 @@ public class AlcoholServiceImpl implements AlcoholService {
 
     @Override
     public void drinkRemoved(User user, Drink drink) {
-        // todo: better removal system
         initializeUser(user);
     }
 
@@ -86,7 +85,6 @@ public class AlcoholServiceImpl implements AlcoholService {
     @Override
     public Date getTimeWhenUserLastSober(User user){
         AlcoholCalculator alc = getOrInitializeAlcoholCalculator(user);
-        // TODO optimize
         final int maxMinutes = 10080;
         final int interval = 15;
 
@@ -116,7 +114,6 @@ public class AlcoholServiceImpl implements AlcoholService {
     }
 
     public static AlcoholService getInstance() {
-        if (instance == null) instance = new AlcoholServiceImpl();
         return instance;
     }
 

@@ -97,7 +97,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         User user = userDAO.readByPrimaryKey(userId);
         party.removeParticipant(user);
         partyDao.save(party);
-        log.info("User with name {} was added to party {}", user.getName(), party.getName());
+        log.info("User with name {} was removed from party {}", user.getName(), party.getName());
     }
 
     @Override

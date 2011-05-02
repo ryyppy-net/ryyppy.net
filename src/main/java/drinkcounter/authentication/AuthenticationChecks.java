@@ -38,7 +38,6 @@ public class AuthenticationChecks {
     }
 
     public void checkHighLevelRightsToUser(int userId) {
-        
         User user = currentUser.getUser();
         if (user == null){
             throw new NotLoggedInException();
@@ -46,14 +45,10 @@ public class AuthenticationChecks {
         
         if (user.getId() == userId) return;
         
-        //TODO optimize by query
         List<Party> parties = user.getParties();
         for (Party p : parties) {
-            List<User> participants = p.getParticipants();
-            for (User u : participants) {
-                if (u.getId() == userId)
-                    return;
-            }
+            if (drinkCounterService.isUserParticipant(p.getId(), userId))
+                return;
         }
         throw new NotEnoughRightsException();
     }
