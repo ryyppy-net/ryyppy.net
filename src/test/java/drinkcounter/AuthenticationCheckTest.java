@@ -60,6 +60,10 @@ public class AuthenticationCheckTest {
     
     @Test
     public void testCheckRightsForParty() {
+        DrinkCounterService drinkCounterService = mock(DrinkCounterService.class);
+        when(drinkCounterService.isUserParticipant(1, user.getId())).thenReturn(true);
+        when(drinkCounterService.isUserParticipant(2, user.getId())).thenReturn(false);
+        authenticationChecks.setDrinkCounterService(drinkCounterService);
         authenticationChecks.checkRightsForParty(1);
         
         Exception e = null;
