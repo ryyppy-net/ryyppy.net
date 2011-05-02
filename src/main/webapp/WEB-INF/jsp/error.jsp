@@ -22,7 +22,7 @@
                 <li><spring:message code="error.list.you_fucked_up" /></li>
             </ul>
             <p><spring:message code="error.continue" />
-                <a href="/ui/checklogin"><spring:message code="error.to_frontpage" /></a> 
+                <a href="/"><spring:message code="error.to_frontpage" /></a> 
                 <spring:message code="error.try_again" />
             </p>
         </div>

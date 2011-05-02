@@ -1,8 +1,6 @@
 package drinkcounter.authentication;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
-import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.util.List;
