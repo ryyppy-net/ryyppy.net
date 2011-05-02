@@ -24,11 +24,15 @@ public class AlcoholCalculator {
     }
     
     public void setWeight(float weight) {
-        burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
+        synchronized(this) {
+            burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
+        }
     }
     
     public void reset() {
-        functions.clear();
+        synchronized(this) {
+            functions.clear();
+        }
     }
     
     /**
@@ -37,20 +41,24 @@ public class AlcoholCalculator {
      * @return grams of alcohol in blood at given time
      */
     public float getAlcoholAmountAt(Date time) {
-        return (float)calculate(time);
+        synchronized(this) {
+            return (float)calculate(time);
+        }
     }
     
     public void calculateDrink(Drink drink) {
-        double p = calculate(drink.getTimeStamp());
-        
-        // If there is still alcohol to burn, then the last function will be "disabled" with a cutter
-        int size = functions.size();
-        if (p > 0 && size > 0) {
-            functions.get(size - 1).setCutter(p);
-        }
+        synchronized(this) {
+            double p = calculate(drink.getTimeStamp());
 
-        ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, p + STANDARD_DRINK_ALCOHOL_GRAMS);
-        functions.add(newFunction);
+            // If there is still alcohol to burn, then the last function will be "disabled" with a cutter
+            int size = functions.size();
+            if (p > 0 && size > 0) {
+                functions.get(size - 1).setCutter(p);
+            }
+
+            ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, p + STANDARD_DRINK_ALCOHOL_GRAMS);
+            functions.add(newFunction);
+        }
     }
     
     // best function name ever
