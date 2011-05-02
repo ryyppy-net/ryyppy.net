@@ -24,7 +24,6 @@ public class AuthenticationController {
     public static final String TIMEZONEOFFSET = "timeZoneOffset";
 
     @Autowired private DrinkCounterService drinkCounterService;
-    @Autowired private UserService userService;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
@@ -32,14 +31,6 @@ public class AuthenticationController {
     public @ResponseBody String receiveTimezone(HttpSession session,  @PathVariable String timezoneOffset) {
         session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezoneOffset));
         return null;
-    }
-
-    @RequestMapping("/checklogin")
-    public String checkLogin(HttpSession session) {
-        if (session.getAttribute(OPENID) != null && (userService.getUserByOpenId((String)session.getAttribute(OPENID)) != null)) {
-            return "redirect:user";
-        }
-        return "redirect:login";
     }
     
     @RequestMapping("/login")

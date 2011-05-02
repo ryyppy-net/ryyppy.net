@@ -25,7 +25,7 @@
             </ul> 
             <p>
                 <spring:message code="loginerror.continue" />
-                <a href="/ui/checklogin"><spring:message code="loginerror.to_frontpage" /></a>
+                <a href="/"><spring:message code="loginerror.to_frontpage" /></a>
                 <spring:message code="loginerror.try_again" />
             </p>
         </div>
