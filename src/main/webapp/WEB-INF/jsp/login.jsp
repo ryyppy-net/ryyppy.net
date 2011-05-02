@@ -24,12 +24,13 @@
         <div id="logoContainer">
             <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
             
-            <p>
+            <p class="totalDrinkCount">
                 <spring:message code="login.already_n_drinks" arguments="${totalDrinkCount}" />
             </p>
-            <div class="langSelection">
+            
+            <p class="langSelection">
                 <a href="?lang=en">In English</a> | <a href="?lang=fi">Suomeksi</a>
-            </div>
+            </p>
         </div>
         
         <div class="login">

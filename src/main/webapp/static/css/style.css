@@ -8,6 +8,11 @@ body {
     background-color: #505050;
 }
 
+p {
+    margin-bottom: 5px;
+    line-height: 120%;
+}
+
 a {
     text-decoration: none;
 }
