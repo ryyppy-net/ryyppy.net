@@ -1,4 +1,4 @@
-package drinkcounter.model;
+package drinkcounter.alcoholcalculator;
 
 import java.util.Date;
 
