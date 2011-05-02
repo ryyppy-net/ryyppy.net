@@ -50,6 +50,9 @@
                     </td>
                 </tr>
             </table>
+            
+            <p><spring:message code="login.security_info" /></p>
+            <p><spring:message code="login.more_security_info" /></p>
 
             <div id="manualLogin" style="display: none;">
                 <h2><spring:message code="login.login_manual"/></h2>

@@ -137,13 +137,13 @@
         </div>
         
         <!-- stupid css not able to center vertically properly -->
-        <table id="userButtonTable" style="height:200px;  margin-left:auto; margin-right:auto; margin-top:10px; margin-bottom:10px;">
+        <table id="userButtonTable">
             <tr>
                 <td class="userButton"></td>
             </tr>
         </table>
         
-        <div class="header" style="margin-top: 2em;">
+        <div class="header headerMargin">
             <a class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
@@ -158,22 +158,24 @@
                 <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${user.id}" />
 
                 <div class="party">
-                    <a href="${viewPartyUrl}">
-                        <span style="margin: 5px;">
-                            <c:out value="${party.name}" />
-                        </span>
-                        <span id="partyStartTime">
-                            <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
-                        </span>
-                    </a>
-                        <a class="headerButtonA" title="<spring:message code="user.exit_dialog.title"/>" onClick="return confirm('<spring:message code="user.exit_dialog.msg"/>');" href="${leavePartyUrl}">
-                        <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
-                    </a>
+                    <div class="marginBox">
+                        <a href="${viewPartyUrl}">
+                            <span>
+                                <c:out value="${party.name}" />
+                            </span>
+                            <span id="partyStartTime">
+                                <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
+                            </span>
+                        </a>
+                            <a class="headerButtonA" title="<spring:message code="user.exit_dialog.title"/>" onClick="return confirm('<spring:message code="user.exit_dialog.msg"/>');" href="${leavePartyUrl}">
+                            <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
+                        </a>
+                    </div>
                 </div>
             </c:forEach>
         </div>
 
-        <div class="header" style="margin-top: 2em;">
+        <div class="header headerMargin">
             <a class="headerButtonA" title="<spring:message code="user.add_or_remove_drinks"/>" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);">
                 <div class="headerButton headerButtonRight" id="configureDrinksButton"></div>
             </a>
@@ -181,9 +183,11 @@
                 <h1><spring:message code="user.history"/></h1>
             </div>
         </div>
+
         <div class="userHistoryContainer">
-            <div id="historyGraph" style="height: 300px;"></div>
+            <div id="historyGraph"></div>
         </div>
+            
         <div id="configureDrinksDialog" class="popupDialog">
             <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinksDialog'), configureDrinksDialogClosed);">X</a></span>
 
