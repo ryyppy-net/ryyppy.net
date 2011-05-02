@@ -29,6 +29,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -166,6 +167,7 @@ public class User extends AbstractEntity{
      * @return the drinks
      */
     @OneToMany(mappedBy="drinker")
+    @OrderBy("timeStamp asc")
     public List<Drink> getDrinks() {
         return drinks;
     }
@@ -175,14 +177,6 @@ public class User extends AbstractEntity{
      * @param drinks the drinks to set
      */
     public void setDrinks(List<Drink> drinks) {
-        // TODO make query for this and remove sorting
-        Collections.sort(drinks, new Comparator<Drink>() {
-            @Override
-            public int compare(Drink o1, Drink o2) {
-                return o1.getTimeStamp().compareTo(o2.getTimeStamp());
-            }
-        });
-
         this.drinks = drinks;
     }
 
