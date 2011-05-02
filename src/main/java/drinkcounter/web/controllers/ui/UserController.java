@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.openid.OpenIDAuthenticationToken;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -169,32 +170,24 @@ public class UserController {
     }
     
     @RequestMapping("/getUserByEmail")
-    public ResponseEntity<byte[]> getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
+    public @ResponseBody String getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
         int id = Integer.parseInt(partyId);
         authenticationChecks.checkRightsForParty(id);
 
-        String data = "";
-        if (!userService.emailIsCorrect(email))
-            data = "0";
-        
-        User user = userService.getUserByEmail(email);
-        if (user == null)
-            data = "0";
-        else {
-            // TODO optimize by query
-            List<Party> parties = user.getParties();
-            data = Integer.toString(user.getId());
-            for (Party p : parties) {
-                if (p.getId() == id) {
-                    // user is already in party
-                    data = "0";
-                    break;
-                }
-            }
+        if (!userService.emailIsCorrect(email)){
+            return "0";
         }
         
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "text/plain;charset=utf-8");
-        return new ResponseEntity<byte[]>(data.getBytes(), headers, HttpStatus.OK);
+        User user = userService.getUserByEmail(email);
+        if (user == null){
+            return "0";
+        }
+        else {
+            if(drinkCounterService.isUserParticipant(id, user.getId())){
+                return "0";
+            }else{
+                return Integer.toString(user.getId());
+            }
+        }
     }
 }
