@@ -24,6 +24,7 @@ public interface DrinkCounterService {
     void linkUserToParty(int userId, int partyId);
     void unlinkUserFromParty(int userId, int partyId);
     List<User> listUsersByParty(int partyId);
+    boolean isUserParticipant(int partyId, int userId);
 
     // Drinks
     List<Drink> getDrinks(int userId);
