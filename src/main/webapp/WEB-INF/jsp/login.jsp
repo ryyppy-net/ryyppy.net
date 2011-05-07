@@ -45,7 +45,7 @@
                         <img style="cursor: pointer" onclick="login('https://steamcommunity.com/openid/')" src="/static/images/steam-icon2.png" style="border:none" alt="Steam" />
                     </td>
                     <td>
-                        <a href="facebook">Facebook</a>
+                        <a href="facebook"><img src="/static/images/f_logo.jpg" style="border:none" alt="Facebook" /></a>
                     </td>
                     <td>
                         <a href="#manualLogin" onclick="manualLogin()">
