@@ -3,6 +3,49 @@ var removeDrinkUrl = '/API/users/_userid_/remove-drink/_drinkid_';
 var historyUrl = '/API/users/_userid_/show-history';
 var userUrl = '/API/users/_userid_/';
 
+
+var partyHistoryUrl = '/API/parties/_partyid_/get-history';
+
+
+function PartyHost(partyId) {
+    var that = this;
+    this.partyId = partyId;
+    this.users = [];
+
+    this.loadData = function() {
+        $.get(partyHistoryUrl.replace('_partyid_', this.partyId), function(data) {that.historyLoaded(data);} );
+    }
+    
+    this.historyLoaded = function(data) {
+        var rows = data.split('\n');
+        for (var i = 1; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.length == 0) continue;
+            var columns = row.split(',');
+            
+            var userId = columns[0];
+
+            if (this.users[userId] == undefined) {
+                this.users[userId] = new User(userId);
+            }
+            
+            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+            var history = [Number(columns[1]) + timezoneoffset, Number(columns[2])];
+            
+            var user = this.users[userId];
+            user.history.push(history);
+        }
+    }
+
+    this.getUserHistoryFunction = function(userId) {
+        var user = this.users[userId];
+        return function() {
+            return (user != undefined) ? user.history : undefined;
+        };
+    }
+}
+
+
 function UserButton(userId, element, color) {
     var that = this;
     this.alcoholScale = 3;
