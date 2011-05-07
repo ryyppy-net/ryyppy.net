@@ -6,7 +6,8 @@ var RyyppyNet = {
     graph: null,
     graphInterval: null,
     graphVisible: false,
-    updateInterval: 2 * 60 * 1000
+    updateInterval: 2 * 60 * 100,
+    layout: []
 };
 
 $(document).ready(function() {
@@ -67,14 +68,16 @@ $(document).ready(function() {
     forceRefresh();
     
     // if resized, refresh
-    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
+    setInterval(function() { if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
     
     // update data every two minutes
     setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
 });
 
 $(window).resize(function() {
-    needsRefreshing = true;
+    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
+        RyyppyNet.needsRefreshing = true;
 });
 
 function forceRefresh() {
@@ -152,8 +155,8 @@ function createAndFillGrid(data) {
     $('#drinkers').html('');
     RyyppyNet.users = parseData(data);
     
-    var layout = determineLayout(RyyppyNet.users.length);
-    layout = pivotLayoutIfNecessary(layout);
+    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    RyyppyNet.layout = layout;
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
     for (var i = 0; i < layout[1]; i++) {
