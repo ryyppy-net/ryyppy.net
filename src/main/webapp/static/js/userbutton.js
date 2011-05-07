@@ -87,7 +87,9 @@ function UserButton(userId, element, color) {
 
     this.update = function() {
         $.get(userUrl.replace('_userid_', this.userId), function(data) {that.dataLoaded(data);} );
-        $.get(historyUrl.replace('_userid_', this.userId), function(data) {that.historyLoaded(data);} );
+
+        if (this.element.height() < 150 || this.element.width() < 200) return;
+            $.get(historyUrl.replace('_userid_', this.userId), function(data) {that.historyLoaded(data);} );
     }
 
     this.dataLoaded = function(data) {
@@ -152,9 +154,9 @@ function UserButton(userId, element, color) {
     }
 
     this.renderGraph = function() {
-        if (this.element.height() < 150) return;
-        if (this.element.width() < 200) return;
-        
+        if (this.series == null)
+            return;
+
         var newElement = $('#graph' + this.userId);
         if (newElement.length == 0) {
             newElement = $('<div>');
@@ -179,9 +181,6 @@ function UserButton(userId, element, color) {
             this.element.resize(onResize);
             onResize();
         }
-
-        if (this.series == null)
-            return;
 
         $.plot(newElement, this.series, this.graphOptions);
     }
