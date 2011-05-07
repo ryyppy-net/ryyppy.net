@@ -55,7 +55,7 @@ body {
     text-align: center;
 }
 
-#logoContainer p {
+p.totalDrinkCount {
     color: #ffffff;
     font-variant: small-caps;
     font-size: 125%;
