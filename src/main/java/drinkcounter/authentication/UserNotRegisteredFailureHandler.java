@@ -31,9 +31,7 @@ public class UserNotRegisteredFailureHandler extends SimpleUrlAuthenticationFail
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         
-        if (exception instanceof UsernameNotFoundException
-                && exception.getAuthentication() instanceof OpenIDAuthenticationToken
-                && ((OpenIDAuthenticationToken) exception.getAuthentication()).getStatus().equals(OpenIDAuthenticationStatus.SUCCESS)) {
+        if (exception instanceof UsernameNotFoundException) {
             DefaultRedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
             request.getSession(true).setAttribute(AuthenticationController.OPENID, ((UsernameNotFoundException) exception).getExtraInformation());
             // redirect to registration

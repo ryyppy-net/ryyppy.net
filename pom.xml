@@ -21,6 +21,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.framework.version>3.0.5.RELEASE</spring.framework.version>
+        <org.springframework.social-version>1.0.0.M3</org.springframework.social-version>
     </properties>
 
     <build>
@@ -233,6 +234,17 @@
             <artifactId>openid4java</artifactId>
             <version>0.9.5</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-core</artifactId>
+            <version>${org.springframework.social-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-facebook</artifactId>
+            <version>${org.springframework.social-version}</version>
+        </dependency>
 
         <!-- Servlet api -->
         <dependency>
@@ -315,6 +327,11 @@
             <name>JBoss Repsitory</name>
             <layout>default</layout>
             <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+        <repository>
+            <id>org.springframework.maven.milestone</id>
+            <name>Spring Maven Milestone Repository</name>
+            <url>http://maven.springframework.org/milestone</url>
         </repository>
     </repositories>
 </project>
