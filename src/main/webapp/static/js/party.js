@@ -74,7 +74,7 @@ $(document).ready(function() {
 });
 
 $(window).resize(function() {
-    forceRefresh();
+    needsRefreshing = true;
 });
 
 function forceRefresh() {

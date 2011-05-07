@@ -162,16 +162,22 @@ function UserButton(userId, element, color) {
             newElement.attr('class', 'graph');
             newElement.css('position', 'absolute');
 
-            var width = parseFloat(this.element.css('width')) * 0.9;
-            var height = parseFloat(this.element.css('height')) * 0.9;
-            var top = getPositionTop(this.element.get(0)) + (parseFloat(this.element.css('height')) - height) / 2;
-            var left = getPositionLeft(this.element.get(0)) + (parseFloat(this.element.css('width')) - width) / 2;
-            newElement.css('width', width);
-            newElement.css('height', height);
-            newElement.css('left', left);
-            newElement.css('top', top);
-            
             this.element.append(newElement);
+
+            function onResize() {
+                var width = parseFloat(that.element.css('width')) * 0.98;
+                var height = parseFloat(that.element.css('height')) * 0.95;
+                var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
+                var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
+
+                var newElement = $('#graph' + that.userId);
+                newElement.css('left', left);
+                newElement.css('top', top);
+                newElement.css('width', width);
+                newElement.css('height', height);
+            }
+            this.element.resize(onResize);
+            onResize();
         }
 
         if (this.series == null)
