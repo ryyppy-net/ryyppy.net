@@ -39,37 +39,15 @@ import javax.persistence.Transient;
 @Table(name="Users")
 public class User extends AbstractEntity{
 
-    public void removeDrink(Drink drink) {
-        getDrinks().remove(drink);
-        drink.setDrinker(null);
-        AlcoholServiceImpl.getInstance().drinkRemoved(this, drink);
-    }
-
-    @Transient
-    public float getPromilles() {
-        return AlcoholServiceImpl.getInstance().getPromilles(this);
-    }
-
-    @Transient
-    public int getTotalDrinks() {
-        return AlcoholServiceImpl.getInstance().getTotalDrinks(this);
-    }
-
-    public List<Float> getPromillesAtInterval(Date startTime, Date endTime, int intervalMs) {
-        return AlcoholServiceImpl.getInstance().getPromillesAtInterval(this, startTime, endTime, intervalMs);
-    }
-
-    @Transient
-    public float getBloodAlcoholGrams() {
-        return AlcoholServiceImpl.getInstance().getBloodAlcoholGrams(this);
-    }
-
     public enum Sex {
         MALE(0.75f), FEMALE(0.66f);
         public float factor;
         Sex(float factor){
             this.factor = factor;
         }
+    }
+    public enum AuthMethod {
+        OPENID, FACEBOOK
     }
 
     private String email;
@@ -78,7 +56,10 @@ public class User extends AbstractEntity{
     private float weight = 70;
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
+    
+    // authentication attributes
     private String openId;
+    private AuthMethod authMethod = AuthMethod.OPENID;
 
     /**
      * This user is a guest in the system, can be removed after sober
@@ -99,6 +80,18 @@ public class User extends AbstractEntity{
 
     public String getOpenId() {
         return openId;
+    }
+
+    @Enumerated(EnumType.STRING)
+    public AuthMethod getAuthMethod() {
+        if(authMethod == null){
+            authMethod = AuthMethod.OPENID;
+        }
+        return authMethod;
+    }
+
+    public void setAuthMethod(AuthMethod authMethod) {
+        this.authMethod = authMethod;
     }
 
     @ManyToMany(mappedBy="participants")
@@ -187,5 +180,30 @@ public class User extends AbstractEntity{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    
+    public void removeDrink(Drink drink) {
+        getDrinks().remove(drink);
+        drink.setDrinker(null);
+        AlcoholServiceImpl.getInstance().drinkRemoved(this, drink);
+    }
+
+    @Transient
+    public float getPromilles() {
+        return AlcoholServiceImpl.getInstance().getPromilles(this);
+    }
+
+    @Transient
+    public int getTotalDrinks() {
+        return AlcoholServiceImpl.getInstance().getTotalDrinks(this);
+    }
+
+    public List<Float> getPromillesAtInterval(Date startTime, Date endTime, int intervalMs) {
+        return AlcoholServiceImpl.getInstance().getPromillesAtInterval(this, startTime, endTime, intervalMs);
+    }
+
+    @Transient
+    public float getBloodAlcoholGrams() {
+        return AlcoholServiceImpl.getInstance().getBloodAlcoholGrams(this);
     }
 }
