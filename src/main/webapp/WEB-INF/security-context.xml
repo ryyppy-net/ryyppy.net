@@ -7,7 +7,7 @@
           http://www.springframework.org/schema/security
           http://www.springframework.org/schema/security/spring-security-3.0.3.xsd
 ">
-    <http entry-point-ref="openIdEntryPoint">
+    <http entry-point-ref="loginUrlEntryPoint">
         <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/static/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
@@ -17,15 +17,15 @@
         <intercept-url pattern="/favicon.ico" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="ROLE_USER" />
         <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
+        <custom-filter  after="FORM_LOGIN_FILTER" ref="facebookAuthFilter" />
         <logout logout-url="/ui/logout" />
     </http>
     
-    <!-- OpenId -->
-    <beans:bean id="openIdEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+    <beans:bean id="loginUrlEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
         <beans:property name="loginFormUrl" value="/ui/login" />
     </beans:bean>
-    <beans:bean id="openIdAuthFilter" class="org.springframework.security.openid.OpenIDAuthenticationFilter">
-        <beans:property name="filterProcessesUrl" value="/ui/openId"/>
+    
+    <beans:bean id="abstractAuthFilter" abstract="true" class="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter">
         <beans:property name="authenticationManager" ref="authenticationManager"/>
         <beans:property name="authenticationFailureHandler" ref="userNotRegisteredHandler"/>
         <beans:property name="authenticationSuccessHandler">
@@ -33,6 +33,11 @@
                 <beans:property name="defaultTargetUrl" value="/"/>
             </beans:bean>
         </beans:property>
+    </beans:bean>
+    
+    <!-- OpenId -->
+    <beans:bean id="openIdAuthFilter" parent="abstractAuthFilter" class="org.springframework.security.openid.OpenIDAuthenticationFilter">
+        <beans:property name="filterProcessesUrl" value="/ui/openId"/>
         <beans:property name="returnToUrlParameters">
             <beans:set>
                 <beans:value>is_return</beans:value>
@@ -53,6 +58,22 @@
         <beans:property name="userDetailsService" ref="userDetailsService" />
     </beans:bean>
     
+    <!-- Facebook -->
+    <beans:bean id="facebookAuthFilter" parent="abstractAuthFilter" class="drinkcounter.authentication.FacebookAuthenticationFilter">
+        <beans:property name="filterProcessesUrl" value="/ui/facebook"/>
+        <beans:property name="facebookConnectionFactory">
+            <beans:bean class="org.springframework.social.facebook.connect.FacebookConnectionFactory">
+                <beans:constructor-arg value="115634228517140" /> <!-- App id -->
+                <beans:constructor-arg value="70986c871c26a5310611d7c8d9d9ea7c" /> <!-- App secret -->
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
+    
+    <beans:bean id="facebookAuthenticationProvider" class="drinkcounter.authentication.FacebookAuthenticationProvider">
+        <beans:property name="userDetailsService" ref="userDetailsService" />
+    </beans:bean>
+    
+    <!-- Common stuff -->
     <beans:bean id="userDetailsService" class="drinkcounter.authentication.UserDetailsServiceImpl" />
     <beans:bean id="userNotRegisteredHandler" class="drinkcounter.authentication.UserNotRegisteredFailureHandler">
         <beans:property name="registrationURL" value="/ui/newuser" />
@@ -61,5 +82,8 @@
     
     <authentication-manager alias="authenticationManager">
         <authentication-provider ref="openIdAuthProvider"/>
+        <authentication-provider ref="facebookAuthenticationProvider"/>
     </authentication-manager>
+    
+    
 </beans:beans>
