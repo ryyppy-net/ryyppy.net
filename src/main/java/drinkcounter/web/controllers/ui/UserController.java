@@ -8,6 +8,7 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.FacebookAuthenticationToken;
 import drinkcounter.authentication.NotLoggedInException;
 import java.util.Collections;
 import javax.servlet.http.HttpSession;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.GrantedAuthorityImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,6 +42,14 @@ public class UserController {
     @Autowired private UserDetailsService userDetailsService;
     @Autowired private CurrentUser currentUser;
     
+    @RequestMapping("/newuser")
+    public String newUser(HttpSession session){
+        if(session.getAttribute(AuthenticationController.OPENID) == null){
+            throw new NotLoggedInException();
+        }
+        return "newuser";
+    }
+    
     @RequestMapping("/addUser")
     public String addUser(
             @RequestParam("name") String name,
@@ -48,22 +58,37 @@ public class UserController {
             @RequestParam("email") String email, 
             HttpSession session){
                 
-        if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null)
+        if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null){
             session.setAttribute(AuthenticationController.TIMEZONEOFFSET, new Double(0));
+        }
 
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        if (openId == null)
+        if (session.getAttribute(AuthenticationController.OPENID) == null) {
             throw new NotLoggedInException();
+        }
         
-        if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null)
+        if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null) {
             throw new IllegalArgumentException();
+        }
+        
+        
         
         User user = new User();
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
-        user.setOpenId(openId);
         user.setEmail(email);
+        
+        Authentication authToken = (Authentication) session.getAttribute(AuthenticationController.OPENID);
+        if(authToken instanceof FacebookAuthenticationToken){
+            FacebookAuthenticationToken facebookToken = (FacebookAuthenticationToken) authToken;
+            user.setOpenId(facebookToken.getProfileId());
+            user.setAuthMethod(User.AuthMethod.FACEBOOK);
+        }else if(authToken instanceof OpenIDAuthenticationToken){
+            OpenIDAuthenticationToken openIdToken = (OpenIDAuthenticationToken) authToken;
+            user.setOpenId(openIdToken.getIdentityUrl());
+            user.setAuthMethod(User.AuthMethod.OPENID);
+        }
+        
         userService.addUser(user);
         authenticate(user);
         session.removeAttribute(AuthenticationController.OPENID);
@@ -72,10 +97,17 @@ public class UserController {
     
     private void authenticate(User user){
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getOpenId());
-        OpenIDAuthenticationToken authentication = new OpenIDAuthenticationToken(userDetails, 
-                Collections.singleton(new GrantedAuthorityImpl("ROLE_USER")), 
-                user.getOpenId(),
-                Collections.EMPTY_LIST);
+        Authentication authentication = null;
+        switch(user.getAuthMethod()){
+            case OPENID:
+                authentication = new OpenIDAuthenticationToken(userDetails, 
+                    userDetails.getAuthorities(), 
+                    user.getOpenId(),
+                    Collections.EMPTY_LIST);
+                break;
+            case FACEBOOK:
+                authentication = new FacebookAuthenticationToken(userDetails);
+        }
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
@@ -144,17 +176,6 @@ public class UserController {
         
         mav.addObject("parties", user.getParties());
         
-        return mav;
-    }
-    
-    @RequestMapping("/newuser")
-    public ModelAndView newUser(HttpSession session){
-        String openId = (String)session.getAttribute(AuthenticationController.OPENID);
-        if (openId == null)
-            throw new NotLoggedInException();
-        
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("newuser");
         return mav;
     }
     
