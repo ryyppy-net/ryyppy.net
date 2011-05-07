@@ -24,8 +24,11 @@
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
         <script type="text/javascript" src="/static/js/date.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.tmpl.js"></script>
+
         <script type="text/javascript">
             var userButton = null;
+            var userId = ${user.id};
             
             $(document).ready(function() {
                 fixTheFuckingCss();
@@ -78,22 +81,29 @@
 
             function gotDrinkData(data) {
                 $("#drinksList").html("");
-                var count = 0;
+                var drinkData = [];
+                var drinkingTimeText = '<spring:message code="user.drink_time"/>';
+
                 $(data).find('drink').each(function() {
-                    count++;
-                    var li = $('<li>');
                     var id = $(this).find('id').text();
                     var timestamp = Number($(this).find('timestamp').text());
-
                     var date = formatDate(new Date(timestamp));
-
-                    li.html('<a href="#" onclick="if (confirm(\'<spring:message code="user.remove_drink.confirm"/>\')) $.get(\'/ui/removeDrink?userId=' + ${user.id} + '&drinkId=' + id + '\', configureDrinksDialogOpened);"><spring:message code="user.drink_time"/>: ' + date + '</a>');
-                    $("#drinksList").append(li);
+                    drinkData.push({DrinkId: id, DrinkingTimeText: drinkingTimeText, DrinkingTime: date, UserId: userId});
                 });
-                if (count == 0) {
-                    var li = $('<li>');
-                    li.html('<spring:message code="user.no_drinks"/>');
+                
+                if (drinkData.length == 0) {
+                    var li = $('<li>').html('<spring:message code="user.no_drinks"/>');
                     $("#drinksList").append(li);
+                }
+                else {
+                    $.get('/static/templates/drinkListElement.html', function(template) {
+                        $.tmpl(template, drinkData).appendTo('#drinksList');
+                        $('.drink').live('click', function() {
+                            var element = $.tmplItem(this);
+                            if (confirm('<spring:message code="user.remove_drink.confirm"/>'))
+                                $.get('/ui/removeDrink?userId=' + element.data.UserId + '&drinkId=' + element.data.DrinkId, configureDrinksDialogOpened);
+                        });
+                    });
                 }
             }
 

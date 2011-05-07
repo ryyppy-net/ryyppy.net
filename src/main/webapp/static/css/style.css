@@ -339,3 +339,7 @@ input[disabled] {
 canvas {
     margin: 5px;
 }
+
+li.drink {
+    cursor: pointer;
+}
