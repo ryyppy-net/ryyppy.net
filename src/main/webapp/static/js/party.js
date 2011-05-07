@@ -67,14 +67,14 @@ $(document).ready(function() {
     forceRefresh();
     
     // if resized, refresh
-    setInterval(function() {if (RyyppyNet.needsRefreshing == true) forceRefresh();}, 1000);
+    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
     
     // update data every two minutes
     setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
 });
 
 $(window).resize(function() {
-    RyyppyNet.needsRefreshing = true;
+    forceRefresh();
 });
 
 function forceRefresh() {
@@ -164,6 +164,7 @@ function createAndFillGrid(data) {
             
             var newElement = $('<td>');
             newElement.addClass('userButton');
+            newElement.addClass('roundedCornersBordered');
             newElement.attr("width", width);
             var user = RyyppyNet.users[colorIndex].id;
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
