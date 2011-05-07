@@ -31,7 +31,35 @@ function UserHistoryGraph(user, element) {
     }
     
     this.render = function() {
-        this.plot = $.plot(this.element, this.series, this.options);
+        var newElement = $('#historyGraph2');
+        if (newElement.length == 0) {
+            newElement = $('<div>');
+            newElement.attr('id', 'historyGraph2');
+            newElement.attr('class', 'graph');
+            newElement.css('position', 'absolute');
+
+            this.element.append(newElement);
+
+            function onResize() {
+                var width = parseFloat(that.element.css('width')) * 0.98;
+                var height = parseFloat(that.element.css('height')) * 0.95;
+                var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
+                var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
+
+                var newElement = $('#historyGraph2');
+                newElement.css('left', left);
+                newElement.css('top', top);
+                newElement.css('width', width);
+                newElement.css('height', height);
+            }
+            this.element.resize(onResize);
+            onResize();
+        }
+
+        if (this.series == null)
+            return;
+
+        this.plot = $.plot(newElement, this.series, this.options);
     }
 
     this.gotData = function(data) {
