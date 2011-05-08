@@ -31,8 +31,6 @@
             var userId = ${user.id};
             
             $(document).ready(function() {
-                fixTheFuckingCss();
-
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
                 });
