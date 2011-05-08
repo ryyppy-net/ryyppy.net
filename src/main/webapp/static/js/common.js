@@ -150,3 +150,9 @@ function getCookie( cookie_name )
     }
     return 'fi';
 }
+
+function PartyAPI() {
+    this.getUserDrinks = function(userId, callback) {
+        $.get("/API/users/{0}/show-drinks".format(userId), callback);
+    }
+}

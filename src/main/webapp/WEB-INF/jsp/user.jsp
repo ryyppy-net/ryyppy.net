@@ -30,6 +30,8 @@
             var userButton = null;
             var userId = ${user.id};
             
+            var PartyAPI = new PartyAPI();
+            
             $(document).ready(function() {
                 fixTheFuckingCss();
 
@@ -65,7 +67,7 @@
             }
 
             function configureDrinksDialogOpened() {
-                $.get("/API/users/${user.id}/show-drinks", gotDrinkData);
+                PartyAPI.getUserDrinks(${user.id}, gotDrinkData);
                 $("#time").datetimepicker($.datepicker.regional['fi']);
                 $("#time").datetimepicker("option", {maxDate: 0});
                 $("#time").datetimepicker("setDate", new Date());
