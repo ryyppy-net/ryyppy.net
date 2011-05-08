@@ -5,6 +5,8 @@ import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
+import drinkcounter.authentication.NotEnoughRightsException;
+import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
@@ -23,10 +25,12 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -237,5 +241,15 @@ public class APIController {
         if (getId)
             return new String[]{Integer.toString(user.getId()), Long.toString(x), Float.toString(y)};
         return new String[]{Long.toString(x), Float.toString(y)};
+    }
+    
+    @ExceptionHandler(NotEnoughRightsException.class)
+    public HttpEntity handleForbidden(){
+        return new ResponseEntity(HttpStatus.FORBIDDEN);
+    }
+    
+    @ExceptionHandler()
+    public HttpEntity handleExceptions(){
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
