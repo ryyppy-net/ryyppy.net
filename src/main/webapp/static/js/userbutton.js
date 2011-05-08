@@ -1,9 +1,4 @@
-var addDrinkUrl = '/API/users/_userid_/add-drink';
-var historyUrl = '/API/users/_userid_/show-history';
-
-
 var partyHistoryUrl = '/API/parties/_partyid_/get-history';
-
 
 function PartyHost(partyId) {
     var that = this;
@@ -87,7 +82,9 @@ function UserButton(userId, element, color) {
         RyyppyAPI.getUserData(this.userId, function(data) {
             that.dataLoaded(data);
         });
-        $.get(historyUrl.replace('_userid_', this.userId), function(data) {that.historyLoaded(data);} );
+        RyyppyAPI.getUserHistory(this.userId, function(data) {
+            that.historyLoaded(data);
+        });
     }
 
     this.dataLoaded = function(data) {
@@ -192,7 +189,7 @@ function UserButton(userId, element, color) {
 
         this.clicked = true;
         
-        $.get(addDrinkUrl.replace('_userid_', this.userId), function(data) {
+        RyyppyAPI.addDrinkToUser(this.userId, function(data) {
             var drinkUndone = false;
             var drinkId = data;
 
