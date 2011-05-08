@@ -2,6 +2,10 @@ function RyyppyAPI() {
     this.getUserDrinks = function(userId, callback) {
         $.get("/API/users/{0}/show-drinks".format(userId), callback);
     }
+
+    this.removeDrinkFromUser = function(userId, drinkId, callback) {
+        $.get('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
+    }
 }
 
 var RyyppyAPI = new RyyppyAPI();
@@ -105,13 +109,13 @@ function playSound() {
 
 function getPositionLeft(el){
     var pL = 0;
-    while(el) { pL += el.offsetLeft; el = el.offsetParent; }
+    while(el) {pL += el.offsetLeft;el = el.offsetParent;}
     return pL;
 }
 
 function getPositionTop(el){
     var pT = 0;
-    while(el) { pT += el.offsetTop; el = el.offsetParent; }
+    while(el) {pT += el.offsetTop;el = el.offsetParent;}
     return pT;
 }
 

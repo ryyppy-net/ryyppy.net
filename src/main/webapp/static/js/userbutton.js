@@ -1,8 +1,6 @@
 var addDrinkUrl = '/API/users/_userid_/add-drink';
-var removeDrinkUrl = '/API/users/_userid_/remove-drink/_drinkid_';
 var historyUrl = '/API/users/_userid_/show-history';
 var userUrl = '/API/users/_userid_/';
-
 
 var partyHistoryUrl = '/API/parties/_partyid_/get-history';
 
@@ -201,8 +199,7 @@ function UserButton(userId, element, color) {
 
             undoLink.append(undoDiv);
             undoLink.click(function() {
-                var u = removeDrinkUrl.replace('_userid_', that.userId).replace('_drinkid_', drinkId);
-                $.get(u);
+                RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
                 drinkUndone = true;
                 undoDiv.css('background-color', 'red');
             });
