@@ -1,10 +1,10 @@
-function PartyAPI() {
+function RyyppyAPI() {
     this.getUserDrinks = function(userId, callback) {
         $.get("/API/users/{0}/show-drinks".format(userId), callback);
     }
 }
 
-var PartyAPI = new PartyAPI();
+var RyyppyAPI = new RyyppyAPI();
 
 function fixTheFuckingCss() {
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
