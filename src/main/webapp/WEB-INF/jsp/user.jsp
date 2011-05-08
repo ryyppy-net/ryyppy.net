@@ -7,8 +7,6 @@
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" />
         
-        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
-        
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.11.custom.min.js"></script>
