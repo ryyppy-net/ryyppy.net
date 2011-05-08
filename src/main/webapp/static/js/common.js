@@ -1,3 +1,11 @@
+function PartyAPI() {
+    this.getUserDrinks = function(userId, callback) {
+        $.get("/API/users/{0}/show-drinks".format(userId), callback);
+    }
+}
+
+var PartyAPI = new PartyAPI();
+
 function fixTheFuckingCss() {
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
     
@@ -149,10 +157,4 @@ function getCookie( cookie_name )
             return unescape(value);
     }
     return 'fi';
-}
-
-function PartyAPI() {
-    this.getUserDrinks = function(userId, callback) {
-        $.get("/API/users/{0}/show-drinks".format(userId), callback);
-    }
 }
