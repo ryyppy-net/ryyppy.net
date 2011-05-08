@@ -65,7 +65,7 @@
             }
 
             function configureDrinksDialogOpened() {
-                PartyAPI.getUserDrinks(${user.id}, gotDrinkData);
+                RyyppyAPI.getUserDrinks(${user.id}, gotDrinkData);
                 $("#time").datetimepicker($.datepicker.regional['fi']);
                 $("#time").datetimepicker("option", {maxDate: 0});
                 $("#time").datetimepicker("setDate", new Date());
