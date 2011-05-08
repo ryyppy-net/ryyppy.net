@@ -1,4 +1,8 @@
 function RyyppyAPI() {
+    this.getUserData = function(userId, callback) {
+        $.get('/API/users/{0}/'.format(userId), callback);
+    }
+
     this.getUserDrinks = function(userId, callback) {
         $.get("/API/users/{0}/show-drinks".format(userId), callback);
     }
