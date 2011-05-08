@@ -6,6 +6,14 @@ function RyyppyAPI() {
     this.getUserDrinks = function(userId, callback) {
         $.get("/API/users/{0}/show-drinks".format(userId), callback);
     }
+    
+    this.getUserHistory = function(userId, callback) {
+        $.get('/API/users/{0}/show-history'.format(userId), callback);
+    }
+    
+    this.addDrinkToUser = function(userId, callback) {
+        $.get('/API/users/{0}/add-drink'.format(userId), callback);
+    }
 
     this.removeDrinkFromUser = function(userId, drinkId, callback) {
         $.get('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
