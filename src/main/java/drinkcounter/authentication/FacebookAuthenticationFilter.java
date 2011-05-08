@@ -37,11 +37,11 @@ public class FacebookAuthenticationFilter extends AbstractAuthenticationProcessi
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        String returnToUrl = request.getRequestURL().toString();
+        checkFailedAuthentication(request);
         String authorizationGrant = request.getParameter("code");
         if (StringUtils.isBlank(authorizationGrant)) {
             // Get a request token
-            String oauth2Url = facebookConnectionFactory.getOAuthOperations().buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE, new OAuth2Parameters(returnToUrl));
+            String oauth2Url = facebookConnectionFactory.getOAuthOperations().buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE, new OAuth2Parameters(buildReturnToUrl(request)));
             response.sendRedirect(oauth2Url);
 
             // Returning null signals that authentication is not complete
@@ -49,12 +49,24 @@ public class FacebookAuthenticationFilter extends AbstractAuthenticationProcessi
         }
         
         // Request an access token
-        AccessGrant accessToken = facebookConnectionFactory.getOAuthOperations().exchangeForAccess(authorizationGrant, returnToUrl, null);
+        AccessGrant accessToken = facebookConnectionFactory.getOAuthOperations().exchangeForAccess(authorizationGrant, buildReturnToUrl(request), null);
         Connection<FacebookApi> connection = facebookConnectionFactory.createConnection(accessToken);
         FacebookApi facebookApi = connection.getApi();
         String accountId = facebookApi.userOperations().getUserProfile().getId();
         FacebookAuthenticationToken token = new FacebookAuthenticationToken(accountId);
         return getAuthenticationManager().authenticate(token);
     }
+
+    private void checkFailedAuthentication(HttpServletRequest request) throws FacebookAuthException{
+        if (request.getParameter("error") != null) {
+            throw new FacebookAuthException(
+                    request.getParameter("error"),
+                    request.getParameter("error_description"),
+                    request.getParameter("error_reason"));
+        }
+    }
     
+    private String buildReturnToUrl(HttpServletRequest request){
+        return request.getRequestURL().toString();
+    }
 }
