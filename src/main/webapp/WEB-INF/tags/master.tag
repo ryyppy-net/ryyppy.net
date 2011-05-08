@@ -13,7 +13,10 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+        
         <title><c:out value="${title}"/></title>
+
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
         <script type="text/javascript" src="/static/js/jquery.js"></script>
 
@@ -28,6 +31,7 @@
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
             })();
         </script>
+
         <jsp:invoke fragment="customHead" />
     </head>
     <body>
