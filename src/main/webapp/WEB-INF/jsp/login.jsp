@@ -39,17 +39,17 @@
             <table>
                 <tr>
                     <td>
-                        <img style="cursor: pointer" onclick="login('https://www.google.com/accounts/o8/id')" src="/static/images/google-icon.png" style="border:none" alt="Google" />
+                        <img class="loginLogo" onclick="login('https://www.google.com/accounts/o8/id')" src="/static/images/google-icon.png" alt="Google" />
                     </td>
                     <td>
-                        <img style="cursor: pointer" onclick="login('https://steamcommunity.com/openid/')" src="/static/images/steam-icon2.png" style="border:none" alt="Steam" />
+                        <img class="loginLogo" onclick="login('https://steamcommunity.com/openid/')" src="/static/images/steam-icon2.png" alt="Steam" />
                     </td>
                     <td>
-                        <a href="facebook"><img src="/static/images/f_logo.jpg" style="border:none" alt="Facebook" /></a>
+                        <a href="facebook"><img class="loginLogo" src="/static/images/f_logo.png" alt="Facebook" /></a>
                     </td>
                     <td>
                         <a href="#manualLogin" onclick="manualLogin()">
-                            <img src="/static/images/openid.png" style="border:none" alt="OpenID" />
+                            <img class="loginLogo" src="/static/images/openid.png" alt="OpenID" />
                         </a>
                     </td>
                 </tr>
