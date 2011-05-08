@@ -22,13 +22,9 @@ function RyyppyAPI() {
 
 var RyyppyAPI = new RyyppyAPI();
 
-function fixTheFuckingCss() {
-    $("#drinkers").height($(window).height() - $("#topic").height() - 20);
-    
-    $(".party").width($("#body").width() - 10 + 'px');
-
+$(document).ready(function() {
     addToolTips();
-}
+});
 
 function addToolTips() {
     $(".headerButtonA").tooltip({
