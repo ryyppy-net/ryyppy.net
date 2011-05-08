@@ -1,6 +1,6 @@
 var addDrinkUrl = '/API/users/_userid_/add-drink';
 var historyUrl = '/API/users/_userid_/show-history';
-var userUrl = '/API/users/_userid_/';
+
 
 var partyHistoryUrl = '/API/parties/_partyid_/get-history';
 
@@ -84,7 +84,9 @@ function UserButton(userId, element, color) {
     }
 
     this.update = function() {
-        $.get(userUrl.replace('_userid_', this.userId), function(data) {that.dataLoaded(data);} );
+        RyyppyAPI.getUserData(this.userId, function(data) {
+            that.dataLoaded(data);
+        });
         $.get(historyUrl.replace('_userid_', this.userId), function(data) {that.historyLoaded(data);} );
     }
 
