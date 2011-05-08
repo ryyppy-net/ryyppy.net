@@ -30,8 +30,6 @@
             var userButton = null;
             var userId = ${user.id};
             
-            var PartyAPI = new PartyAPI();
-            
             $(document).ready(function() {
                 fixTheFuckingCss();
 
