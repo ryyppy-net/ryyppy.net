@@ -5,11 +5,11 @@
 <t:master>
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
-        <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.11.custom.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
-        <script type="text/javascript" src="/static/js/jquery-ui-1.8.11.custom.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/js/jquery.ui.datepicker-fi.js"></script>
         
@@ -29,8 +29,6 @@
             var userId = ${user.id};
             
             $(document).ready(function() {
-                fixTheFuckingCss();
-
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
                 });
