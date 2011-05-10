@@ -253,15 +253,18 @@ public class APIController {
     }
     
     @RequestMapping("/passphrase/{passphrase}")
-    public @ResponseBody byte[] passphrase(@PathVariable String passphrase) throws IOException{
+    public @ResponseBody String passphrase(@PathVariable String passphrase) throws IOException{
         // TODO korjaa käyttämään userXml-metodia, tämä on lähinnä PoC vasta
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
             throw new NotEnoughRightsException();
         
+        // I've had it with this motherfucking XML in this motherfucking Java
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshallUser(user.getId(), baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        csvWriter.writeRecord(new String[]{user.getName(), Double.toString(user.getPromilles())});
+        csvWriter.close();
+        
+        return baos.toString();
     }
 }
