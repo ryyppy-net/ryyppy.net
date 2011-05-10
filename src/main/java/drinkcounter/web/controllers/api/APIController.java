@@ -6,7 +6,6 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.NotEnoughRightsException;
-import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
@@ -251,5 +250,18 @@ public class APIController {
     @ExceptionHandler()
     public HttpEntity handleExceptions(){
         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @RequestMapping("/passphrase/{passphrase}")
+    public @ResponseBody byte[] passphrase(@PathVariable String passphrase) throws IOException{
+        // TODO korjaa käyttämään userXml-metodia, tämä on lähinnä PoC vasta
+        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        if (user == null)
+            throw new NotEnoughRightsException();
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        partyMarshaller.marshallUser(user.getId(), baos);
+        byte[] bytesXml = baos.toByteArray();
+        return bytesXml;
     }
 }

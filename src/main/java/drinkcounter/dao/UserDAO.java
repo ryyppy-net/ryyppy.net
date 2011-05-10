@@ -10,4 +10,5 @@ import org.synyx.hades.dao.GenericDao;
 public interface UserDAO extends GenericDao<User, Integer> {
     User findByOpenId(String openId);
     User findByEmail(String email);
+    User findByPassphrase(String passphrase);
 }
