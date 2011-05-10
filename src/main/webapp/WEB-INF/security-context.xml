@@ -63,8 +63,8 @@
         <beans:property name="filterProcessesUrl" value="/ui/facebook"/>
         <beans:property name="facebookConnectionFactory">
             <beans:bean class="org.springframework.social.facebook.connect.FacebookConnectionFactory">
-                <beans:constructor-arg value="115634228517140" /> <!-- App id -->
-                <beans:constructor-arg value="70986c871c26a5310611d7c8d9d9ea7c" /> <!-- App secret -->
+                <beans:constructor-arg value="${facebook.app.id}" /> <!-- App id -->
+                <beans:constructor-arg value="${facebook.app.secret}" /> <!-- App secret -->
             </beans:bean>
         </beans:property>
     </beans:bean>
