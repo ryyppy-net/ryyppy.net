@@ -29,9 +29,6 @@ function initializeButtons() {
         toggleDialog($('#kickDrinkerDialog'));
     });
 
-    $('#closeAddDrinkerDialogButton').click(function() {
-        closeDialog($('#addDrinkerDialog'));
-    });
     $('#closeGraphDialogButton').click(function() {
         closeDialog($('#graphDialog'));
     });
