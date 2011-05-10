@@ -135,12 +135,12 @@
         </div>
                 
         <div id="kickDrinkerDialog" class="popupDialog" title="<spring:message code="party.remove_drinker"/>">
-            <ul>
-                <c:choose>
-                    <c:when test="${fn:length(party.participants) < 2}">
-                        <li><spring:message code="party.no_users"/></li>
-                    </c:when>
-                    <c:otherwise>
+            <c:choose>
+                <c:when test="${fn:length(party.participants) < 2}">
+                    <p><spring:message code="party.no_users"/>
+                </c:when>
+                <c:otherwise>
+                    <ul>
                         <c:forEach var="participant" items="${party.participants}">
                             <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${participant.id}" />
                             <c:if test="${participant.id != user.id}">
@@ -152,9 +152,9 @@
                                 </li>
                             </c:if>
                         </c:forEach>
-                    </c:otherwise>
-                </c:choose>
-            </ul>
+                    </ul>
+                </c:otherwise>
+            </c:choose>
         </div>
     </jsp:body>
 </t:master>
