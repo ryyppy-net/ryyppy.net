@@ -27,7 +27,9 @@
         -->
         <property name="locations">
             <list>
-                <value>classpath:drinkcounter/jdbc-dev.properties</value>
+                <value>classpath:drinkcounter/general-configuration-default.properties</value>
+                <value>classpath:drinkcounter/general-configuration.properties</value>
+                <value>classpath:drinkcounter/jdbc-default.properties</value>
                 <value>classpath:drinkcounter/jdbc.properties</value>
             </list>
         </property>

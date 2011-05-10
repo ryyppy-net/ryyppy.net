@@ -10,8 +10,12 @@ import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.FacebookAuthenticationToken;
 import drinkcounter.authentication.NotLoggedInException;
+import drinkcounter.model.Party;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -172,7 +176,8 @@ public class UserController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
         mav.addObject("user", user);
-        
+        List<Party> parties = new ArrayList<Party>(user.getParties());
+        Collections.sort(parties, new BeanComparator("startTime"));
         mav.addObject("parties", user.getParties());
         
         return mav;
