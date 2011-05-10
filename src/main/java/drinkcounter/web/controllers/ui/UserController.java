@@ -208,4 +208,18 @@ public class UserController {
             }
         }
     }
+    
+    @RequestMapping("/passphrase")
+    public ModelAndView passphrase(){
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("passphrase");
+        mav.addObject("passphrase", currentUser.getUser().getPassphrase());
+        return mav;
+    }
+    
+    @RequestMapping("/passphrase-generate")
+    public String generatePassphrase() {
+        userService.generatePassphrase(currentUser.getUser());
+        return "redirect:passphrase";
+    }    
 }
