@@ -20,11 +20,11 @@ function initializeButtons() {
     $('#graphButtonLink').click(function() {
         toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);
     });
+
     $('#addDrinkerButtonLink').click(function() {
-        toggleDialog($('#addDrinkerDialog'));
-        $('#emailInput').focus();
-        repaint();
+        toggleJQUIDialog($('#addDrinkerDialog'));
     });
+
     $('#kickDrinkerButtonLink').click(function() {
         toggleDialog($('#kickDrinkerDialog'));
     });
