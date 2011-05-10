@@ -6,6 +6,7 @@
 <t:master title="${party.name}">
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
         
@@ -20,6 +21,7 @@
         <script type="text/javascript" src="/static/js/flot/jquery.flot.min.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
+        <script type="text/javascript" src="/static/js/jquery-ui-1.8.12.custom.min.js"></script>
         
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
@@ -45,6 +47,12 @@
                 if (!RyyppyNet.graphInterval)
                     RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
             }
+            
+            $(document).ready(function() {
+                $('#addDrinkerAccordion').accordion({
+                    fillSpace: true
+                });
+            });
         </script>
     </jsp:attribute>
     <jsp:body>
@@ -70,53 +78,59 @@
         <div id="addDrinkerDialog" class="popupDialog">
             <span class="closeButton"><a id="closeAddDrinkerDialogButton" href="#">X</a></span>
 
-            <h2><spring:message code="party.add_drinker.registered"/></h2>
-            <form method="post" action="<c:url value="linkUserToParty" />">
-                <input type="hidden" name="partyId" value="${party.id}" />
-                <input type="hidden" id="userId" name="userId" />
-                
-                <table>
-                    <tr>
-                        <th><spring:message code="form.email"/></th>
-                        <td>
-                            <input id="emailInput" type="text" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
-                        </td>
-                        <td id="emailCorrect"></td>
-                    </tr>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="forceRefresh();" /></td>
-                    </tr>
-                </table>
-            </form>
+            <div id="addDrinkerAccordion">
+                <h2><a href="#"><spring:message code="party.add_drinker.registered"/></a></h2>
+                <div>
+                    <form method="post" action="<c:url value="linkUserToParty" />">
+                        <input type="hidden" name="partyId" value="${party.id}" />
+                        <input type="hidden" id="userId" name="userId" />
 
-            <h2><spring:message code="party.add_drinker.guest"/></h2>
-            <form method="post" action="<c:url value="addAnonymousUser" />">
-                <input type="hidden" name="partyId" value="${party.id}" />
-                <table>
-                    <tr>
-                        <th><spring:message code="form.name"/></th>
-                        <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(false);" /></td>
-                    </tr>
-                    <tr>
-                        <th><spring:message code="form.sex"/></th>
-                        <td>
-                            <select name="sex">
-                                <option value="MALE"><spring:message code="form.male"/></option>
-                                <option value="FEMALE"><spring:message code="form.female"/></option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th><spring:message code="form.weight"/></th>
-                        <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" autocomplete="off" /></td>
-                    </tr>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="forceRefresh();" disabled="disabled" /></td>
-                    </tr>
-                </table>
-            </form>
+                        <table>
+                            <tr>
+                                <th><spring:message code="form.email"/></th>
+                                <td>
+                                    <input id="emailInput" type="text" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
+                                </td>
+                                <td id="emailCorrect"></td>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="forceRefresh();" /></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+
+                <h2><a href="#"><spring:message code="party.add_drinker.guest"/></a></h2>
+                <div>
+                    <form method="post" action="<c:url value="addAnonymousUser" />">
+                        <input type="hidden" name="partyId" value="${party.id}" />
+                        <table>
+                            <tr>
+                                <th><spring:message code="form.name"/></th>
+                                <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(false);" /></td>
+                            </tr>
+                            <tr>
+                                <th><spring:message code="form.sex"/></th>
+                                <td>
+                                    <select name="sex">
+                                        <option value="MALE"><spring:message code="form.male"/></option>
+                                        <option value="FEMALE"><spring:message code="form.female"/></option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><spring:message code="form.weight"/></th>
+                                <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" autocomplete="off" /></td>
+                            </tr>
+                            <tr>
+                                <th>&nbsp;</th>
+                                <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="forceRefresh();" disabled="disabled" /></td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
         </div>
                 
         <div id="kickDrinkerDialog" class="popupDialog">
