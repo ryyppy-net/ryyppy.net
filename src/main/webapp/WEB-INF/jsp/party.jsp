@@ -52,6 +52,8 @@
                 $('#addDrinkerAccordion').accordion({
                     fillSpace: true
                 });
+                
+                $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
             });
         </script>
     </jsp:attribute>
@@ -75,7 +77,7 @@
             <div style="margin-top: 13px;" id="groupGraph"></div>
         </div>
 
-        <div id="addDrinkerDialog" class="popupDialog">
+        <div id="addDrinkerDialog" class="popupDialog" title="<spring:message code="party.tooltip.add_drinker"/>">
             <span class="closeButton"><a id="closeAddDrinkerDialogButton" href="#">X</a></span>
 
             <div id="addDrinkerAccordion">
