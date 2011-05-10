@@ -61,6 +61,9 @@ function repaint() {
     $("#addDrinkerDialog").width(bestWidth);
 
     $("#addDrinkerDialog").css('top', Math.max($("#addDrinkerDialog").css('top'), 0));
+    
+    $("#drinkers").height($(window).height() - $("#topic").height() - 20);
+    $(".party").width($("#body").width() - 10 + 'px');
 }
 
 // entry point
@@ -178,7 +181,6 @@ function createAndFillGrid(data) {
             $('#row' + i).append(newElement);
         }
     }
-    fixTheFuckingCss();
     
     updateButtons();
 }
