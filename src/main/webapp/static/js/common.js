@@ -170,3 +170,11 @@ function getCookie( cookie_name )
     }
     return 'fi';
 }
+
+function toggleJQUIDialog(dialog) {
+    if ( dialog.dialog('isOpen') ) {
+        dialog.dialog('close');
+    } else {
+        dialog.dialog('open');
+    }
+}
