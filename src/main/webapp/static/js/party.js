@@ -26,14 +26,11 @@ function initializeButtons() {
     });
 
     $('#kickDrinkerButtonLink').click(function() {
-        toggleDialog($('#kickDrinkerDialog'));
+        toggleJQUIDialog($('#kickDrinkerDialog'));
     });
 
     $('#closeGraphDialogButton').click(function() {
         closeDialog($('#graphDialog'));
-    });
-    $('#closeKickDrinkerDialogButton').click(function() {
-        closeDialog($('#kickDrinkerDialog'));
     });
 }
 

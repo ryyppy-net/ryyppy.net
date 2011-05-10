@@ -52,6 +52,7 @@
                 });
                 
                 $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
+                $('#kickDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
             });
         </script>
     </jsp:attribute>
@@ -133,10 +134,7 @@
             </div>
         </div>
                 
-        <div id="kickDrinkerDialog" class="popupDialog">
-            <span class="closeButton"><a id="closeKickDrinkerDialogButton" href="#">X</a></span>
-
-            <h2><spring:message code="party.remove_drinker"/></h2>
+        <div id="kickDrinkerDialog" class="popupDialog" title="<spring:message code="party.remove_drinker"/>">
             <ul>
                 <c:choose>
                     <c:when test="${fn:length(party.participants) < 2}">
