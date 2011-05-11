@@ -188,53 +188,58 @@ function UserButton(userId, element, color) {
             return;
 
         this.clicked = true;
-        
-        RyyppyAPI.addDrinkToUser(this.userId, function(data) {
-            var drinkUndone = false;
-            var drinkId = data;
+        RyyppyAPI.addDrinkToUser(
+            this.userId,
+            this.showAdding,
+            function() { alert(getMessage('drink_add_failed')); }
+        );
+        this.clicked = false;
+    }
+    
+    this.showAdding = function(data) {
+        var drinkUndone = false;
+        var drinkId = data;
 
-            var undoLink = $('<a>');
-            var undoDiv = $('<div>').text(getMessage('cancel_drink'));
+        var undoLink = $('<a>');
+        var undoDiv = $('<div>').text(getMessage('cancel_drink'));
 
-            undoLink.append(undoDiv);
-            undoLink.click(function() {
-                RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
-                drinkUndone = true;
-                undoDiv.css('background-color', 'red');
-            });
+        undoLink.append(undoDiv);
+        undoLink.click(function() {
+            RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
+            drinkUndone = true;
+            undoDiv.css('background-color', 'red');
+        });
 
-            var newElement = $('<div>');
-            newElement.attr('id', 'undo' + that.userId);
-            newElement.attr('class', 'undo');
-            var width = parseFloat(that.element.css('width'));
-            var height = parseFloat(that.element.css('height'));
-            var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
-            var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
-            newElement.css('width', width);
-            newElement.css('height', height);
-            newElement.css('left', left);
-            newElement.css('top', top);
+        var newElement = $('<div>');
+        newElement.attr('id', 'undo' + that.userId);
+        newElement.attr('class', 'undo');
+        var width = parseFloat(that.element.css('width'));
+        var height = parseFloat(that.element.css('height'));
+        var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
+        var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
+        newElement.css('width', width);
+        newElement.css('height', height);
+        newElement.css('left', left);
+        newElement.css('top', top);
 
-            var title = $('<h1>').text(getMessage('drink_added'));
-            newElement.append(title);
+        var title = $('<h1>').text(getMessage('drink_added'));
+        newElement.append(title);
 
-            newElement.append(undoLink);
-            that.element.append(newElement);
+        newElement.append(undoLink);
+        that.element.append(newElement);
+
+        $('#undo' + that.userId).fadeIn(500).delay(5000).fadeOut(500, function() {
+            that.clicked = false;
+
+            if (!drinkUndone) {
+                that.update();
+                if (that.onDrunk) {
+                   that.onDrunk(that.userId);
+                }
+            }
 
             playSound();
-
-            $('#undo' + that.userId).fadeIn(500).delay(5000).fadeOut(500, function() {
-                that.clicked = false;
-
-                if (!drinkUndone) {
-                    that.update();
-                    if (that.onDrunk) {
-                       that.onDrunk(that.userId);
-                    }
-                }
-
-                newElement.remove();
-            });
+            newElement.remove();
         });
     }
     
