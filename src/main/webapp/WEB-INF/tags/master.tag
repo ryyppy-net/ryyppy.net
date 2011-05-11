@@ -14,10 +14,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
-        
+
         <title><c:out value="${title}"/></title>
 
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
 
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
