@@ -2,7 +2,6 @@ var RyyppyNet = {
     needsRefreshing: false,
     users: [],
     inProgress: [],
-    userButtons: [],
     graph: null,
     graphInterval: null,
     graphVisible: false,
@@ -10,39 +9,48 @@ var RyyppyNet = {
     layout: []
 };
 
-$(document).ready(function() {
-    repaint();
+var repaintAllowed = false;
 
+$(document).ready(function() {
+    repaintAllowed = true;
+    repaint();
     initializeButtons();
+    
+    forceRefresh();
+    
+    // if resized, refresh
+    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
+    
+    // update data every two minutes
+    setInterval(function() {
+        RyyppyAPI.getPartyData(partyId, function() { updateGrid });
+    }, RyyppyNet.updateInterval);
+});
+
+$(window).resize(function() {
+    repaint();
+    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
+        RyyppyNet.needsRefreshing = true;
 });
 
 function initializeButtons() {
     $('#graphButtonLink').click(function() {
         toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);
     });
+
     $('#addDrinkerButtonLink').click(function() {
-        toggleDialog($('#addDrinkerDialog'));
-        $('#emailInput').focus();
-        repaint();
-    });
-    $('#kickDrinkerButtonLink').click(function() {
-        toggleDialog($('#kickDrinkerDialog'));
+        toggleJQUIDialog($('#addDrinkerDialog'));
     });
 
-    $('#closeAddDrinkerDialogButton').click(function() {
-        closeDialog($('#addDrinkerDialog'));
+    $('#kickDrinkerButtonLink').click(function() {
+        toggleJQUIDialog($('#kickDrinkerDialog'));
     });
+
     $('#closeGraphDialogButton').click(function() {
         closeDialog($('#graphDialog'));
     });
-    $('#closeKickDrinkerDialogButton').click(function() {
-        closeDialog($('#kickDrinkerDialog'));
-    });
 }
-
-$(window).resize(function() {
-    repaint();
-});
 
 function updateGroupGraph() {
     if (RyyppyNet.graph != null && RyyppyNet.graphVisible)
@@ -56,6 +64,10 @@ function graphDialogClosed() {
 }
 
 function repaint() {
+    if (!repaintAllowed) return;
+    
+    repaintAllowed = false;
+    
     var windowWidth = $(window).width();
     var bestWidth = Math.min(600, windowWidth - 20);
     $("#addDrinkerDialog").width(bestWidth);
@@ -64,29 +76,15 @@ function repaint() {
     
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
     $(".party").width($("#body").width() - 10 + 'px');
+    
+    repaintAllowed = true;
 }
-
-// entry point
-$(document).ready(function() {
-    forceRefresh();
-    
-    // if resized, refresh
-    setInterval(function() { if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
-    
-    // update data every two minutes
-    setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
-});
-
-$(window).resize(function() {
-    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
-        RyyppyNet.needsRefreshing = true;
-});
 
 function forceRefresh() {
     RyyppyNet.needsRefreshing = false;
-    $('#drinkers').html('');
-    getPartyData(createAndFillGrid);
+    RyyppyAPI.getPartyData(partyId, function(data) {
+        grid.createAndFillGrid(data);
+    });
 }
 
 function determineLayout(n) {
@@ -118,10 +116,6 @@ function pivotLayoutIfNecessary(layout) {
     return layout;
 }
 
-function getPartyData(callback) {
-    $.get(dataUrl, callback);
-}
-
 function areSame(list1, list2) {
     if (list1.length != list2.length) return false;
     
@@ -147,49 +141,18 @@ function updateGrid(data) {
         return;
     }
 
-    updateButtons();
+    grid.updateButtons();
 }
 
 function onUserDrunk() {
     updateGroupGraph();
 }
 
-function createAndFillGrid(data) {
-    $('#drinkers').html('');
-    RyyppyNet.users = parseData(data);
-    
-    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-    RyyppyNet.layout = layout;
-    var width = "" + (1 / layout[0] * 100) + "%;";
-    var height = "" + (1 / layout[1] * 100) + "%;";
-    for (var i = 0; i < layout[1]; i++) {
-        $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
-        for (var j = 0; j < layout[0]; j++) {
-            var colorIndex = i*layout[0] + j;
-            if (colorIndex >= RyyppyNet.users.length) continue;
-            
-            var newElement = $('<td>');
-            newElement.addClass('userButton');
-            newElement.addClass('roundedCornersBordered');
-            newElement.attr("width", width);
-            var user = RyyppyNet.users[colorIndex].id;
-            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
-            ub.onDrunk = onUserDrunk;
-            ub.onDataLoaded = onButtonDataUpdated;
-            RyyppyNet.userButtons.push(ub);
-
-            $('#row' + i).append(newElement);
-        }
-    }
-    
-    updateButtons();
-}
-
 function onButtonDataUpdated() {
     var max = 0;
 
-    for (var i in RyyppyNet.userButtons) {
-        var userButton = RyyppyNet.userButtons[i];
+    for (var i in grid.userButtons) {
+        var userButton = grid.userButtons[i];
         if (userButton.series == null) continue;
         for (var j in userButton.series[0].data) {
             var d = userButton.series[0].data[j];
@@ -201,16 +164,9 @@ function onButtonDataUpdated() {
 
     max = Math.floor(max) + 1;
 
-    for (i in RyyppyNet.userButtons) {
-        userButton = RyyppyNet.userButtons[i];
+    for (i in grid.userButtons) {
+        userButton = grid.userButtons[i];
         userButton.setMaxY(max);
-    }
-}
-
-function updateButtons() {
-    for (i in RyyppyNet.userButtons) {
-        var userButton = RyyppyNet.userButtons[i];
-        userButton.update();
     }
 }
 
@@ -223,4 +179,50 @@ function parseData(data) {
         users.push(user);
     });
     return users;
+}
+
+function UserButtonGrid(target) {
+    this.target = target;
+    this.userButtons = [];
+}
+
+UserButtonGrid.prototype.empty = function() {
+    $(this.target).html('');
+}
+
+UserButtonGrid.prototype.createAndFillGrid = function(data) {
+    RyyppyNet.users = parseData(data);
+
+    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    RyyppyNet.layout = layout;
+    var width = "" + (1 / layout[0] * 100) + "%;";
+    var height = "" + (1 / layout[1] * 100) + "%;";
+    for (var i = 0; i < layout[1]; i++) {
+        $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
+        for (var j = 0; j < layout[0]; j++) {
+            var colorIndex = i*layout[0] + j;
+            if (colorIndex >= RyyppyNet.users.length) continue;
+
+            var newElement = $('<td>');
+            newElement.addClass('userButton');
+            newElement.addClass('roundedCornersBordered');
+            newElement.attr("width", width);
+            var user = RyyppyNet.users[colorIndex].id;
+            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
+            ub.onDrunk = onUserDrunk;
+            ub.onDataLoaded = onButtonDataUpdated;
+            this.userButtons.push(ub);
+
+            $('#row' + i).append(newElement);
+        }
+    }
+
+    this.updateButtons();
+}
+
+UserButtonGrid.prototype.updateButtons = function() {
+    for (i in grid.userButtons) {
+        var userButton = grid.userButtons[i];
+        userButton.update();
+    }
 }
