@@ -106,8 +106,7 @@
                 var time = $("#time").datetimepicker("getDate");
                 if (time != null && time <= new Date()) success = true;
 
-                var button = $("#submitTime");
-                button.attr("disabled", success ? "" : "disabled");
+                $("#submitTime").prop("disabled", success ? "" : "disabled");
             }
 
             $(document).ready(function() {
