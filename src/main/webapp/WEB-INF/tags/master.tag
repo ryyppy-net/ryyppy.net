@@ -18,7 +18,9 @@
         <title><c:out value="${title}"/></title>
 
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+
         <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
 
         <script type="text/javascript">
             var _gaq = _gaq || [];
