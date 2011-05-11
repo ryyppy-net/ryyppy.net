@@ -13,6 +13,7 @@ var RyyppyNet = {
 var repaintAllowed = false;
 
 $(document).ready(function() {
+    repaintAllowed = true;
     repaint();
     initializeButtons();
 });
