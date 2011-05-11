@@ -191,38 +191,38 @@ function parseData(data) {
 
 function UserButtonGrid(target) {
     this.target = target;
+}
 
-    this.empty = function() {
-        $(this.target).html('');
-    }
-    
-    this.createAndFillGrid = function(data) {
-        RyyppyNet.users = parseData(data);
+UserButtonGrid.prototype.empty = function() {
+    $(this.target).html('');
+}
 
-        var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-        RyyppyNet.layout = layout;
-        var width = "" + (1 / layout[0] * 100) + "%;";
-        var height = "" + (1 / layout[1] * 100) + "%;";
-        for (var i = 0; i < layout[1]; i++) {
-            $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
-            for (var j = 0; j < layout[0]; j++) {
-                var colorIndex = i*layout[0] + j;
-                if (colorIndex >= RyyppyNet.users.length) continue;
+UserButtonGrid.prototype.createAndFillGrid = function(data) {
+    RyyppyNet.users = parseData(data);
 
-                var newElement = $('<td>');
-                newElement.addClass('userButton');
-                newElement.addClass('roundedCornersBordered');
-                newElement.attr("width", width);
-                var user = RyyppyNet.users[colorIndex].id;
-                var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
-                ub.onDrunk = onUserDrunk;
-                ub.onDataLoaded = onButtonDataUpdated;
-                RyyppyNet.userButtons.push(ub);
+    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    RyyppyNet.layout = layout;
+    var width = "" + (1 / layout[0] * 100) + "%;";
+    var height = "" + (1 / layout[1] * 100) + "%;";
+    for (var i = 0; i < layout[1]; i++) {
+        $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
+        for (var j = 0; j < layout[0]; j++) {
+            var colorIndex = i*layout[0] + j;
+            if (colorIndex >= RyyppyNet.users.length) continue;
 
-                $('#row' + i).append(newElement);
-            }
+            var newElement = $('<td>');
+            newElement.addClass('userButton');
+            newElement.addClass('roundedCornersBordered');
+            newElement.attr("width", width);
+            var user = RyyppyNet.users[colorIndex].id;
+            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
+            ub.onDrunk = onUserDrunk;
+            ub.onDataLoaded = onButtonDataUpdated;
+            RyyppyNet.userButtons.push(ub);
+
+            $('#row' + i).append(newElement);
         }
-
-        updateButtons();
     }
+
+    updateButtons();
 }
