@@ -18,6 +18,10 @@ function RyyppyAPI() {
     this.removeDrinkFromUser = function(userId, drinkId, callback) {
         $.get('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
     }
+
+    this.getPartyData = function(partyId, callback) {
+        $.get('/API/parties/{0}/'.format(partyId), callback);
+    }
 }
 
 var RyyppyAPI = new RyyppyAPI();

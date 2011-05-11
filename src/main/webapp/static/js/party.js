@@ -23,7 +23,9 @@ $(document).ready(function() {
     setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
     
     // update data every two minutes
-    setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
+    setInterval(function() {
+        RyyppyAPI.getPartyData(partyId, function() { updateGrid });
+    }, RyyppyNet.updateInterval);
 });
 
 $(window).resize(function() {
@@ -81,7 +83,9 @@ function repaint() {
 
 function forceRefresh() {
     RyyppyNet.needsRefreshing = false;
-    getPartyData(grid.createAndFillGrid);
+    RyyppyAPI.getPartyData(partyId, function(data) {
+        grid.createAndFillGrid(data);
+    });
 }
 
 function determineLayout(n) {
@@ -111,10 +115,6 @@ function pivotLayoutIfNecessary(layout) {
     }
 
     return layout;
-}
-
-function getPartyData(callback) {
-    $.get(dataUrl, callback);
 }
 
 function areSame(list1, list2) {

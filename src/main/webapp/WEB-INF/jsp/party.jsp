@@ -7,11 +7,7 @@
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
-        
-        <script type="text/javascript">
-            // global urls
-            var dataUrl = '/API/parties/${party.id}/';
-        </script>
+
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         
         <!-- hack -->
@@ -28,6 +24,8 @@
         <script type="text/javascript" src="/static/js/party.js"></script>
 
         <script type="text/javascript">
+            var partyId = ${party.id};
+            
             function graphDialogOpened() {
                 RyyppyNet.graphVisible = true;
                 var element = $('#groupGraph');
