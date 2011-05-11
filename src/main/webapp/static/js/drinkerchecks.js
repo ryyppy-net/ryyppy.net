@@ -37,11 +37,11 @@ function getIdByEmail(email, partyId) {
         if (data !== '0') {
             $("#emailCorrect").html("<img style='width:20px; height:20px;' src='/static/images/yes.png' alt='user found' />").removeClass("error");
             $('#userId').val(data);
-            $('#linkUserButton').attr("disabled", "");
+            $('#linkUserButton').prop("disabled", "");
         }
         else {
             $("#emailCorrect").html("<img style='width:20px; height:20px;' src='/static/images/no.png' alt='user not found' />").addClass("error");
-            $('#linkUserButton').attr("disabled", "disabled");
+            $('#linkUserButton').prop("disabled", "disabled");
         }
     });
 }
