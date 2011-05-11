@@ -16,6 +16,21 @@ $(document).ready(function() {
     repaintAllowed = true;
     repaint();
     initializeButtons();
+    
+    forceRefresh();
+    
+    // if resized, refresh
+    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
+    
+    // update data every two minutes
+    setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
+});
+
+$(window).resize(function() {
+    repaint();
+    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
+        RyyppyNet.needsRefreshing = true;
 });
 
 function initializeButtons() {
@@ -35,10 +50,6 @@ function initializeButtons() {
         closeDialog($('#graphDialog'));
     });
 }
-
-$(window).resize(function() {
-    repaint();
-});
 
 function updateGroupGraph() {
     if (RyyppyNet.graph != null && RyyppyNet.graphVisible)
@@ -67,23 +78,6 @@ function repaint() {
     
     repaintAllowed = true;
 }
-
-// entry point
-$(document).ready(function() {
-    forceRefresh();
-    
-    // if resized, refresh
-    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
-    
-    // update data every two minutes
-    setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
-});
-
-$(window).resize(function() {
-    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
-        RyyppyNet.needsRefreshing = true;
-});
 
 function forceRefresh() {
     RyyppyNet.needsRefreshing = false;
