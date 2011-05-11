@@ -2,7 +2,6 @@ var RyyppyNet = {
     needsRefreshing: false,
     users: [],
     inProgress: [],
-    userButtons: [],
     graph: null,
     graphInterval: null,
     graphVisible: false,
@@ -152,8 +151,8 @@ function onUserDrunk() {
 function onButtonDataUpdated() {
     var max = 0;
 
-    for (var i in RyyppyNet.userButtons) {
-        var userButton = RyyppyNet.userButtons[i];
+    for (var i in grid.userButtons) {
+        var userButton = grid.userButtons[i];
         if (userButton.series == null) continue;
         for (var j in userButton.series[0].data) {
             var d = userButton.series[0].data[j];
@@ -165,15 +164,15 @@ function onButtonDataUpdated() {
 
     max = Math.floor(max) + 1;
 
-    for (i in RyyppyNet.userButtons) {
-        userButton = RyyppyNet.userButtons[i];
+    for (i in grid.userButtons) {
+        userButton = grid.userButtons[i];
         userButton.setMaxY(max);
     }
 }
 
 function updateButtons() {
-    for (i in RyyppyNet.userButtons) {
-        var userButton = RyyppyNet.userButtons[i];
+    for (i in grid.userButtons) {
+        var userButton = grid.userButtons[i];
         userButton.update();
     }
 }
@@ -191,6 +190,7 @@ function parseData(data) {
 
 function UserButtonGrid(target) {
     this.target = target;
+    this.userButtons = [];
 }
 
 UserButtonGrid.prototype.empty = function() {
@@ -218,7 +218,7 @@ UserButtonGrid.prototype.createAndFillGrid = function(data) {
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
             ub.onDrunk = onUserDrunk;
             ub.onDataLoaded = onButtonDataUpdated;
-            RyyppyNet.userButtons.push(ub);
+            this.userButtons.push(ub);
 
             $('#row' + i).append(newElement);
         }
