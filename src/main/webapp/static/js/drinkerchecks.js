@@ -13,7 +13,7 @@ function checkDrinkerFields(checkEmail) {
         success = false;
     
     var button = $("#submitButton");
-    button.attr("disabled", success ? "" : "disabled");
+    button.prop("disabled", success ? "" : "disabled");
 }
 
 function checkEmail(email, exclude) {
