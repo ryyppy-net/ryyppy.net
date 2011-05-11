@@ -46,6 +46,8 @@
                     RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
             }
             
+            var grid = new UserButtonGrid($('#drinkers'));
+
             $(document).ready(function() {
                 $('#addDrinkerAccordion').accordion({
                     fillSpace: true
