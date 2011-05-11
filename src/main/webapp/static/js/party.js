@@ -70,10 +70,9 @@ function repaint() {
     
     var windowWidth = $(window).width();
     var bestWidth = Math.min(600, windowWidth - 20);
-    $("#addDrinkerDialog").width(bestWidth);
+    $("#addDrinkerDialog").dialog('option', 'width', bestWidth);
+    $("#kickDrinkerDialog").dialog('option', 'width', bestWidth);
 
-    $("#addDrinkerDialog").css('top', Math.max($("#addDrinkerDialog").css('top'), 0));
-    
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
     $(".party").width($("#body").width() - 10 + 'px');
     
