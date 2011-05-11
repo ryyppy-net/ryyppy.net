@@ -43,6 +43,8 @@
                 if (!RyyppyNet.graphInterval)
                     RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
             }
+            
+            var grid = new UserButtonGrid($('#drinkers'));
         </script>
     </jsp:attribute>
     <jsp:body>

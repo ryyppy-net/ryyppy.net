@@ -10,9 +10,10 @@ var RyyppyNet = {
     layout: []
 };
 
+var repaintAllowed = false;
+
 $(document).ready(function() {
     repaint();
-
     initializeButtons();
 });
 
@@ -56,6 +57,10 @@ function graphDialogClosed() {
 }
 
 function repaint() {
+    if (!repaintAllowed) return;
+    
+    repaintAllowed = false;
+    
     var windowWidth = $(window).width();
     var bestWidth = Math.min(600, windowWidth - 20);
     $("#addDrinkerDialog").width(bestWidth);
@@ -64,6 +69,8 @@ function repaint() {
     
     $("#drinkers").height($(window).height() - $("#topic").height() - 20);
     $(".party").width($("#body").width() - 10 + 'px');
+    
+    repaintAllowed = true;
 }
 
 // entry point
@@ -71,7 +78,7 @@ $(document).ready(function() {
     forceRefresh();
     
     // if resized, refresh
-    setInterval(function() { if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
+    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
     
     // update data every two minutes
     setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
@@ -85,8 +92,7 @@ $(window).resize(function() {
 
 function forceRefresh() {
     RyyppyNet.needsRefreshing = false;
-    $('#drinkers').html('');
-    getPartyData(createAndFillGrid);
+    getPartyData(grid.createAndFillGrid);
 }
 
 function determineLayout(n) {
@@ -154,37 +160,6 @@ function onUserDrunk() {
     updateGroupGraph();
 }
 
-function createAndFillGrid(data) {
-    $('#drinkers').html('');
-    RyyppyNet.users = parseData(data);
-    
-    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-    RyyppyNet.layout = layout;
-    var width = "" + (1 / layout[0] * 100) + "%;";
-    var height = "" + (1 / layout[1] * 100) + "%;";
-    for (var i = 0; i < layout[1]; i++) {
-        $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
-        for (var j = 0; j < layout[0]; j++) {
-            var colorIndex = i*layout[0] + j;
-            if (colorIndex >= RyyppyNet.users.length) continue;
-            
-            var newElement = $('<td>');
-            newElement.addClass('userButton');
-            newElement.addClass('roundedCornersBordered');
-            newElement.attr("width", width);
-            var user = RyyppyNet.users[colorIndex].id;
-            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
-            ub.onDrunk = onUserDrunk;
-            ub.onDataLoaded = onButtonDataUpdated;
-            RyyppyNet.userButtons.push(ub);
-
-            $('#row' + i).append(newElement);
-        }
-    }
-    
-    updateButtons();
-}
-
 function onButtonDataUpdated() {
     var max = 0;
 
@@ -223,4 +198,42 @@ function parseData(data) {
         users.push(user);
     });
     return users;
+}
+
+function UserButtonGrid(target) {
+    this.target = target;
+
+    this.empty = function() {
+        $(this.target).html('');
+    }
+    
+    this.createAndFillGrid = function(data) {
+        RyyppyNet.users = parseData(data);
+
+        var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+        RyyppyNet.layout = layout;
+        var width = "" + (1 / layout[0] * 100) + "%;";
+        var height = "" + (1 / layout[1] * 100) + "%;";
+        for (var i = 0; i < layout[1]; i++) {
+            $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
+            for (var j = 0; j < layout[0]; j++) {
+                var colorIndex = i*layout[0] + j;
+                if (colorIndex >= RyyppyNet.users.length) continue;
+
+                var newElement = $('<td>');
+                newElement.addClass('userButton');
+                newElement.addClass('roundedCornersBordered');
+                newElement.attr("width", width);
+                var user = RyyppyNet.users[colorIndex].id;
+                var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
+                ub.onDrunk = onUserDrunk;
+                ub.onDataLoaded = onButtonDataUpdated;
+                RyyppyNet.userButtons.push(ub);
+
+                $('#row' + i).append(newElement);
+            }
+        }
+
+        updateButtons();
+    }
 }
