@@ -11,6 +11,9 @@
                 openDialog($("#addDrinkerDialog"));
                 $("#drinkerName").focus();
                 
+                $('.userField').live('keyup', function() { checkDrinkerFields(true); });
+                $('#email').live('keyup', function() { checkEmail($(this).val()); });
+                
                 repaint();
             });
             
@@ -38,10 +41,10 @@
 
                 <form method="post" action="addUser">
                     <label for="drinkerName"><spring:message code="form.name" /></label><br />
-                    <input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" /><br />
+                    <input id="drinkerName" class="userField" type="text" name="name" /><br />
 
                     <label for="email"><spring:message code="form.email" /></label><br />
-                    <input id="email" type="text" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
+                    <input id="email" class="userField" type="text" name="email" />
                     <span id="emailCorrect">&nbsp;</span><br />
 
                     <label for="sex"><spring:message code="form.sex" /></label><br />
@@ -51,7 +54,7 @@
                     </select><br />
 
                     <label for="drinkerWeight"><spring:message code="form.weight" /></label><br />
-                    <input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" autocomplete="off" /><br />
+                    <input id="drinkerWeight" class="userField" type="password" name="weight" autocomplete="off" /><br />
 
                     <input id="submitButton" type="submit" value="<spring:message code="form.add_drinker" />" />
                 </form>
