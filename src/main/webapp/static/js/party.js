@@ -141,7 +141,7 @@ function updateGrid(data) {
         return;
     }
 
-    updateButtons();
+    grid.updateButtons();
 }
 
 function onUserDrunk() {
@@ -167,13 +167,6 @@ function onButtonDataUpdated() {
     for (i in grid.userButtons) {
         userButton = grid.userButtons[i];
         userButton.setMaxY(max);
-    }
-}
-
-function updateButtons() {
-    for (i in grid.userButtons) {
-        var userButton = grid.userButtons[i];
-        userButton.update();
     }
 }
 
@@ -224,5 +217,12 @@ UserButtonGrid.prototype.createAndFillGrid = function(data) {
         }
     }
 
-    updateButtons();
+    this.updateButtons();
+}
+
+UserButtonGrid.prototype.updateButtons = function() {
+    for (i in grid.userButtons) {
+        var userButton = grid.userButtons[i];
+        userButton.update();
+    }
 }
