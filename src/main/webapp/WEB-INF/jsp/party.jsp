@@ -5,13 +5,10 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="${party.name}">
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
-        
         <script type="text/javascript">
             // global urls
             var dataUrl = '/API/parties/${party.id}/';
         </script>
-        <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
