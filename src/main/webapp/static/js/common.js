@@ -11,8 +11,10 @@ function RyyppyAPI() {
         $.get('/API/users/{0}/show-history'.format(userId), callback);
     }
     
-    this.addDrinkToUser = function(userId, callback) {
-        $.get('/API/users/{0}/add-drink'.format(userId), callback);
+    this.addDrinkToUser = function(userId, successCallback, errorCallback) {
+        $.ajax({url: '/API/users/{0}/add-drink'.format(userId)})
+            .success(successCallback)
+            .error(errorCallback);
     }
 
     this.removeDrinkFromUser = function(userId, drinkId, callback) {
@@ -147,6 +149,7 @@ MESSAGES['en']['idle'] = 'Idle ';
 MESSAGES['en']['cancel_drink'] = 'Cancel drink';
 MESSAGES['en']['loading'] = 'Loading...';
 MESSAGES['en']['drink_added'] = "Adding a drink...";
+MESSAGES['en']['drink_add_failed'] = "Adding a drink failed! Please refresh the page and try again.";
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
 MESSAGES['fi']['portion'] = ' annos';
@@ -155,6 +158,7 @@ MESSAGES['fi']['idle'] = 'Juomatta ';
 MESSAGES['fi']['cancel_drink'] = 'Peru juoma';
 MESSAGES['fi']['loading'] = 'Ladataan...';
 MESSAGES['fi']['drink_added'] = "Juomaa lisätään...";
+MESSAGES['fi']['drink_add_failed'] = "Juoman lisääminen epäonnistui! Ole hyvä ja lataa sivu uudestaan.";
 
 function getCookie( cookie_name )
 {
