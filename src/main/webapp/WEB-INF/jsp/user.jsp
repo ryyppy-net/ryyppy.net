@@ -4,10 +4,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
-        <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
@@ -108,8 +106,7 @@
                 var time = $("#time").datetimepicker("getDate");
                 if (time != null && time <= new Date()) success = true;
 
-                var button = $("#submitTime");
-                button.attr("disabled", success ? "" : "disabled");
+                $("#submitTime").prop("disabled", success ? "" : "disabled");
             }
 
             $(document).ready(function() {
