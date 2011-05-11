@@ -23,7 +23,7 @@ $(document).ready(function() {
     
     // update data every two minutes
     setInterval(function() {
-        RyyppyAPI.getPartyData(partyId, function() { updateGrid });
+        RyyppyAPI.getPartyData(partyId, function() {updateGrid});
     }, RyyppyNet.updateInterval);
 });
 
@@ -187,10 +187,13 @@ function UserButtonGrid(target) {
 }
 
 UserButtonGrid.prototype.empty = function() {
-    $(this.target).html('');
+    // TODO: Use this.target instead of hardcoded ID
+    $('#drinkers').html('');
 }
 
 UserButtonGrid.prototype.createAndFillGrid = function(data) {
+    this.empty();
+    
     RyyppyNet.users = parseData(data);
 
     var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
