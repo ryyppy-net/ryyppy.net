@@ -65,7 +65,9 @@ function repaint() {
     $("#addDrinkerDialog").dialog('option', 'width', bestWidth);
     $("#kickDrinkerDialog").dialog('option', 'width', bestWidth);
 
-    $("#drinkers").height($(window).height() - $("#topic").height() - 20);
+    $("#drinkers").height($(window).height() - $("#topic").height() - 30);
+    $("#drinkers").width($(window).width() - 20);
+
     $(".party").width($("#body").width() - 10 + 'px');
     
     repaintAllowed = true;
