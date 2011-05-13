@@ -65,6 +65,7 @@ function repaint() {
     $("#addDrinkerDialog").dialog('option', 'width', bestWidth);
     $("#kickDrinkerDialog").dialog('option', 'width', bestWidth);
 
+    grid.updateGrid();
     $("#drinkers").height($(window).height() - $("#topic").height() - 30);
     $("#drinkers").width($(window).width() - 20);
 
