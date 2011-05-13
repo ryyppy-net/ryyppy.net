@@ -121,6 +121,9 @@ function pageUpdate() {
     $('#topic').text(partyHost.name);
     grid.users = partyHost.users;
     grid.updateGrid();
+    
+    if (RyyppyNet.graph !== null)
+        RyyppyNet.graph.users = partyHost.users;
 }
 
 
@@ -149,10 +152,11 @@ PartyHost.prototype.parseUserData = function(data) {
 
     $(data).find('user').each(function() {
         var part = $(this);
-        var user = {
-            id: part.find('id').text(), 
-            alcohol: part.find('alcoholInPromilles').text()
-        };
+
+        var user = new User();
+        user.id = part.find('id').text();
+        user.promilles = part.find('alcoholInPromilles').text();
+        user.name = part.find('name').text();
 
         users.push(user);
     });
@@ -168,4 +172,11 @@ PartyHost.prototype.update = function() {
         if (typeof that.onUpdate === 'function')
             that.onUpdate();
     });
+}
+
+
+function User() {
+    this.id = -1;
+    this.name = "";
+    this.promilles = 0.0;
 }

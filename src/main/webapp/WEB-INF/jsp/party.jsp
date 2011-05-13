@@ -35,11 +35,9 @@
                 element.css('width', dialog.css('width')).css('height', (parseInt(dialog.css('height'), 0) - 10) + 'px');
                 
                 if (RyyppyNet.graph == null) {
-<c:forEach items="${party.participants}" var="participant">
-                    RyyppyNet.users.push({name: '${participant.name}', id:'${participant.id}'});
-</c:forEach>
-                    RyyppyNet.graph = new GroupGraph(RyyppyNet.users, element);
+                    RyyppyNet.graph = new GroupGraph(partyHost.users, element);
                 }
+
                 RyyppyNet.graph.options.legend = { position:'nw' };
                 updateGroupGraph();
                 if (!RyyppyNet.graphInterval)
