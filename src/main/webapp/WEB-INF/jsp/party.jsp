@@ -16,6 +16,7 @@
         
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
+        <script type="text/javascript" src="/static/js/userbuttongrid.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/partygraph.js"></script>
         <script type="text/javascript" src="/static/js/party.js"></script>
