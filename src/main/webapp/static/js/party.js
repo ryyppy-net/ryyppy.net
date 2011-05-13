@@ -18,7 +18,7 @@ $(document).ready(function() {
     
     // update data every two minutes
     setInterval(function() {
-        partyHost.update(data);
+        partyHost.update();
     }, RyyppyNet.updateInterval);
 });
 
@@ -167,4 +167,3 @@ PartyHost.prototype.update = function() {
             that.onUpdate();
     });
 }
-
