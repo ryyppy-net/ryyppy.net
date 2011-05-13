@@ -24,9 +24,6 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     repaint();
-    var tmp = grid.pivotLayoutIfNecessary(grid.determineLayout(RyyppyNet.users.length));
-    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
-        RyyppyNet.needsRefreshing = true;
 });
 
 function initializeButtons() {
@@ -89,17 +86,6 @@ function areSame(list1, list2) {
     }
     
     return true;
-}
-
-function updateGrid(data) {
-    partyHost.update(data);
-    
-    if (!areSame(partyHost.users, RyyppyNet.users)) {
-        forceRefresh();
-        return;
-    }
-
-    grid.updateButtons();
 }
 
 function onUserDrunk() {
