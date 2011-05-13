@@ -6,7 +6,7 @@ var RyyppyNet = {
     graph: null,
     graphInterval: null,
     graphVisible: false,
-    updateInterval: 2 * 60 * 100,
+    updateInterval: 2 * 60 * 1000,
     layout: []
 };
 
