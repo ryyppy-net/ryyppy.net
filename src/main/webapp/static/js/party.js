@@ -19,17 +19,21 @@ $(document).ready(function() {
     forceRefresh();
     
     // if resized, refresh
-    setInterval(function() {if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
+    setInterval(function() {
+        if (RyyppyNet.needsRefreshing === true) forceRefresh();
+    }, 1000);
     
     // update data every two minutes
     setInterval(function() {
-        RyyppyAPI.getPartyData(partyId, function() {updateGrid});
+        RyyppyAPI.getPartyData(partyId, function() {
+            updateGrid
+        });
     }, RyyppyNet.updateInterval);
 });
 
 $(window).resize(function() {
     repaint();
-    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    var tmp = grid.pivotLayoutIfNecessary(grid.determineLayout(RyyppyNet.users.length));
     if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
         RyyppyNet.needsRefreshing = true;
 });
@@ -84,35 +88,6 @@ function forceRefresh() {
     RyyppyAPI.getPartyData(partyId, function(data) {
         grid.createAndFillGrid(data);
     });
-}
-
-function determineLayout(n) {
-    var best = [0, 0];
-    var initial = Math.ceil(Math.sqrt(n));
-    var square_candidate = initial * initial;
-    var other_candidate  = (initial - 1) * (initial + 1);
-
-    if (Math.abs(square_candidate - n) < Math.abs(other_candidate - n)) {
-        best = [initial, initial];
-    } else {
-        best = [initial - 1, initial + 1];
-    }
-
-    if ((best[0] * (best[1] - 1)) >= n) {
-        best[1] = best[1] - 1;
-    }
-
-    return best;
-}
-
-function pivotLayoutIfNecessary(layout) {
-    var layout_aspect = layout[0] < layout[1];
-    var window_aspect = $(window).width() < $(window).height();
-    if (layout_aspect != window_aspect) {
-        return [layout[1], layout[0]];
-    }
-
-    return layout;
 }
 
 function areSame(list1, list2) {
@@ -173,7 +148,10 @@ function parseData(data) {
     var users = [];
     $(data).find('user').each(function() {
         var part = $(this);
-        var user = {id: part.find('id').text(), alcohol: part.find('alcoholInPromilles').text()};
+        var user = {
+            id: part.find('id').text(), 
+            alcohol: part.find('alcoholInPromilles').text()
+        };
 
         users.push(user);
     });
@@ -195,7 +173,7 @@ UserButtonGrid.prototype.createAndFillGrid = function(data) {
     
     RyyppyNet.users = parseData(data);
 
-    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
+    var layout = this.pivotLayoutIfNecessary(this.determineLayout(RyyppyNet.users.length));
     RyyppyNet.layout = layout;
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
@@ -227,4 +205,33 @@ UserButtonGrid.prototype.updateButtons = function() {
         var userButton = grid.userButtons[i];
         userButton.update();
     }
+}
+
+UserButtonGrid.prototype.determineLayout = function(n) {
+    var best = [0, 0];
+    var initial = Math.ceil(Math.sqrt(n));
+    var square_candidate = initial * initial;
+    var other_candidate  = (initial - 1) * (initial + 1);
+
+    if (Math.abs(square_candidate - n) < Math.abs(other_candidate - n)) {
+        best = [initial, initial];
+    } else {
+        best = [initial - 1, initial + 1];
+    }
+
+    if ((best[0] * (best[1] - 1)) >= n) {
+        best[1] = best[1] - 1;
+    }
+
+    return best;
+}
+
+UserButtonGrid.prototype.pivotLayoutIfNecessary = function(layout) {
+    var layout_aspect = layout[0] < layout[1];
+    var window_aspect = $(window).width() < $(window).height();
+    if (layout_aspect != window_aspect) {
+        return [layout[1], layout[0]];
+    }
+
+    return layout;
 }
