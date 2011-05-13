@@ -1,12 +1,9 @@
 var RyyppyNet = {
-    needsRefreshing: false,
-    users: [],
     inProgress: [],
     graph: null,
     graphInterval: null,
     graphVisible: false,
-    updateInterval: 2 * 60 * 1000,
-    layout: []
+    updateInterval: 2 * 60 * 1000
 };
 
 var repaintAllowed = false;
