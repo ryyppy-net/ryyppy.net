@@ -26,7 +26,7 @@ $(document).ready(function() {
     // update data every two minutes
     setInterval(function() {
         RyyppyAPI.getPartyData(partyId, function() {
-            updateGrid
+            updateGrid();
         });
     }, RyyppyNet.updateInterval);
 });
