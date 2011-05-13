@@ -24,6 +24,10 @@
         <script type="text/javascript">
             var partyId = ${party.id};
             
+            var partyHost = new PartyHost(partyId);
+            partyHost.onUpdate = pageUpdate;
+            var grid = new UserButtonGrid($('#drinkers'));
+
             function graphDialogOpened() {
                 RyyppyNet.graphVisible = true;
                 var element = $('#groupGraph');
@@ -41,8 +45,6 @@
                 if (!RyyppyNet.graphInterval)
                     RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
             }
-            
-            var grid = new UserButtonGrid($('#drinkers'));
 
             $(document).ready(function() {
                 $('#addDrinkerAccordion').accordion({
@@ -61,7 +63,7 @@
             <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a>
             <a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a>
             <div class="headerTextDiv">
-                <h1 id="topic"><c:out value="${party.name}" /></h1>
+                <h1 id="topic">&nbsp;</h1>
             </div>
         </div>
 
