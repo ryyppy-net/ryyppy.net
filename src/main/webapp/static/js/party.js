@@ -16,18 +16,9 @@ $(document).ready(function() {
     repaint();
     initializeButtons();
     
-    forceRefresh();
-    
-    // if resized, refresh
-    setInterval(function() {
-        if (RyyppyNet.needsRefreshing === true) forceRefresh();
-    }, 1000);
-    
     // update data every two minutes
     setInterval(function() {
-        RyyppyAPI.getPartyData(partyId, function() {
-            updateGrid();
-        });
+        partyHost.update(data);
     }, RyyppyNet.updateInterval);
 });
 
@@ -83,13 +74,6 @@ function repaint() {
     repaintAllowed = true;
 }
 
-function forceRefresh() {
-    RyyppyNet.needsRefreshing = false;
-    RyyppyAPI.getPartyData(partyId, function(data) {
-        grid.createAndFillGrid(data);
-    });
-}
-
 function areSame(list1, list2) {
     if (list1.length != list2.length) return false;
     
@@ -108,9 +92,9 @@ function areSame(list1, list2) {
 }
 
 function updateGrid(data) {
-    var newdata = parseData(data);
+    partyHost.update(data);
     
-    if (!areSame(newdata, RyyppyNet.users)) {
+    if (!areSame(partyHost.users, RyyppyNet.users)) {
         forceRefresh();
         return;
     }
@@ -144,8 +128,37 @@ function onButtonDataUpdated() {
     }
 }
 
-function parseData(data) {
+
+function pageUpdate() {
+    $('#topic').text(partyHost.name);
+    grid.users = partyHost.users;
+    grid.updateGrid();
+}
+
+
+
+function PartyHost(partyId) {
+    this.partyId = partyId;
+    this.name = "";
+    this.users = [];
+    this.onUpdate = undefined;
+    
+    this.update();
+}
+
+PartyHost.prototype.parseData = function(data) {
+    this.parseUserData(data);
+    this.parsePartyData(data);
+}
+
+PartyHost.prototype.parsePartyData = function(data) {
+    // TODO: Ugly hack
+    this.name = $($(data).find('name')[0]).text();
+}
+
+PartyHost.prototype.parseUserData = function(data) {
     var users = [];
+
     $(data).find('user').each(function() {
         var part = $(this);
         var user = {
@@ -155,5 +168,17 @@ function parseData(data) {
 
         users.push(user);
     });
-    return users;
+
+    this.users = users;
 }
+
+PartyHost.prototype.update = function() {
+    var that = this;
+    RyyppyAPI.getPartyData(partyId, function(data) {
+        that.parseData(data);
+
+        if (typeof that.onUpdate === 'function')
+            that.onUpdate();
+    });
+}
+
