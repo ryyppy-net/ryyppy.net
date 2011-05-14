@@ -14,6 +14,9 @@
                 clip = new ZeroClipboard.Client();
                 clip.glue( 'd_clip_button', 'd_clip_container' );
                 clip.setText('<c:out value="${passphrase}" />');
+                clip.addEventListener('complete', function() {
+                    alert('<spring:message code="passphrase.copied" />');
+                });
             });
 
             $(window).resize(function() {

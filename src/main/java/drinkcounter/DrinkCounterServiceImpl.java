@@ -132,7 +132,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    @Transactional
     public void addDrinkToDate(int userId, String date, double timezoneOffset) {
         DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
         DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").withZone(dtz);
@@ -140,13 +139,20 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
         if (dt.isAfterNow()) throw new IllegalArgumentException(date);
 
+        addDrinkToDate(userId, dt.toDate());
+    }
+
+    @Override
+    @Transactional
+    public void addDrinkToDate(int userId, Date date) {
+        if (date.after(new Date())) throw new IllegalArgumentException("date");
         User user = userDAO.readByPrimaryKey(userId);
         Drink drink = new Drink();
         drink.setDrinker(user);
-        drink.setTimeStamp(dt.toDate());
+        drink.setTimeStamp(date);
         user.drink(drink);
         drinkDao.save(drink);
-        log.info("User {} has drunk a drink at {}", user.getName(), dt.toString());
+        log.info("User {} has drunk a drink at {}", user.getName(), date.toString());
     }
 
     @Override

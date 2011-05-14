@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package drinkcounter;
 
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +27,7 @@ public interface DrinkCounterService {
     int addDrink(int userId);
     void removeDrinkFromUser(int userId, int drinkId);
     void addDrinkToDate(int id, String date, double timezoneOffset);
+    void addDrinkToDate(int userId, Date date);
     long getTotalDrinkCount();
 
 }

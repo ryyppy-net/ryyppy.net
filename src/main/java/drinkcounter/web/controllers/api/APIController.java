@@ -13,6 +13,7 @@ import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -251,20 +252,58 @@ public class APIController {
     public HttpEntity handleExceptions(){
         return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    
+
+
+
+
+
     @RequestMapping("/passphrase/{passphrase}")
-    public @ResponseBody String passphrase(@PathVariable String passphrase) throws IOException{
-        // TODO korjaa käyttämään userXml-metodia, tämä on lähinnä PoC vasta
+    public @ResponseBody String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
             throw new NotEnoughRightsException();
-        
+
+        return getUserCsv(user);
+    }
+
+    @RequestMapping("/passphrase/{passphrase}/add-drink/{time}")
+    public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
+        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        if (user == null)
+            throw new NotEnoughRightsException();
+
+        try {
+            if (time == null || time.equals("") || time.equals("0"))
+                drinkCounterService.addDrink(user.getId());
+            else
+                drinkCounterService.addDrinkToDate(user.getId(), new Date(Long.parseLong(time)));
+        } catch (Exception e) {
+            return "-1";
+        }
+
+        return getUserCsv(user);
+    }
+
+    @RequestMapping("/passphrase/{passphrase}/undo-drink")
+    public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase) throws IOException{
+        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        if (user == null)
+            throw new NotEnoughRightsException();
+
+        int count = user.getDrinks().size();
+        if (count > 0)
+            drinkCounterService.removeDrinkFromUser(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
+
+        return getUserCsv(user);
+    }
+
+    private String getUserCsv(User user) throws IOException {
         // I've had it with this motherfucking XML in this motherfucking Java
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{user.getName(), Double.toString(user.getPromilles())});
         csvWriter.close();
-        
+
         return baos.toString();
     }
 }
