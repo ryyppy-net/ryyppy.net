@@ -9,6 +9,9 @@ var RyyppyNet = {
 var repaintAllowed = false;
 
 $(document).ready(function() {
+    document.documentElement.style.overflow = 'hidden';	 // firefox, chrome
+    document.body.scroll = "no";	// ie only
+
     repaintAllowed = true;
     repaint();
     initializeButtons();

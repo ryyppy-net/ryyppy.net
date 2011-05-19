@@ -19,6 +19,7 @@ UserButtonGrid.prototype.updateGrid = function() {
     RyyppyNet.layout = layout;
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
+    this.userButtons = [];
     for (var i = 0; i < layout[1]; i++) {
         $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
         for (var j = 0; j < layout[0]; j++) {
