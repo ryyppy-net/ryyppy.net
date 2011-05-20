@@ -38,7 +38,6 @@ import javax.persistence.Transient;
 @Entity
 @Table(name="Users")
 public class User extends AbstractEntity{
-
     public enum Sex {
         MALE(0.75f), FEMALE(0.66f);
         public float factor;
@@ -56,6 +55,7 @@ public class User extends AbstractEntity{
     private float weight = 70;
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<Drink>();
+    private String passphrase;
     
     // authentication attributes
     private String openId;
@@ -115,6 +115,15 @@ public class User extends AbstractEntity{
     public float getWeight() {
         return weight;
     }
+
+    public void setPassphrase(String passphrase) {
+        this.passphrase = passphrase;
+    }
+    
+    public String getPassphrase() {
+        return passphrase;
+    }
+
 
     /**
      * Weight in kilos
