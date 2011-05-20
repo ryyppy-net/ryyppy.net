@@ -5,6 +5,7 @@ import drinkcounter.dao.UserDAO;
 import drinkcounter.model.User;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,5 +107,17 @@ public class UserServiceImpl implements UserService{
         if (email == null || email.length() == 0) return null;
         
         return userDAO.findByEmail(email.toLowerCase());
-    }    
+    }
+
+    @Override
+    public void generatePassphrase(User user) {
+        String passphrase = UUID.randomUUID().toString();
+        user.setPassphrase(passphrase);
+        updateUser(user);
+    }
+
+    @Override
+    public User getUserByPassphrase(String passphrase) {
+        return userDAO.findByPassphrase(passphrase);
+    }
 }
