@@ -24,4 +24,8 @@ public interface UserService {
     boolean emailIsCorrect(String email);
     
     User getUserByEmail(String email);
+
+    void generatePassphrase(User user);
+
+    public User getUserByPassphrase(String toLowerCase);
 }

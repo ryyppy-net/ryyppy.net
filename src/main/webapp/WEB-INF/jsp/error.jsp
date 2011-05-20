@@ -12,7 +12,7 @@
             <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
         </div>
         
-        <div class="login" style="text-align:left;">
+        <div class="login" style="text-align:left;padding-left:30px;">
             <h2> <spring:message code="error.title" /></h2>
             <p><spring:message code="error.reasons" /></p>
             <ul>
