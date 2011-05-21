@@ -60,24 +60,18 @@ function repaint() {
     
     repaintAllowed = false;
     
-    var windowWidth = $(window).width();
-    var bestWidth = Math.min(600, windowWidth - 20);
-
     grid.updateGrid();
     $("#drinkers").height($(window).height() - $("#topic").height() - 30);
     $("#drinkers").width($(window).width() - 20);
 
     $(".party").width($("#body").width() - 10 + 'px');
 
-    resizePopupDialogs(bestWidth);
+    var bestSize = calculateBestDialogSize();
+    resizePopupDialogs(bestSize);
 
     repaintAllowed = true;
 }
 
-function resizePopupDialogs(maxWidth) {
-    $('.popupDialog').dialog('option', 'width', maxWidth)
-                     .dialog('option', 'position', 'center');
-}
 
 function areSame(list1, list2) {
     if (list1.length != list2.length) return false;

@@ -185,9 +185,22 @@ function toggleJQUIDialog(dialog) {
     } else {
         dialog.dialog('open');
     }
+    
+    var bestSize = calculateBestDialogSize();
+    resizePopupDialogs(bestSize);
 }
 
-function resizePopupDialogs(maxWidth) {
-    $('.popupDialog').dialog('option', 'width', maxWidth)
+function calculateBestDialogSize() {
+    var windowWidth = $(window).width();
+    var bestWidth = Math.min(600, windowWidth - 20);
+    var windowHeight = $(window).height();
+    var bestHeight = Math.min(480, windowWidth - 20);    
+    
+    return {bestWidth: bestWidth, bestHeight: bestHeight};
+}
+
+function resizePopupDialogs(bestSize) {
+    $('.popupDialog').dialog('option', 'width', bestSize['bestWidth'])
+                     .dialog('option', 'height', bestSize['bestHeight'])
                      .dialog('option', 'position', 'center');
 }
