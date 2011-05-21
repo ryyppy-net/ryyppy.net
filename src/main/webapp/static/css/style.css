@@ -152,10 +152,6 @@ div.popupDialog {
     position: absolute;
 }
 
-div.popupDialog table {
-    width: 100%;
-}
-
 div.popupDialog th {
     text-align: left;
     width: 25%;
