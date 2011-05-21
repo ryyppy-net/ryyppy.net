@@ -35,6 +35,15 @@
                 
                 $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
                 $('#kickDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
+                $('#graphDialog').dialog({
+                    autoOpen: false,
+                    draggable: false,
+                    resizable: false,
+                    width: 600,
+                    open: function() {
+                        graphDialogOpened();
+                    }
+                });
             });
         </script>
     </jsp:attribute>
@@ -53,8 +62,7 @@
             <table id="drinkers"></table>
         </div>
             
-        <div id="graphDialog">
-            <span class="closeButton"><a id="closeGraphDialogButton" href="#">X</a></span>
+        <div id="graphDialog" class="popupDialog" title="<spring:message code="party.group_graph"/>">
             <div style="margin-top: 13px;" id="groupGraph"></div>
         </div>
 
