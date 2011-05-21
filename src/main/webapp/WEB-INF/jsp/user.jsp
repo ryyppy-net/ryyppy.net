@@ -116,9 +116,26 @@
                 $('#configureDrinkerButtonLink').click(function() {
                     toggleJQUIDialog($('#configureDrinkerDialog'));
                 });
+                $('#configureDrinksButtonLink').click(function() {
+                    toggleJQUIDialog($('#configureDrinksDialog'));
+                    $("#configureDrinksAccordion").accordion({ fillSpace: true });
+                });
                 
                 $('#addPartyDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
                 $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
+               
+                $('#configureDrinksDialog').dialog({
+                    modal: true,
+                    draggable: false,
+                    autoOpen: false,
+                    resizable: false,
+                    width: 600,
+                    
+                    open: function() {
+                        configureDrinksDialogOpened();
+                        $("#configureDrinksAccordion").accordion({ fillSpace: true });
+                    }
+                });
                 
                 repaint();
             });
@@ -196,7 +213,7 @@
         </div>
 
         <div class="header headerMargin">
-            <a class="headerButtonA" title="<spring:message code="user.add_or_remove_drinks"/>" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);">
+            <a id="configureDrinksButtonLink" class="headerButtonA" title="<spring:message code="user.add_or_remove_drinks"/>" href="#">
                 <div class="headerButton headerButtonRight" id="configureDrinksButton"></div>
             </a>
             <div class="headerTextDiv">
@@ -208,22 +225,22 @@
             <div id="historyGraph" class="roundedCornersBordered"></div>
         </div>
             
-        <div id="configureDrinksDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinksDialog'), configureDrinksDialogClosed);">X</a></span>
+        <div id="configureDrinksDialog" class="popupDialog" title="<spring:message code="user.history"/>">
+            <div id="configureDrinksAccordion">
+                <h2><a href="#"><spring:message code="user.add_drinks_at"/></a></h2>
+                <div>
+                    <form method="POST" action="<c:url value="addDrinkToDate" />">
+                        <input type="hidden" name="userId" value="${user.id}" />
+                        <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
+                        <input type="submit" value="Lisää" id="submitTime" />
+                    </form>
+                </div>
 
-            <div style="float:left">
-                <h2><spring:message code="user.add_drinks_at"/></h2>
-                <form method="POST" action="<c:url value="addDrinkToDate" />">
-                    <input type="hidden" name="userId" value="${user.id}" />
-                    <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
-                    <input type="submit" value="Lisää" id="submitTime" />
-                </form>
-            </div>
-
-            <div style="float:right">
-                <h2><spring:message code="user.remove_drink"/></h2>
-                <ul id="drinksList">
-                </ul>
+                <h2><a href="#"><spring:message code="user.remove_drink"/></a></h2>
+                <div>
+                    <ul id="drinksList">
+                    </ul>
+                </div>
             </div>
         </div>
 
