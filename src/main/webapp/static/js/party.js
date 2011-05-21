@@ -25,7 +25,7 @@ $(window).resize(function() {
 
 function initializeButtons() {
     $('#graphButtonLink').click(function() {
-        toggleJQUIDialog($('#graphDialog'));
+        toggleJQUIDialog($('#fooDialog'));
     });
 
     $('#addDrinkerButtonLink').click(function() {
@@ -34,10 +34,6 @@ function initializeButtons() {
 
     $('#kickDrinkerButtonLink').click(function() {
         toggleJQUIDialog($('#kickDrinkerDialog'));
-    });
-
-    $('#closeGraphDialogButton').click(function() {
-        closeDialog($('#graphDialog'));
     });
 }
 
@@ -49,27 +45,23 @@ function updateGroupGraph() {
 function graphDialogOpened() {
     RyyppyNet.graphVisible = true;
     var element = $('#groupGraph');
-    var dialog = $('#graphDialog');
-
-    element.html('<p>Hello World</p>');
+    var dialog = $('#fooDialog');
 
     repaint();
 
     var height = dialog.height();
     var width = dialog.width();
     
-    dialog.height(800);
-    
     element.width(dialog.width()).height(parseInt(dialog.height(), 0) - 10);
 
-    /*if (RyyppyNet.graph == null) {
+    if (RyyppyNet.graph == null) {
         RyyppyNet.graph = new GroupGraph(partyHost.users, element);
     }
 
     RyyppyNet.graph.options.legend = {position:'nw'};
     updateGroupGraph();
     if (!RyyppyNet.graphInterval)
-        RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);*/
+        RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
 }
 
 function graphDialogClosed() {

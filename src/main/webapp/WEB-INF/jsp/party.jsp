@@ -41,6 +41,16 @@
                     resizable: false,
                     width: 600,
                     open: function() {
+                        //graphDialogOpened();
+                    }
+                });
+                
+                $('#fooDialog').dialog({
+                    autoOpen: false,
+                    draggable: false,
+                    resizable: false,
+                    width: 600,
+                    open: function() {
                         graphDialogOpened();
                     }
                 });
@@ -63,7 +73,12 @@
         </div>
             
         <div id="graphDialog" class="popupDialog" title="<spring:message code="party.group_graph"/>">
-            <div style="margin-top: 13px;" id="groupGraph"></div>
+            <!--<div style="margin-top: 13px;" id="groupGraph"></div>-->
+            <p>Hello World</p>
+        </div>
+            
+        <div id="fooDialog" class="popupDialog" title="<spring:message code="party.group_graph"/>">
+            <div id="groupGraph"></div>
         </div>
 
         <div id="addDrinkerDialog" class="popupDialog" title="<spring:message code="party.tooltip.add_drinker"/>">
