@@ -186,3 +186,8 @@ function toggleJQUIDialog(dialog) {
         dialog.dialog('open');
     }
 }
+
+function resizePopupDialogs(maxWidth) {
+    $('.popupDialog').dialog('option', 'width', maxWidth)
+                     .dialog('option', 'position', 'center');
+}
