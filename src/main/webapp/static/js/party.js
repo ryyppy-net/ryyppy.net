@@ -25,7 +25,7 @@ $(window).resize(function() {
 
 function initializeButtons() {
     $('#graphButtonLink').click(function() {
-        toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);
+        toggleJQUIDialog($('#graphDialog'));
     });
 
     $('#addDrinkerButtonLink').click(function() {
@@ -50,16 +50,26 @@ function graphDialogOpened() {
     RyyppyNet.graphVisible = true;
     var element = $('#groupGraph');
     var dialog = $('#graphDialog');
-    element.css('width', dialog.css('width')).css('height', (parseInt(dialog.css('height'), 0) - 10) + 'px');
 
-    if (RyyppyNet.graph == null) {
+    element.html('<p>Hello World</p>');
+
+    repaint();
+
+    var height = dialog.height();
+    var width = dialog.width();
+    
+    dialog.height(800);
+    
+    element.width(dialog.width()).height(parseInt(dialog.height(), 0) - 10);
+
+    /*if (RyyppyNet.graph == null) {
         RyyppyNet.graph = new GroupGraph(partyHost.users, element);
     }
 
-    RyyppyNet.graph.options.legend = { position:'nw' };
+    RyyppyNet.graph.options.legend = {position:'nw'};
     updateGroupGraph();
     if (!RyyppyNet.graphInterval)
-        RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
+        RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);*/
 }
 
 function graphDialogClosed() {
