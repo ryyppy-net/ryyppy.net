@@ -28,22 +28,6 @@
             partyHost.onUpdate = pageUpdate;
             var grid = new UserButtonGrid($('#drinkers'));
 
-            function graphDialogOpened() {
-                RyyppyNet.graphVisible = true;
-                var element = $('#groupGraph');
-                var dialog = $('#graphDialog');
-                element.css('width', dialog.css('width')).css('height', (parseInt(dialog.css('height'), 0) - 10) + 'px');
-                
-                if (RyyppyNet.graph == null) {
-                    RyyppyNet.graph = new GroupGraph(partyHost.users, element);
-                }
-
-                RyyppyNet.graph.options.legend = { position:'nw' };
-                updateGroupGraph();
-                if (!RyyppyNet.graphInterval)
-                    RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
-            }
-
             $(document).ready(function() {
                 $('#addDrinkerAccordion').accordion({
                     fillSpace: true

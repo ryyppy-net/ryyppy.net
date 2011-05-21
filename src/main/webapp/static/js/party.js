@@ -46,6 +46,22 @@ function updateGroupGraph() {
         RyyppyNet.graph.update();
 }
 
+function graphDialogOpened() {
+    RyyppyNet.graphVisible = true;
+    var element = $('#groupGraph');
+    var dialog = $('#graphDialog');
+    element.css('width', dialog.css('width')).css('height', (parseInt(dialog.css('height'), 0) - 10) + 'px');
+
+    if (RyyppyNet.graph == null) {
+        RyyppyNet.graph = new GroupGraph(partyHost.users, element);
+    }
+
+    RyyppyNet.graph.options.legend = { position:'nw' };
+    updateGroupGraph();
+    if (!RyyppyNet.graphInterval)
+        RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
+}
+
 function graphDialogClosed() {
     RyyppyNet.graphVisible = false;
     if (RyyppyNet.graphInterval)
