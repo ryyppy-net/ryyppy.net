@@ -199,16 +199,6 @@ function UserButton(userId, element, color) {
         var drinkUndone = false;
         var drinkId = data;
 
-        var undoLink = $('<a>');
-        var undoDiv = $('<div>').text(getMessage('cancel_drink'));
-
-        undoLink.append(undoDiv);
-        undoLink.click(function() {
-            RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
-            drinkUndone = true;
-            undoDiv.css('background-color', 'red');
-        });
-
         var newElement = $('<div>');
         newElement.attr('id', 'undo' + that.userId);
         newElement.attr('class', 'undo');
@@ -223,6 +213,17 @@ function UserButton(userId, element, color) {
 
         var title = $('<h1>').text(getMessage('drink_added'));
         newElement.append(title);
+        
+        var undoLink = $('<a>');
+        var undoDiv = $('<div>').text(getMessage('cancel_drink'));
+
+        undoLink.append(undoDiv);
+        undoLink.click(function() {
+            RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
+            drinkUndone = true;
+            title.text(getMessage('drink_was_canceled'));
+            undoDiv.css('background-color', 'red');
+        });
 
         newElement.append(undoLink);
         that.element.append(newElement);
