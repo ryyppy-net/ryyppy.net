@@ -35,7 +35,7 @@
                 
                 $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
                 $('#kickDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
-                $('#fooDialog').dialog({
+                $('#groupGraphDialog').dialog({
                     autoOpen: false,
                     draggable: false,
                     resizable: false,
@@ -61,7 +61,7 @@
             <table id="drinkers"></table>
         </div>
             
-        <div id="fooDialog" class="popupDialog" title="<spring:message code="party.group_graph"/>">
+        <div id="groupGraphDialog" class="popupDialog" title="<spring:message code="party.group_graph"/>">
             <div id="groupGraph"></div>
         </div>
 
