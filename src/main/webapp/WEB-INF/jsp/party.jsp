@@ -75,8 +75,6 @@
         </div>
 
         <div id="addDrinkerDialog" class="popupDialog" title="<spring:message code="party.tooltip.add_drinker"/>">
-            <span class="closeButton"><a id="closeAddDrinkerDialogButton" href="#">X</a></span>
-
             <div id="addDrinkerAccordion">
                 <h2><a href="#"><spring:message code="party.add_drinker.registered"/></a></h2>
                 <div>
