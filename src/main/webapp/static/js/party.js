@@ -52,7 +52,7 @@ function graphDialogOpened() {
     var height = dialog.height();
     var width = dialog.width();
     
-    element.width(dialog.width()).height(parseInt(dialog.height(), 0) - 10);
+    element.width(dialog.width() - 30).height(dialog.height() - 30);
 
     if (RyyppyNet.graph == null) {
         RyyppyNet.graph = new GroupGraph(partyHost.users, element);
