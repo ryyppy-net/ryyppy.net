@@ -110,16 +110,15 @@
             }
 
             $(document).ready(function() {
-                $('#addDrinkerButtonLink').click(function() {
-                    toggleJQUIDialog($('#addDrinkerDialog'));
+                $('#addPartyButtonLink').click(function() {
+                    toggleJQUIDialog($('#addPartyDialog'));
                 });
                 $('#configureDrinkerButtonLink').click(function() {
                     toggleJQUIDialog($('#configureDrinkerDialog'));
                 });
                 
-                
+                $('#addPartyDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
                 $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
-                $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
                 
                 repaint();
             });
@@ -165,8 +164,8 @@
         </div>
         
         <div class="header headerMargin">
-            <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#">
-                <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
+            <a id="addPartyButtonLink" class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#">
+                <div id="addPartyButton" class="headerButton headerButtonRight"></div>
             </a>
             <div class="headerTextDiv">
                 <h1><spring:message code="user.your_parties"/></h1>
@@ -228,7 +227,7 @@
             </div>
         </div>
 
-        <div id="addDrinkerDialog" class="popupDialog" title="<spring:message code="user.new_party"/>">
+        <div id="addPartyDialog" class="popupDialog" title="<spring:message code="user.new_party"/>">
             <form method="POST" action="<c:url value="addParty" />">
                 <input type="hidden" name="userId" value="${user.id}" />
                 <table>
