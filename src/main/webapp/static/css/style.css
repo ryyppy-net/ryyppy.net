@@ -24,7 +24,7 @@ li > a, p > a {
     color: #000000;
 }
 
-#addDrinkerDialog {
+#addDrinkerDialog, #addPartyDialog {
     width: 400px;
 }
 
@@ -249,7 +249,7 @@ div.popupDialog a {
     width: 33%;
 }
 
-div#addDrinkerButton {
+div#addDrinkerButton, div#addPartyButton {
     background-color: #50b93e;
     background-image: url("/static/images/plus.png");
 }
