@@ -25,7 +25,7 @@ $(window).resize(function() {
 
 function initializeButtons() {
     $('#graphButtonLink').click(function() {
-        toggleJQUIDialog($('#fooDialog'));
+        toggleJQUIDialog($('#groupGraphDialog'));
     });
 
     $('#addDrinkerButtonLink').click(function() {
@@ -45,7 +45,7 @@ function updateGroupGraph() {
 function graphDialogOpened() {
     RyyppyNet.graphVisible = true;
     var element = $('#groupGraph');
-    var dialog = $('#fooDialog');
+    var dialog = $('#groupGraphDialog');
 
     repaint();
 
