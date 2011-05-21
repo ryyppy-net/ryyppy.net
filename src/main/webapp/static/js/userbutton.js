@@ -234,9 +234,10 @@ function UserButton(userId, element, color) {
                 if (that.onDrunk) {
                    that.onDrunk(that.userId);
                 }
+                
+                playSound();
             }
 
-            playSound();
             newElement.remove();
             
             that.clicked = false;
