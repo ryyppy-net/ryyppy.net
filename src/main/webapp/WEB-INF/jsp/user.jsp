@@ -110,11 +110,16 @@
             }
 
             $(document).ready(function() {
+                $('#addDrinkerButtonLink').click(function() {
+                    toggleJQUIDialog($('#addDrinkerDialog'));
+                });
                 $('#configureDrinkerButtonLink').click(function() {
                     toggleJQUIDialog($('#configureDrinkerDialog'));
                 });
-                $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
                 
+                
+                $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
+                $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
                 
                 repaint();
             });
@@ -160,7 +165,7 @@
         </div>
         
         <div class="header headerMargin">
-            <a class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
+            <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#">
                 <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
             </a>
             <div class="headerTextDiv">
@@ -223,11 +228,7 @@
             </div>
         </div>
 
-        <div id="addDrinkerDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
-
-            <h2><spring:message code="user.new_party"/></h2>
-
+        <div id="addDrinkerDialog" class="popupDialog" title="<spring:message code="user.new_party"/>">
             <form method="POST" action="<c:url value="addParty" />">
                 <input type="hidden" name="userId" value="${user.id}" />
                 <table>
