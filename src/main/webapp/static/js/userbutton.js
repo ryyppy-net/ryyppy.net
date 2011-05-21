@@ -193,7 +193,6 @@ function UserButton(userId, element, color) {
             this.showAdding,
             function() { alert(getMessage('drink_add_failed')); }
         );
-        this.clicked = false;
     }
     
     this.showAdding = function(data) {
@@ -229,8 +228,6 @@ function UserButton(userId, element, color) {
         that.element.append(newElement);
 
         $('#undo' + that.userId).fadeIn(500).delay(5000).fadeOut(500, function() {
-            that.clicked = false;
-
             if (!drinkUndone) {
                 that.update();
                 if (that.onDrunk) {
@@ -240,6 +237,8 @@ function UserButton(userId, element, color) {
 
             playSound();
             newElement.remove();
+            
+            that.clicked = false;
         });
     }
     
