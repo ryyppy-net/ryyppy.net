@@ -110,6 +110,12 @@
             }
 
             $(document).ready(function() {
+                $('#configureDrinkerButtonLink').click(function() {
+                    toggleJQUIDialog($('#configureDrinkerDialog'));
+                });
+                $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
+                
+                
                 repaint();
             });
             
@@ -123,6 +129,9 @@
                 $("#userButtonTable").width(bestWidth);
                 $(".party").width(bestWidth);
                 $("#historyGraph").width(bestWidth - 35);
+                
+                var bestSize = calculateBestDialogSize();
+                resizePopupDialogs(bestSize);
             }
         </script>
     </jsp:attribute>
@@ -132,7 +141,7 @@
                 <div class="headerButton headerButtonLeft" id="goBack">
                 </div>
             </a>
-            <a class="headerButtonA" title="<spring:message code="user.settings"/>" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail); $('#drinkerName').focus();">
+            <a id="configureDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.settings"/>" href="#">
                 <div class="headerButton headerButtonRight" id="configureButton">
                 </div>
             </a>
@@ -234,13 +243,7 @@
             </form>
         </div>
                 
-        <div id="configureDrinkerDialog" class="popupDialog">
-            <span style="float: right;">
-                <a href="#" onClick="closeDialog($('#configureDrinkerDialog'));">X</a>
-            </span>
-
-            <h2><spring:message code="user.edit"/></h2>
-
+        <div id="configureDrinkerDialog" class="popupDialog" title="<spring:message code="user.edit"/>">
             <form method="post" action="<c:url value="modifyUser" />">
                 <input type="hidden" name="userId" value="${user.id}" />                
                 <table>
