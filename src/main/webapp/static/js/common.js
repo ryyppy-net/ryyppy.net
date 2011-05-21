@@ -194,8 +194,8 @@ function calculateBestDialogSize() {
     var windowWidth = $(window).width();
     var bestWidth = Math.min(600, windowWidth - 20);
     var windowHeight = $(window).height();
-    var bestHeight = Math.min(480, windowWidth - 20);    
-    
+    var bestHeight = Math.min(600, windowHeight - 20);    
+
     return {bestWidth: bestWidth, bestHeight: bestHeight};
 }
 
