@@ -184,10 +184,6 @@ td input, td select {
     color: #ffffff;
 }
 
-td input[type=submit] {
-    width: 50%;
-}
-
 div.popupDialog a {
     color: #ffffff;
 }
@@ -345,4 +341,8 @@ canvas {
 
 li.drink {
     cursor: pointer;
+}
+
+.ui-accordion-content {
+    padding: 5px !important;
 }
