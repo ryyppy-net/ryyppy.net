@@ -124,16 +124,6 @@ div.party a {
     color: #000000;
 }
 
-div#graphDialog {
-    padding: 5px;
-    border: 3px solid #505050;
-    border-radius: 10px;
-    background-color: #252525;
-    color: #ffffff;
-    display: none;
-    position: absolute;
-}
-
 div#graphDialog a {
     color: #ffffff;
     z-index: 666;
