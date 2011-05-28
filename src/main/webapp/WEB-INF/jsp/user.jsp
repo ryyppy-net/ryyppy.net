@@ -158,17 +158,13 @@
     </jsp:attribute>
     <jsp:body>
         <div class="header">
-            <a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');">
-                <div class="headerButton headerButtonLeft" id="goBack">
-                </div>
-            </a>
-            <a id="configureDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.settings"/>" href="#">
-                <div class="headerButton headerButtonRight" id="configureButton">
-                </div>
-            </a>
-            <div class="headerTextDiv">
-                <h1><c:out value="${user.name}" /></h1>
-            </div>
+            <table style="width: 100%;" class="noBorders">
+                <tr>
+                    <td class="headerButton"><a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');"><div class="headerButton headerButtonLeft" id="goBack"></div></a></td>
+                    <td class="topic"><h1 class="topic"><c:out value="${user.name}" /></h1></td>
+                    <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.settings"/>" href="#"><div class="headerButton headerButtonRight" id="configureButton"></div></a></td>
+                </tr>
+            </table>
         </div>
         
         <!-- stupid css not able to center vertically properly -->
