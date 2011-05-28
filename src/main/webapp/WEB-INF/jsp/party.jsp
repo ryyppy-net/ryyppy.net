@@ -48,13 +48,15 @@
     </jsp:attribute>
     <jsp:body>
         <div class="header">
-            <a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div id="goBack" class="headerButton headerButtonLeft"></div></a>
-            <a id="graphButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#"><div id="graphButton" class="headerButton headerButtonLeft"></div></a>
-            <a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a>
-            <a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a>
-            <div class="headerTextDiv">
-                <h1 id="topic">&nbsp;</h1>
-            </div>
+            <table style="width: 100%;" class="noBorders">
+                <tr>
+                    <td class="headerButton"><a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div id="goBack" class="headerButton headerButtonLeft"></div></a></td>
+                    <td class="headerButton"><a id="graphButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#"><div id="graphButton" class="headerButton headerButtonLeft"></div></a></td>
+                    <td class="topic"><h1 class="topic" id="topic">&nbsp;</h1></td>                    
+                    <td class="headerButton"><a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
+                    <td class="headerButton"><a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
+                </tr>
+            </table>
         </div>
 
         <div id="body">

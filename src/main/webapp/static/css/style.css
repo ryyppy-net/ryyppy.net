@@ -46,6 +46,14 @@ h1 {
     font-size: 2.0em;
 }
 
+.noBorders tr, .noBorders td {
+    border: 0px;
+}
+
+.topic {
+    vertical-align: top;
+}
+
 h1 > a {
     background-color: #252525;
     color: #ffffff;
@@ -199,7 +207,6 @@ div.popupDialog a {
     
     width: 40px;
     height: 40px;
-    background-color: #50b93e;
     background-repeat: no-repeat;
     background-position: center center;
 }
@@ -219,7 +226,7 @@ div.popupDialog a {
 .header {
     text-align: center;
     background-color: #252525;
-    height: 48px;
+    min-height: 48px;
     margin-bottom: 5px;
 }
 
