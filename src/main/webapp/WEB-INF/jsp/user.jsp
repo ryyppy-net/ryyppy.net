@@ -4,10 +4,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
-        <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
@@ -108,11 +106,37 @@
                 var time = $("#time").datetimepicker("getDate");
                 if (time != null && time <= new Date()) success = true;
 
-                var button = $("#submitTime");
-                button.attr("disabled", success ? "" : "disabled");
+                $("#submitTime").prop("disabled", success ? "" : "disabled");
             }
 
             $(document).ready(function() {
+                $('#addPartyButtonLink').click(function() {
+                    toggleJQUIDialog($('#addPartyDialog'));
+                });
+                $('#configureDrinkerButtonLink').click(function() {
+                    toggleJQUIDialog($('#configureDrinkerDialog'));
+                });
+                $('#configureDrinksButtonLink').click(function() {
+                    toggleJQUIDialog($('#configureDrinksDialog'));
+                    $("#configureDrinksAccordion").accordion({ fillSpace: true });
+                });
+                
+                $('#addPartyDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
+                $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
+               
+                $('#configureDrinksDialog').dialog({
+                    modal: true,
+                    draggable: false,
+                    autoOpen: false,
+                    resizable: false,
+                    width: 600,
+                    
+                    open: function() {
+                        configureDrinksDialogOpened();
+                        $("#configureDrinksAccordion").accordion({ fillSpace: true });
+                    }
+                });
+                
                 repaint();
             });
             
@@ -126,22 +150,21 @@
                 $("#userButtonTable").width(bestWidth);
                 $(".party").width(bestWidth);
                 $("#historyGraph").width(bestWidth - 35);
+                
+                var bestSize = calculateBestDialogSize();
+                resizePopupDialogs(bestSize);
             }
         </script>
     </jsp:attribute>
     <jsp:body>
         <div class="header">
-            <a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');">
-                <div class="headerButton headerButtonLeft" id="goBack">
-                </div>
-            </a>
-            <a class="headerButtonA" title="<spring:message code="user.settings"/>" href="#" onClick="toggleDialog($('#configureDrinkerDialog'), checkEmail); $('#drinkerName').focus();">
-                <div class="headerButton headerButtonRight" id="configureButton">
-                </div>
-            </a>
-            <div class="headerTextDiv">
-                <h1><c:out value="${user.name}" /></h1>
-            </div>
+            <table style="width: 100%;" class="noBorders">
+                <tr>
+                    <td class="headerButton"><a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');"><div class="headerButton headerButtonLeft" id="goBack"></div></a></td>
+                    <td class="topic"><h1 class="topic"><c:out value="${user.name}" /></h1></td>
+                    <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.settings"/>" href="#"><div class="headerButton headerButtonRight" id="configureButton"></div></a></td>
+                </tr>
+            </table>
         </div>
         
         <!-- stupid css not able to center vertically properly -->
@@ -154,8 +177,8 @@
         </div>
         
         <div class="header headerMargin">
-            <a class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#" onClick="toggleDialog($('#addDrinkerDialog')); $('#nameInput').focus();">
-                <div class="headerButton headerButtonRight" id="addDrinkerButton"></div>
+            <a id="addPartyButtonLink" class="headerButtonA" title="<spring:message code="user.add_party"/>" href="#">
+                <div id="addPartyButton" class="headerButton headerButtonRight"></div>
             </a>
             <div class="headerTextDiv">
                 <h1><spring:message code="user.your_parties"/></h1>
@@ -186,7 +209,7 @@
         </div>
 
         <div class="header headerMargin">
-            <a class="headerButtonA" title="<spring:message code="user.add_or_remove_drinks"/>" href="#" onClick="toggleDialog($('#configureDrinksDialog'), configureDrinksDialogOpened, configureDrinksDialogClosed);">
+            <a id="configureDrinksButtonLink" class="headerButtonA" title="<spring:message code="user.add_or_remove_drinks"/>" href="#">
                 <div class="headerButton headerButtonRight" id="configureDrinksButton"></div>
             </a>
             <div class="headerTextDiv">
@@ -198,30 +221,26 @@
             <div id="historyGraph" class="roundedCornersBordered"></div>
         </div>
             
-        <div id="configureDrinksDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#configureDrinksDialog'), configureDrinksDialogClosed);">X</a></span>
+        <div id="configureDrinksDialog" class="popupDialog" title="<spring:message code="user.history"/>">
+            <div id="configureDrinksAccordion">
+                <h2><a href="#"><spring:message code="user.add_drinks_at"/></a></h2>
+                <div>
+                    <form method="POST" action="<c:url value="addDrinkToDate" />">
+                        <input type="hidden" name="userId" value="${user.id}" />
+                        <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
+                        <input type="submit" value="Lisää" id="submitTime" />
+                    </form>
+                </div>
 
-            <div style="float:left">
-                <h2><spring:message code="user.add_drinks_at"/></h2>
-                <form method="POST" action="<c:url value="addDrinkToDate" />">
-                    <input type="hidden" name="userId" value="${user.id}" />
-                    <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
-                    <input type="submit" value="Lisää" id="submitTime" />
-                </form>
-            </div>
-
-            <div style="float:right">
-                <h2><spring:message code="user.remove_drink"/></h2>
-                <ul id="drinksList">
-                </ul>
+                <h2><a href="#"><spring:message code="user.remove_drink"/></a></h2>
+                <div>
+                    <ul id="drinksList">
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <div id="addDrinkerDialog" class="popupDialog">
-            <span style="float: right;"><a href="#" onClick="closeDialog($('#addDrinkerDialog'));">X</a></span>
-
-            <h2><spring:message code="user.new_party"/></h2>
-
+        <div id="addPartyDialog" class="popupDialog" title="<spring:message code="user.new_party"/>">
             <form method="POST" action="<c:url value="addParty" />">
                 <input type="hidden" name="userId" value="${user.id}" />
                 <table>
@@ -237,13 +256,7 @@
             </form>
         </div>
                 
-        <div id="configureDrinkerDialog" class="popupDialog">
-            <span style="float: right;">
-                <a href="#" onClick="closeDialog($('#configureDrinkerDialog'));">X</a>
-            </span>
-
-            <h2><spring:message code="user.edit"/></h2>
-
+        <div id="configureDrinkerDialog" class="popupDialog" title="<spring:message code="user.edit"/>">
             <form method="post" action="<c:url value="modifyUser" />">
                 <input type="hidden" name="userId" value="${user.id}" />                
                 <table>

@@ -11,12 +11,18 @@ function RyyppyAPI() {
         $.get('/API/users/{0}/show-history'.format(userId), callback);
     }
     
-    this.addDrinkToUser = function(userId, callback) {
-        $.get('/API/users/{0}/add-drink'.format(userId), callback);
+    this.addDrinkToUser = function(userId, successCallback, errorCallback) {
+        $.ajax({url: '/API/users/{0}/add-drink'.format(userId)})
+            .success(successCallback)
+            .error(errorCallback);
     }
 
     this.removeDrinkFromUser = function(userId, drinkId, callback) {
         $.get('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
+    }
+
+    this.getPartyData = function(partyId, callback) {
+        $.get('/API/parties/{0}/'.format(partyId), callback);
     }
 }
 
@@ -145,16 +151,20 @@ MESSAGES['en']['portion'] = ' portion';
 MESSAGES['en']['portions'] = ' portions';
 MESSAGES['en']['idle'] = 'Idle ';
 MESSAGES['en']['cancel_drink'] = 'Cancel drink';
+MESSAGES['en']['drink_was_canceled'] = 'The drink was canceled!';
 MESSAGES['en']['loading'] = 'Loading...';
 MESSAGES['en']['drink_added'] = "Adding a drink...";
+MESSAGES['en']['drink_add_failed'] = "Adding a drink failed! Please refresh the page and try again.";
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
 MESSAGES['fi']['portion'] = ' annos';
 MESSAGES['fi']['portions'] = ' annosta';
 MESSAGES['fi']['idle'] = 'Juomatta ';
 MESSAGES['fi']['cancel_drink'] = 'Peru juoma';
+MESSAGES['fi']['drink_was_canceled'] = 'Juoma peruttiin!';
 MESSAGES['fi']['loading'] = 'Ladataan...';
 MESSAGES['fi']['drink_added'] = "Juomaa lisätään...";
+MESSAGES['fi']['drink_add_failed'] = "Juoman lisääminen epäonnistui! Ole hyvä ja lataa sivu uudestaan.";
 
 function getCookie( cookie_name )
 {
@@ -169,4 +179,42 @@ function getCookie( cookie_name )
             return unescape(value);
     }
     return 'fi';
+}
+
+function toggleJQUIDialog(dialog) {
+    if ( dialog.dialog('isOpen') ) {
+        dialog.dialog('close');
+    } else {
+        dialog.dialog('open');
+    }
+    
+    var bestSize = calculateBestDialogSize();
+    resizePopupDialogs(bestSize);
+}
+
+function calculateBestDialogSize() {
+    var windowWidth = $(window).width();
+    var bestWidth = Math.min(600, windowWidth - 20);
+    var windowHeight = $(window).height();
+    var bestHeight = Math.min(600, windowHeight - 20);    
+
+    return {bestWidth: bestWidth, bestHeight: bestHeight};
+}
+
+function resizePopupDialogs(bestSize) {
+    $('.popupDialog').dialog('option', 'width', bestSize['bestWidth'])
+                     .dialog('option', 'height', bestSize['bestHeight'])
+                     .dialog('option', 'position', 'center');
+}
+
+function fitElementOnAnother(element, another) {
+    var width = parseFloat(another.css('width'));
+    var height = parseFloat(another.css('height'));
+    var top = getPositionTop(another.get(0)) + (parseFloat(another.css('height')) - height) / 2;
+    var left = getPositionLeft(another.get(0)) + (parseFloat(another.css('width')) - width) / 2;
+
+    element.css('width', width);
+    element.css('height', height);
+    element.css('left', left);
+    element.css('top', top);
 }

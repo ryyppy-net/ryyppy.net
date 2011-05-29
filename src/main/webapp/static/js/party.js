@@ -1,52 +1,67 @@
 var RyyppyNet = {
-    needsRefreshing: false,
-    users: [],
     inProgress: [],
-    userButtons: [],
     graph: null,
     graphInterval: null,
     graphVisible: false,
-    updateInterval: 2 * 60 * 100,
-    layout: []
+    updateInterval: 2 * 60 * 1000
 };
 
+var repaintAllowed = false;
+
 $(document).ready(function() {
+    repaintAllowed = true;
     repaint();
-
     initializeButtons();
+    
+    // update data every two minutes
+    setInterval(function() {
+        partyHost.update();
+    }, RyyppyNet.updateInterval);
 });
-
-function initializeButtons() {
-    $('#graphButtonLink').click(function() {
-        toggleDialog($('#graphDialog'), graphDialogOpened, graphDialogClosed);
-    });
-    $('#addDrinkerButtonLink').click(function() {
-        toggleDialog($('#addDrinkerDialog'));
-        $('#emailInput').focus();
-        repaint();
-    });
-    $('#kickDrinkerButtonLink').click(function() {
-        toggleDialog($('#kickDrinkerDialog'));
-    });
-
-    $('#closeAddDrinkerDialogButton').click(function() {
-        closeDialog($('#addDrinkerDialog'));
-    });
-    $('#closeGraphDialogButton').click(function() {
-        closeDialog($('#graphDialog'));
-    });
-    $('#closeKickDrinkerDialogButton').click(function() {
-        closeDialog($('#kickDrinkerDialog'));
-    });
-}
 
 $(window).resize(function() {
     repaint();
 });
 
+function initializeButtons() {
+    $('#graphButtonLink').click(function() {
+        toggleJQUIDialog($('#groupGraphDialog'));
+    });
+
+    $('#addDrinkerButtonLink').click(function() {
+        toggleJQUIDialog($('#addDrinkerDialog'));
+    });
+
+    $('#kickDrinkerButtonLink').click(function() {
+        toggleJQUIDialog($('#kickDrinkerDialog'));
+    });
+}
+
 function updateGroupGraph() {
     if (RyyppyNet.graph != null && RyyppyNet.graphVisible)
         RyyppyNet.graph.update();
+}
+
+function graphDialogOpened() {
+    RyyppyNet.graphVisible = true;
+    var element = $('#groupGraph');
+    var dialog = $('#groupGraphDialog');
+
+    repaint();
+
+    var height = dialog.height();
+    var width = dialog.width();
+    
+    element.width(dialog.width() - 30).height(dialog.height() - 30);
+
+    if (RyyppyNet.graph == null) {
+        RyyppyNet.graph = new GroupGraph(partyHost.users, element);
+    }
+
+    RyyppyNet.graph.options.legend = {position:'nw'};
+    updateGroupGraph();
+    if (!RyyppyNet.graphInterval)
+        RyyppyNet.graphInterval = setInterval(updateGroupGraph, RyyppyNet.updateInterval);
 }
 
 function graphDialogClosed() {
@@ -56,71 +71,22 @@ function graphDialogClosed() {
 }
 
 function repaint() {
-    var windowWidth = $(window).width();
-    var bestWidth = Math.min(600, windowWidth - 20);
-    $("#addDrinkerDialog").width(bestWidth);
-
-    $("#addDrinkerDialog").css('top', Math.max($("#addDrinkerDialog").css('top'), 0));
+    if (!repaintAllowed) return;
     
-    $("#drinkers").height($(window).height() - $("#topic").height() - 20);
+    repaintAllowed = false;
+    
+    grid.updateGrid();
+    $("#drinkers").height($(window).height() - $("#topic").height() - 30);
+    $("#drinkers").width($(window).width() - 20);
+
     $(".party").width($("#body").width() - 10 + 'px');
+
+    var bestSize = calculateBestDialogSize();
+    resizePopupDialogs(bestSize);
+
+    repaintAllowed = true;
 }
 
-// entry point
-$(document).ready(function() {
-    forceRefresh();
-    
-    // if resized, refresh
-    setInterval(function() { if (RyyppyNet.needsRefreshing === true) forceRefresh();}, 1000);
-    
-    // update data every two minutes
-    setInterval(function() {getPartyData(updateGrid);}, RyyppyNet.updateInterval);
-});
-
-$(window).resize(function() {
-    var tmp = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-    if (RyyppyNet.layout.length != tmp.length || RyyppyNet.layout[0] != tmp[0] || RyyppyNet.layout[1] != tmp[1])
-        RyyppyNet.needsRefreshing = true;
-});
-
-function forceRefresh() {
-    RyyppyNet.needsRefreshing = false;
-    $('#drinkers').html('');
-    getPartyData(createAndFillGrid);
-}
-
-function determineLayout(n) {
-    var best = [0, 0];
-    var initial = Math.ceil(Math.sqrt(n));
-    var square_candidate = initial * initial;
-    var other_candidate  = (initial - 1) * (initial + 1);
-
-    if (Math.abs(square_candidate - n) < Math.abs(other_candidate - n)) {
-        best = [initial, initial];
-    } else {
-        best = [initial - 1, initial + 1];
-    }
-
-    if ((best[0] * (best[1] - 1)) >= n) {
-        best[1] = best[1] - 1;
-    }
-
-    return best;
-}
-
-function pivotLayoutIfNecessary(layout) {
-    var layout_aspect = layout[0] < layout[1];
-    var window_aspect = $(window).width() < $(window).height();
-    if (layout_aspect != window_aspect) {
-        return [layout[1], layout[0]];
-    }
-
-    return layout;
-}
-
-function getPartyData(callback) {
-    $.get(dataUrl, callback);
-}
 
 function areSame(list1, list2) {
     if (list1.length != list2.length) return false;
@@ -139,57 +105,15 @@ function areSame(list1, list2) {
     return true;
 }
 
-function updateGrid(data) {
-    var newdata = parseData(data);
-    
-    if (!areSame(newdata, RyyppyNet.users)) {
-        forceRefresh();
-        return;
-    }
-
-    updateButtons();
-}
-
 function onUserDrunk() {
     updateGroupGraph();
-}
-
-function createAndFillGrid(data) {
-    $('#drinkers').html('');
-    RyyppyNet.users = parseData(data);
-    
-    var layout = pivotLayoutIfNecessary(determineLayout(RyyppyNet.users.length));
-    RyyppyNet.layout = layout;
-    var width = "" + (1 / layout[0] * 100) + "%;";
-    var height = "" + (1 / layout[1] * 100) + "%;";
-    for (var i = 0; i < layout[1]; i++) {
-        $('#drinkers').append('<tr style="height:'+ height +'" id="row' + i + '"></tr>');
-        for (var j = 0; j < layout[0]; j++) {
-            var colorIndex = i*layout[0] + j;
-            if (colorIndex >= RyyppyNet.users.length) continue;
-            
-            var newElement = $('<td>');
-            newElement.addClass('userButton');
-            newElement.addClass('roundedCornersBordered');
-            newElement.attr("width", width);
-            var user = RyyppyNet.users[colorIndex].id;
-            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
-            ub.onDrunk = onUserDrunk;
-            ub.onDataLoaded = onButtonDataUpdated;
-            RyyppyNet.userButtons.push(ub);
-
-            $('#row' + i).append(newElement);
-        }
-    }
-    
-    updateButtons();
 }
 
 function onButtonDataUpdated() {
     var max = 0;
 
-    for (var i in RyyppyNet.userButtons) {
-        var userButton = RyyppyNet.userButtons[i];
+    for (var i in grid.userButtons) {
+        var userButton = grid.userButtons[i];
         if (userButton.series == null) continue;
         for (var j in userButton.series[0].data) {
             var d = userButton.series[0].data[j];
@@ -201,26 +125,73 @@ function onButtonDataUpdated() {
 
     max = Math.floor(max) + 1;
 
-    for (i in RyyppyNet.userButtons) {
-        userButton = RyyppyNet.userButtons[i];
+    for (i in grid.userButtons) {
+        userButton = grid.userButtons[i];
         userButton.setMaxY(max);
     }
 }
 
-function updateButtons() {
-    for (i in RyyppyNet.userButtons) {
-        var userButton = RyyppyNet.userButtons[i];
-        userButton.update();
-    }
+
+function pageUpdate() {
+    $('#topic').text(partyHost.name);
+    grid.users = partyHost.users;
+    grid.updateGrid();
+    
+    if (RyyppyNet.graph !== null)
+        RyyppyNet.graph.users = partyHost.users;
 }
 
-function parseData(data) {
+
+
+function PartyHost(partyId) {
+    this.partyId = partyId;
+    this.name = "";
+    this.users = [];
+    this.onUpdate = undefined;
+    
+    this.update();
+}
+
+PartyHost.prototype.parseData = function(data) {
+    this.parseUserData(data);
+    this.parsePartyData(data);
+}
+
+PartyHost.prototype.parsePartyData = function(data) {
+    // TODO: Ugly hack
+    this.name = $($(data).find('name')[0]).text();
+}
+
+PartyHost.prototype.parseUserData = function(data) {
     var users = [];
+
     $(data).find('user').each(function() {
         var part = $(this);
-        var user = {id: part.find('id').text(), alcohol: part.find('alcoholInPromilles').text()};
+
+        var user = new User();
+        user.id = part.find('id').text();
+        user.promilles = part.find('alcoholInPromilles').text();
+        user.name = part.find('name').text();
 
         users.push(user);
     });
-    return users;
+
+    this.users = users;
+}
+
+PartyHost.prototype.update = function() {
+    var that = this;
+    RyyppyAPI.getPartyData(partyId, function(data) {
+        that.parseData(data);
+
+        if (typeof that.onUpdate === 'function')
+            that.onUpdate();
+    });
+}
+
+
+function User() {
+    this.id = -1;
+    this.name = "";
+    this.promilles = 0.0;
 }
