@@ -209,7 +209,7 @@ function UserButton(userId, element, color) {
 
             undoDiv.fadeIn(500, function() {
                 var timeoutId = setTimeout(function() {
-                    this.fadeAndRemove(undoDiv);
+                    that.fadeAndRemove(undoDiv);
 
                     if (!drinkUndone) {
                         that.update();
