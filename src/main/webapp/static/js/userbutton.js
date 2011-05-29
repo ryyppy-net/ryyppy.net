@@ -149,6 +149,9 @@ function UserButton(userId, element, color) {
     }
 
     this.renderGraph = function() {
+        if (this.element.height() < 150) return;
+        if (this.element.width() < 200) return;
+        
         if (this.series == null)
             return;
 
@@ -185,52 +188,46 @@ function UserButton(userId, element, color) {
             return;
 
         this.clicked = true;
-        
-        RyyppyAPI.addDrinkToUser(this.userId, function(data) {
-            var drinkUndone = false;
-            var drinkId = data;
+        RyyppyAPI.addDrinkToUser(
+            this.userId,
+            this.showAdding,
+            function() { alert(getMessage('drink_add_failed')); }
+        );
+    }
+    
+    this.showAdding = function(data) {
+        var drinkUndone = false;
+        var drinkId = data;
 
-            var undoLink = $('<a>');
-            var undoDiv = $('<div>').text(getMessage('cancel_drink'));
+        var undoData = { UserId: that.userId, AddingDrinkMessage: getMessage('drink_added'), UndoMessage: getMessage('cancel_drink') };
 
-            undoLink.append(undoDiv);
-            undoLink.click(function() {
+        $.get('/static/templates/undoDrink.html', function(template) {
+            var undoDiv = $.tmpl(template, undoData);
+            undoDiv.appendTo('#user' + that.userId);
+
+            fitElementOnAnother(undoDiv, that.element);
+
+            var undoButton = $('#undoButton' + that.userId);
+            undoButton.live('click', function() {
                 RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
                 drinkUndone = true;
-                undoDiv.css('background-color', 'red');
+                undoButton.text(getMessage('drink_was_canceled'))
+                          .css('background-color', 'red');
             });
 
-            var newElement = $('<div>');
-            newElement.attr('id', 'undo' + that.userId);
-            newElement.attr('class', 'undo');
-            var width = parseFloat(that.element.css('width'));
-            var height = parseFloat(that.element.css('height'));
-            var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
-            var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
-            newElement.css('width', width);
-            newElement.css('height', height);
-            newElement.css('left', left);
-            newElement.css('top', top);
-
-            var title = $('<h1>').text(getMessage('drink_added'));
-            newElement.append(title);
-
-            newElement.append(undoLink);
-            that.element.append(newElement);
-
-            playSound();
-
-            $('#undo' + that.userId).fadeIn(500).delay(5000).fadeOut(500, function() {
-                that.clicked = false;
-
+            undoDiv.fadeIn(500).delay(5000).fadeOut(500, function() {
                 if (!drinkUndone) {
                     that.update();
                     if (that.onDrunk) {
                        that.onDrunk(that.userId);
                     }
+
+                    playSound();
                 }
 
-                newElement.remove();
+                undoDiv.remove();
+
+                that.clicked = false;
             });
         });
     }

@@ -24,7 +24,7 @@ li > a, p > a {
     color: #000000;
 }
 
-#addDrinkerDialog {
+#addDrinkerDialog, #addPartyDialog {
     width: 400px;
 }
 
@@ -46,6 +46,14 @@ h1 {
     font-size: 2.0em;
 }
 
+.noBorders tr, .noBorders td {
+    border: 0px;
+}
+
+.topic {
+    vertical-align: top;
+}
+
 h1 > a {
     background-color: #252525;
     color: #ffffff;
@@ -62,10 +70,10 @@ h2 {
 }
 
 table#drinkers {
-    height: 100%;
-    width: 100%;
     border-spacing: 5px;
     border-collapse: separate;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 td.userButton {
@@ -124,18 +132,6 @@ div.party a {
     color: #000000;
 }
 
-div#graphDialog {
-    padding: 5px;
-    width: 600px;
-    height: 500px;
-    border: 3px solid #505050;
-    border-radius: 10px;
-    background-color: #252525;
-    color: #ffffff;
-    display: none;
-    position: absolute;
-}
-
 div#graphDialog a {
     color: #ffffff;
     z-index: 666;
@@ -164,10 +160,6 @@ div.popupDialog {
     position: absolute;
 }
 
-div.popupDialog table {
-    width: 100%;
-}
-
 div.popupDialog th {
     text-align: left;
     width: 25%;
@@ -182,10 +174,6 @@ td input, td select {
     width: 100%;
     background-color: #505050;
     color: #ffffff;
-}
-
-td input[type=submit] {
-    width: 50%;
 }
 
 div.popupDialog a {
@@ -219,7 +207,6 @@ div.popupDialog a {
     
     width: 40px;
     height: 40px;
-    background-color: #50b93e;
     background-repeat: no-repeat;
     background-position: center center;
 }
@@ -239,7 +226,7 @@ div.popupDialog a {
 .header {
     text-align: center;
     background-color: #252525;
-    height: 48px;
+    min-height: 48px;
     margin-bottom: 5px;
 }
 
@@ -253,7 +240,7 @@ div.popupDialog a {
     width: 33%;
 }
 
-div#addDrinkerButton {
+div#addDrinkerButton, div#addPartyButton {
     background-color: #50b93e;
     background-image: url("/static/images/plus.png");
 }
@@ -345,4 +332,8 @@ canvas {
 
 li.drink {
     cursor: pointer;
+}
+
+.ui-accordion-content {
+    padding: 0px !important;
 }
