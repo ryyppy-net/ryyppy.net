@@ -199,48 +199,36 @@ function UserButton(userId, element, color) {
         var drinkUndone = false;
         var drinkId = data;
 
-        var newElement = $('<div>');
-        newElement.attr('id', 'undo' + that.userId);
-        newElement.attr('class', 'undo');
-        var width = parseFloat(that.element.css('width'));
-        var height = parseFloat(that.element.css('height'));
-        var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
-        var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
-        newElement.css('width', width);
-        newElement.css('height', height);
-        newElement.css('left', left);
-        newElement.css('top', top);
+        var undoData = { UserId: that.userId, AddingDrinkMessage: getMessage('drink_added'), UndoMessage: getMessage('cancel_drink') };
 
-        var title = $('<h1>').text(getMessage('drink_added'));
-        newElement.append(title);
-        
-        var undoLink = $('<a>');
-        var undoDiv = $('<div>').text(getMessage('cancel_drink'));
+        $.get('/static/templates/undoDrink.html', function(template) {
+            var undoDiv = $.tmpl(template, undoData);
+            undoDiv.appendTo('#user' + that.userId);
 
-        undoLink.append(undoDiv);
-        undoLink.click(function() {
-            RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
-            drinkUndone = true;
-            title.text(getMessage('drink_was_canceled'));
-            undoDiv.css('background-color', 'red');
-        });
+            fitElementOnAnother(undoDiv, that.element);
 
-        newElement.append(undoLink);
-        that.element.append(newElement);
+            var undoButton = $('#undoButton' + that.userId);
+            undoButton.live('click', function() {
+                RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
+                drinkUndone = true;
+                undoButton.text(getMessage('drink_was_canceled'))
+                          .css('background-color', 'red');
+            });
 
-        $('#undo' + that.userId).fadeIn(500).delay(5000).fadeOut(500, function() {
-            if (!drinkUndone) {
-                that.update();
-                if (that.onDrunk) {
-                   that.onDrunk(that.userId);
+            undoDiv.fadeIn(500).delay(5000).fadeOut(500, function() {
+                if (!drinkUndone) {
+                    that.update();
+                    if (that.onDrunk) {
+                       that.onDrunk(that.userId);
+                    }
+
+                    playSound();
                 }
-                
-                playSound();
-            }
 
-            newElement.remove();
-            
-            that.clicked = false;
+                undoDiv.remove();
+
+                that.clicked = false;
+            });
         });
     }
     
