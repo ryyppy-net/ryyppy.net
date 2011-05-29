@@ -210,6 +210,7 @@ function UserButton(userId, element, color) {
             undoDiv.fadeIn(500, function() {
                 var timeoutId = setTimeout(function() {
                     that.fadeAndRemove(undoDiv);
+                    that.enableButton();
 
                     if (!drinkUndone) {
                         that.update();
@@ -219,8 +220,6 @@ function UserButton(userId, element, color) {
 
                         playSound();
                     }
-
-                    that.clicked = false;
                 }, 5000);
                 
                 $('#portionSize').live('click', function() {
@@ -238,6 +237,7 @@ function UserButton(userId, element, color) {
                     
                     setTimeout(function() {
                         that.fadeAndRemove(undoDiv);
+                        that.enableButton();
                     }, 2000);
                 });
             });
@@ -248,6 +248,14 @@ function UserButton(userId, element, color) {
         element.fadeOut(500, function() {
             element.remove();
         });
+    }
+    
+    this.disableButton = function() {
+        this.clicked = true;
+    }
+    
+    this.enableButton = function() {
+        this.clicked = false;
     }
     
     this.buildHtml();
