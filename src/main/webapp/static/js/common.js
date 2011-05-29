@@ -213,8 +213,10 @@ function fitElementOnAnother(element, another) {
     var top = getPositionTop(another.get(0)) + (parseFloat(another.css('height')) - height) / 2;
     var left = getPositionLeft(another.get(0)) + (parseFloat(another.css('width')) - width) / 2;
 
-    element.css('width', width);
-    element.css('height', height);
-    element.css('left', left);
-    element.css('top', top);
+    element.css({
+        'width': width,
+        'height': height,
+        'left': left,
+        'top': top
+    });
 }
