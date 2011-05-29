@@ -215,4 +215,11 @@ public class User extends AbstractEntity{
     public float getBloodAlcoholGrams() {
         return AlcoholServiceImpl.getInstance().getBloodAlcoholGrams(this);
     }
+
+    @Override
+    public String toString() {
+        return "User{"+"name=" + name + ", email=" + email + '}';
+    }
+    
+    
 }
