@@ -206,3 +206,15 @@ function resizePopupDialogs(bestSize) {
                      .dialog('option', 'height', bestSize['bestHeight'])
                      .dialog('option', 'position', 'center');
 }
+
+function fitElementOnAnother(element, another) {
+    var width = parseFloat(another.css('width'));
+    var height = parseFloat(another.css('height'));
+    var top = getPositionTop(another.get(0)) + (parseFloat(another.css('height')) - height) / 2;
+    var left = getPositionLeft(another.get(0)) + (parseFloat(another.css('width')) - width) / 2;
+
+    element.css('width', width);
+    element.css('height', height);
+    element.css('left', left);
+    element.css('top', top);
+}
