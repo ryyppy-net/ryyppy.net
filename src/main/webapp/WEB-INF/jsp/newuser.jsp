@@ -41,7 +41,7 @@
                     <input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" /><br />
 
                     <label for="email"><spring:message code="form.email" /></label><br />
-                    <input id="email" type="text" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
+                    <input id="email" type="email" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
                     <span id="emailCorrect">&nbsp;</span><br />
 
                     <label for="sex"><spring:message code="form.sex" /></label><br />

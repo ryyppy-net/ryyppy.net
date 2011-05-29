@@ -77,7 +77,7 @@
                     <tr>
                         <th><spring:message code="form.email"/></th>
                         <td>
-                            <input id="emailInput" type="text" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
+                            <input id="emailInput" type="email" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
                         </td>
                         <td id="emailCorrect"></td>
                     </tr>
