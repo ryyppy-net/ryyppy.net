@@ -92,7 +92,9 @@
                 else {
                     $.get('/static/templates/drinkListElement.html', function(template) {
                         $.tmpl(template, drinkData).appendTo('#drinksList');
-                        $('.drink').live('click', function() {
+                        
+                        $('.drink').unbind('click');
+                        $('.drink').bind('click', function() {
                             var element = $.tmplItem(this);
                             if (confirm('<spring:message code="user.remove_drink.confirm"/>'))
                                 $.get('/ui/removeDrink?userId=' + element.data.UserId + '&drinkId=' + element.data.DrinkId, configureDrinksDialogOpened);
