@@ -149,9 +149,9 @@ function UserButton(userId, element, color) {
     }
 
     this.renderGraph = function() {
-        if (this.element.height() < 150) return;
-        if (this.element.width() < 200) return;
-        
+        if (this.series == null)
+            return;
+
         var newElement = $('#graph' + this.userId);
         if (newElement.length == 0) {
             newElement = $('<div>');
@@ -176,9 +176,6 @@ function UserButton(userId, element, color) {
             this.element.resize(onResize);
             onResize();
         }
-
-        if (this.series == null)
-            return;
 
         $.plot(newElement, this.series, this.graphOptions);
     }
