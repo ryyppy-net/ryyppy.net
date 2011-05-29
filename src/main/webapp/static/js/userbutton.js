@@ -215,20 +215,34 @@ function UserButton(userId, element, color) {
                           .css('background-color', 'red');
             });
 
-            undoDiv.fadeIn(500).delay(5000).fadeOut(500, function() {
-                if (!drinkUndone) {
-                    that.update();
-                    if (that.onDrunk) {
-                       that.onDrunk(that.userId);
-                    }
+            var portionChanged = false;
 
-                    playSound();
-                }
-
-                undoDiv.remove();
-
-                that.clicked = false;
+            $('#portionSize').live('click', function() {
+                portionChanged = true;
             });
+
+            (function() {
+                undoDiv.fadeIn(500, function() {
+                    if (portionChanged) return;
+                    undoDiv.delay(5000, function() {
+                        if (portionChanged) return;
+                        undoDiv.fadeOut(500);
+
+                        if (!drinkUndone) {
+                            that.update();
+                            if (that.onDrunk) {
+                               that.onDrunk(that.userId);
+                            }
+
+                            playSound();
+                        }
+
+                        undoDiv.remove();
+
+                        that.clicked = false;
+                    });
+                });
+            })();
         });
     }
     

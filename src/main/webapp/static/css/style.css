@@ -337,3 +337,9 @@ li.drink {
 .ui-accordion-content {
     padding: 0px !important;
 }
+
+.undo select {
+    font-size: 1.25em;
+    padding: 5px;
+    width: auto;
+}
