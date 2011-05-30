@@ -196,15 +196,25 @@ function UserButton(userId, element, color) {
     }
     
     this.showAdding = function(data) {
+        var selectedPortionSize = 0.33;
+        var selectedPortionAlcoholPercentage = 4.5;
+        
         var drinkUndone = false;
         var drinkId = data;
 
-        var undoData = {UserId: that.userId, AddingDrinkMessage: getMessage('drink_added'), UndoMessage: getMessage('cancel_drink')};
+        var undoData = {
+            UserId: that.userId,
+            AddingDrinkMessage: getMessage('drink_added'),
+            UndoMessage: getMessage('cancel_drink')
+        };
 
         $.get('/static/templates/undoDrink.html', function(template) {
             var undoDiv = $.tmpl(template, undoData);
             undoDiv.appendTo('#user' + that.userId);
             fitElementOnAnother(undoDiv, that.element);
+            
+            $("#portionSizeLabel" + that.userId).html(selectedPortionSize);
+            $("#portionAlcoholPercentageLabel" + that.userId).html(selectedPortionAlcoholPercentage);
             
             var i = 0;
             
@@ -265,6 +275,11 @@ function UserButton(userId, element, color) {
                         $('#acceptButton' + that.userId).live('click', function() {
                             editButton.css('background-color', 'black');
 
+                            selectedPortionSize = $('#portionSize' + that.userId).val();
+                            selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
+                            $("#portionSizeLabel" + that.userId).html(selectedPortionSize);
+                            $("#portionAlcoholPercentageLabel" + that.userId).html(selectedPortionAlcoholPercentage);
+
                             i = 0;
 
                             progressBar = setInterval(function() {
@@ -274,6 +289,21 @@ function UserButton(userId, element, color) {
                             
                             undoDiv.show();
                             editDiv.remove();
+                            
+                            timeoutId = setTimeout(function() {
+                                that.fadeAndRemove(undoDiv);
+                                that.enableButton();
+
+                                if (!drinkUndone) {
+                                    $('#progressBar' + that.userId).remove();
+                                    that.update();
+                                    if (that.onDrunk) {
+                                       that.onDrunk(that.userId);
+                                    }
+
+                                    playSound();
+                                }
+                            }, 5000);
                         });
                     });
                 });
