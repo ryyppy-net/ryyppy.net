@@ -306,7 +306,7 @@ input[disabled] {
     margin-bottom: 5px;
 }
 
-.undo div, .editDrink div {
+.divButton {
     border: 2px solid #ffffff;
     border-radius: 5px;
     width: 80%;
@@ -352,4 +352,12 @@ li.drink {
     font-size: 1.25em;
     padding: 5px;
     width: auto;
+}
+
+div#progressbar {
+    width: 80%;
+    padding: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5px;
 }
