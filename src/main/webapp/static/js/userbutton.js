@@ -39,6 +39,31 @@ function PartyHost(partyId) {
 }
 
 
+
+function DrinkProgressBar(element) {
+    this.element = element;
+    this.progress = 0;
+    
+    this.reset = function() {
+        this.progress = 0;
+        this.update();
+    }
+
+    this.update = function() {
+        this.element.progressbar({value: this.progress});
+    }
+
+    this.remove = function() {
+        this.element.remove();
+    }
+    
+    return this;
+}
+
+
+
+
+
 function UserButton(userId, element, color) {
     var that = this;
     this.alcoholScale = 3;
@@ -55,6 +80,8 @@ function UserButton(userId, element, color) {
     
     this.selectedPortionSize = 0.33;
     this.selectedPortionAlcoholPercentage = 4.5;
+    
+    this.progressBar = null;
     
     this.graphOptions = {
         crosshair: {mode: null},
@@ -218,12 +245,8 @@ function UserButton(userId, element, color) {
             
             that.updatePortionSizeAndAlcoholPercentage();
             
-            var i = 0;
-            
-            var progressBar = setInterval(function() {
-                i++;
-                $("#progressbar" + that.userId).progressbar({ value: i });
-            }, 50);
+            that.progressBar = DrinkProgressBar($("#progressbar" + that.userId));
+            var progressBarInterval = that.startProgressBar();
 
             undoDiv.fadeIn(500, function() {
                 var timeoutId = setTimeout(function() {
@@ -231,7 +254,7 @@ function UserButton(userId, element, color) {
                     that.enableButton();
 
                     if (!drinkUndone) {
-                        $('#progressBar' + that.userId).remove();
+                        that.progressBar.remove();
                         that.update();
                         if (that.onDrunk) {
                            that.onDrunk(that.userId);
@@ -248,7 +271,7 @@ function UserButton(userId, element, color) {
                 var undoButton = $('#undoButton' + that.userId);
                 undoButton.live('click', function() {
                     clearTimeout(timeoutId);
-                    clearInterval(progressBar);
+                    clearInterval(progressBarInterval);
                     
                     RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
                     drinkUndone = true;
@@ -265,7 +288,7 @@ function UserButton(userId, element, color) {
                 editButton.live('click', function() {
                     clearTimeout(timeoutId);
                     editButton.css('background-color', 'green');
-                    clearInterval(progressBar);
+                    clearInterval(progressBarInterval);
                     
                     $.get('/static/templates/editDrink.html', function(template) {
                         var editDiv = $.tmpl(template, undoData);
@@ -282,12 +305,7 @@ function UserButton(userId, element, color) {
                             that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
                             that.updatePortionSizeAndAlcoholPercentage();
 
-                            i = 0;
-
-                            progressBar = setInterval(function() {
-                                i++;
-                                $("#progressbar" + that.userId).progressbar({ value: i });
-                            }, 50);
+                            progressBarInterval = that.startProgressBar();
                             
                             undoDiv.show();
                             editDiv.remove();
@@ -297,7 +315,7 @@ function UserButton(userId, element, color) {
                                 that.enableButton();
 
                                 if (!drinkUndone) {
-                                    $('#progressBar' + that.userId).remove();
+                                    that.progressBar.remove();
                                     that.update();
                                     if (that.onDrunk) {
                                        that.onDrunk(that.userId);
@@ -343,6 +361,13 @@ function UserButton(userId, element, color) {
     this.updatePortionSizeAndAlcoholPercentage = function() {
         $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize);
         $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage);
+    }
+    
+    this.startProgressBar = function() {
+        return setInterval(function() {
+                that.progressBar.progress++;
+                that.progressBar.update();
+        }, 50);
     }
     
     this.buildHtml();
