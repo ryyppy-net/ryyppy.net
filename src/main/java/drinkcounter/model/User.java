@@ -106,6 +106,7 @@ public class User extends AbstractEntity{
     public void drink(Drink drink){
         AlcoholServiceImpl.getInstance().drinkAdded(this, drink);
         getDrinks().add(drink);
+        drink.setDrinker(this);
     }
 
     /**
