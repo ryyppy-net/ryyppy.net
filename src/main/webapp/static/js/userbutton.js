@@ -204,7 +204,6 @@ function UserButton(userId, element, color) {
         $.get('/static/templates/undoDrink.html', function(template) {
             var undoDiv = $.tmpl(template, undoData);
             undoDiv.appendTo('#user' + that.userId);
-
             fitElementOnAnother(undoDiv, that.element);
 
             undoDiv.fadeIn(500, function() {
@@ -239,6 +238,25 @@ function UserButton(userId, element, color) {
                         that.fadeAndRemove(undoDiv);
                         that.enableButton();
                     }, 2000);
+                });
+                
+                var editButton = $('#editButton' + that.userId);
+                editButton.live('click', function() {
+                    clearTimeout(timeoutId);
+                    editButton.css('background-color', 'green');
+                    
+                    $.get('/static/templates/editDrink.html', function(template) {
+                        var editDiv = $.tmpl(template, undoData);
+                        editDiv.appendTo('#user' + that.userId);
+                        fitElementOnAnother(editDiv, that.element);
+                        undoDiv.hide();
+                        editDiv.show();
+                        
+                        $('#acceptButton' + that.userId).live('click', function() {
+                            editButton.css('background-color', 'none');
+                            editDiv.remove();
+                        });
+                    });
                 });
             });
         });

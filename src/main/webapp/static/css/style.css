@@ -289,14 +289,24 @@ input[disabled] {
     cursor: auto;
 }
 
-.undo h1 {
+.editDrink {
+    background-color: #000000;
+    color: #ffffff;
+    position: absolute;
+    display: none;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    cursor: auto;
+}
+
+.undo h1, .editDrink h1 {
     background-color: #000000;
     color: white;
     font-size: 200%;
     margin-bottom: 5px;
 }
 
-.undo div {
+.undo div, .editDrink div {
     border: 2px solid #ffffff;
     border-radius: 5px;
     width: 80%;
@@ -338,7 +348,7 @@ li.drink {
     padding: 0px !important;
 }
 
-.undo select {
+.editDrink select {
     font-size: 1.25em;
     padding: 5px;
     width: auto;
