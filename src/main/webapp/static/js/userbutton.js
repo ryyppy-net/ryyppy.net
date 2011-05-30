@@ -191,7 +191,7 @@ function UserButton(userId, element, color) {
         RyyppyAPI.addDrinkToUser(
             this.userId,
             this.showAdding,
-            function() { alert(getMessage('drink_add_failed')); }
+            function() {alert(getMessage('drink_add_failed'));}
         );
     }
     
@@ -199,7 +199,7 @@ function UserButton(userId, element, color) {
         var drinkUndone = false;
         var drinkId = data;
 
-        var undoData = { UserId: that.userId, AddingDrinkMessage: getMessage('drink_added'), UndoMessage: getMessage('cancel_drink') };
+        var undoData = {UserId: that.userId, AddingDrinkMessage: getMessage('drink_added'), UndoMessage: getMessage('cancel_drink')};
 
         $.get('/static/templates/undoDrink.html', function(template) {
             var undoDiv = $.tmpl(template, undoData);
@@ -207,43 +207,55 @@ function UserButton(userId, element, color) {
 
             fitElementOnAnother(undoDiv, that.element);
 
-            var undoButton = $('#undoButton' + that.userId);
-            undoButton.live('click', function() {
-                RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
-                drinkUndone = true;
-                undoButton.text(getMessage('drink_was_canceled'))
-                          .css('background-color', 'red');
-            });
+            undoDiv.fadeIn(500, function() {
+                var timeoutId = setTimeout(function() {
+                    that.fadeAndRemove(undoDiv);
+                    that.enableButton();
 
-            var portionChanged = false;
-
-            $('#portionSize').live('click', function() {
-                portionChanged = true;
-            });
-
-            (function() {
-                undoDiv.fadeIn(500, function() {
-                    if (portionChanged) return;
-                    undoDiv.delay(5000, function() {
-                        if (portionChanged) return;
-                        undoDiv.fadeOut(500);
-
-                        if (!drinkUndone) {
-                            that.update();
-                            if (that.onDrunk) {
-                               that.onDrunk(that.userId);
-                            }
-
-                            playSound();
+                    if (!drinkUndone) {
+                        that.update();
+                        if (that.onDrunk) {
+                           that.onDrunk(that.userId);
                         }
 
-                        undoDiv.remove();
-
-                        that.clicked = false;
-                    });
+                        playSound();
+                    }
+                }, 5000);
+                
+                $('#portionSize').live('click', function() {
+                    clearTimeout(timeoutId);
                 });
-            })();
+                
+                var undoButton = $('#undoButton' + that.userId);
+                undoButton.live('click', function() {
+                    clearTimeout(timeoutId);
+                    
+                    RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
+                    drinkUndone = true;
+                    undoButton.text(getMessage('drink_was_canceled'))
+                              .css('background-color', 'red');
+                    
+                    setTimeout(function() {
+                        that.fadeAndRemove(undoDiv);
+                        that.enableButton();
+                    }, 2000);
+                });
+            });
         });
+    }
+    
+    this.fadeAndRemove = function(element) {
+        element.fadeOut(500, function() {
+            element.remove();
+        });
+    }
+    
+    this.disableButton = function() {
+        this.clicked = true;
+    }
+    
+    this.enableButton = function() {
+        this.clicked = false;
     }
     
     this.buildHtml();
