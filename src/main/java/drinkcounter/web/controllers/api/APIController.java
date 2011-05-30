@@ -33,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -43,6 +44,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class APIController {
 
     private static final Logger log = LoggerFactory.getLogger(APIController.class);
+    /**
+     * Gram's per litre
+     */
+    public static final float ALCOHOL_DENSITY = 789;
 
     @Autowired
     private PartyMarshaller partyMarshaller;
@@ -79,12 +84,18 @@ public class APIController {
     }
 
     @RequestMapping("/users/{userId}/add-drink")
-    public @ResponseBody String addDrink(HttpSession session, @PathVariable String userId){
+    public @ResponseBody String addDrink(HttpSession session, 
+    @PathVariable String userId, 
+    @RequestParam(value="volume", required=false) Float volume,
+    @RequestParam(value="alcohol", required=false) Float alcoholPercentage ){
         int id = Integer.parseInt(userId);
         authenticationChecks.checkHighLevelRightsToUser(id);
-        int drinkId = drinkCounterService.addDrink(id);
-        User user = userService.getUser(id);
-        return Integer.toString(drinkId);
+        if(volume != null && alcoholPercentage != null){
+            float alcoholAmount = volume*alcoholPercentage*ALCOHOL_DENSITY;
+            return Integer.toString(drinkCounterService.addDrink(id, alcoholAmount));
+        }
+        
+        return Integer.toString(drinkCounterService.addDrink(id));
     }
 
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
@@ -276,7 +287,7 @@ public class APIController {
             if (time == null || time.equals("") || time.equals("0"))
                 drinkCounterService.addDrink(user.getId());
             else
-                drinkCounterService.addDrinkToDate(user.getId(), new Date(Long.parseLong(time)));
+                drinkCounterService.addDrink(user.getId(), new Date(Long.parseLong(time)));
         } catch (Exception e) {
             return "-1";
         }
