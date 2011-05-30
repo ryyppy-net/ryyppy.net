@@ -205,6 +205,13 @@ function UserButton(userId, element, color) {
             var undoDiv = $.tmpl(template, undoData);
             undoDiv.appendTo('#user' + that.userId);
             fitElementOnAnother(undoDiv, that.element);
+            
+            var i = 0;
+            
+            setInterval(function() {
+                i++;
+                $("#progressbar").progressbar({ value: i });
+            }, 50);
 
             undoDiv.fadeIn(500, function() {
                 var timeoutId = setTimeout(function() {
