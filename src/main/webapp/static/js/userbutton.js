@@ -208,7 +208,7 @@ function UserButton(userId, element, color) {
             
             var i = 0;
             
-            setInterval(function() {
+            var progressBar = setInterval(function() {
                 i++;
                 $("#progressbar").progressbar({ value: i });
             }, 50);
@@ -219,6 +219,7 @@ function UserButton(userId, element, color) {
                     that.enableButton();
 
                     if (!drinkUndone) {
+                        $('#progressBar').remove();
                         that.update();
                         if (that.onDrunk) {
                            that.onDrunk(that.userId);
@@ -235,6 +236,7 @@ function UserButton(userId, element, color) {
                 var undoButton = $('#undoButton' + that.userId);
                 undoButton.live('click', function() {
                     clearTimeout(timeoutId);
+                    clearInterval(progressBar);
                     
                     RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
                     drinkUndone = true;
@@ -251,6 +253,7 @@ function UserButton(userId, element, color) {
                 editButton.live('click', function() {
                     clearTimeout(timeoutId);
                     editButton.css('background-color', 'green');
+                    clearInterval(progressBar);
                     
                     $.get('/static/templates/editDrink.html', function(template) {
                         var editDiv = $.tmpl(template, undoData);
@@ -261,6 +264,14 @@ function UserButton(userId, element, color) {
                         
                         $('#acceptButton' + that.userId).live('click', function() {
                             editButton.css('background-color', 'black');
+
+                            i = 0;
+
+                            progressBar = setInterval(function() {
+                                i++;
+                                $("#progressbar").progressbar({ value: i });
+                            }, 50);
+                            
                             undoDiv.show();
                             editDiv.remove();
                         });
