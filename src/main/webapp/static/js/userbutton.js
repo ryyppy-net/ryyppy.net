@@ -53,6 +53,9 @@ function UserButton(userId, element, color) {
     this.minimumWidth = 240;
     this.minimumHeight = 160;
     
+    this.selectedPortionSize = 0.33;
+    this.selectedPortionAlcoholPercentage = 4.5;
+    
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
@@ -199,9 +202,6 @@ function UserButton(userId, element, color) {
     }
     
     this.showAdding = function(data) {
-        var selectedPortionSize = 0.33;
-        var selectedPortionAlcoholPercentage = 4.5;
-        
         var drinkUndone = false;
         var drinkId = data;
 
@@ -216,8 +216,7 @@ function UserButton(userId, element, color) {
             undoDiv.appendTo('#body');
             that.fitElementOnAnotherOrFullScreen(undoDiv, $('#user' + that.userId));
             
-            $("#portionSizeLabel" + that.userId).html(selectedPortionSize);
-            $("#portionAlcoholPercentageLabel" + that.userId).html(selectedPortionAlcoholPercentage);
+            that.updatePortionSizeAndAlcoholPercentage();
             
             var i = 0;
             
@@ -279,10 +278,9 @@ function UserButton(userId, element, color) {
                         $('#acceptButton' + that.userId).live('click', function() {
                             editButton.css('background-color', 'black');
 
-                            selectedPortionSize = $('#portionSize' + that.userId).val();
-                            selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
-                            $("#portionSizeLabel" + that.userId).html(selectedPortionSize);
-                            $("#portionAlcoholPercentageLabel" + that.userId).html(selectedPortionAlcoholPercentage);
+                            that.selectedPortionSize = $('#portionSize' + that.userId).val();
+                            that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
+                            that.updatePortionSizeAndAlcoholPercentage();
 
                             i = 0;
 
@@ -340,6 +338,11 @@ function UserButton(userId, element, color) {
         } else {
             fitElementOnAnother(element, another);
         }
+    }
+    
+    this.updatePortionSizeAndAlcoholPercentage = function() {
+        $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize);
+        $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage);
     }
     
     this.buildHtml();
