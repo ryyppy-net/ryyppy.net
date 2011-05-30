@@ -210,7 +210,7 @@ function UserButton(userId, element, color) {
             
             var progressBar = setInterval(function() {
                 i++;
-                $("#progressbar").progressbar({ value: i });
+                $("#progressbar" + that.userId).progressbar({ value: i });
             }, 50);
 
             undoDiv.fadeIn(500, function() {
@@ -219,7 +219,7 @@ function UserButton(userId, element, color) {
                     that.enableButton();
 
                     if (!drinkUndone) {
-                        $('#progressBar').remove();
+                        $('#progressBar' + that.userId).remove();
                         that.update();
                         if (that.onDrunk) {
                            that.onDrunk(that.userId);
@@ -269,7 +269,7 @@ function UserButton(userId, element, color) {
 
                             progressBar = setInterval(function() {
                                 i++;
-                                $("#progressbar").progressbar({ value: i });
+                                $("#progressbar" + that.userId).progressbar({ value: i });
                             }, 50);
                             
                             undoDiv.show();
