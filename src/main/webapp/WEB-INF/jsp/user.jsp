@@ -168,7 +168,7 @@
         </div>
         
         <!-- stupid css not able to center vertically properly -->
-        <div class="body">
+        <div id="body" class="body">
             <table id="userButtonTable">
                 <tr>
                     <td class="userButton roundedCornersBordered"></td>

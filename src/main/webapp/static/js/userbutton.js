@@ -50,6 +50,9 @@ function UserButton(userId, element, color) {
     this.onDataLoaded = null;
     this.series = null;
     
+    this.minimumWidth = 240;
+    this.minimumHeight = 160;
+    
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
@@ -210,8 +213,19 @@ function UserButton(userId, element, color) {
 
         $.get('/static/templates/undoDrink.html', function(template) {
             var undoDiv = $.tmpl(template, undoData);
-            undoDiv.appendTo('#user' + that.userId);
-            fitElementOnAnother(undoDiv, that.element);
+            
+            if (that.element.width() < that.minimumWidth || that.element.height() < that.minimumHeight) {
+                undoDiv.appendTo('#body');
+                undoDiv.css({
+                    'top': 5,
+                    'left': 5,
+                    'width': $(window).width() - 10,
+                    'height': $(window).height() - 10
+                });
+            } else {
+                undoDiv.appendTo('#user' + that.userId);
+                fitElementOnAnother(undoDiv, that.element);                
+            }
             
             $("#portionSizeLabel" + that.userId).html(selectedPortionSize);
             $("#portionAlcoholPercentageLabel" + that.userId).html(selectedPortionAlcoholPercentage);
@@ -267,8 +281,20 @@ function UserButton(userId, element, color) {
                     
                     $.get('/static/templates/editDrink.html', function(template) {
                         var editDiv = $.tmpl(template, undoData);
-                        editDiv.appendTo('#user' + that.userId);
-                        fitElementOnAnother(editDiv, that.element);
+                        
+                        if (that.element.width() < that.minimumWidth || that.element.height() < that.minimumHeight) {
+                            editDiv.appendTo('#body');
+                            editDiv.css({
+                                'top': 5,
+                                'left': 5,
+                                'width': $(window).width() - 10,
+                                'height': $(window).height() - 10
+                            });
+                        } else {
+                            editDiv.appendTo('#user' + that.userId);
+                            fitElementOnAnother(editDiv, that.element);                            
+                        }
+
                         undoDiv.hide();
                         editDiv.show();
                         
