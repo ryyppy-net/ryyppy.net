@@ -83,6 +83,8 @@ function UserButton(userId, element, color) {
     
     this.progressBar = null;
     
+    this.drinkId = -1;
+    
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
@@ -221,15 +223,41 @@ function UserButton(userId, element, color) {
             return;
 
         this.clicked = true;
-        RyyppyAPI.addDrinkToUser(
-            this.userId,
-            this.selectedPortionSize,
-            this.selectedPortionAlcoholPercentage,
-            this.showAdding,
-            function() {alert(getMessage('drink_add_failed'));}
-        );
+        this.addDrink();
+        this.showAdding();
+    }
+
+    this.addDrink = function() {
+        var addDrinkViaApi = function() {
+            RyyppyAPI.addDrinkToUser(
+                that.userId,
+                that.selectedPortionSize,
+                that.selectedPortionAlcoholPercentage,
+                function(data) {
+                    that.drinkId = data;
+                },
+                function() {alert(getMessage('drink_add_failed'));}
+            );
+        }
+        
+        if (this.drinkId != -1) {
+            this.removePreviousDrink(addDrinkViaApi);
+        } else {
+            addDrinkViaApi();
+        }
     }
     
+    this.removePreviousDrink = function(callback) {
+        if (this.drinkId === -1)
+            return;
+
+        RyyppyAPI.removeDrinkFromUser(this.userId, this.drinkId, function() {
+            this.drinkId = -1;
+            if (typeof(callback) !== "undefined")
+                callback();
+        });
+    }
+
     this.showAdding = function(data) {
         var drinkUndone = false;
         var drinkId = data;
@@ -263,6 +291,7 @@ function UserButton(userId, element, color) {
                         }
 
                         playSound();
+                        that.drinkId = -1;
                     }
                 }, 5000);
                 
@@ -275,7 +304,7 @@ function UserButton(userId, element, color) {
                     clearTimeout(timeoutId);
                     clearInterval(progressBarInterval);
                     
-                    RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
+                    that.removePreviousDrink();
                     drinkUndone = true;
                     undoButton.text(getMessage('drink_was_canceled'))
                               .css('background-color', 'red');
@@ -324,17 +353,11 @@ function UserButton(userId, element, color) {
                                     }
 
                                     playSound();
+                                    that.drinkId = -1;
                                 }
                             }, 5000);
                             
-                            RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
-                            RyyppyAPI.addDrinkToUser(
-                                that.userId,
-                                that.selectedPortionSize,
-                                that.selectedPortionAlcoholPercentage,
-                                undefined,
-                                function() {alert(getMessage('drink_add_failed'));}
-                            );
+                            that.addDrink();
                         });
                     });
                 });
@@ -375,6 +398,7 @@ function UserButton(userId, element, color) {
     }
     
     this.startProgressBar = function() {
+        that.progressBar.reset();
         return setInterval(function() {
                 that.progressBar.progress++;
                 that.progressBar.update();
