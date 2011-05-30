@@ -11,8 +11,15 @@ function RyyppyAPI() {
         $.get('/API/users/{0}/show-history'.format(userId), callback);
     }
     
-    this.addDrinkToUser = function(userId, successCallback, errorCallback) {
-        $.ajax({url: '/API/users/{0}/add-drink'.format(userId)})
+    this.addDrinkToUser = function(userId, volume, alcohol, successCallback, errorCallback) {
+        $.ajax(
+            {
+                url: '/API/users/{0}/add-drink'.format(userId),
+                data: {
+                    'volume': volume,
+                    'alcohol': alcohol
+                }
+            })
             .success(successCallback)
             .error(errorCallback);
     }
