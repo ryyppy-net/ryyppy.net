@@ -253,7 +253,8 @@ function UserButton(userId, element, color) {
                         editDiv.show();
                         
                         $('#acceptButton' + that.userId).live('click', function() {
-                            editButton.css('background-color', 'none');
+                            editButton.css('background-color', 'black');
+                            undoDiv.show();
                             editDiv.remove();
                         });
                     });
