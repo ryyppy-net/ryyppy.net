@@ -41,10 +41,26 @@ function PartyHost(partyId) {
 
 
 function DrinkProgressBar(element) {
+    var that = this;
     this.element = element;
     this.progress = 0;
+    this.updateIntervalId = undefined;
+    this.time = 5000;
+    
+    this.start = function() {
+        this.reset();
+        this.updateIntervalId = setInterval(function() {
+            that.progress++;
+            that.update();
+        }, this.time / 100);
+    }
+    
+    this.stop = function() {
+        clearInterval(this.updateIntervalId);
+    }
     
     this.reset = function() {
+        this.stop();
         this.progress = 0;
         this.update();
     }
@@ -276,7 +292,7 @@ function UserButton(userId, element, color) {
             that.updatePortionSizeAndAlcoholPercentage();
             
             that.progressBar = DrinkProgressBar($("#progressbar" + that.userId));
-            var progressBarInterval = that.startProgressBar();
+            that.progressBar.start();
 
             undoDiv.fadeIn(500, function() {
                 var timeoutId = setTimeout(function() {
@@ -302,7 +318,7 @@ function UserButton(userId, element, color) {
                 var undoButton = $('#undoButton' + that.userId);
                 undoButton.live('click', function() {
                     clearTimeout(timeoutId);
-                    clearInterval(progressBarInterval);
+                    that.progressBar.stop();
                     
                     that.removePreviousDrink();
                     drinkUndone = true;
@@ -319,7 +335,6 @@ function UserButton(userId, element, color) {
                 editButton.live('click', function() {
                     clearTimeout(timeoutId);
                     editButton.css('background-color', 'green');
-                    clearInterval(progressBarInterval);
                     
                     $.get('/static/templates/editDrink.html', function(template) {
                         var editDiv = $.tmpl(template, undoData);
@@ -336,7 +351,7 @@ function UserButton(userId, element, color) {
                             that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
                             that.updatePortionSizeAndAlcoholPercentage();
 
-                            progressBarInterval = that.startProgressBar();
+                            that.progressBar.start();
                             
                             undoDiv.show();
                             editDiv.remove();
@@ -395,14 +410,6 @@ function UserButton(userId, element, color) {
     this.updatePortionSizeAndAlcoholPercentage = function() {
         $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize);
         $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage);
-    }
-    
-    this.startProgressBar = function() {
-        that.progressBar.reset();
-        return setInterval(function() {
-                that.progressBar.progress++;
-                that.progressBar.update();
-        }, 50);
     }
     
     this.buildHtml();
