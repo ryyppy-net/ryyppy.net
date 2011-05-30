@@ -56,7 +56,7 @@ public class AlcoholCalculator {
                 functions.get(size - 1).setCutter(p);
             }
 
-            ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, p + STANDARD_DRINK_ALCOHOL_GRAMS);
+            ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, p + drink.getAlcohol());
             functions.add(newFunction);
         }
     }
