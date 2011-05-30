@@ -50,6 +50,11 @@ function DrinkProgressBar(element) {
     this.start = function() {
         this.reset();
         this.updateIntervalId = setInterval(function() {
+            if (that.progress > 100) {
+                that.stop();
+                return;
+            }
+            
             that.progress++;
             that.update();
         }, this.time / 100);
