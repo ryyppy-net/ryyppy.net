@@ -103,19 +103,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public int addDrink(int userIdentifier) {
-        User user = userDAO.readByPrimaryKey(userIdentifier);
-        Drink drink = new Drink();
-        drink.setDrinker(user);
-        drink.setTimeStamp(new Date());
-
-        user.drink(drink);
-        
-        drinkDao.save(drink);
-        log.info("User {} has drunk a drink", user.getName());
-
-        return drink.getId();
+        return addDrink(userIdentifier, new Date());
     }
-
+    
     @Override
     public List<Drink> getDrinks(int userIdentifier) {
         User user = userDAO.readByPrimaryKey(userIdentifier);
@@ -132,27 +122,27 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    public void addDrinkToDate(int userId, String date, double timezoneOffset) {
+    public int addDrinkToDate(int userId, String date, double timezoneOffset) {
         DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
         DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").withZone(dtz);
         DateTime dt = parser.parseDateTime(date);
 
         if (dt.isAfterNow()) throw new IllegalArgumentException(date);
 
-        addDrinkToDate(userId, dt.toDate());
+        return addDrink(userId, dt.toDate());
     }
 
     @Override
     @Transactional
-    public void addDrinkToDate(int userId, Date date) {
+    public int addDrink(int userId, Date date) {
         if (date.after(new Date())) throw new IllegalArgumentException("date");
         User user = userDAO.readByPrimaryKey(userId);
         Drink drink = new Drink();
-        drink.setDrinker(user);
         drink.setTimeStamp(date);
         user.drink(drink);
         drinkDao.save(drink);
         log.info("User {} has drunk a drink at {}", user.getName(), date.toString());
+        return drink.getId();
     }
 
     @Override
@@ -163,5 +153,17 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     public boolean isUserParticipant(int partyId, int userId) {
         return partyDao.countUserParticipations(partyId, userId) > 0;
+    }
+
+    @Override
+    public int addDrink(int userId, float alcoholAmount) {
+        User user = userDAO.readByPrimaryKey(userId);
+        Drink drink = new Drink();
+        drink.setTimeStamp(new Date());
+        drink.setAlcohol(alcoholAmount);
+        user.drink(drink);
+        drinkDao.save(drink);
+        log.info("User {} has drunk a drink", user.getName());
+        return drink.getId();
     }
 }

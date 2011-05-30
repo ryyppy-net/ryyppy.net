@@ -1,5 +1,6 @@
 package drinkcounter.model;
 
+import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -20,6 +21,7 @@ public class Drink extends AbstractEntity {
 
     private User drinker;
     private Date timeStamp;
+    private float alcohol = (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
 
     public Drink() {
         timeStamp = new Date();
@@ -41,5 +43,19 @@ public class Drink extends AbstractEntity {
 
     public void setTimeStamp(Date timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    /**
+     * Amount of alcohol in drink in grams
+     */
+    public float getAlcohol() {
+        return alcohol;
+    }
+
+    /**
+     * Amount of alcohol in drink in grams
+     */
+    public void setAlcohol(float alcohol) {
+        this.alcohol = alcohol;
     }
 }
