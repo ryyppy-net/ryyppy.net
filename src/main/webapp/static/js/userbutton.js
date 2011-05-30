@@ -79,7 +79,7 @@ function UserButton(userId, element, color) {
     this.minimumHeight = 160;
     
     this.selectedPortionSize = 0.33;
-    this.selectedPortionAlcoholPercentage = 4.5;
+    this.selectedPortionAlcoholPercentage = 0.047;
     
     this.progressBar = null;
     
@@ -223,6 +223,8 @@ function UserButton(userId, element, color) {
         this.clicked = true;
         RyyppyAPI.addDrinkToUser(
             this.userId,
+            this.selectedPortionSize,
+            this.selectedPortionAlcoholPercentage,
             this.showAdding,
             function() {alert(getMessage('drink_add_failed'));}
         );
@@ -324,6 +326,15 @@ function UserButton(userId, element, color) {
                                     playSound();
                                 }
                             }, 5000);
+                            
+                            RyyppyAPI.removeDrinkFromUser(that.userId, drinkId);
+                            RyyppyAPI.addDrinkToUser(
+                                that.userId,
+                                that.selectedPortionSize,
+                                that.selectedPortionAlcoholPercentage,
+                                undefined,
+                                function() {alert(getMessage('drink_add_failed'));}
+                            );
                         });
                     });
                 });
