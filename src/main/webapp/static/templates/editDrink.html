@@ -1,8 +1,8 @@
 <div id="edit${UserId}" class="editDrink">
-    <h1>Muokkaa juomaa</h1>
+    <h1>${EditDrinkLabel}</h1>
         
     <form>
-        <label for="portionSize">Annoskoko</label>
+        <label for="portionSize">${PortionSizeLabel}</label>
         <select id="portionSize${UserId}">
             <option value="0.04">4 cl</option>
             <option value="0.08">8 cl</option>
@@ -15,7 +15,7 @@
             <option value="1.0">1,0 l</option>
         </select>
         <br />
-        <label for="portionAlcoholPercentage">Alkoholi-%</label>
+        <label for="portionAlcoholPercentage">${PortionAlcoholPercentageLabel}</label>
         <select id="portionAlcoholPercentage${UserId}">
             <option value="0.05" selected="selected">0-5%</option>
             <option value="0.10">6-10%</option>
@@ -40,5 +40,5 @@
         </select>
     </form>
     
-    <div id="acceptButton${UserId}" class="divButton">Hyväksy</div>
+    <div id="acceptButton${UserId}" class="divButton">${AcceptLabel}</div>
 </div>

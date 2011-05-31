@@ -265,7 +265,11 @@ function UserButton(userId, element, color) {
         var undoData = {
             UserId: that.userId,
             AddingDrinkMessage: getMessage('drink_added'),
-            UndoMessage: getMessage('cancel_drink')
+            UndoMessage: getMessage('cancel_drink'),
+            PortionSizeLabel: getMessage('portion_size'),
+            PortionAlcoholPercentageLabel: getMessage('portion_alcohol_percentage'),
+            EditDrinkLabel: getMessage('edit_drink'),
+            AcceptLabel: getMessage('accept')
         };
 
         $.get('/static/templates/undoDrink.html', function(template) {
@@ -385,8 +389,8 @@ function UserButton(userId, element, color) {
     }
     
     this.updatePortionSizeAndAlcoholPercentage = function() {
-        $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize);
-        $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage);
+        $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize + ' ' + getMessage('liters'));
+        $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage * 100);
     }
     
     this.buildHtml();

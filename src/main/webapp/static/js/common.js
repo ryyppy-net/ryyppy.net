@@ -163,6 +163,11 @@ MESSAGES['en']['loading'] = 'Loading...';
 MESSAGES['en']['drink_added'] = "Adding a drink...";
 MESSAGES['en']['drink_add_failed'] = "Adding a drink failed! Please refresh the page and try again.";
 MESSAGES['en']['wait_for_adding_drink'] = "Please wait...";
+MESSAGES['en']['liters'] = 'liters';
+MESSAGES['en']['portion_size'] = 'Portion size';
+MESSAGES['en']['portion_alcohol_percentage'] = 'Alc-%';
+MESSAGES['en']['accept'] = 'Accept';
+MESSAGES['en']['edit_drink'] = 'Edit drink';
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
 MESSAGES['fi']['portion'] = ' annos';
@@ -174,6 +179,13 @@ MESSAGES['fi']['loading'] = 'Ladataan...';
 MESSAGES['fi']['drink_added'] = "Juomaa lisätään...";
 MESSAGES['fi']['drink_add_failed'] = "Juoman lisääminen epäonnistui! Ole hyvä ja lataa sivu uudestaan.";
 MESSAGES['fi']['wait_for_adding_drink'] = "Ole hyvä ja odota...";
+MESSAGES['fi']['liters'] = 'l';
+MESSAGES['fi']['portion_size'] = 'Annoskoko';
+MESSAGES['fi']['portion_alcohol_percentage'] = 'Alkoholi-%';
+MESSAGES['fi']['accept'] = 'Hyväksy';
+MESSAGES['fi']['edit_drink'] = 'Muokkaa juomaa';
+
+
 
 function getCookie( cookie_name )
 {
