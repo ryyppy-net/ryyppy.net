@@ -104,8 +104,6 @@ function UserButton(userId, element, color) {
     
     this.progressBar = null;
     
-    this.drinkId = -1;
-    
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
@@ -244,44 +242,25 @@ function UserButton(userId, element, color) {
             return;
 
         this.clicked = true;
-        this.addDrink();
         this.showAdding();
     }
 
     this.addDrink = function() {
-        var addDrinkViaApi = function() {
-            RyyppyAPI.addDrinkToUser(
-                that.userId,
-                that.selectedPortionSize,
-                that.selectedPortionAlcoholPercentage,
-                function(data) {
-                    that.drinkId = data;
-                },
-                function() {alert(getMessage('drink_add_failed'));}
-            );
-        }
-        
-        if (this.drinkId != -1) {
-            this.removePreviousDrink(addDrinkViaApi);
-        } else {
-            addDrinkViaApi();
-        }
-    }
-    
-    this.removePreviousDrink = function(callback) {
-        if (this.drinkId === -1)
-            return;
-
-        RyyppyAPI.removeDrinkFromUser(this.userId, this.drinkId, function() {
-            this.drinkId = -1;
-            if (typeof(callback) !== "undefined")
-                callback();
-        });
+        RyyppyAPI.addDrinkToUser(
+            that.userId,
+            that.selectedPortionSize,
+            that.selectedPortionAlcoholPercentage,
+            function(data) {
+                playSound();
+            },
+            function() {
+                alert(getMessage('drink_add_failed'));
+            }
+        );
     }
 
-    this.showAdding = function(data) {
+    this.showAdding = function() {
         var drinkUndone = false;
-        var drinkId = data;
 
         var undoData = {
             UserId: that.userId,
@@ -305,14 +284,12 @@ function UserButton(userId, element, color) {
                     that.enableButton();
 
                     if (!drinkUndone) {
+                        that.addDrink();
                         that.progressBar.remove();
                         that.update();
                         if (that.onDrunk) {
                            that.onDrunk(that.userId);
                         }
-
-                        playSound();
-                        that.drinkId = -1;
                     }
                 }, 5000);
                 
@@ -325,7 +302,6 @@ function UserButton(userId, element, color) {
                     clearTimeout(timeoutId);
                     that.progressBar.stop();
                     
-                    that.removePreviousDrink();
                     drinkUndone = true;
                     undoButton.text(getMessage('drink_was_canceled'))
                               .css('background-color', 'red');
@@ -366,18 +342,14 @@ function UserButton(userId, element, color) {
                                 that.enableButton();
 
                                 if (!drinkUndone) {
+                                    that.addDrink();
                                     that.progressBar.remove();
                                     that.update();
                                     if (that.onDrunk) {
                                        that.onDrunk(that.userId);
                                     }
-
-                                    playSound();
-                                    that.drinkId = -1;
                                 }
                             }, 5000);
-                            
-                            that.addDrink();
                         });
                     });
                 });

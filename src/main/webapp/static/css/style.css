@@ -279,7 +279,7 @@ input[disabled] {
     background-color: red;
 }
 
-.undo {
+.undo, .editDrink {
     background-color: #000000;
     color: #ffffff;
     position: absolute;
@@ -287,16 +287,7 @@ input[disabled] {
     border: 2px solid #ffffff;
     border-radius: 5px;
     cursor: auto;
-}
-
-.editDrink {
-    background-color: #000000;
-    color: #ffffff;
-    position: absolute;
-    display: none;
-    border: 2px solid #ffffff;
-    border-radius: 5px;
-    cursor: auto;
+    text-align: center;
 }
 
 .undo h1, .editDrink h1 {
