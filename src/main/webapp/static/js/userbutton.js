@@ -254,6 +254,7 @@ function UserButton(userId, element, color) {
             that.selectedPortionSize,
             that.selectedPortionAlcoholPercentage,
             function(data) {
+                that.update();
                 playSound();
             },
             function() {
@@ -271,7 +272,6 @@ function UserButton(userId, element, color) {
 
             that.addDrink();
             that.progressBar.remove();
-            that.update();
             if (that.onDrunk) {
                that.onDrunk(that.userId);
             }
