@@ -279,7 +279,7 @@ function UserButton(userId, element, color) {
             
             that.updatePortionSizeAndAlcoholPercentage();
             
-            that.progressBar = DrinkProgressBar($("#progressbar" + that.userId));
+            that.progressBar = new DrinkProgressBar($("#progressbar" + that.userId));
             that.progressBar.start();
 
             undoDiv.fadeIn(500, function() {
