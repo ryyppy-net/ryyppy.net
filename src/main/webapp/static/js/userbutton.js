@@ -306,21 +306,6 @@ function UserButton(userId, element, color) {
             that.undoDiv.fadeIn(500, function() {
                 that.scheduleAddingDrink();
                 
-                var undoButton = $('#undoButton' + that.userId);
-                undoButton.click(function() {
-                    that.cancelAddingDrink();
-                    that.progressBar.stop();
-                    
-                    undoButton.text(getMessage('drink_was_canceled'))
-                              .css('background-color', 'red');
-                    
-                    setTimeout(function() {
-                        that.fadeAndRemove(that.undoDiv);
-                        that.progressBar.remove();
-                        that.enableButton();
-                    }, 2000);
-                });
-                
                 var editButton = $('#editButton' + that.userId);
                 editButton.click(function() {
                     that.cancelAddingDrink();
@@ -349,6 +334,22 @@ function UserButton(userId, element, color) {
                             that.scheduleAddingDrink();
                         });
                     });
+                });
+                
+                var undoButton = $('#undoButton' + that.userId);
+                undoButton.click(function() {
+                    that.cancelAddingDrink();
+                    editButton.unbind('click');
+                    that.progressBar.stop();
+                    
+                    undoButton.text(getMessage('drink_was_canceled'))
+                              .css('background-color', 'red');
+                    
+                    setTimeout(function() {
+                        that.fadeAndRemove(that.undoDiv);
+                        that.progressBar.remove();
+                        that.enableButton();
+                    }, 2000);
                 });
             });
         });
