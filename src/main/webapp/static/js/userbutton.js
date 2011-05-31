@@ -260,6 +260,8 @@ function UserButton(userId, element, color) {
     }
 
     this.showAdding = function() {
+        var timeoutId = undefined;
+        
         var undoData = {
             UserId: that.userId,
             AddingDrinkMessage: getMessage('drink_added'),
@@ -281,7 +283,8 @@ function UserButton(userId, element, color) {
             that.progressBar.start();
 
             undoDiv.fadeIn(500, function() {
-                var timeoutId = setTimeout(function() {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(function() {
                     that.fadeAndRemove(undoDiv);
                     that.enableButton();
 
@@ -292,10 +295,6 @@ function UserButton(userId, element, color) {
                        that.onDrunk(that.userId);
                     }
                 }, 5000);
-                
-                $('#portionSize').live('click', function() {
-                    clearTimeout(timeoutId);
-                });
                 
                 var undoButton = $('#undoButton' + that.userId);
                 undoButton.live('click', function() {
@@ -337,6 +336,7 @@ function UserButton(userId, element, color) {
                             undoDiv.show();
                             editDiv.remove();
                             
+                            clearTimeout(timeoutId);
                             timeoutId = setTimeout(function() {
                                 that.fadeAndRemove(undoDiv);
                                 that.enableButton();
