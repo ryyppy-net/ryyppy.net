@@ -260,8 +260,6 @@ function UserButton(userId, element, color) {
     }
 
     this.showAdding = function() {
-        var drinkUndone = false;
-
         var undoData = {
             UserId: that.userId,
             AddingDrinkMessage: getMessage('drink_added'),
@@ -287,13 +285,11 @@ function UserButton(userId, element, color) {
                     that.fadeAndRemove(undoDiv);
                     that.enableButton();
 
-                    if (!drinkUndone) {
-                        that.addDrink();
-                        that.progressBar.remove();
-                        that.update();
-                        if (that.onDrunk) {
-                           that.onDrunk(that.userId);
-                        }
+                    that.addDrink();
+                    that.progressBar.remove();
+                    that.update();
+                    if (that.onDrunk) {
+                       that.onDrunk(that.userId);
                     }
                 }, 5000);
                 
@@ -306,12 +302,12 @@ function UserButton(userId, element, color) {
                     clearTimeout(timeoutId);
                     that.progressBar.stop();
                     
-                    drinkUndone = true;
                     undoButton.text(getMessage('drink_was_canceled'))
                               .css('background-color', 'red');
                     
                     setTimeout(function() {
                         that.fadeAndRemove(undoDiv);
+                        that.progressBar.remove();
                         that.enableButton();
                     }, 2000);
                 });
@@ -345,13 +341,11 @@ function UserButton(userId, element, color) {
                                 that.fadeAndRemove(undoDiv);
                                 that.enableButton();
 
-                                if (!drinkUndone) {
-                                    that.addDrink();
-                                    that.progressBar.remove();
-                                    that.update();
-                                    if (that.onDrunk) {
-                                       that.onDrunk(that.userId);
-                                    }
+                                that.addDrink();
+                                that.progressBar.remove();
+                                that.update();
+                                if (that.onDrunk) {
+                                   that.onDrunk(that.userId);
                                 }
                             }, 5000);
                         });
