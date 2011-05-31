@@ -104,6 +104,9 @@ function UserButton(userId, element, color) {
     
     this.progressBar = null;
     
+    this.timeoutId = undefined;
+    this.undoDiv = undefined;
+    
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
@@ -259,9 +262,27 @@ function UserButton(userId, element, color) {
         );
     }
 
+
+    this.scheduleAddingDrink = function() {
+        this.cancelAddingDrink();
+        this.timeoutId = setTimeout(function() {
+            that.fadeAndRemove(that.undoDiv);
+            that.enableButton();
+
+            that.addDrink();
+            that.progressBar.remove();
+            that.update();
+            if (that.onDrunk) {
+               that.onDrunk(that.userId);
+            }
+        }, 5000);
+    }
+    
+    this.cancelAddingDrink = function() {
+        clearTimeout(this.timeoutId);
+    }
+
     this.showAdding = function() {
-        var timeoutId = undefined;
-        
         var undoData = {
             UserId: that.userId,
             AddingDrinkMessage: getMessage('drink_added'),
@@ -273,47 +294,36 @@ function UserButton(userId, element, color) {
         };
 
         $.get('/static/templates/undoDrink.html', function(template) {
-            var undoDiv = $.tmpl(template, undoData);
-            undoDiv.appendTo('#body');
-            that.fitElementOnAnotherOrFullScreen(undoDiv, $('#user' + that.userId));
+            that.undoDiv = $.tmpl(template, undoData);
+            that.undoDiv.appendTo('#body');
+            that.fitElementOnAnotherOrFullScreen(that.undoDiv, $('#user' + that.userId));
             
             that.updatePortionSizeAndAlcoholPercentage();
             
             that.progressBar = new DrinkProgressBar($("#progressbar" + that.userId));
             that.progressBar.start();
 
-            undoDiv.fadeIn(500, function() {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(function() {
-                    that.fadeAndRemove(undoDiv);
-                    that.enableButton();
-
-                    that.addDrink();
-                    that.progressBar.remove();
-                    that.update();
-                    if (that.onDrunk) {
-                       that.onDrunk(that.userId);
-                    }
-                }, 5000);
+            that.undoDiv.fadeIn(500, function() {
+                that.scheduleAddingDrink();
                 
                 var undoButton = $('#undoButton' + that.userId);
-                undoButton.live('click', function() {
-                    clearTimeout(timeoutId);
+                undoButton.click(function() {
+                    that.cancelAddingDrink();
                     that.progressBar.stop();
                     
                     undoButton.text(getMessage('drink_was_canceled'))
                               .css('background-color', 'red');
                     
                     setTimeout(function() {
-                        that.fadeAndRemove(undoDiv);
+                        that.fadeAndRemove(that.undoDiv);
                         that.progressBar.remove();
                         that.enableButton();
                     }, 2000);
                 });
                 
                 var editButton = $('#editButton' + that.userId);
-                editButton.live('click', function() {
-                    clearTimeout(timeoutId);
+                editButton.click(function() {
+                    that.cancelAddingDrink();
                     editButton.css('background-color', 'green');
                     
                     $.get('/static/templates/editDrink.html', function(template) {
@@ -321,10 +331,10 @@ function UserButton(userId, element, color) {
                         editDiv.appendTo('#body');
                         that.fitElementOnAnotherOrFullScreen(editDiv, $('#user' + that.userId));
                         
-                        undoDiv.hide();
+                        that.undoDiv.hide();
                         editDiv.show();
                         
-                        $('#acceptButton' + that.userId).live('click', function() {
+                        $('#acceptButton' + that.userId).click(function() {
                             editButton.css('background-color', 'black');
 
                             that.selectedPortionSize = $('#portionSize' + that.userId).val();
@@ -333,21 +343,10 @@ function UserButton(userId, element, color) {
 
                             that.progressBar.start();
                             
-                            undoDiv.show();
+                            that.undoDiv.show();
                             editDiv.remove();
                             
-                            clearTimeout(timeoutId);
-                            timeoutId = setTimeout(function() {
-                                that.fadeAndRemove(undoDiv);
-                                that.enableButton();
-
-                                that.addDrink();
-                                that.progressBar.remove();
-                                that.update();
-                                if (that.onDrunk) {
-                                   that.onDrunk(that.userId);
-                                }
-                            }, 5000);
+                            that.scheduleAddingDrink();
                         });
                     });
                 });
