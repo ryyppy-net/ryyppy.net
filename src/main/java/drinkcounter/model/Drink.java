@@ -8,6 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Temporal;
+import javax.persistence.Transient;
 
 /**
  *
@@ -57,5 +58,10 @@ public class Drink extends AbstractEntity {
      */
     public void setAlcohol(float alcohol) {
         this.alcohol = alcohol;
+    }
+
+    @Transient
+    public float getAmountOfShots() {
+        return alcohol / (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
     }
 }

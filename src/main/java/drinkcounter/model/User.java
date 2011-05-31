@@ -145,17 +145,22 @@ public class User extends AbstractEntity{
         return sex;
     }
 
+    /**
+     *
+     * @param date, the date to count the drinks after
+     * @return the amount of shots (alkoholiannoksia)
+     */
     public int drinksSince(Date date){
-        int count = 0;
+        float shots = 0f;
         // iterate from last to first
         ListIterator<Drink> iterator = drinks.listIterator(drinks.size());
         while(iterator.hasPrevious()){
             Drink drink = iterator.previous();
             if (drink.getTimeStamp().before(date))
                 break;
-            count++;
+            shots += drink.getAmountOfShots();
         }
-        return count;
+        return Math.round(shots);
     }
 
     public boolean isGuest() {
