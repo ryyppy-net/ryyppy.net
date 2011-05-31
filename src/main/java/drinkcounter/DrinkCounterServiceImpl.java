@@ -80,14 +80,14 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         
         for (User current : getParty(party.getId()).getParticipants()) {
             if (current.getId() == user.getId()) {
-                log.info("User with name {} was already added to party {}. Skipping", user.getName(), party.getName());
+                log.info("{} was already added to party {}. Skipping", user, party.getName());
                 return;
             }
         }
         
         party.addParticipant(user);
         partyDao.save(party);
-        log.info("User with name {} was added to party {}", user.getName(), party.getName());
+        log.info("{} was added to party {}", user, party.getName());
     }
 
     @Override
@@ -97,7 +97,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         User user = userDAO.readByPrimaryKey(userId);
         party.removeParticipant(user);
         partyDao.save(party);
-        log.info("User with name {} was removed from party {}", user.getName(), party.getName());
+        log.info("{} was removed from party {}", user, party.getName());
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         drink.setTimeStamp(date);
         user.drink(drink);
         drinkDao.save(drink);
-        log.info("User {} has drunk a drink at {}", user.getName(), date.toString());
+        log.info("{} has drunk a drink at {}", user, date.toString());
         return drink.getId();
     }
 

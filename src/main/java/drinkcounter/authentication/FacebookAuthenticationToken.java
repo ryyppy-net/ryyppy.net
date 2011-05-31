@@ -40,6 +40,9 @@ public class FacebookAuthenticationToken extends AbstractAuthenticationToken{
 
     @Override
     public Object getPrincipal() {
+        if(principal == null){
+            return profileId;
+        }
         return principal;
     }
     
