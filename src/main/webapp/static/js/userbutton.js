@@ -97,7 +97,7 @@ function UserButton(userId, element, color) {
     this.series = null;
     
     this.minimumWidth = 240;
-    this.minimumHeight = 160;
+    this.minimumHeight = 240;
     
     this.selectedPortionSize = 0.33;
     this.selectedPortionAlcoholPercentage = 0.047;
