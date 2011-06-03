@@ -359,7 +359,9 @@ function UserButton(userId, element, color) {
                             that.selectedPortionSize = $('#portionSize' + that.userId).val();
                             that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
                             that.addDrink();
-                            editDiv.remove();
+                            that.undoDiv.remove();
+                            that.fadeAndRemove(editDiv);
+                            that.enableButton();
                         });
                     });
                 });
