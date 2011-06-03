@@ -234,6 +234,18 @@ public class APIController {
         drinkCounterService.linkUserToParty(user.getId(), pid);
         return user.getId().toString();
     }
+    
+    @RequestMapping("/parties/{partyId}/link-user-to-party/{userId}")
+    public @ResponseBody String linkUserToParty(HttpSession session, @PathVariable String partyId,
+            @PathVariable String userId){
+                
+        int pid = Integer.parseInt(partyId);
+        int uid = Integer.parseInt(userId);
+        authenticationChecks.checkRightsForParty(pid);
+//        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
+        drinkCounterService.linkUserToParty(uid, pid);
+        return "";
+    }
 
     private List<String[]> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;

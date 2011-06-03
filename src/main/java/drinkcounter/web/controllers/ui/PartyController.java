@@ -68,18 +68,6 @@ public class PartyController {
         return "redirect:party?id="+party.getId();
     }
    
-    @RequestMapping("/linkUserToParty")
-    public String linkUserToParty(HttpSession session, @RequestParam("partyId") String partyId,
-            @RequestParam("userId") String userId){
-                
-        int pid = Integer.parseInt(partyId);
-        int uid = Integer.parseInt(userId);
-        authenticationChecks.checkRightsForParty(pid);
-//        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
-        drinkCounterService.linkUserToParty(uid, pid);
-        return "redirect:party?id="+partyId;
-    }
-
     @RequestMapping("/removeUserFromParty")
     public @ResponseBody String removeUserFromParty(HttpSession session, @RequestParam("partyId") String partyId,
             @RequestParam("userId") String userId){
