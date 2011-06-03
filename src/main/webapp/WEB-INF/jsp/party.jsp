@@ -54,8 +54,17 @@
                     },
                     function() { alert('fail'); }
                 );
-                    
-                
+                return false;
+            }
+            
+            function linkUserToParty() {
+                RyyppyAPI.linkUserToParty(partyId, $('#userId').val(),
+                    function() {
+                        partyHost.update();
+                        $('#addDrinkerDialog').dialog('close');
+                    },
+                    function() { alert('fail'); }
+                );
                 return false;
             }
         </script>
@@ -85,7 +94,7 @@
             <div id="addDrinkerAccordion">
                 <h2><a href="#"><spring:message code="party.add_drinker.registered"/></a></h2>
                 <div>
-                    <form method="post" action="<c:url value="linkUserToParty" />">
+                    <form method="post" action="#">
                         <input type="hidden" name="partyId" value="${party.id}" />
                         <input type="hidden" id="userId" name="userId" />
 
@@ -99,7 +108,7 @@
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>
-                                <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="forceRefresh();" /></td>
+                                <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="return linkUserToParty();" /></td>
                             </tr>
                         </table>
                     </form>
@@ -107,7 +116,7 @@
 
                 <h2><a href="#"><spring:message code="party.add_drinker.guest"/></a></h2>
                 <div>
-                    <form method="post" action="">
+                    <form method="post" action="#">
                         <input type="hidden" name="partyId" value="${party.id}" />
                         <table>
                             <tr>

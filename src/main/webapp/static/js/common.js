@@ -45,6 +45,15 @@ function RyyppyAPI() {
             .success(successCallback)
             .error(errorCallback);
     }
+    
+    this.linkUserToParty = function(partyId, userId, successCallback, errorCallback) {
+        $.ajax(
+            {
+                url: '/API/parties/{0}/link-user-to-party/{1}'.format(partyId, userId)
+            })
+            .success(successCallback)
+            .error(errorCallback);        
+    }
 }
 
 var RyyppyAPI = new RyyppyAPI();
