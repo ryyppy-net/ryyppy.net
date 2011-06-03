@@ -179,22 +179,22 @@ function UserButton(userId, element, color) {
 
     this.dataLoaded = function(data) {
         var xml = $(data);
-        var name = xml.find('name').text();
+        this.name = xml.find('name').text();
         var alcohol = xml.find('alcoholInPromilles').text();
         var drinks = xml.find('totalDrinks').text();
         var idletime = xml.find('idle').text();
 
         this.alcohol = alcohol;
 
-        this.setTexts(name, alcohol, drinks, idletime);
+        this.setTexts(alcohol, drinks, idletime);
         if (this.onDataLoaded != null)
             this.onDataLoaded(data);
     }
 
-    this.setTexts = function(name, alcohol, drinks, idletime) {
+    this.setTexts = function(alcohol, drinks, idletime) {
         var div = $('#info' + userId);
         div.html('');
-        div.append($('<span class="name"></span>').text(name));
+        div.append($('<span class="name"></span>').text(this.name));
         div.append($('<br />'));
         div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'));
         div.append($('<br />'));
@@ -413,6 +413,7 @@ function UserButton(userId, element, color) {
     }
     
     this.updatePortionSizeAndAlcoholPercentage = function() {
+        $('#userNameLabel' + that.userId).html(this.name);
         $("#portionLabel" + that.userId).html(this.portionSizes[this.selectedPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.selectedPortionAlcoholPercentage]);
     }
     
