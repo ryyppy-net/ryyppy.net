@@ -116,6 +116,36 @@ function UserButton(userId, element, color) {
         xaxis: {mode: "time", timeformat: "%H:%M", show:true}
     };
     
+    this.portionSizes = {
+        '0.04': '4 cl',
+        '0.08': '8 cl',
+        '0.12': '12 cl',
+        '0.16': '16 cl',
+        '0.2': '0.2 l',
+        '0.33': '0.33 l',
+        '0.4': '0.4 l',
+        '0.5': '0.5 l',
+        '0.6': '0.6 l',
+        '1.0': '1.0 l'
+    };
+    
+    this.portionAlcoholPercentages = {
+        '0.028': '2.8%',
+        '0.047': '4.7%',
+        '0.052': '5.2%',
+        '0.055': '5.5%',
+        '0.08': '8.0%',
+        '0.12': '12.0%',
+        '0.14': '14.0%',
+        '0.22': '22.0%',
+        '0.30': '30.0%',
+        '0.32': '32.0%',
+        '0.38': '38.0%',
+        '0.40': '40.0%',
+        '0.48': '48.0%',
+        '0.80': '80.0%'
+    };
+    
     this.element = element;
 
     this.element.click(function () {that.buttonClick();} );
@@ -389,8 +419,7 @@ function UserButton(userId, element, color) {
     }
     
     this.updatePortionSizeAndAlcoholPercentage = function() {
-        $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize + ' ' + getMessage('liters'));
-        $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage * 100);
+        $("#portionLabel" + that.userId).html(this.portionSizes[this.selectedPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.selectedPortionAlcoholPercentage]);
     }
     
     this.buildHtml();
