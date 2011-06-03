@@ -68,25 +68,6 @@ public class PartyController {
         return "redirect:party?id="+party.getId();
     }
    
-    @RequestMapping("/addAnonymousUser")
-    public String addAnonymousUser(HttpSession session,
-            @RequestParam("partyId") String partyId,
-            @RequestParam("name") String name,
-            @RequestParam("sex") String sex,
-            @RequestParam("weight") float weight){
-        int pid = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(pid);
-        
-        User user = new User();
-        user.setName(name);
-        user.setSex(User.Sex.valueOf(sex));
-        user.setWeight(weight);
-        user.setGuest(true);
-        userService.addUser(user);
-        drinkCounterService.linkUserToParty(user.getId(), pid);
-        return "redirect:party?id=" + partyId;
-    }
-    
     @RequestMapping("/linkUserToParty")
     public String linkUserToParty(HttpSession session, @RequestParam("partyId") String partyId,
             @RequestParam("userId") String userId){

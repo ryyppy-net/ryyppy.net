@@ -45,6 +45,19 @@
                     }
                 });
             });
+            
+            function addAnonymousUser() {
+                RyyppyAPI.addAnonymousUserToParty(partyId, $('#drinkerName').val(), $('#drinkerSex').val(), $('#drinkerWeight').val(),
+                    function() {
+                        partyHost.update();
+                        $('#addDrinkerDialog').dialog('close');
+                    },
+                    function() { alert('fail'); }
+                );
+                    
+                
+                return false;
+            }
         </script>
     </jsp:attribute>
     <jsp:body>
@@ -94,7 +107,7 @@
 
                 <h2><a href="#"><spring:message code="party.add_drinker.guest"/></a></h2>
                 <div>
-                    <form method="post" action="<c:url value="addAnonymousUser" />">
+                    <form method="post" action="">
                         <input type="hidden" name="partyId" value="${party.id}" />
                         <table>
                             <tr>
@@ -104,7 +117,7 @@
                             <tr>
                                 <th><spring:message code="form.sex"/></th>
                                 <td>
-                                    <select name="sex">
+                                    <select id="drinkerSex" name="sex">
                                         <option value="MALE"><spring:message code="form.male"/></option>
                                         <option value="FEMALE"><spring:message code="form.female"/></option>
                                     </select>
@@ -116,7 +129,7 @@
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>
-                                <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="forceRefresh();" disabled="disabled" /></td>
+                                <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="return addAnonymousUser();" disabled="disabled" /></td>
                             </tr>
                         </table>
                     </form>

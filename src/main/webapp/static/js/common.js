@@ -31,6 +31,20 @@ function RyyppyAPI() {
     this.getPartyData = function(partyId, callback) {
         $.get('/API/parties/{0}/'.format(partyId), callback);
     }
+    
+    this.addAnonymousUserToParty = function(partyId, name, sex, weight, successCallback, errorCallback) {
+        $.ajax(
+            {
+                url: '/API/parties/{0}/add-anonymous-user'.format(partyId),
+                data: {
+                    'name': name,
+                    'sex': sex,
+                    'weight': weight
+                }
+            })
+            .success(successCallback)
+            .error(errorCallback);
+    }
 }
 
 var RyyppyAPI = new RyyppyAPI();
