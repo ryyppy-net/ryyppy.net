@@ -215,6 +215,25 @@ public class APIController {
         byte[] bytes = baos.toByteArray();
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
+    
+    @RequestMapping("/parties/{partyId}/add-anonymous-user")
+    public @ResponseBody String addAnonymousUser(HttpSession session,
+            @PathVariable String partyId,
+            @RequestParam("name") String name,
+            @RequestParam("sex") String sex,
+            @RequestParam("weight") float weight){
+        int pid = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(pid);
+        
+        User user = new User();
+        user.setName(name);
+        user.setSex(User.Sex.valueOf(sex));
+        user.setWeight(weight);
+        user.setGuest(true);
+        userService.addUser(user);
+        drinkCounterService.linkUserToParty(user.getId(), pid);
+        return user.getId().toString();
+    }
 
     private List<String[]> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;
