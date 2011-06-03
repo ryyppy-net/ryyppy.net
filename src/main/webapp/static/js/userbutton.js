@@ -99,8 +99,11 @@ function UserButton(userId, element, color) {
     this.minimumWidth = 240;
     this.minimumHeight = 240;
     
-    this.selectedPortionSize = 0.33;
-    this.selectedPortionAlcoholPercentage = 0.047;
+    this.defaultPortionSize = 0.33;
+    this.defaultPortionAlcoholPercentage = 0.047;
+    
+    this.selectedPortionSize = this.defaultPortionSize;
+    this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
     
     this.progressBar = null;
     
@@ -261,6 +264,9 @@ function UserButton(userId, element, color) {
                 alert(getMessage('drink_add_failed'));
             }
         );
+            
+        this.selectedPortionSize = this.defaultPortionSize;
+        this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
     }
 
 
