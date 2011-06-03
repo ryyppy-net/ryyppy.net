@@ -356,18 +356,10 @@ function UserButton(userId, element, color) {
                         editDiv.show();
                         
                         $('#acceptButton' + that.userId).click(function() {
-                            editButton.css('background-color', 'black');
-
                             that.selectedPortionSize = $('#portionSize' + that.userId).val();
                             that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
-                            that.updatePortionSizeAndAlcoholPercentage();
-
-                            that.progressBar.start();
-                            
-                            that.undoDiv.show();
+                            that.addDrink();
                             editDiv.remove();
-                            
-                            that.scheduleAddingDrink();
                         });
                     });
                 });
