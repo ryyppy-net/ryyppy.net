@@ -166,7 +166,7 @@ MESSAGES['en']['wait_for_adding_drink'] = "Please wait...";
 MESSAGES['en']['liters'] = 'liters';
 MESSAGES['en']['portion_size'] = 'Portion size';
 MESSAGES['en']['portion_alcohol_percentage'] = 'Alc-%';
-MESSAGES['en']['accept'] = 'Accept';
+MESSAGES['en']['accept'] = 'Add the drink';
 MESSAGES['en']['edit_drink'] = 'Edit drink';
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
@@ -182,7 +182,7 @@ MESSAGES['fi']['wait_for_adding_drink'] = "Ole hyvä ja odota...";
 MESSAGES['fi']['liters'] = 'l';
 MESSAGES['fi']['portion_size'] = 'Annoskoko';
 MESSAGES['fi']['portion_alcohol_percentage'] = 'Alkoholi-%';
-MESSAGES['fi']['accept'] = 'Hyväksy';
+MESSAGES['fi']['accept'] = 'Lisää juoma';
 MESSAGES['fi']['edit_drink'] = 'Muokkaa juomaa';
 
 
