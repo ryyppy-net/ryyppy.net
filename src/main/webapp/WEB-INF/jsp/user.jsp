@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
         <script type="text/javascript" src="/static/js/common.js"></script>
+        <script type="text/javascript" src="/static/js/datetimepicker.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/js/jquery.ui.datepicker-fi.js"></script>
@@ -25,6 +26,7 @@
         <script type="text/javascript">
             var userButton = null;
             var userId = ${user.id};
+            var picker;
             
             $(document).ready(function() {
                 $('.party').each(function(index) {
@@ -103,14 +105,6 @@
                 }
             }
 
-            function checkTimeField() {
-                var success = false;
-                var time = $("#time").datetimepicker("getDate");
-                if (time != null && time <= new Date()) success = true;
-
-                $("#submitTime").prop("disabled", success ? "" : "disabled");
-            }
-
             $(document).ready(function() {
                 $('#addPartyButtonLink').click(function() {
                     toggleJQUIDialog($('#addPartyDialog'));
@@ -125,7 +119,21 @@
                 
                 $('#addPartyDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
                 $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
-               
+                
+                
+                
+                $('#submitTime').click(function() {
+                    var formattedTime = '{0}.{1}.{2} {3}:{4}'.format(
+                        picker.selectedTime.getDate(),
+                        picker.selectedTime.getMonth() + 1,
+                        picker.selectedTime.getFullYear(),
+                        picker.selectedTime.getHours(),
+                        picker.selectedTime.getMinutes()
+                    );
+                    $('#date').val(formattedTime);
+                });
+                
+                
                 $('#configureDrinksDialog').dialog({
                     modal: true,
                     draggable: false,
@@ -136,6 +144,11 @@
                     open: function() {
                         configureDrinksDialogOpened();
                         $("#configureDrinksAccordion").accordion({ fillSpace: true });
+                        picker = new DateTimePicker('#historyDrinkTime');
+                    },
+                    
+                    close: function() {
+                        $('#historyDrinkTime').html('');
                     }
                 });
                 
@@ -227,9 +240,10 @@
             <div id="configureDrinksAccordion">
                 <h2><a href="#"><spring:message code="user.add_drinks_at"/></a></h2>
                 <div>
+                    <div id="historyDrinkTime"></div>
                     <form method="POST" action="<c:url value="addDrinkToDate" />">
                         <input type="hidden" name="userId" value="${user.id}" />
-                        <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
+                        <input type="hidden" id="date" name="date" value="" />
                         <input type="submit" value="Lisää" id="submitTime" />
                     </form>
                 </div>
