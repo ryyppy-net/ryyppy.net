@@ -24,6 +24,11 @@
                 return this.selectedTime;
             }
             
+            DateTimePicker.prototype.daysInMonth = function(month, year) {
+                var d = new Date(year, month, 0);
+                return d.getDate();
+            }
+            
             DateTimePicker.prototype.showSelectedTime = function() {
                 $('#dateDay').val(this.selectedTime.getDate());
                 $('#dateMonth').val(this.selectedTime.getMonth() + 1);
@@ -49,14 +54,72 @@
                     that.adjustWidths();
                     that.showSelectedTime();
                     that.initializeButtons();
+                    that.initializeHandlers();
                 });                
+            }
+            
+            DateTimePicker.prototype.initializeHandlers = function() {
+                var that = this;
+                
+                $('#dateDay').change(function() {
+                    var newValue = $(this).val();
+                    if (newValue >= 1 && newValue <= that.daysInMonth(that.selectedTime.getMonth(), that.selectedTime.getYear()) && !that.formDateIsInTheFuture())
+                        that.selectedTime.setDate(newValue);
+                    that.showSelectedTime();
+                });
+
+                $('#dateMonth').change(function() {
+                    var newValue = $(this).val();
+                    if (newValue >= 1 && newValue <= 12 && !that.formDateIsInTheFuture())
+                        that.selectedTime.setDate(newValue);
+                    that.showSelectedTime();
+                });
+                
+                $('#dateYear').change(function() {
+                    var newValue = $(this).val();
+                    if (!that.formDateIsInTheFuture())
+                        that.selectedTime.setYear(newValue);
+                    that.showSelectedTime();
+                });
+
+                $('#dateHour').change(function() {
+                    var newValue = $(this).val();
+                    if (newValue >= 1 && newValue <= 23 && !that.formDateIsInTheFuture())
+                        that.selectedTime.setHours(newValue);
+                    that.showSelectedTime();
+                });
+
+                $('#dateMinute').change(function() {
+                    var newValue = $(this).val();
+                    if (newValue >= 0 && newValue <= 59 && !that.formDateIsInTheFuture())
+                        that.selectedTime.setMinutes(newValue);
+                    that.showSelectedTime();
+                });
+            }
+            
+            DateTimePicker.prototype.getDateFromFormValues = function() {
+                var formDate = new Date();
+                formDate.setDate($('#dateDay').val());
+                formDate.setMonth($('#dateMonth').val() - 1);
+                formDate.setYear($('#dateYear').val());
+                formDate.setHours($('#dateHour').val());
+                formDate.setMinutes($('#dateMinute').val());
+                return formDate;
+            }
+            
+            DateTimePicker.prototype.formDateIsInTheFuture = function() {
+                return this.dateIsInTheFuture(this.getDateFromFormValues());
+            }
+            
+            DateTimePicker.prototype.dateIsInTheFuture = function(d) {
+                return d > (new Date());
             }
             
             DateTimePicker.prototype.manipulateDate = function(event, manipulationFunction) {
                 event.preventDefault();
-                if (typeof manipulationFunction !== undefined)
+                if (typeof manipulationFunction !== 'undefined')
                     manipulationFunction();
-                if (typeof this.onUpdate !== undefined)
+                if (typeof this.onUpdate !== 'undefined')
                     this.onUpdate();
                 this.showSelectedTime();
                 return false;
@@ -67,7 +130,10 @@
 
                 $('#increaseDays').click(function(event) {
                     return that.manipulateDate(event, function() {
-                        that.selectedTime.setDate(that.selectedTime.getDate() + 1);
+                        var formDate = that.getDateFromFormValues();
+                        formDate.setDate(that.selectedTime.getDate() + 1);
+                        if (!that.dateIsInTheFuture(formDate))
+                            that.selectedTime.setDate(that.selectedTime.getDate() + 1);
                     });
                 });
                 
@@ -79,7 +145,10 @@
 
                 $('#increaseMonths').click(function(event) {
                     return that.manipulateDate(event, function() {
-                        that.selectedTime.setMonth(that.selectedTime.getMonth() + 1);
+                        var formDate = that.getDateFromFormValues();
+                        formDate.setMonth(that.selectedTime.getMonth() + 1);
+                        if (!that.dateIsInTheFuture(formDate))
+                            that.selectedTime.setMonth(that.selectedTime.getMonth() + 1);
                     });
                 });
                 
@@ -91,7 +160,10 @@
 
                 $('#increaseYears').click(function(event) {
                     return that.manipulateDate(event, function() {
-                        that.selectedTime.setYear(that.selectedTime.getFullYear() + 1);
+                        var formDate = that.getDateFromFormValues();
+                        formDate.setYear(that.selectedTime.getFullYear() + 1);
+                        if (!that.dateIsInTheFuture(formDate))
+                            that.selectedTime.setYear(that.selectedTime.getFullYear() + 1);
                     });
                 });
                 
@@ -103,7 +175,10 @@
                 
                 $('#increaseHours').click(function(event) {
                     return that.manipulateDate(event, function() {
-                        that.selectedTime.setHours(that.selectedTime.getHours() + 1);
+                        var formDate = that.getDateFromFormValues();
+                        formDate.setHours(that.selectedTime.getHours() + 1);
+                        if (!that.dateIsInTheFuture(formDate))
+                            that.selectedTime.setHours(that.selectedTime.getHours() + 1);
                     });
                 });
                 
@@ -115,7 +190,10 @@
 
                 $('#increaseMinutes').click(function(event) {
                     return that.manipulateDate(event, function() {
-                        that.selectedTime.setMinutes(that.selectedTime.getMinutes() + 1);
+                        var formDate = that.getDateFromFormValues();
+                        formDate.setMinutes(that.selectedTime.getMinutes() + 1);
+                        if (!that.dateIsInTheFuture(formDate))
+                            that.selectedTime.setMinutes(that.selectedTime.getMinutes() + 1);
                     });
                 });
                 
