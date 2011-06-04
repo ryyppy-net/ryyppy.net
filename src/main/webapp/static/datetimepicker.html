@@ -15,11 +15,14 @@
             function DateTimePicker(element) {
                 this.element = element;
                 this.selectedTime = new Date();
+                this.onUpdate = undefined;
                 
                 this.appendTemplate();
             }
             
-            
+            DateTimePicker.prototype.getSelectedTime = function() {
+                return this.selectedTime;
+            }
             
             DateTimePicker.prototype.showSelectedTime = function() {
                 $('#dateDay').val(this.selectedTime.getDate());
@@ -53,7 +56,7 @@
                 event.preventDefault();
                 if (typeof manipulationFunction !== undefined)
                     manipulationFunction();
-                this.setSelectedTime();
+                this.showSelectedTime();
                 return false;
             }
             
