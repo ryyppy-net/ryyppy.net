@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/jquery.tmpl.js"></script>
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
         
         <script type="text/javascript">
             $(document).ready(function() {
@@ -18,7 +19,9 @@
                 this.appendTemplate();
             }
             
-            DateTimePicker.prototype.setSelectedTime = function() {
+            
+            
+            DateTimePicker.prototype.showSelectedTime = function() {
                 $('#dateDay').val(this.selectedTime.getDate());
                 $('#dateMonth').val(this.selectedTime.getMonth() + 1);
                 $('#dateYear').val(this.selectedTime.getFullYear());
@@ -41,7 +44,7 @@
                     $.tmpl(template, undefined).appendTo(that.element);
                     
                     that.adjustWidths();
-                    that.setSelectedTime();
+                    that.showSelectedTime();
                     that.initializeButtons();
                 });                
             }
