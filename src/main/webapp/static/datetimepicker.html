@@ -56,6 +56,8 @@
                 event.preventDefault();
                 if (typeof manipulationFunction !== undefined)
                     manipulationFunction();
+                if (typeof this.onUpdate !== undefined)
+                    this.onUpdate();
                 this.showSelectedTime();
                 return false;
             }
