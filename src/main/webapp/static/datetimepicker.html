@@ -13,28 +13,25 @@
             
             function DateTimePicker(element) {
                 this.element = element;
+                this.selectedTime = new Date();
                 
                 this.appendTemplate();
             }
             
-            DateTimePicker.prototype.setCurrentTime = function() {
-                var currentTime = new Date();
+            DateTimePicker.prototype.setSelectedTime = function() {
+                $('#dateDay').val(this.selectedTime.getDate());
+                $('#dateMonth').val(this.selectedTime.getMonth() + 1);
+                $('#dateYear').val(this.selectedTime.getFullYear());
                 
-                $('#dateDay').val(currentTime.getDay());
-                $('#dateMonth').val(currentTime.getMonth() + 1);
-                $('#dateYear').val(currentTime.getFullYear());
-                
-                $('#dateHour').val(currentTime.getHours());
-                $('#dateMinute').val(currentTime.getMinutes());
+                $('#dateHour').val(this.selectedTime.getHours());
+                $('#dateMinute').val(this.selectedTime.getMinutes());
             }
             
             DateTimePicker.prototype.adjustWidths = function() {
                 var widest = 0;
-                $('#drinkTime td').each(function(index) {
+                $('td', $(this.element)).each(function(index) {
                     widest = Math.max(widest, $(this).width());
-                });
-
-                $('#drinkTime td').width(widest);
+                }).width(widest);
             }
             
             DateTimePicker.prototype.appendTemplate = function() {
@@ -42,9 +39,83 @@
                 
                 $.get('/static/templates/datetimepicker.html', function(template) {
                     $.tmpl(template, undefined).appendTo(that.element);
+                    
                     that.adjustWidths();
-                    that.setCurrentTime();
+                    that.setSelectedTime();
+                    that.initializeButtons();
                 });                
+            }
+            
+            DateTimePicker.prototype.manipulateDate = function(event, manipulationFunction) {
+                event.preventDefault();
+                if (typeof manipulationFunction !== undefined)
+                    manipulationFunction();
+                this.setSelectedTime();
+                return false;
+            }
+            
+            DateTimePicker.prototype.initializeButtons = function() {
+                var that = this;
+
+                $('#increaseDays').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setDate(that.selectedTime.getDate() + 1);
+                    });
+                });
+                
+                $('#decreaseDays').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setDate(that.selectedTime.getDate() - 1);
+                    });
+                });
+
+                $('#increaseMonths').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setMonth(that.selectedTime.getMonth() + 1);
+                    });
+                });
+                
+                $('#decreaseMonths').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setMonth(that.selectedTime.getMonth() - 1);
+                    });
+                });
+
+                $('#increaseYears').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setYear(that.selectedTime.getFullYear() + 1);
+                    });
+                });
+                
+                $('#decreaseYears').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setYear(that.selectedTime.getFullYear() - 1);
+                    });
+                });
+                
+                $('#increaseHours').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setHours(that.selectedTime.getHours() + 1);
+                    });
+                });
+                
+                $('#decreaseHours').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setHours(that.selectedTime.getHours() - 1);
+                    });
+                });
+
+                $('#increaseMinutes').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setMinutes(that.selectedTime.getMinutes() + 1);
+                    });
+                });
+                
+                $('#decreaseMinutes').click(function(event) {
+                    return that.manipulateDate(event, function() {
+                        that.selectedTime.setMinutes(that.selectedTime.getMinutes() - 1);
+                    });
+                });
             }
         </script>
         
