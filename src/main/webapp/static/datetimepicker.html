@@ -17,18 +17,33 @@
                 this.appendTemplate();
             }
             
+            DateTimePicker.prototype.setCurrentTime = function() {
+                var currentTime = new Date();
+                
+                $('#dateDay').val(currentTime.getDay());
+                $('#dateMonth').val(currentTime.getMonth() + 1);
+                $('#dateYear').val(currentTime.getFullYear());
+                
+                $('#dateHour').val(currentTime.getHours());
+                $('#dateMinute').val(currentTime.getMinutes());
+            }
+            
+            DateTimePicker.prototype.adjustWidths = function() {
+                var widest = 0;
+                $('#drinkTime td').each(function(index) {
+                    widest = Math.max(widest, $(this).width());
+                });
+
+                $('#drinkTime td').width(widest);
+            }
+            
             DateTimePicker.prototype.appendTemplate = function() {
                 var that = this;
                 
                 $.get('/static/templates/datetimepicker.html', function(template) {
                     $.tmpl(template, undefined).appendTo(that.element);
-                    
-                    var widest = 0;
-                    $('#drinkTime td').each(function(index) {
-                        widest = Math.max(widest, $(this).width());
-                    });
-                    
-                    $('#drinkTime td').width(widest);
+                    that.adjustWidths();
+                    that.setCurrentTime();
                 });                
             }
         </script>
