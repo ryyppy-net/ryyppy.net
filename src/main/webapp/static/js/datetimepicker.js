@@ -40,16 +40,12 @@ DateTimePicker.prototype.adjustWidths = function() {
 }
 
 DateTimePicker.prototype.appendTemplate = function() {
-    var that = this;
+    $('#datetimepickerTemplate').tmpl(undefined).appendTo(this.element);
 
-    $.get('/static/templates/datetimepicker.html', function(template) {
-        $.tmpl(template, undefined).appendTo(that.element);
-
-        that.adjustWidths();
-        that.showSelectedTime();
-        that.initializeButtons();
-        that.initializeHandlers();
-    });                
+    this.adjustWidths();
+    this.showSelectedTime();
+    this.initializeButtons();
+    this.initializeHandlers();
 }
 
 DateTimePicker.prototype.initializeHandlers = function() {
