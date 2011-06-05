@@ -48,10 +48,13 @@ DrinkProgressBar.prototype.remove = function() {
 
 function UserButton(userId, element, color) {
     var that = this;
+
+    this.userId = userId;
+    this.element = element;
     this.color = color;
+
     this.alcoholScale = 3;
     this.timeScale = 5 * 60 * 60 * 1000;
-    this.userId = userId;
     this.clicked = false;
     this.onDrunk = null;
     this.alcohol = 0;
@@ -108,9 +111,7 @@ function UserButton(userId, element, color) {
         '0.80': '80.0%'
     };
     
-    this.element = element;
-
-    this.element.click(function () {that.buttonClick();} );
+    this.element.click($.proxy(this.buttonClick, this));
     
     this.buildHtml();
 }
@@ -135,13 +136,8 @@ UserButton.prototype.setMaxY = function(max) {
 }
 
 UserButton.prototype.update = function() {
-    var that = this;
-    RyyppyAPI.getUserData(this.userId, function(data) {
-        that.dataLoaded(data);
-    });
-    RyyppyAPI.getUserHistory(this.userId, function(data) {
-        that.historyLoaded(data);
-    });
+    RyyppyAPI.getUserData(this.userId, $.proxy(this.dataLoaded, this));
+    RyyppyAPI.getUserHistory(this.userId, $.proxy(this.historyLoaded, this));
 }
 
 UserButton.prototype.dataLoaded = function(data) {
@@ -206,8 +202,6 @@ UserButton.prototype.historyLoaded = function(data) {
 }
 
 UserButton.prototype.renderGraph = function() {
-    var that = this;
-    
     if (this.element.height() < 150) return;
     if (this.element.width() < 200) return;
 
@@ -224,19 +218,20 @@ UserButton.prototype.renderGraph = function() {
         this.element.append(newElement);
 
         function onResize() {
-            var width = parseFloat(that.element.css('width')) * 0.98;
-            var height = parseFloat(that.element.css('height')) * 0.95;
-            var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
-            var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
+            var width = parseFloat(this.element.css('width')) * 0.98;
+            var height = parseFloat(this.element.css('height')) * 0.95;
+            var top = getPositionTop(this.element.get(0)) + (parseFloat(this.element.css('height')) - height) / 2;
+            var left = getPositionLeft(this.element.get(0)) + (parseFloat(this.element.css('width')) - width) / 2;
 
-            var newElement = $('#graph' + that.userId);
+            var newElement = $('#graph' + this.userId);
             newElement.css('left', left);
             newElement.css('top', top);
             newElement.css('width', width);
             newElement.css('height', height);
         }
-        this.element.resize(onResize);
-        onResize();
+        
+        this.element.resize($.proxy(onResize, this));
+        $.proxy(onResize, this)();
     }
 
     $.plot(newElement, this.series, this.graphOptions);
@@ -251,16 +246,14 @@ UserButton.prototype.buttonClick = function() {
 }
 
 UserButton.prototype.addDrink = function() {
-    var that = this;
-
     RyyppyAPI.addDrinkToUser(
-        that.userId,
-        that.selectedPortionSize,
-        that.selectedPortionAlcoholPercentage,
-        function(data) {
-            that.update();
+        this.userId,
+        this.selectedPortionSize,
+        this.selectedPortionAlcoholPercentage,
+        $.proxy(function(data) {
+            this.update();
             playSound();
-        },
+        }, this),
         function() {
             alert(getMessage('drink_add_failed'));
         }
@@ -272,19 +265,17 @@ UserButton.prototype.addDrink = function() {
 
 
 UserButton.prototype.scheduleAddingDrink = function() {
-    var that = this;
-    
     this.cancelAddingDrink();
-    this.timeoutId = setTimeout(function() {
-        that.fadeAndRemove(that.undoDiv);
-        that.enableButton();
+    this.timeoutId = setTimeout($.proxy(function() {
+        this.fadeAndRemove(this.undoDiv);
+        this.enableButton();
 
-        that.addDrink();
-        that.progressBar.remove();
-        if (that.onDrunk) {
-           that.onDrunk(that.userId);
+        this.addDrink();
+        this.progressBar.remove();
+        if (this.onDrunk) {
+           this.onDrunk(this.userId);
         }
-    }, 5000);
+    }, this), 5000);
 }
 
 UserButton.prototype.cancelAddingDrink = function() {
