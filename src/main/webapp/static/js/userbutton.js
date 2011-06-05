@@ -112,6 +112,8 @@ function UserButton(userId, element, color) {
         '0.48': '48.0%',
         '0.80': '80.0%'
     };
+
+    this.graphElement = undefined;
     
     this.buildHtml();
 }
@@ -126,16 +128,17 @@ UserButton.prototype.buildHtml = function() {
         this.buttonElement = $.tmpl(template, buttonData);
         this.buttonElement.appendTo(this.element);
         this.initializeButton();
+        
+        this.graphElement = $('#graph' + this.userId);
+        this.element.resize($.proxy(this.onResize, this));
+        $.proxy(this.onResize, this)();
+        this.renderGraph();
     }, this));
 }
 
 UserButton.prototype.initializeButton = function() {
     this.buttonElement.css('background-color', this.color);
     this.buttonElement.click($.proxy(this.buttonClick, this));
-    
-    var div = $('<div>');
-    div.attr('id', 'info' + this.userId);
-    this.buttonElement.append(div);
     this.setTexts(getMessage('loading'), 0, 0, 0);
 }
 
@@ -209,44 +212,37 @@ UserButton.prototype.historyLoaded = function(data) {
 
     var series = {data: histories, color: 'rgb(0, 0, 0)'};
     this.series = [series];
-
+    
     this.renderGraph();
 }
 
 UserButton.prototype.renderGraph = function() {
-    if (this.element.height() < 150) return;
-    if (this.element.width() < 200) return;
+    if (this.graphElement == undefined)
+        return;
+    
+    if (this.element.height() < 150 || this.element.width() < 200) {
+        this.graphElement.hide();
+        return;
+    } 
 
     if (this.series == null)
         return;
 
-    var newElement = $('#graph' + this.userId);
-    if (newElement.length == 0) {
-        newElement = $('<div>');
-        newElement.attr('id', 'graph' + this.userId);
-        newElement.attr('class', 'graph');
-        newElement.css('position', 'absolute');
+    this.graphElement.show();
+    $.plot(this.graphElement, this.series, this.graphOptions);
+}
 
-        this.element.append(newElement);
 
-        function onResize() {
-            var width = parseFloat(this.element.css('width')) * 0.98;
-            var height = parseFloat(this.element.css('height')) * 0.95;
-            var top = getPositionTop(this.element.get(0)) + (parseFloat(this.element.css('height')) - height) / 2;
-            var left = getPositionLeft(this.element.get(0)) + (parseFloat(this.element.css('width')) - width) / 2;
+UserButton.prototype.onResize = function() {
+    var width = parseFloat(this.element.css('width')) * 0.98;
+    var height = parseFloat(this.element.css('height')) * 0.95;
+    var top = getPositionTop(this.element.get(0)) + (parseFloat(this.element.css('height')) - height) / 2;
+    var left = getPositionLeft(this.element.get(0)) + (parseFloat(this.element.css('width')) - width) / 2;
 
-            var newElement = $('#graph' + this.userId);
-            newElement.css('left', left);
-            newElement.css('top', top);
-            newElement.css('width', width);
-            newElement.css('height', height);
-        }
-        
-        this.element.resize($.proxy(onResize, this));
-        $.proxy(onResize, this)();
-    }
-
-    $.plot(newElement, this.series, this.graphOptions);
+    this.graphElement.css('left', left);
+    this.graphElement.css('top', top);
+    this.graphElement.css('width', width);
+    this.graphElement.css('height', height);
 }
 
 UserButton.prototype.buttonClick = function() {

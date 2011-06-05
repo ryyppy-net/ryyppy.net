@@ -78,7 +78,6 @@ table#drinkers {
 
 td.userButton {
     display:table-cell;
-    vertical-align:middle;
     margin: 5px;
     font-size: 1em;
     text-align:center;
@@ -375,4 +374,9 @@ div#fooTime {
 
 div.userButton {
     height: 100%;
+    vertical-align: middle;
+}
+
+.graph {
+    position: absolute;
 }
