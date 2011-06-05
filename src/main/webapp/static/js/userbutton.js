@@ -167,6 +167,8 @@ UserButton.prototype.dataLoaded = function(data) {
     this.setTexts(alcohol, drinks, idletime);
     if (this.onDataLoaded != null)
         this.onDataLoaded(data);
+
+    $('#info' + this.userId).css('top', ($('#infoContainer' + this.userId).height() / 2) - ($('#info' + this.userId).height() / 2));
 }
 
 UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
