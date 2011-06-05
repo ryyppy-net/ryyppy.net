@@ -1,5 +1,4 @@
 function DrinkProgressBar(element) {
-    var that = this;
     this.element = element;
     this.progress = 0;
     this.updateIntervalId = undefined;
@@ -7,15 +6,15 @@ function DrinkProgressBar(element) {
     
     this.start = function() {
         this.reset();
-        this.updateIntervalId = setInterval(function() {
-            if (that.progress > 100) {
-                that.stop();
+        this.updateIntervalId = setInterval($.proxy(function() {
+            if (this.progress > 100) {
+                this.stop();
                 return;
             }
             
-            that.progress++;
-            that.update();
-        }, this.time / 100);
+            this.progress++;
+            this.update();
+        }, this), this.time / 100);
     }
     
     this.stop = function() {
