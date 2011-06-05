@@ -75,6 +75,8 @@ function UserButton(userId, element, color) {
     this.timeoutId = undefined;
     this.undoDiv = undefined;
     
+    this.buttonElement;
+    
     this.graphOptions = {
         crosshair: {mode: null},
         yaxis: {min: 0},
@@ -111,19 +113,29 @@ function UserButton(userId, element, color) {
         '0.80': '80.0%'
     };
     
-    this.element.click($.proxy(this.buttonClick, this));
-    
     this.buildHtml();
 }
 
 
 UserButton.prototype.buildHtml = function() {
-    this.element.attr('id', 'user' + this.userId);
-    this.element.css('background-color', this.color);
+    var buttonData = {
+        'UserId': this.userId
+    };
 
+    $.get('/static/templates/userButton.html', $.proxy(function(template) {
+        this.buttonElement = $.tmpl(template, buttonData);
+        this.buttonElement.appendTo(this.element);
+        this.initializeButton();
+    }, this));
+}
+
+UserButton.prototype.initializeButton = function() {
+    this.buttonElement.css('background-color', this.color);
+    this.buttonElement.click($.proxy(this.buttonClick, this));
+    
     var div = $('<div>');
     div.attr('id', 'info' + this.userId);
-    this.element.append(div);
+    this.buttonElement.append(div);
     this.setTexts(getMessage('loading'), 0, 0, 0);
 }
 

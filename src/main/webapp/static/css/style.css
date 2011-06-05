@@ -372,3 +372,7 @@ div#fooTime {
     padding: 5px;
     text-align: center;
 }
+
+div.userButton {
+    height: 100%;
+}
