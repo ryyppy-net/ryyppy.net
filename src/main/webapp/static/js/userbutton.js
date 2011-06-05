@@ -4,40 +4,44 @@ function DrinkProgressBar(element) {
     this.updateIntervalId = undefined;
     this.time = 5000;
     
-    this.start = function() {
-        this.reset();
-        this.updateIntervalId = setInterval($.proxy(function() {
-            if (this.progress > 100) {
-                this.stop();
-                return;
-            }
-            
-            this.progress++;
-            this.update();
-        }, this), this.time / 100);
-    }
-    
-    this.stop = function() {
-        clearInterval(this.updateIntervalId);
-    }
-    
-    this.reset = function() {
-        this.stop();
-        this.progress = 0;
-        this.update();
-    }
-
-    this.update = function() {
-        this.element.progressbar({value: this.progress});
-    }
-
-    this.remove = function() {
-        this.element.remove();
-    }
-    
     return this;
 }
 
+DrinkProgressBar.prototype.start = function() {
+    this.reset();
+    this.updateIntervalId = setInterval(
+        $.proxy(this.stepThrough, this),
+        this.time / 100
+    );
+};
+
+DrinkProgressBar.prototype.stepThrough = function() {
+    if (this.progress > 100) {
+        this.stop();
+        return;
+    }
+
+    this.progress++;
+    this.update();
+}
+
+DrinkProgressBar.prototype.stop = function() {
+    clearInterval(this.updateIntervalId);
+}
+
+DrinkProgressBar.prototype.reset = function() {
+    this.stop();
+    this.progress = 0;
+    this.update();
+}
+
+DrinkProgressBar.prototype.update = function() {
+    this.element.progressbar({value: this.progress});
+}
+
+DrinkProgressBar.prototype.remove = function() {
+    this.element.remove();
+}
 
 
 
