@@ -293,5 +293,7 @@
                 </table>
             </form>
         </div>
+                    
+        <t:jQueryTemplates></t:jQueryTemplates>
     </jsp:body>
 </t:master>
