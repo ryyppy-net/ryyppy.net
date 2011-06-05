@@ -1,11 +1,3 @@
-var RyyppyNet = {
-    inProgress: [],
-    graph: null,
-    graphInterval: null,
-    graphVisible: false,
-    updateInterval: 2 * 60 * 1000
-};
-
 var repaintAllowed = false;
 
 $(document).ready(function() {
@@ -108,29 +100,6 @@ function areSame(list1, list2) {
 function onUserDrunk() {
     updateGroupGraph();
 }
-
-function onButtonDataUpdated() {
-    var max = 0;
-
-    for (var i in grid.userButtons) {
-        var userButton = grid.userButtons[i];
-        if (userButton.series == null) continue;
-        for (var j in userButton.series[0].data) {
-            var d = userButton.series[0].data[j];
-            var a = d[1];
-            if (Number(a) >= Number(max))
-                max = a;
-        }
-    }
-
-    max = Math.floor(max) + 1;
-
-    for (i in grid.userButtons) {
-        userButton = grid.userButtons[i];
-        userButton.setMaxY(max);
-    }
-}
-
 
 function pageUpdate() {
     $('#topic').text(partyHost.name);

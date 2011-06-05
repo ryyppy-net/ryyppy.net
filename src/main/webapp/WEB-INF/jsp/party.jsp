@@ -28,6 +28,7 @@
             var partyHost = new PartyHost(partyId);
             partyHost.onUpdate = pageUpdate;
             var grid = new UserButtonGrid($('#drinkers'));
+            grid.onUserDrunk = onUserDrunk;
 
             $(document).ready(function() {
                 $('#addDrinkerAccordion').accordion({
