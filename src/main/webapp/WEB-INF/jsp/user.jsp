@@ -18,6 +18,7 @@
         <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
+        <script type="text/javascript" src="/static/js/userbuttongrid.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
         <script type="text/javascript" src="/static/js/date.js"></script>
@@ -27,16 +28,21 @@
             var userButton = null;
             var userId = ${user.id};
             var picker;
-            
+            var grid;
+
             $(document).ready(function() {
+                $('#drinkers').height(275);
+                grid = new UserButtonGrid($('#drinkers'));
+                grid.users = [{'id': userId }];
+                grid.updateGrid();
+                
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
                 });
                 
-                userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
-                userButton.onDataLoaded = onButtonDataUpdated;
-                userButton.update();
-                setInterval(function() {userButton.update()}, 60 * 1000);
+                setInterval(function() {
+                    grid.updateButtons();
+                }, 60 * 1000);
 
                 var user = { id: ${user.id}, name: '${user.name}' };
                 
@@ -45,20 +51,6 @@
                 graph.options.legend = { position:'nw' };
                 graph.update();
             });
-
-            function onButtonDataUpdated() {
-                if (userButton.series == null) return;
-
-                var max = 0;
-                for (var j in userButton.series[0].data) {
-                    var d = userButton.series[0].data[j];
-                    var a = d[1];
-                    if (Number(a) >= Number(max))
-                        max = a;
-                }
-                max = Math.floor(max) + 1;
-                userButton.setMaxY(max);
-            }
 
             function configureDrinksDialogOpened() {
                 RyyppyAPI.getUserDrinks(${user.id}, gotDrinkData);
@@ -162,7 +154,7 @@
             function repaint() {
                 var windowWidth = $(window).width();
                 var bestWidth = windowWidth - 15;
-                $("#userButtonTable").width(bestWidth);
+                $("#drinkers").width(bestWidth);
                 $(".party").width(bestWidth);
                 $("#historyGraph").width(bestWidth - 35);
                 
@@ -184,11 +176,7 @@
         
         <!-- stupid css not able to center vertically properly -->
         <div id="body" class="body">
-            <table id="userButtonTable">
-                <tr>
-                    <td class="userButton roundedCornersBordered"></td>
-                </tr>
-            </table>
+            <table id="drinkers"></table>
         </div>
         
         <div class="header headerMargin">

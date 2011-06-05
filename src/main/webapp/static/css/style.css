@@ -310,10 +310,6 @@ input[disabled] {
     float: right;
 }
 
-#userButtonTable {
-    height:275px;
-}
-
 #historyGraph {
     height: 300px;
     background-color:#E6A465;

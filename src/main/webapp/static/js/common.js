@@ -1,3 +1,12 @@
+var RyyppyNet = {
+    inProgress: [],
+    graph: null,
+    graphInterval: null,
+    graphVisible: false,
+    updateInterval: 2 * 60 * 1000
+};
+
+
 function RyyppyAPI() {
     this.getUserData = function(userId, callback) {
         $.get('/API/users/{0}/'.format(userId), callback);
