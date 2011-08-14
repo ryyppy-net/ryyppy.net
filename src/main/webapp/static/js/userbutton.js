@@ -236,15 +236,20 @@ UserButton.prototype.renderGraph = function() {
 
 
 UserButton.prototype.onResize = function() {
-    var width = parseFloat(this.element.css('width')) * 0.98;
-    var height = parseFloat(this.element.css('height')) * 0.95;
+    var width = parseFloat(this.element.css('width'));
+    var height = parseFloat(this.element.css('height'));
     var top = getPositionTop(this.element.get(0)) + (parseFloat(this.element.css('height')) - height) / 2;
     var left = getPositionLeft(this.element.get(0)) + (parseFloat(this.element.css('width')) - width) / 2;
 
+    this.buttonElement.css('left', left);
+    this.buttonElement.css('top', top);
+    this.buttonElement.css('width', width);
+    this.buttonElement.css('height', height);
+
     this.graphElement.css('left', left);
     this.graphElement.css('top', top);
-    this.graphElement.css('width', width);
-    this.graphElement.css('height', height);
+    this.graphElement.css('width', width * 0.98);
+    this.graphElement.css('height', height * 0.95);
 }
 
 UserButton.prototype.buttonClick = function() {
