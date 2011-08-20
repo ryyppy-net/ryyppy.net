@@ -1,95 +1,60 @@
-var partyHistoryUrl = '/API/parties/_partyid_/get-history';
-
-function PartyHost(partyId) {
-    var that = this;
-    this.partyId = partyId;
-    this.users = [];
-
-    this.loadData = function() {
-        $.get(partyHistoryUrl.replace('_partyid_', this.partyId), function(data) {that.historyLoaded(data);} );
-    }
-    
-    this.historyLoaded = function(data) {
-        var rows = data.split('\n');
-        for (var i = 1; i < rows.length; i++) {
-            var row = rows[i];
-            if (row.length == 0) continue;
-            var columns = row.split(',');
-            
-            var userId = columns[0];
-
-            if (this.users[userId] == undefined) {
-                this.users[userId] = new User(userId);
-            }
-            
-            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-            var history = [Number(columns[1]) + timezoneoffset, Number(columns[2])];
-            
-            var user = this.users[userId];
-            user.history.push(history);
-        }
-    }
-
-    this.getUserHistoryFunction = function(userId) {
-        var user = this.users[userId];
-        return function() {
-            return (user != undefined) ? user.history : undefined;
-        };
-    }
-}
-
-
-
 function DrinkProgressBar(element) {
-    var that = this;
     this.element = element;
     this.progress = 0;
     this.updateIntervalId = undefined;
     this.time = 5000;
     
-    this.start = function() {
-        this.reset();
-        this.updateIntervalId = setInterval(function() {
-            if (that.progress > 100) {
-                that.stop();
-                return;
-            }
-            
-            that.progress++;
-            that.update();
-        }, this.time / 100);
-    }
-    
-    this.stop = function() {
-        clearInterval(this.updateIntervalId);
-    }
-    
-    this.reset = function() {
-        this.stop();
-        this.progress = 0;
-        this.update();
-    }
-
-    this.update = function() {
-        this.element.progressbar({value: this.progress});
-    }
-
-    this.remove = function() {
-        this.element.remove();
-    }
-    
     return this;
 }
 
+DrinkProgressBar.prototype.start = function() {
+    this.reset();
+    this.updateIntervalId = setInterval(
+        $.proxy(this.stepThrough, this),
+        this.time / 100
+    );
+};
+
+DrinkProgressBar.prototype.stepThrough = function() {
+    if (this.progress > 100) {
+        this.stop();
+        return;
+    }
+
+    this.progress++;
+    this.update();
+}
+
+DrinkProgressBar.prototype.stop = function() {
+    clearInterval(this.updateIntervalId);
+}
+
+DrinkProgressBar.prototype.reset = function() {
+    this.stop();
+    this.progress = 0;
+    this.update();
+}
+
+DrinkProgressBar.prototype.update = function() {
+    this.element.progressbar({value: this.progress});
+}
+
+DrinkProgressBar.prototype.remove = function() {
+    this.element.remove();
+}
 
 
 
 
 function UserButton(userId, element, color) {
     var that = this;
+
+    this.userId = userId;
+    this.element = element;
+    this.color = color;
+
     this.alcoholScale = 3;
     this.timeScale = 5 * 60 * 60 * 1000;
-    this.userId = userId;
     this.clicked = false;
     this.onDrunk = null;
     this.alcohol = 0;
@@ -99,13 +64,18 @@ function UserButton(userId, element, color) {
     this.minimumWidth = 240;
     this.minimumHeight = 240;
     
-    this.selectedPortionSize = 0.33;
-    this.selectedPortionAlcoholPercentage = 0.047;
+    this.defaultPortionSize = 0.33;
+    this.defaultPortionAlcoholPercentage = 0.047;
+    
+    this.selectedPortionSize = this.defaultPortionSize;
+    this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
     
     this.progressBar = null;
     
     this.timeoutId = undefined;
     this.undoDiv = undefined;
+    
+    this.buttonElement;
     
     this.graphOptions = {
         crosshair: {mode: null},
@@ -113,282 +83,322 @@ function UserButton(userId, element, color) {
         xaxis: {mode: "time", timeformat: "%H:%M", show:true}
     };
     
-    this.element = element;
-
-    this.element.click(function () {that.buttonClick();} );
+    this.portionSizes = {
+        '0.04': '4 cl',
+        '0.08': '8 cl',
+        '0.12': '12 cl',
+        '0.16': '16 cl',
+        '0.2': '0.2 l',
+        '0.33': '0.33 l',
+        '0.4': '0.4 l',
+        '0.5': '0.5 l',
+        '0.6': '0.6 l',
+        '1.0': '1.0 l'
+    };
     
-    this.buildHtml = function() {
-        this.element.attr('id', 'user' + this.userId);
-        this.element.css('background-color', color);
+    this.portionAlcoholPercentages = {
+        '0.028': '2.8%',
+        '0.047': '4.7%',
+        '0.052': '5.2%',
+        '0.055': '5.5%',
+        '0.08': '8.0%',
+        '0.12': '12.0%',
+        '0.14': '14.0%',
+        '0.22': '22.0%',
+        '0.30': '30.0%',
+        '0.32': '32.0%',
+        '0.38': '38.0%',
+        '0.40': '40.0%',
+        '0.48': '48.0%',
+        '0.80': '80.0%'
+    };
 
-        var div = $('<div>');
-        div.attr('id', 'info' + userId);
-        this.element.append(div);
-        this.setTexts(getMessage('loading'), 0, 0, 0);
-    }
-
-    this.setMaxY = function(max) {
-        var old = this.graphOptions.yaxis.max;
-        if (old != max) {
-            this.graphOptions.yaxis.max = max;
-            this.renderGraph();
-        }
-    }
-
-    this.update = function() {
-        RyyppyAPI.getUserData(this.userId, function(data) {
-            that.dataLoaded(data);
-        });
-        RyyppyAPI.getUserHistory(this.userId, function(data) {
-            that.historyLoaded(data);
-        });
-    }
-
-    this.dataLoaded = function(data) {
-        var xml = $(data);
-        var name = xml.find('name').text();
-        var alcohol = xml.find('alcoholInPromilles').text();
-        var drinks = xml.find('totalDrinks').text();
-        var idletime = xml.find('idle').text();
-
-        this.alcohol = alcohol;
-
-        this.setTexts(name, alcohol, drinks, idletime);
-        if (this.onDataLoaded != null)
-            this.onDataLoaded(data);
-    }
-
-    this.setTexts = function(name, alcohol, drinks, idletime) {
-        var div = $('#info' + userId);
-        div.html('');
-        div.append($('<span class="name"></span>').text(name));
-        div.append($('<br />'));
-        div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'));
-        div.append($('<br />'));
-
-        var click_me_msg = getMessage('click_me');
-        var portion_msg = getMessage('portion');
-        var portions_msg = getMessage('portions');
-        var idle_msg = getMessage('idle');
-        
-        if (drinks == 0) {
-            div.append($('<span class="details"></span>').text(click_me_msg));
-        } else {
-            if (drinks == 1)
-                div.append($('<span class="details"></span>').text(drinks + portion_msg));
-            else
-                div.append($('<span class="details"></span>').text(drinks + portions_msg));
-
-            div.append($('<br />'));
-            div.append($('<span class="details"></span>').text(idle_msg + formatTime(idletime)));
-        }
-    }
-
-    this.historyLoaded = function(data) {
-        var histories = [];
-
-        var rows = data.split('\n');
-        for (var i = 1; i < rows.length; i++) {
-            var row = rows[i];
-            if (row.length == 0) continue;
-            var columns = row.split(',');
-
-            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-
-            var history = [Number(columns[0]) + timezoneoffset, Number(columns[1])];
-            histories.push(history);
-        }
-
-        var series = {data: histories, color: 'rgb(0, 0, 0)'};
-        this.series = [series];
-
-        this.renderGraph();
-    }
-
-    this.renderGraph = function() {
-        if (this.element.height() < 150) return;
-        if (this.element.width() < 200) return;
-        
-        if (this.series == null)
-            return;
-
-        var newElement = $('#graph' + this.userId);
-        if (newElement.length == 0) {
-            newElement = $('<div>');
-            newElement.attr('id', 'graph' + this.userId);
-            newElement.attr('class', 'graph');
-            newElement.css('position', 'absolute');
-
-            this.element.append(newElement);
-
-            function onResize() {
-                var width = parseFloat(that.element.css('width')) * 0.98;
-                var height = parseFloat(that.element.css('height')) * 0.95;
-                var top = getPositionTop(that.element.get(0)) + (parseFloat(that.element.css('height')) - height) / 2;
-                var left = getPositionLeft(that.element.get(0)) + (parseFloat(that.element.css('width')) - width) / 2;
-
-                var newElement = $('#graph' + that.userId);
-                newElement.css('left', left);
-                newElement.css('top', top);
-                newElement.css('width', width);
-                newElement.css('height', height);
-            }
-            this.element.resize(onResize);
-            onResize();
-        }
-
-        $.plot(newElement, this.series, this.graphOptions);
-    }
-
-    this.buttonClick = function() {
-        if (this.clicked)
-            return;
-
-        this.clicked = true;
-        this.showAdding();
-    }
-
-    this.addDrink = function() {
-        RyyppyAPI.addDrinkToUser(
-            that.userId,
-            that.selectedPortionSize,
-            that.selectedPortionAlcoholPercentage,
-            function(data) {
-                that.update();
-                playSound();
-            },
-            function() {
-                alert(getMessage('drink_add_failed'));
-            }
-        );
-    }
-
-
-    this.scheduleAddingDrink = function() {
-        this.cancelAddingDrink();
-        this.timeoutId = setTimeout(function() {
-            that.fadeAndRemove(that.undoDiv);
-            that.enableButton();
-
-            that.addDrink();
-            that.progressBar.remove();
-            if (that.onDrunk) {
-               that.onDrunk(that.userId);
-            }
-        }, 5000);
-    }
-    
-    this.cancelAddingDrink = function() {
-        clearTimeout(this.timeoutId);
-    }
-
-    this.showAdding = function() {
-        var undoData = {
-            UserId: that.userId,
-            AddingDrinkMessage: getMessage('drink_added'),
-            UndoMessage: getMessage('cancel_drink'),
-            PortionSizeLabel: getMessage('portion_size'),
-            PortionAlcoholPercentageLabel: getMessage('portion_alcohol_percentage'),
-            EditDrinkLabel: getMessage('edit_drink'),
-            AcceptLabel: getMessage('accept')
-        };
-
-        $.get('/static/templates/undoDrink.html', function(template) {
-            that.undoDiv = $.tmpl(template, undoData);
-            that.undoDiv.appendTo('#body');
-            that.fitElementOnAnotherOrFullScreen(that.undoDiv, $('#user' + that.userId));
-            
-            that.updatePortionSizeAndAlcoholPercentage();
-            
-            that.progressBar = new DrinkProgressBar($("#progressbar" + that.userId));
-            that.progressBar.start();
-
-            that.undoDiv.fadeIn(500, function() {
-                that.scheduleAddingDrink();
-                
-                var editButton = $('#editButton' + that.userId);
-                editButton.click(function() {
-                    that.cancelAddingDrink();
-                    editButton.css('background-color', 'green');
-                    
-                    $.get('/static/templates/editDrink.html', function(template) {
-                        var editDiv = $.tmpl(template, undoData);
-                        editDiv.appendTo('#body');
-                        that.fitElementOnAnotherOrFullScreen(editDiv, $('#user' + that.userId));
-                        
-                        that.undoDiv.hide();
-                        editDiv.show();
-                        
-                        $('#acceptButton' + that.userId).click(function() {
-                            editButton.css('background-color', 'black');
-
-                            that.selectedPortionSize = $('#portionSize' + that.userId).val();
-                            that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
-                            that.updatePortionSizeAndAlcoholPercentage();
-
-                            that.progressBar.start();
-                            
-                            that.undoDiv.show();
-                            editDiv.remove();
-                            
-                            that.scheduleAddingDrink();
-                        });
-                    });
-                });
-                
-                var undoButton = $('#undoButton' + that.userId);
-                undoButton.click(function() {
-                    that.cancelAddingDrink();
-                    editButton.unbind('click');
-                    that.progressBar.stop();
-                    
-                    undoButton.text(getMessage('drink_was_canceled'))
-                              .css('background-color', 'red');
-                    
-                    setTimeout(function() {
-                        that.fadeAndRemove(that.undoDiv);
-                        that.progressBar.remove();
-                        that.enableButton();
-                    }, 2000);
-                });
-            });
-        });
-    }
-    
-    this.fadeAndRemove = function(element) {
-        element.fadeOut(500, function() {
-            element.remove();
-        });
-    }
-    
-    this.disableButton = function() {
-        this.clicked = true;
-    }
-    
-    this.enableButton = function() {
-        this.clicked = false;
-    }
-    
-    this.fitElementOnAnotherOrFullScreen = function(element, another) {
-        if (another.width() < this.minimumWidth || another.height() < this.minimumHeight) {
-            element.css({
-                'top': 5,
-                'left': 5,
-                'width': $(window).width() - 10,
-                'height': $(window).height() - 10
-            });
-        } else {
-            fitElementOnAnother(element, another);
-        }
-    }
-    
-    this.updatePortionSizeAndAlcoholPercentage = function() {
-        $("#portionSizeLabel" + that.userId).html(this.selectedPortionSize + ' ' + getMessage('liters'));
-        $("#portionAlcoholPercentageLabel" + that.userId).html(this.selectedPortionAlcoholPercentage * 100);
-    }
+    this.graphElement = undefined;
     
     this.buildHtml();
 }
+
+
+UserButton.prototype.buildHtml = function() {
+    var buttonData = {
+        'UserId': this.userId
+    };
+
+    $.get('/static/templates/userButton.html', $.proxy(function(template) {
+        this.buttonElement = $.tmpl(template, buttonData);
+        this.buttonElement.appendTo(this.element);
+        this.initializeButton();
+        
+        this.graphElement = $('#graph' + this.userId);
+        this.element.resize($.proxy(this.onResize, this));
+        $.proxy(this.onResize, this)();
+        this.renderGraph();
+    }, this));
+}
+
+UserButton.prototype.initializeButton = function() {
+    this.buttonElement.css('background-color', this.color);
+    this.buttonElement.click($.proxy(this.buttonClick, this));
+    this.setTexts(getMessage('loading'), 0, 0, 0);
+}
+
+UserButton.prototype.setMaxY = function(max) {
+    var old = this.graphOptions.yaxis.max;
+    if (old != max) {
+        this.graphOptions.yaxis.max = max;
+        this.renderGraph();
+    }
+}
+
+UserButton.prototype.update = function() {
+    RyyppyAPI.getUserData(this.userId, $.proxy(this.dataLoaded, this));
+    RyyppyAPI.getUserHistory(this.userId, $.proxy(this.historyLoaded, this));
+}
+
+UserButton.prototype.dataLoaded = function(data) {
+    var xml = $(data);
+    this.name = xml.find('name').text();
+    var alcohol = xml.find('alcoholInPromilles').text();
+    var drinks = xml.find('totalDrinks').text();
+    var idletime = xml.find('idle').text();
+
+    this.alcohol = alcohol;
+
+    this.setTexts(alcohol, drinks, idletime);
+    if (this.onDataLoaded != null)
+        this.onDataLoaded(data);
+
+    $('#info' + this.userId).css('top', ($('#infoContainer' + this.userId).height() / 2) - ($('#info' + this.userId).height() / 2));
+}
+
+UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
+    var div = $('#info' + this.userId);
+    div.html('');
+    div.append($('<span class="name"></span>').text(this.name));
+    div.append($('<br />'));
+    div.append($('<span class="details"></span>').text(Number(alcohol).toFixed(2)+'\u2030'));
+    div.append($('<br />'));
+
+    var click_me_msg = getMessage('click_me');
+    var portion_msg = getMessage('portion');
+    var portions_msg = getMessage('portions');
+    var idle_msg = getMessage('idle');
+
+    if (drinks == 0) {
+        div.append($('<span class="details"></span>').text(click_me_msg));
+    } else {
+        if (drinks == 1)
+            div.append($('<span class="details"></span>').text(drinks + portion_msg));
+        else
+            div.append($('<span class="details"></span>').text(drinks + portions_msg));
+
+        div.append($('<br />'));
+        div.append($('<span class="details"></span>').text(idle_msg + formatTime(idletime)));
+    }
+}
+
+UserButton.prototype.historyLoaded = function(data) {
+    var histories = [];
+
+    var rows = data.split('\n');
+    for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        if (row.length == 0) continue;
+        var columns = row.split(',');
+
+        var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+
+        var history = [Number(columns[0]) + timezoneoffset, Number(columns[1])];
+        histories.push(history);
+    }
+
+    var series = {data: histories, color: 'rgb(0, 0, 0)'};
+    this.series = [series];
+    
+    this.renderGraph();
+}
+
+UserButton.prototype.renderGraph = function() {
+    if (this.graphElement == undefined)
+        return;
+    
+    if (this.element.height() < 150 || this.element.width() < 200) {
+        this.graphElement.hide();
+        return;
+    } 
+
+    if (this.series == null)
+        return;
+
+    this.graphElement.show();
+    $.plot(this.graphElement, this.series, this.graphOptions);
+}
+
+
+UserButton.prototype.onResize = function() {
+    var width = parseFloat(this.element.css('width'));
+    var height = parseFloat(this.element.css('height'));
+    var top = getPositionTop(this.element.get(0)) + (parseFloat(this.element.css('height')) - height) / 2;
+    var left = getPositionLeft(this.element.get(0)) + (parseFloat(this.element.css('width')) - width) / 2;
+
+    this.buttonElement.css('left', left);
+    this.buttonElement.css('top', top);
+    this.buttonElement.css('width', width);
+    this.buttonElement.css('height', height);
+
+    this.graphElement.css('left', left);
+    this.graphElement.css('top', top);
+    this.graphElement.css('width', width * 0.98);
+    this.graphElement.css('height', height * 0.95);
+}
+
+UserButton.prototype.buttonClick = function() {
+    if (this.clicked)
+        return;
+
+    this.clicked = true;
+    this.showAdding();
+}
+
+UserButton.prototype.addDrink = function() {
+    RyyppyAPI.addDrinkToUser(
+        this.userId,
+        this.selectedPortionSize,
+        this.selectedPortionAlcoholPercentage,
+        $.proxy(function(data) {
+            this.update();
+            playSound();
+        }, this),
+        function() {
+            alert(getMessage('drink_add_failed'));
+        }
+    );
+
+    this.selectedPortionSize = this.defaultPortionSize;
+    this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
+}
+
+
+UserButton.prototype.scheduleAddingDrink = function() {
+    this.cancelAddingDrink();
+    this.timeoutId = setTimeout($.proxy(function() {
+        this.fadeAndRemove(this.undoDiv);
+        this.enableButton();
+
+        this.addDrink();
+        this.progressBar.remove();
+        if (this.onDrunk) {
+           this.onDrunk(this.userId);
+        }
+    }, this), 5000);
+}
+
+UserButton.prototype.cancelAddingDrink = function() {
+    clearTimeout(this.timeoutId);
+}
+
+UserButton.prototype.showAdding = function() {
+    var that = this;
+    
+    var undoData = {
+        UserId: that.userId,
+        AddingDrinkMessage: getMessage('drink_added'),
+        UndoMessage: getMessage('cancel_drink'),
+        PortionSizeLabel: getMessage('portion_size'),
+        PortionAlcoholPercentageLabel: getMessage('portion_alcohol_percentage'),
+        EditDrinkLabel: getMessage('edit_drink'),
+        AcceptLabel: getMessage('accept')
+    };
+
+    $.get('/static/templates/undoDrink.html', function(template) {
+        that.undoDiv = $.tmpl(template, undoData);
+        that.undoDiv.appendTo('#body');
+        that.fitElementOnAnotherOrFullScreen(that.undoDiv, $('#user' + that.userId));
+
+        that.updatePortionSizeAndAlcoholPercentage();
+
+        that.progressBar = new DrinkProgressBar($("#progressbar" + that.userId));
+        that.progressBar.start();
+
+        that.undoDiv.fadeIn(500, function() {
+            that.scheduleAddingDrink();
+
+            var editButton = $('#editButton' + that.userId);
+            editButton.click(function() {
+                that.cancelAddingDrink();
+                editButton.css('background-color', 'green');
+
+                $.get('/static/templates/editDrink.html', function(template) {
+                    var editDiv = $.tmpl(template, undoData);
+                    editDiv.appendTo('#body');
+                    that.fitElementOnAnotherOrFullScreen(editDiv, $('#user' + that.userId));
+
+                    that.undoDiv.hide();
+                    editDiv.show();
+
+                    $('#acceptButton' + that.userId).click(function() {
+                        that.selectedPortionSize = $('#portionSize' + that.userId).val();
+                        that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
+                        that.addDrink();
+                        that.undoDiv.remove();
+                        that.fadeAndRemove(editDiv);
+                        that.enableButton();
+                    });
+                });
+            });
+
+            var undoButton = $('#undoButton' + that.userId);
+            undoButton.click(function() {
+                that.cancelAddingDrink();
+                editButton.unbind('click');
+                that.progressBar.stop();
+
+                undoButton.text(getMessage('drink_was_canceled'))
+                          .css('background-color', 'red');
+
+                setTimeout(function() {
+                    that.fadeAndRemove(that.undoDiv);
+                    that.progressBar.remove();
+                    that.enableButton();
+                }, 2000);
+            });
+        });
+    });
+}
+
+UserButton.prototype.fadeAndRemove = function(element) {
+    element.fadeOut(500, function() {
+        element.remove();
+    });
+}
+
+UserButton.prototype.disableButton = function() {
+    this.clicked = true;
+}
+
+UserButton.prototype.enableButton = function() {
+    this.clicked = false;
+}
+
+UserButton.prototype.fitElementOnAnotherOrFullScreen = function(element, another) {
+    if (another.width() < this.minimumWidth || another.height() < this.minimumHeight) {
+        element.css({
+            'top': 5,
+            'left': 5,
+            'width': $(window).width() - 10,
+            'height': $(window).height() - 10
+        });
+    } else {
+        fitElementOnAnother(element, another);
+    }
+}
+
+UserButton.prototype.updatePortionSizeAndAlcoholPercentage = function() {
+    $('#userNameLabel' + this.userId).html(this.name);
+    $("#portionLabel" + this.userId).html(this.portionSizes[this.selectedPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.selectedPortionAlcoholPercentage]);
+}
+
+
 
 function formatTime(time) {
     var days = Math.floor(time / (60 * 60 * 24));

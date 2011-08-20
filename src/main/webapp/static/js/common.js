@@ -1,3 +1,12 @@
+var RyyppyNet = {
+    inProgress: [],
+    graph: null,
+    graphInterval: null,
+    graphVisible: false,
+    updateInterval: 2 * 60 * 1000
+};
+
+
 function RyyppyAPI() {
     this.getUserData = function(userId, callback) {
         $.get('/API/users/{0}/'.format(userId), callback);
@@ -30,6 +39,29 @@ function RyyppyAPI() {
 
     this.getPartyData = function(partyId, callback) {
         $.get('/API/parties/{0}/'.format(partyId), callback);
+    }
+    
+    this.addAnonymousUserToParty = function(partyId, name, sex, weight, successCallback, errorCallback) {
+        $.ajax(
+            {
+                url: '/API/parties/{0}/add-anonymous-user'.format(partyId),
+                data: {
+                    'name': name,
+                    'sex': sex,
+                    'weight': weight
+                }
+            })
+            .success(successCallback)
+            .error(errorCallback);
+    }
+    
+    this.linkUserToParty = function(partyId, userId, successCallback, errorCallback) {
+        $.ajax(
+            {
+                url: '/API/parties/{0}/link-user-to-party/{1}'.format(partyId, userId)
+            })
+            .success(successCallback)
+            .error(errorCallback);        
     }
 }
 
@@ -166,7 +198,7 @@ MESSAGES['en']['wait_for_adding_drink'] = "Please wait...";
 MESSAGES['en']['liters'] = 'liters';
 MESSAGES['en']['portion_size'] = 'Portion size';
 MESSAGES['en']['portion_alcohol_percentage'] = 'Alc-%';
-MESSAGES['en']['accept'] = 'Accept';
+MESSAGES['en']['accept'] = 'Add the drink';
 MESSAGES['en']['edit_drink'] = 'Edit drink';
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
@@ -182,7 +214,7 @@ MESSAGES['fi']['wait_for_adding_drink'] = "Ole hyvä ja odota...";
 MESSAGES['fi']['liters'] = 'l';
 MESSAGES['fi']['portion_size'] = 'Annoskoko';
 MESSAGES['fi']['portion_alcohol_percentage'] = 'Alkoholi-%';
-MESSAGES['fi']['accept'] = 'Hyväksy';
+MESSAGES['fi']['accept'] = 'Lisää juoma';
 MESSAGES['fi']['edit_drink'] = 'Muokkaa juomaa';
 
 

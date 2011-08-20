@@ -17,6 +17,7 @@
             }
         </script>
         <script type="text/javascript" src="/static/js/login.js"></script>
+        <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
     </jsp:attribute>
     
     <jsp:body>
@@ -85,9 +86,10 @@
             </p>
         </div>
                     
-        <div style="text-align: center;">
-            <p style="margin-top: 20px;">
-                <iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FRyyppynet%2F151477181585164&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font&amp;colorscheme=dark&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe>
+        <div style="text-align: center; margin-top: 20px;">
+            <p>
+                <iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FRyyppynet%2F151477181585164&amp;layout=button_count&amp;show_faces=false&amp;width=90&amp;action=like&amp;font&amp;colorscheme=dark&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px; margin-right:20px;" allowTransparency="true"></iframe>
+                <g:plusone size="medium" href="http://ryyppy.net"></g:plusone>
             </p>
         </div>
     </jsp:body>

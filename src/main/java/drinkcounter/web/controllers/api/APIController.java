@@ -215,6 +215,37 @@ public class APIController {
         byte[] bytes = baos.toByteArray();
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
+    
+    @RequestMapping("/parties/{partyId}/add-anonymous-user")
+    public @ResponseBody String addAnonymousUser(HttpSession session,
+            @PathVariable String partyId,
+            @RequestParam("name") String name,
+            @RequestParam("sex") String sex,
+            @RequestParam("weight") float weight){
+        int pid = Integer.parseInt(partyId);
+        authenticationChecks.checkRightsForParty(pid);
+        
+        User user = new User();
+        user.setName(name);
+        user.setSex(User.Sex.valueOf(sex));
+        user.setWeight(weight);
+        user.setGuest(true);
+        userService.addUser(user);
+        drinkCounterService.linkUserToParty(user.getId(), pid);
+        return user.getId().toString();
+    }
+    
+    @RequestMapping("/parties/{partyId}/link-user-to-party/{userId}")
+    public @ResponseBody String linkUserToParty(HttpSession session, @PathVariable String partyId,
+            @PathVariable String userId){
+                
+        int pid = Integer.parseInt(partyId);
+        int uid = Integer.parseInt(userId);
+        authenticationChecks.checkRightsForParty(pid);
+//        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
+        drinkCounterService.linkUserToParty(uid, pid);
+        return "";
+    }
 
     private List<String[]> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;

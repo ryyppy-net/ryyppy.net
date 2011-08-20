@@ -28,6 +28,7 @@
             var partyHost = new PartyHost(partyId);
             partyHost.onUpdate = pageUpdate;
             var grid = new UserButtonGrid($('#drinkers'));
+            grid.onUserDrunk = onUserDrunk;
 
             $(document).ready(function() {
                 $('#addDrinkerAccordion').accordion({
@@ -45,6 +46,28 @@
                     }
                 });
             });
+            
+            function addAnonymousUser() {
+                RyyppyAPI.addAnonymousUserToParty(partyId, $('#drinkerName').val(), $('#drinkerSex').val(), $('#drinkerWeight').val(),
+                    function() {
+                        partyHost.update();
+                        $('#addDrinkerDialog').dialog('close');
+                    },
+                    function() { alert('fail'); }
+                );
+                return false;
+            }
+            
+            function linkUserToParty() {
+                RyyppyAPI.linkUserToParty(partyId, $('#userId').val(),
+                    function() {
+                        partyHost.update();
+                        $('#addDrinkerDialog').dialog('close');
+                    },
+                    function() { alert('fail'); }
+                );
+                return false;
+            }
         </script>
     </jsp:attribute>
     <jsp:body>
@@ -72,7 +95,7 @@
             <div id="addDrinkerAccordion">
                 <h2><a href="#"><spring:message code="party.add_drinker.registered"/></a></h2>
                 <div>
-                    <form method="post" action="<c:url value="linkUserToParty" />">
+                    <form method="post" action="#">
                         <input type="hidden" name="partyId" value="${party.id}" />
                         <input type="hidden" id="userId" name="userId" />
 
@@ -86,7 +109,7 @@
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>
-                                <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="forceRefresh();" /></td>
+                                <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="return linkUserToParty();" /></td>
                             </tr>
                         </table>
                     </form>
@@ -94,7 +117,7 @@
 
                 <h2><a href="#"><spring:message code="party.add_drinker.guest"/></a></h2>
                 <div>
-                    <form method="post" action="<c:url value="addAnonymousUser" />">
+                    <form method="post" action="#">
                         <input type="hidden" name="partyId" value="${party.id}" />
                         <table>
                             <tr>
@@ -104,7 +127,7 @@
                             <tr>
                                 <th><spring:message code="form.sex"/></th>
                                 <td>
-                                    <select name="sex">
+                                    <select id="drinkerSex" name="sex">
                                         <option value="MALE"><spring:message code="form.male"/></option>
                                         <option value="FEMALE"><spring:message code="form.female"/></option>
                                     </select>
@@ -116,7 +139,7 @@
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>
-                                <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="forceRefresh();" disabled="disabled" /></td>
+                                <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="return addAnonymousUser();" disabled="disabled" /></td>
                             </tr>
                         </table>
                     </form>
