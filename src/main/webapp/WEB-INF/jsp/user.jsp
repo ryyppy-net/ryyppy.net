@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="/static/css/jquery-ui/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
         <script type="text/javascript" src="/static/js/common.js"></script>
+        <script type="text/javascript" src="/static/js/datetimepicker.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/js/jquery.ui.datepicker-fi.js"></script>
@@ -17,6 +18,7 @@
         <script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/static/js/flot/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
+        <script type="text/javascript" src="/static/js/userbuttongrid.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
         <script type="text/javascript" src="/static/js/date.js"></script>
@@ -25,16 +27,22 @@
         <script type="text/javascript">
             var userButton = null;
             var userId = ${user.id};
-            
+            var picker;
+            var grid;
+
             $(document).ready(function() {
+                $('#drinkers').height(275);
+                grid = new UserButtonGrid($('#drinkers'));
+                grid.users = [{'id': userId }];
+                grid.updateGrid();
+                
                 $('.party').each(function(index) {
                     $(this).css('background-color', colors[index]);
                 });
                 
-                userButton = new UserButton(<c:out value="${user.id}" />, $('.userButton'), getColorAtIndex(0));
-                userButton.onDataLoaded = onButtonDataUpdated;
-                userButton.update();
-                setInterval(function() {userButton.update()}, 60 * 1000);
+                setInterval(function() {
+                    grid.updateButtons();
+                }, 60 * 1000);
 
                 var user = { id: ${user.id}, name: '${user.name}' };
                 
@@ -43,20 +51,6 @@
                 graph.options.legend = { position:'nw' };
                 graph.update();
             });
-
-            function onButtonDataUpdated() {
-                if (userButton.series == null) return;
-
-                var max = 0;
-                for (var j in userButton.series[0].data) {
-                    var d = userButton.series[0].data[j];
-                    var a = d[1];
-                    if (Number(a) >= Number(max))
-                        max = a;
-                }
-                max = Math.floor(max) + 1;
-                userButton.setMaxY(max);
-            }
 
             function configureDrinksDialogOpened() {
                 RyyppyAPI.getUserDrinks(${user.id}, gotDrinkData);
@@ -103,14 +97,6 @@
                 }
             }
 
-            function checkTimeField() {
-                var success = false;
-                var time = $("#time").datetimepicker("getDate");
-                if (time != null && time <= new Date()) success = true;
-
-                $("#submitTime").prop("disabled", success ? "" : "disabled");
-            }
-
             $(document).ready(function() {
                 $('#addPartyButtonLink').click(function() {
                     toggleJQUIDialog($('#addPartyDialog'));
@@ -125,7 +111,21 @@
                 
                 $('#addPartyDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });                
                 $('#configureDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
-               
+                
+                
+                
+                $('#submitTime').click(function() {
+                    var formattedTime = '{0}.{1}.{2} {3}:{4}'.format(
+                        picker.selectedTime.getDate(),
+                        picker.selectedTime.getMonth() + 1,
+                        picker.selectedTime.getFullYear(),
+                        picker.selectedTime.getHours(),
+                        picker.selectedTime.getMinutes()
+                    );
+                    $('#date').val(formattedTime);
+                });
+                
+                
                 $('#configureDrinksDialog').dialog({
                     modal: true,
                     draggable: false,
@@ -136,6 +136,11 @@
                     open: function() {
                         configureDrinksDialogOpened();
                         $("#configureDrinksAccordion").accordion({ fillSpace: true });
+                        picker = new DateTimePicker('#historyDrinkTime');
+                    },
+                    
+                    close: function() {
+                        $('#historyDrinkTime').html('');
                     }
                 });
                 
@@ -149,7 +154,7 @@
             function repaint() {
                 var windowWidth = $(window).width();
                 var bestWidth = windowWidth - 15;
-                $("#userButtonTable").width(bestWidth);
+                $("#drinkers").width(bestWidth);
                 $(".party").width(bestWidth);
                 $("#historyGraph").width(bestWidth - 35);
                 
@@ -171,11 +176,7 @@
         
         <!-- stupid css not able to center vertically properly -->
         <div id="body" class="body">
-            <table id="userButtonTable">
-                <tr>
-                    <td class="userButton roundedCornersBordered"></td>
-                </tr>
-            </table>
+            <table id="drinkers"></table>
         </div>
         
         <div class="header headerMargin">
@@ -227,9 +228,10 @@
             <div id="configureDrinksAccordion">
                 <h2><a href="#"><spring:message code="user.add_drinks_at"/></a></h2>
                 <div>
+                    <div id="historyDrinkTime"></div>
                     <form method="POST" action="<c:url value="addDrinkToDate" />">
                         <input type="hidden" name="userId" value="${user.id}" />
-                        <input type="text" onblur="checkTimeField();" onkeyup="checkTimeField();" onchange="checkTimeField();" name="date" id="time" value="" />
+                        <input type="hidden" id="date" name="date" value="" />
                         <input type="submit" value="Lisää" id="submitTime" />
                     </form>
                 </div>
@@ -291,5 +293,7 @@
                 </table>
             </form>
         </div>
+                    
+        <t:jQueryTemplates></t:jQueryTemplates>
     </jsp:body>
 </t:master>

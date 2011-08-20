@@ -2,6 +2,7 @@ function UserButtonGrid(target) {
     this.target = target;
     this.userButtons = [];
     this.users = undefined;
+    this.onUserDrunk = undefined;
 }
 
 UserButtonGrid.prototype.empty = function() {
@@ -32,8 +33,7 @@ UserButtonGrid.prototype.updateGrid = function() {
             newElement.attr("width", width);
             var user = this.users[colorIndex].id;
             var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
-            ub.onDrunk = onUserDrunk;
-            ub.onDataLoaded = onButtonDataUpdated;
+            ub.onDrunk = this.onUserDrunk;
             this.userButtons.push(ub);
 
             $('#row' + i).append(newElement);
@@ -44,10 +44,8 @@ UserButtonGrid.prototype.updateGrid = function() {
 }
 
 UserButtonGrid.prototype.updateButtons = function() {
-    for (i in grid.userButtons) {
-        var userButton = grid.userButtons[i];
-        userButton.update();
-    }
+    this.userButtons.map(function(userButton) { userButton.update(); });
+    this.resetUserButtonMaximumPromilles();
 }
 
 UserButtonGrid.prototype.determineLayout = function(n) {
@@ -77,4 +75,26 @@ UserButtonGrid.prototype.pivotLayoutIfNecessary = function(layout) {
     }
 
     return layout;
+}
+
+UserButtonGrid.prototype.resetUserButtonMaximumPromilles = function() {
+    var max = 0;
+
+    for (var i in this.userButtons) {
+        var userButton = this.userButtons[i];
+        if (userButton.series == null) continue;
+        for (var j in userButton.series[0].data) {
+            var d = userButton.series[0].data[j];
+            var a = d[1];
+            if (Number(a) >= Number(max))
+                max = a;
+        }
+    }
+
+    max = Math.floor(max) + 1;
+
+    for (i in grid.userButtons) {
+        userButton = this.userButtons[i];
+        userButton.setMaxY(max);
+    }
 }
