@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="jasmine-1.1.0/jasmine.css" />
+
+    <script src="jasmine-1.1.0/jasmine.js"></script>
+    <script src="jasmine-1.1.0/jasmine-html.js"></script>
+
+    <script src="../unit/ryyppy.spec.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+        jasmine.getEnv().execute();
+    </script>
+</body>
+</html>
