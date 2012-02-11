@@ -119,12 +119,6 @@ public class APIController {
         return bytesXml;
     }
     
-    @RequestMapping(value="/users/{userId}", headers="Accept=application/json")
-    public @ResponseBody String userJSON(@PathVariable String userId) throws IOException{
-        User user = userService.getUser(Integer.parseInt(userId));
-        return new Gson().toJson(user);
-    }
-    
     @RequestMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable String userId) throws IOException{
         int id = Integer.parseInt(userId);
