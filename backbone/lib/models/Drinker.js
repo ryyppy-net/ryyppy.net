@@ -1,7 +1,7 @@
 /**
  * Person can participate in parties and drink.
  */
-Person = Backbone.Model.extend({
+Drinker = Backbone.Model.extend({
     defaults: {
         drinks: 0,
         name: 'Anonymous'
@@ -9,5 +9,9 @@ Person = Backbone.Model.extend({
 
     initialize: function () {
         console.log('Person initialized');
+    },
+
+    drink: function () {
+        this.set('drinks', this.get('drinks') + 1);
     }
 });
