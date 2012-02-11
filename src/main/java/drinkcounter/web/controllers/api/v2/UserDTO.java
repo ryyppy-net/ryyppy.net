@@ -16,6 +16,7 @@ public class UserDTO {
     private String name;
     private String email;
     private User.Sex sex;
+    private Float weight;
 
     public String getEmail() {
         return email;
@@ -47,5 +48,23 @@ public class UserDTO {
 
     public void setSex(Sex sex) {
         this.sex = sex;
+    }
+
+    public Float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Float weight) {
+        this.weight = weight;
+    }
+    
+    public static UserDTO fromUser(User user){
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setName(user.getName());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setSex(user.getSex());
+        userDTO.setWeight(user.getWeight());
+        return userDTO;
     }
 }
