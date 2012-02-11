@@ -17,6 +17,8 @@ public class UserDTO {
     private String email;
     private User.Sex sex;
     private Float weight;
+    private Float promilles;
+    private Integer totalDrinks;
 
     public String getEmail() {
         return email;
@@ -57,6 +59,22 @@ public class UserDTO {
     public void setWeight(Float weight) {
         this.weight = weight;
     }
+
+    public Float getPromilles() {
+        return promilles;
+    }
+
+    public void setPromilles(Float promilles) {
+        this.promilles = promilles;
+    }
+
+    public Integer getTotalDrinks() {
+        return totalDrinks;
+    }
+
+    public void setTotalDrinks(Integer totalDrinks) {
+        this.totalDrinks = totalDrinks;
+    }
     
     public static UserDTO fromUser(User user){
         UserDTO userDTO = new UserDTO();
@@ -65,6 +83,8 @@ public class UserDTO {
         userDTO.setEmail(user.getEmail());
         userDTO.setSex(user.getSex());
         userDTO.setWeight(user.getWeight());
+        userDTO.setPromilles(user.getPromilles());
+        userDTO.setTotalDrinks(user.getTotalDrinks());
         return userDTO;
     }
 }
