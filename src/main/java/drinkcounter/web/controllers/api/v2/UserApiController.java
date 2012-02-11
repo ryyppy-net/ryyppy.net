@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -26,8 +27,8 @@ public class UserApiController {
     
     private Gson gson = new Gson();
     
-    @RequestMapping("/users/{userId}")
-    public @ResponseBody String users(@PathVariable Integer userId) {
+    @RequestMapping(value="/users/{userId}", method=RequestMethod.GET)
+    public @ResponseBody String getUser(@PathVariable Integer userId) {
         User user = userService.getUser(userId);
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
