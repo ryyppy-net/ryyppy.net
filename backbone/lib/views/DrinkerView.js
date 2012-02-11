@@ -8,10 +8,12 @@ DrinkerView = Backbone.View.extend({
     initialize: function () {
         this.template = _.template($('#drinker-template').html());
         this.render();
+
+        this.model.on('change', this.render, this);
     },
 
     drink: function (event) {
-        console.log('drinker ' + this.model.get('name') + ' drank');
+        this.model.drink();
     },
 
     render: function () {

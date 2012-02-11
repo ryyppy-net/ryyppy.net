@@ -21,7 +21,7 @@
 
         doSearch: function (event) {
             var name = this.$el.find('input').first().val();
-            var person = new Person({name: name});
+            var person = new Drinker({name: name});
             Ryyppy.drinkers.add(person);
         }
     });

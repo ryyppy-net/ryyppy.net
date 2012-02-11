@@ -1,5 +1,5 @@
 DrinkerList = Backbone.Collection.extend({
-    model: Person,
+    model: Drinker,
 
     initialize: function () {
         console.log('DrinkerList initialized');
