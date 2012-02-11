@@ -331,16 +331,11 @@
 
 	
     <repositories>
-<!--        <repository>
+        <repository>
             <id>JBoss</id>
             <name>JBoss Repsitory</name>
             <layout>default</layout>
             <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-        </repository>-->
-<!--        <repository>
-            <id>org.springframework.maven.milestone</id>
-            <name>Spring Maven Milestone Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
-        </repository>-->
+        </repository>
     </repositories>
 </project>
