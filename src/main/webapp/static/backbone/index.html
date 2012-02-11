@@ -1,23 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Ryyppy.net</title>
+
+    <meta charset="utf-8">
+
+    <link href="css/style.css" rel="stylesheet" />
 
     <script src="vendor/underscore/underscore-min.js"></script>
     <script src="vendor/jquery/jquery-1.7.1.min.js"></script>
     <script src="vendor/backbone/backbone-min.js"></script>
 
     <script src="lib/ryyppy.js"></script>
+
     <script src="lib/views/AppView.js"></script>
     <script src="lib/views/AddUserView.js"></script>
     <script src="lib/views/DrinkerView.js"></script>
+    <script src="lib/views/CurrentDrinkerView.js"></script>
     <script src="lib/views/DrinkerListView.js"></script>
+    <script src="lib/views/PartyListView.js"></script>
+    <script src="lib/views/PartyView.js"></script>
+
     <script src="lib/models/Drinker.js"></script>
+    <script src="lib/models/Party.js"></script>
+
     <script src="lib/collections/DrinkerList.js"></script>
+    <script src="lib/collections/PartyList.js"></script>
+
+    <script src="lib/repositories/DrinkerRepository.js"></script>
+    <script src="lib/repositories/PartyRepository.js"></script>
 </head>
 <body>
     <script type="text/template" id="drinker-template">
-        <%= name %> <%= drinks %>
+        <%= name %> <%= drinks %> <%= promilles.toFixed(2) %>&permil;
+    </script>
+
+    <script type="text/template" id="party-template">
+        <%= name %>
     </script>
 
     <script type="text/template" id="search_template">

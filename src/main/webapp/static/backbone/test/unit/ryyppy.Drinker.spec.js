@@ -1,15 +1,15 @@
 describe('Drinker module', function () {
     it('Construction', function () {
-        var person = new Drinker();
-        expect(person).not.toBeUndefined();
-        expect(person.get('name')).toBe('Anonymous');
-        expect(person.get('drinks')).toBe(0);
+        var drinker = new Drinker();
+        expect(drinker).not.toBeUndefined();
+        expect(drinker.get('name')).toBe('Anonymous');
+        expect(drinker.get('drinks')).toBe(0);
     });
 
     it('Having drinks', function () {
-        var person = new Drinker();
-        expect(person.get('drinks')).toBe(0);
-        person.drink();
-        expect(person.get('drinks')).toBe(1);
+        var drinker = new Drinker();
+        expect(drinker.get('drinks')).toBe(0);
+        drinker.drink();
+        expect(drinker.get('drinks')).toBe(1);
     });
 });
