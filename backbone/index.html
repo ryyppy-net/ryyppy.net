@@ -4,16 +4,31 @@
     <title></title>
 
     <script src="vendor/underscore/underscore-min.js"></script>
-    <script src="vendor/backbone/backbone-min.js"></script>
     <script src="vendor/jquery/jquery-1.7.1.min.js"></script>
+    <script src="vendor/backbone/backbone-min.js"></script>
 
     <script src="lib/ryyppy.js"></script>
+    <script src="lib/views/AppView.js"></script>
+    <script src="lib/views/AddUserView.js"></script>
+    <script src="lib/views/DrinkerView.js"></script>
+    <script src="lib/views/DrinkerListView.js"></script>
     <script src="lib/models/Person.js"></script>
+    <script src="lib/collections/DrinkerList.js"></script>
 </head>
 <body>
+    <script type="text/template" id="drinker-template">
+        <%= name %>
+    </script>
+
+    <script type="text/template" id="search_template">
+        <label>Drinker name</label>
+        <input type="text" id="search_input" />
+        <input type="button" class="add-user" value="Add new drinker" />
+    </script>
+
     <script>
         $(function () {
-            Ryyppy().start();
+            window.Ryyppy.start();
         });
     </script>
 </body>

@@ -4,13 +4,13 @@
 (function () {
     "use strict";
 
-    window.Ryyppy = function () {
-        return {
-            start: function () {
-                console.log('Ryyppy.net started');
-                var person = new Person();
-                console.log(JSON.stringify(person.toJSON()));
-            }
+    window.Ryyppy = {
+        drinkers: undefined,
+
+        start: function () {
+            console.log('Ryyppy.net starting...');
+            this.drinkers = new DrinkerList;
+            new window.AppView({ el: 'body' });
         }
     };
 })();
