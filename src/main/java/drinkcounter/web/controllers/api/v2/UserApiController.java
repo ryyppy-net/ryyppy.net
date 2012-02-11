@@ -5,17 +5,16 @@
 package drinkcounter.web.controllers.api.v2;
 
 import com.google.gson.Gson;
+import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
+import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.User;
 import java.util.Collections;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  *
@@ -27,6 +26,8 @@ public class UserApiController {
     
     @Autowired
     private UserService userService;
+    @Autowired
+    private DrinkCounterService drinkCounterService;
     
     @Autowired
     private CurrentUser currentUser;
@@ -47,5 +48,16 @@ public class UserApiController {
         return gson.toJson(users);
     }
     
+    @RequestMapping(value="/users/{userId}/drinks", method= RequestMethod.POST)
+    public void drink(@PathVariable Integer userId,
+            @RequestParam(value="volume", required=false) Float volume,
+            @RequestParam(value="alcohol", required=false) Float alcoholPercentage){
+        if (volume != null && alcoholPercentage != null) {
+            float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
+            drinkCounterService.addDrink(userId, alcoholAmount);
+        } else {
+            drinkCounterService.addDrink(userId);
+        }
+    }
     
 }

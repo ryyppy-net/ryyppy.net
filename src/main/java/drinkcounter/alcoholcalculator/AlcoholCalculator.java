@@ -11,6 +11,12 @@ import java.util.List;
  * @author murgo
  */
 public class AlcoholCalculator {
+    
+    /**
+     * Gram's per litre
+     */
+    public static final float ALCOHOL_DENSITY = 789f;
+    
     // The rate at which alcohol is burned per millisecond
     private double burnRate;
     
@@ -76,5 +82,9 @@ public class AlcoholCalculator {
         }
 
         return alcohol;
+    }
+    
+    public static float getAlcoholAmount(float volume, float alcoholPercentage){
+        return volume*alcoholPercentage*ALCOHOL_DENSITY;
     }
 }
