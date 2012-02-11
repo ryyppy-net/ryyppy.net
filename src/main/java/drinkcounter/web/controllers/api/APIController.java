@@ -2,6 +2,7 @@ package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
 import com.google.common.base.Charsets;
+import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
@@ -14,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -116,6 +118,12 @@ public class APIController {
         partyMarshaller.marshallUser(id, baos);
         byte[] bytesXml = baos.toByteArray();
         return bytesXml;
+    }
+    
+    @RequestMapping(value="/users/{userId}", headers="Accept=application/json")
+    public @ResponseBody String userJSON(@PathVariable String userId) throws IOException{
+        User user = userService.getUser(Integer.parseInt(userId));
+        return new Gson().toJson(user);
     }
     
     @RequestMapping("/users/{userId}/drinks")
