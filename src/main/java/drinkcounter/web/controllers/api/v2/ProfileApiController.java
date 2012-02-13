@@ -6,10 +6,13 @@ package drinkcounter.web.controllers.api.v2;
 
 import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
+import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Drink;
+import drinkcounter.model.User;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +25,13 @@ import org.springframework.web.bind.annotation.*;
  */
 @Controller
 @RequestMapping("/v2")
-public class UserApiController {
+public class ProfileApiController {
     
     @Autowired
     private DrinkCounterService drinkCounterService;
+    
+    @Autowired
+    private UserService userService;
     
     @Autowired
     private CurrentUser currentUser;
@@ -38,17 +44,36 @@ public class UserApiController {
         return gson.toJson(userDTO);
     }
     
+    @RequestMapping(value="/profile", method=RequestMethod.POST)
+    public void updateUser(
+                        @RequestParam("name") String name,
+                        @RequestParam("email") String email,
+                        @RequestParam("sex") User.Sex sex,
+                        @RequestParam("weight") Float weight){
+        User user = currentUser.getUser();
+        user.setName(name);
+        user.setEmail(email);
+        user.setSex(sex);
+        user.setWeight(weight);
+        userService.updateUser(user);
+    }
+    
     @RequestMapping(value="/profile/drinks", method= RequestMethod.POST)
     public void drink(
             @RequestParam(value="volume", required=false) Float volume,
-            @RequestParam(value="alcohol", required=false) Float alcoholPercentage){
+            @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
+            @RequestParam(value="timestamp", required=false) String timestamp){
         Integer userId = currentUser.getUser().getId();
+        double alcoholAmount = AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
         if (volume != null && alcoholPercentage != null) {
-            float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
-            drinkCounterService.addDrink(userId, alcoholAmount);
-        } else {
-            drinkCounterService.addDrink(userId);
+            alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
         }
+        Date time = null;
+        if(timestamp != null){
+            time = new Date(new DateTime(timestamp).getMillis());
+        }
+        drinkCounterService.addDrink(userId, time, (float)alcoholAmount);
+        
     }
     
     @RequestMapping(value="/profile/drinks", method=RequestMethod.GET)
