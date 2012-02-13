@@ -6,12 +6,12 @@ package drinkcounter.web.controllers.api.v2;
 
 import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
-import drinkcounter.model.User;
-import java.util.Collections;
-import java.util.Map;
+import drinkcounter.model.Drink;
+import java.util.ArrayList;
+import java.util.List;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -51,4 +51,21 @@ public class UserApiController {
         }
     }
     
+    @RequestMapping(value="/profile/drinks", method=RequestMethod.GET)
+    public @ResponseBody String getDrinks(){
+        List<Drink> drinks = currentUser.getUser().getDrinks();
+        List<DrinkDTO> drinkDTOs = new ArrayList<DrinkDTO>();
+        for (Drink drink : drinks) {
+            DrinkDTO drinkDTO = new DrinkDTO();
+            drinkDTO.setId(drink.getId());
+            drinkDTO.setTimestamp(new DateTime(drink.getTimeStamp()).toString());
+            drinkDTOs.add(drinkDTO);
+        }
+        return gson.toJson(drinkDTOs);
+    }
+    
+    @RequestMapping(value="/profile/drinks", method=RequestMethod.DELETE)
+    public void deleteDrink(@RequestParam(value="drinkId") Integer drinkId){
+        drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
+    }
 }
