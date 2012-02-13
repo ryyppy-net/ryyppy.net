@@ -328,7 +328,7 @@ public class APIController {
     }
 
     @RequestMapping("/passphrase/{passphrase}/undo-drink")
-    public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase) throws IOException{
+    public @ResponseBody String undoDrink(@PathVariable String passphrase) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
             throw new NotEnoughRightsException();
