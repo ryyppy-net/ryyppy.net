@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserApiController {
     
     @Autowired
-    private UserService userService;
-    @Autowired
     private DrinkCounterService drinkCounterService;
     
     @Autowired
@@ -34,24 +32,17 @@ public class UserApiController {
     
     private Gson gson = new Gson();
     
-    @RequestMapping(value="/users/{userId}", method=RequestMethod.GET)
-    public @ResponseBody String getUser(@PathVariable Integer userId) {
-        User user = userService.getUser(userId);
-        UserDTO userDTO = UserDTO.fromUser(user);
+    @RequestMapping(value="/profile", method=RequestMethod.GET)
+    public @ResponseBody String getUser() {
+        UserDTO userDTO = UserDTO.fromUser(currentUser.getUser());
         return gson.toJson(userDTO);
     }
     
-    @RequestMapping(value="/users", method= RequestMethod.GET)
-    public @ResponseBody String getUsers(){
-        User user = currentUser.getUser();
-        Map<String, Integer[]> users = Collections.singletonMap("users", new Integer[]{user.getId()});
-        return gson.toJson(users);
-    }
-    
-    @RequestMapping(value="/users/{userId}/drinks", method= RequestMethod.POST)
-    public void drink(@PathVariable Integer userId,
+    @RequestMapping(value="/profile/drinks", method= RequestMethod.POST)
+    public void drink(
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage){
+        Integer userId = currentUser.getUser().getId();
         if (volume != null && alcoholPercentage != null) {
             float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
             drinkCounterService.addDrink(userId, alcoholAmount);
