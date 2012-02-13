@@ -6,17 +6,19 @@ package drinkcounter.web.controllers.api.v2;
 
 import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
+import drinkcounter.UserService;
+import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  *
@@ -30,6 +32,8 @@ public class PartyApiController {
     private CurrentUser currentUser;
     @Autowired
     private DrinkCounterService drinkCounterService;
+    @Autowired
+    private UserService userService;
     
     private Gson gson = new Gson();
     
@@ -43,14 +47,14 @@ public class PartyApiController {
         return gson.toJson(partyDTOs);
     }
     
-    @RequestMapping(value="/parties/{partyId}")
+    @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET)
     public @ResponseBody String getParty(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         PartyDTO partyDTO = PartyDTO.fromParty(party);
         return gson.toJson(partyDTO);
     }
     
-    @RequestMapping(value="/parties/{partyId}/participants")
+    @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.GET)
     public @ResponseBody String getParticipants(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         List<User> participants = party.getParticipants();
@@ -59,5 +63,36 @@ public class PartyApiController {
             participantDTOs.add(ParticipantDTO.fromUser(participant));
         }
         return gson.toJson(participantDTOs);
+    }
+    
+    @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET)
+    public @ResponseBody String getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
+        Party party = drinkCounterService.getParty(partyId);
+        User participant = userService.getUser(participantId);
+        if(!party.getParticipants().contains(participant)){
+            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
+        }
+        return gson.toJson(ParticipantDTO.fromUser(participant));
+    }
+    
+    @RequestMapping(value="/parties/{partyId}/participants/{participantId}/drinks", method=RequestMethod.POST)
+    public void drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+            @RequestParam(value="volume", required=false) Float volume,
+            @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
+            @RequestParam(value="timestamp", required=false) String timestamp){
+        Party party = drinkCounterService.getParty(partyId);
+        User participant = userService.getUser(participantId);
+        if(!party.getParticipants().contains(participant)){
+            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
+        }
+        float alcoholAmount = (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
+        if (volume != null && alcoholPercentage != null) {
+            alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
+        }
+        Date time = null;
+        if(timestamp != null){
+            time = new Date(new DateTime(timestamp).getMillis());
+        }
+        drinkCounterService.addDrink(participantId, time, alcoholAmount);
     }
 }
