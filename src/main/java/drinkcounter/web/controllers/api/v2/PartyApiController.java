@@ -65,6 +65,30 @@ public class PartyApiController {
         return gson.toJson(participantDTOs);
     }
     
+    @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.POST)
+    public void addParticipant(@PathVariable Integer partyId, @RequestParam(value="email", required=false) String email,
+            @RequestParam(value="name", required=false) String name,
+            @RequestParam(value="sex", required=false) User.Sex sex,
+            @RequestParam(value="weight", required=false) Float weight){
+        if(email != null){
+            User user = userService.getUserByEmail(email);
+            drinkCounterService.linkUserToParty(user.getId(), partyId);
+            return;
+        }
+        
+        if (name == null || sex == null || weight == null) {
+            throw new RuntimeException("If email is not provided, give name, sex and weight to create a guest participant");
+        }
+        
+        User user = new User();
+        user.setName(name);
+        user.setSex(sex);
+        user.setWeight(weight);
+        user.setGuest(true);
+        userService.addUser(user);
+        drinkCounterService.linkUserToParty(user.getId(), partyId);
+    }
+    
     @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET)
     public @ResponseBody String getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         Party party = drinkCounterService.getParty(partyId);
