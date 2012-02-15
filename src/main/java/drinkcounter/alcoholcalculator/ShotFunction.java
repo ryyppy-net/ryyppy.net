@@ -7,17 +7,16 @@ import java.util.Date;
  * @author murgo
  */
 public class ShotFunction {
-    private double a;
-    private double b;
-    private double increment;
+    private double burnRate;
+    private double startAlcoholAmount;
     private double cutter;
+    private long timeTaken;
 
-    public ShotFunction(Date timeTaken, double burnRate, double i)
+    public ShotFunction(Date timeTaken, double burnRate, double startAlcoholAmount)
     {
-        a = burnRate;
-        increment = i;
-
-        b = -burnRate * timeTaken.getTime() + increment;
+        this.burnRate = burnRate;
+        this.startAlcoholAmount = startAlcoholAmount;
+        this.timeTaken = timeTaken.getTime();
     }
 
     public double getCutter() { return cutter; }
@@ -25,9 +24,9 @@ public class ShotFunction {
 
     public double calc(long milliseconds)
     {
-        double result = a * milliseconds + b;
+        double result = (burnRate * (double)(milliseconds - timeTaken)) + startAlcoholAmount ;
 
-        if (result > increment)
+        if (result > startAlcoholAmount)
             return 0;
 
         if (result <= cutter)
