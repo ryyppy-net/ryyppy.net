@@ -54,15 +54,15 @@ public class AlcoholCalculator {
     
     public void calculateDrink(Drink drink) {
         synchronized(this) {
-            double p = calculate(drink.getTimeStamp());
+            double currentAlcohol = calculate(drink.getTimeStamp());
 
             // If there is still alcohol to burn, then the last function will be "disabled" with a cutter
             int size = functions.size();
-            if (p > 0 && size > 0) {
-                functions.get(size - 1).setCutter(p);
+            if (currentAlcohol > 0 && size > 0) {
+                functions.get(size - 1).setCutter(currentAlcohol);
             }
 
-            ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, p + drink.getAlcohol());
+            ShotFunction newFunction = new ShotFunction(drink.getTimeStamp(), burnRate, currentAlcohol + drink.getAlcohol());
             functions.add(newFunction);
         }
     }
