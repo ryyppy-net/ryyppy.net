@@ -219,6 +219,11 @@
             <artifactId>spring-orm</artifactId>
             <version>${spring.framework.version}</version>
         </dependency>
+        <dependency>
+            <artifactId>spring-aop</artifactId>
+            <groupId>org.springframework</groupId>
+            <version>${spring.framework.version}</version>
+        </dependency>
         
         <!-- Authentication and security -->
         <dependency>
