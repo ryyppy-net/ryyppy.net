@@ -19,6 +19,7 @@ public class SpringSecurityCurrentUserImpl implements CurrentUser{
     @Autowired
     private UserService userService;
 
+    @Override
     public User getUser(){
         int userId = ((DrinkcounterUserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUserId();
         return userService.getUser(userId);
