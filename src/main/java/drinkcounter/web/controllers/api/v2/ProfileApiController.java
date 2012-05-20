@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,7 @@ public class ProfileApiController {
     }
     
     @RequestMapping(value="/profile", method=RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
     public void updateUser(
                         @RequestParam("name") String name,
                         @RequestParam("email") String email,
@@ -59,6 +61,7 @@ public class ProfileApiController {
     }
     
     @RequestMapping(value="/profile/drinks", method= RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
     public void drink(
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
@@ -90,6 +93,7 @@ public class ProfileApiController {
     }
     
     @RequestMapping(value="/profile/drinks", method=RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
     public void deleteDrink(@RequestParam(value="drinkId") Integer drinkId){
         drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
     }
