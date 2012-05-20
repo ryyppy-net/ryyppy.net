@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +67,7 @@ public class PartyApiController {
     }
     
     @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
     public void addParticipant(@PathVariable Integer partyId, @RequestParam(value="email", required=false) String email,
             @RequestParam(value="name", required=false) String name,
             @RequestParam(value="sex", required=false) User.Sex sex,
@@ -101,6 +102,7 @@ public class PartyApiController {
     }
     
     @RequestMapping(value="/parties/{partyId}/participants/{participantId}/drinks", method=RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
     public void drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
