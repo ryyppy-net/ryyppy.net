@@ -3,7 +3,7 @@
  */
 Drinker = Backbone.Model.extend({
     defaults: {
-        drinks: 0,
+        totalDrinks: 0,
         name: 'Anonymous'
     },
 
@@ -12,6 +12,7 @@ Drinker = Backbone.Model.extend({
     },
 
     drink: function () {
-        this.set('drinks', this.get('drinks') + 1);
+        this.set('totalDrinks', this.get('totalDrinks') + 1);
+        DrinkerRepository.addDrinkToSelf();
     }
 });
