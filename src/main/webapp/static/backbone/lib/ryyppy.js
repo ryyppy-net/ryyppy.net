@@ -4,6 +4,24 @@
 (function () {
     "use strict";
 
+    window.RyyppyRouter = Backbone.Router.extend({
+        routes: {
+            'help': 'help',
+            '*other': 'defaultRoute'
+        },
+
+        defaultRoute: function () {
+            console.log('default called');
+        },
+
+        help: function () {
+            console.log('help called');
+        }
+    });
+
+    var router = new RyyppyRouter();
+    Backbone.history.start();
+
     window.Ryyppy = {
         user: undefined,
         drinkers: undefined,
@@ -23,7 +41,7 @@
 
         initializeUserData: function () {
             if (!localStorage.getItem('currentUserId')) {
-                DrinkerRepository.getCurrentUser(function (data) {
+                DrinkerRepository.getCurrentUserId(function (data) {
                     localStorage.setItem('currentUserId', data);
                 });
             }
