@@ -11,16 +11,17 @@ function MyCtrl1($scope, $http) {
 MyCtrl1.$inject = ['$scope', '$http'];
 
 
-function MyCtrl2($scope, $http, $routeParams) {
+function MyCtrl2($scope, $http, $routeParams, $timeout) {
     $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
         $scope.party = data;
     });
-    $http.get("/API/v2/parties/" + $routeParams.partyId + "/participants").success(function (data) {
-        $scope.participants = data;
-    });
 
-    $scope.addDrink = function (participant) {
-        console.log("Adding drink to " + participant.name);
-    }
+    (function tick() {
+        $http.get("/API/v2/parties/" + $routeParams.partyId + "/participants").success(function (data) {
+            $scope.participants = data;
+        });
+        console.log("Polling...");
+        $timeout(tick, 5000);
+    })();
 }
-MyCtrl2.$inject = ['$scope', '$http', '$routeParams'];
+MyCtrl2.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
