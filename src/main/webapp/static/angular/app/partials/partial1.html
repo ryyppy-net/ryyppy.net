@@ -1,5 +1,5 @@
 <p>Bileitä:</p>
 
 <ul>
-    <li ng-repeat="party in parties">{{ party.name }}</li>
+    <li ng-repeat="party in parties"><a href="#/party/{{ party.id }}">{{ party.name }}</a></li>
 </ul>

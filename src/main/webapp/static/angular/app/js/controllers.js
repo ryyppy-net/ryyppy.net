@@ -12,6 +12,7 @@ function MyCtrl1($scope, $http)
 MyCtrl1.$inject = ['$scope', '$http'];
 
 
-function MyCtrl2() {
+function MyCtrl2($scope, $routeParams) {
+    $scope.partyId = $routeParams.partyId;
 }
-MyCtrl2.$inject = [];
+MyCtrl2.$inject = ['$scope', '$routeParams'];
