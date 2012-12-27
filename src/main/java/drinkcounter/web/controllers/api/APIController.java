@@ -4,6 +4,7 @@ import com.csvreader.CsvWriter;
 import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
+import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.NotEnoughRightsException;
 import drinkcounter.model.Drink;
@@ -91,7 +92,7 @@ public class APIController {
         int id = Integer.parseInt(userId);
         authenticationChecks.checkHighLevelRightsToUser(id);
         if(volume != null && alcoholPercentage != null){
-            float alcoholAmount = volume*alcoholPercentage*ALCOHOL_DENSITY;
+            float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
             return Integer.toString(drinkCounterService.addDrink(id, alcoholAmount));
         }
         
@@ -327,7 +328,7 @@ public class APIController {
     }
 
     @RequestMapping("/passphrase/{passphrase}/undo-drink")
-    public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase) throws IOException{
+    public @ResponseBody String undoDrink(@PathVariable String passphrase) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
             throw new NotEnoughRightsException();
