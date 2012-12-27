@@ -1,5 +1,8 @@
 <h1>{{ party.name }}</h1>
 
 <ul>
-    <li ng-repeat="participant in participants">{{ participant.name }}</li>
+    <li ng-repeat="participant in participants">
+        {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles + '\u2030' }}
+        <button ng-click="addDrink(participant)">Lisää</button>
+    </li>
 </ul>
