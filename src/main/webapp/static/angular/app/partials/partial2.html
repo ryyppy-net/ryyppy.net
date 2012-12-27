@@ -2,7 +2,7 @@
 
 <ul>
     <li ng-repeat="participant in participants">
-        {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles + '\u2030' }}
+        {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles | number: 2 }}&permil;
         <button ng-click="addDrink(participant)">Lisää</button>
     </li>
 </ul>
