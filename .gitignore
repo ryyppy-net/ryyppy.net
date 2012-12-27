@@ -1,3 +1,6 @@
 .idea
-target
 *.iml
+target
+
+# Mac files
+.DS_Store
