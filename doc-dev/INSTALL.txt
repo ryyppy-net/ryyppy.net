@@ -1,7 +1,7 @@
 Alkoholilaskurin asennus:
 
 * Asenna Maven (3.0.2)
-* Hae koodit osoitteesta: https://username@bitbucket.org/palto/juomalaskuri
+* Hae koodit osoitteesta: https://username@bitbucket.org/VilleSalonen/ryyppy.net
 * Mene checkout-hakemistoon ja aja:
   * ajaminen: mvn jetty:run
   * k‰‰nt‰minen: mvn install
