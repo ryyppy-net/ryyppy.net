@@ -4,6 +4,10 @@
 
 
 function UserCtrl($scope, $http) {
+    $http.get("/API/v2/profile").success(function (data) {
+        $scope.profile = data;
+    });
+
     $http.get("/API/v2/parties").success(function (data) {
         $scope.parties = data;
     });
