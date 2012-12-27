@@ -23,5 +23,12 @@ function MyCtrl2($scope, $http, $routeParams, $timeout) {
         console.log("Polling...");
         $timeout(tick, 5000);
     })();
+
+    $scope.addDrink = function (participant) {
+        console.log("Adding drink to " + participant.name);
+        $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id + "/drinks", {"volume": 0.33, "alcohol": 0.5, "timestamp": null}).success(function (data) {
+            console.log("Added drink.");
+        });
+    };
 }
 MyCtrl2.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
