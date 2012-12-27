@@ -11,7 +11,7 @@ function UserCtrl($scope, $http) {
 UserCtrl.$inject = ['$scope', '$http'];
 
 
-function MyCtrl2($scope, $http, $routeParams, $timeout) {
+function PartyCtrl($scope, $http, $routeParams, $timeout) {
     $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
         $scope.party = data;
     });
@@ -31,4 +31,4 @@ function MyCtrl2($scope, $http, $routeParams, $timeout) {
         });
     };
 }
-MyCtrl2.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
+PartyCtrl.$inject = ['$scope', '$http', '$routeParams', '$timeout'];

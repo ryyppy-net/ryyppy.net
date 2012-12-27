@@ -16,12 +16,12 @@ describe('UserCtrl', function(){
 });
 
 
-describe('MyCtrl2', function(){
+describe('PartyCtrl', function(){
   var myCtrl2;
 
 
   beforeEach(function(){
-    myCtrl2 = new MyCtrl2();
+    myCtrl2 = new PartyCtrl();
   });
 
 
