@@ -1,2 +1,5 @@
-<p>This is the partial for view 2.</p>
-<p>Party: {{ partyId }}</p>
+<h1>{{ party.name }}</h1>
+
+<ul>
+    <li ng-repeat="participant in participants">{{ participant.name }}</li>
+</ul>
