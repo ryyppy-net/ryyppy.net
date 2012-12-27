@@ -1,5 +1,17 @@
-<p>Bileitä:</p>
+<div class="row">
+    <div class="twelve columns">
+        <h1>{{ profile.name }}</h1>
+    </div>
+</div>
 
-<ul>
-    <li ng-repeat="party in parties"><a href="#/party/{{ party.id }}">{{ party.name }}</a></li>
-</ul>
+<div class="row">
+    <div class="twelve rows">
+        <h1>Bileesi</h1>
+
+        <ul>
+            <li ng-repeat="party in parties" ng-include="'partials/party_button.html'"></li>
+        </ul>
+    </div>
+</div>
+
+
