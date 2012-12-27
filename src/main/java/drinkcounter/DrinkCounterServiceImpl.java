@@ -17,6 +17,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,6 +64,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    @PreAuthorize("hasPermission(#partyId, 'Party', 'read')")
     public Party getParty(int partyId) {
         return partyDao.readByPrimaryKey(partyId);
     }
@@ -156,6 +158,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    @Transactional
     public int addDrink(int userId, float alcoholAmount) {
         User user = userDAO.readByPrimaryKey(userId);
         Drink drink = new Drink();
@@ -165,5 +168,24 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         drinkDao.save(drink);
         log.info("User {} has drunk a drink", user.getName());
         return drink.getId();
+    }
+
+    @Override
+    @Transactional
+    public void addDrink(int userId, Date date, Float alcoholAmount) {
+        User user = userDAO.readByPrimaryKey(userId);
+        Drink drink = new Drink();
+        if(date != null){
+            drink.setTimeStamp(date);
+        }else{
+            drink.setTimeStamp(new Date());
+        }
+        
+        if(alcoholAmount != null){
+            drink.setAlcohol(alcoholAmount);
+        }
+        user.drink(drink);
+        drinkDao.save(drink);
+        log.info("{} has drunk a drink at {}", user, new DateTime(date).toString());
     }
 }

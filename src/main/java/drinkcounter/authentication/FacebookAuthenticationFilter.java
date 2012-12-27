@@ -13,7 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.social.connect.Connection;
-import org.springframework.social.facebook.api.FacebookApi;
+import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.connect.FacebookConnectionFactory;
 import org.springframework.social.oauth2.AccessGrant;
 import org.springframework.social.oauth2.GrantType;
@@ -41,7 +41,9 @@ public class FacebookAuthenticationFilter extends AbstractAuthenticationProcessi
         String authorizationGrant = request.getParameter("code");
         if (StringUtils.isBlank(authorizationGrant)) {
             // Get a request token
-            String oauth2Url = facebookConnectionFactory.getOAuthOperations().buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE, new OAuth2Parameters(buildReturnToUrl(request)));
+            OAuth2Parameters parameters = new OAuth2Parameters();
+            parameters.setRedirectUri(buildReturnToUrl(request));
+            String oauth2Url = facebookConnectionFactory.getOAuthOperations().buildAuthorizeUrl(GrantType.AUTHORIZATION_CODE, parameters);
             response.sendRedirect(oauth2Url);
 
             // Returning null signals that authentication is not complete
@@ -50,8 +52,8 @@ public class FacebookAuthenticationFilter extends AbstractAuthenticationProcessi
         
         // Request an access token
         AccessGrant accessToken = facebookConnectionFactory.getOAuthOperations().exchangeForAccess(authorizationGrant, buildReturnToUrl(request), null);
-        Connection<FacebookApi> connection = facebookConnectionFactory.createConnection(accessToken);
-        FacebookApi facebookApi = connection.getApi();
+        Connection<Facebook> connection = facebookConnectionFactory.createConnection(accessToken);
+        Facebook facebookApi = connection.getApi();
         String accountId = facebookApi.userOperations().getUserProfile().getId();
         FacebookAuthenticationToken token = new FacebookAuthenticationToken(accountId);
         return getAuthenticationManager().authenticate(token);

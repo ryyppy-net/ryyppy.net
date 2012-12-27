@@ -3,6 +3,7 @@
 \.chg\..*$
 \.rej$
 \.conflict\~$
+\.idea
 .DS_Store
 syntax: glob
 target
