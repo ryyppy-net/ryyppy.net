@@ -39,7 +39,7 @@ public class ProfileApiController {
     
     private Gson gson = new Gson();
     
-    @RequestMapping(value="/profile", method=RequestMethod.GET, produces = {"text/plain;charset=UTF-8", "application/json;charset=UTF-8"})
+    @RequestMapping(value="/profile", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getUser() {
         UserDTO userDTO = UserDTO.fromUser(currentUser.getUser());
         return gson.toJson(userDTO);
@@ -79,7 +79,7 @@ public class ProfileApiController {
         
     }
     
-    @RequestMapping(value="/profile/drinks", method=RequestMethod.GET, produces = {"text/plain;charset=UTF-8", "application/json;charset=UTF-8"})
+    @RequestMapping(value="/profile/drinks", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getDrinks(){
         List<Drink> drinks = currentUser.getUser().getDrinks();
         List<DrinkDTO> drinkDTOs = new ArrayList<DrinkDTO>();
