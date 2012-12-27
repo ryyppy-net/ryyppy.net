@@ -11,7 +11,9 @@ function UserCtrl($scope, $http) {
 UserCtrl.$inject = ['$scope', '$http'];
 
 
-function PartyCtrl($scope, $http, $routeParams, $timeout) {
+function PartyCtrl($scope, $http, $routeParams, $timeout, $resource) {
+    var self = this;
+
     $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
         $scope.party = data;
     });
@@ -21,8 +23,12 @@ function PartyCtrl($scope, $http, $routeParams, $timeout) {
             $scope.participants = data;
         });
         console.log("Polling...");
-        $timeout(tick, 5000);
+        self.timeoutPromise = $timeout(tick, 10000);
     })();
+
+    $scope.$on('$destroy', function cleanup() {
+        $timeout.cancel(self.timeoutPromise);
+    });
 
     $scope.addDrink = function (participant) {
         console.log("Adding drink to " + participant.name);
