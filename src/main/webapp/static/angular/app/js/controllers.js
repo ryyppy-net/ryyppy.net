@@ -18,5 +18,9 @@ function MyCtrl2($scope, $http, $routeParams) {
     $http.get("/API/v2/parties/" + $routeParams.partyId + "/participants").success(function (data) {
         $scope.participants = data;
     });
+
+    $scope.addDrink = function (participant) {
+        console.log("Adding drink to " + participant.name);
+    }
 }
 MyCtrl2.$inject = ['$scope', '$http', '$routeParams'];
