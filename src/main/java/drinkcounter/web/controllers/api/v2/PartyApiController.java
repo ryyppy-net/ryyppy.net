@@ -38,7 +38,7 @@ public class PartyApiController {
     
     private Gson gson = new Gson();
     
-    @RequestMapping(value="/parties", method= RequestMethod.GET, produces = {"text/plain;charset=UTF-8", "application/json;charset=UTF-8"})
+    @RequestMapping(value="/parties", method= RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParties(){
         List<Party> parties = currentUser.getUser().getParties();
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
@@ -48,14 +48,14 @@ public class PartyApiController {
         return gson.toJson(partyDTOs);
     }
     
-    @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET, produces = {"text/plain;charset=UTF-8", "application/json;charset=UTF-8"})
+    @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParty(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         PartyDTO partyDTO = PartyDTO.fromParty(party);
         return gson.toJson(partyDTO);
     }
     
-    @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.GET, produces = {"text/plain;charset=UTF-8", "application/json;charset=UTF-8"})
+    @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParticipants(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         List<User> participants = party.getParticipants();
@@ -91,7 +91,7 @@ public class PartyApiController {
         drinkCounterService.linkUserToParty(user.getId(), partyId);
     }
     
-    @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET, produces = {"text/plain;charset=UTF-8", "application/json;charset=UTF-8"})
+    @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
