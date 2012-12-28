@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package drinkcounter.web.controllers.api.v2;
 
 import com.google.gson.Gson;
@@ -9,8 +5,6 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
-import drinkcounter.authentication.NotEnoughRightsException;
-import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.text.MessageFormat;
@@ -52,7 +46,6 @@ public class PartyApiController {
     
     @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParty(@PathVariable Integer partyId){
-        authorizeForParty(partyId);
         Party party = drinkCounterService.getParty(partyId);
         PartyDTO partyDTO = PartyDTO.fromParty(party);
         return gson.toJson(partyDTO);
@@ -60,7 +53,6 @@ public class PartyApiController {
     
     @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParticipants(@PathVariable Integer partyId){
-        authorizeForParty(partyId);
         Party party = drinkCounterService.getParty(partyId);
         List<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
@@ -76,7 +68,6 @@ public class PartyApiController {
             @RequestParam(value="name", required=false) String name,
             @RequestParam(value="sex", required=false) User.Sex sex,
             @RequestParam(value="weight", required=false) Float weight){
-        authorizeForParty(partyId);
         if(email != null){
             User user = userService.getUserByEmail(email);
             drinkCounterService.linkUserToParty(user.getId(), partyId);
@@ -99,13 +90,11 @@ public class PartyApiController {
     @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method=RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     public void removeParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
-        authorizeForParty(partyId);
         drinkCounterService.unlinkUserFromParty(participantId, partyId);
     }
     
     @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
-        authorizeForParty(partyId);
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
         if(!party.getParticipants().contains(participant)){
@@ -120,7 +109,6 @@ public class PartyApiController {
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
-        authorizeForParty(partyId);
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
         if(!party.getParticipants().contains(participant)){
@@ -135,19 +123,5 @@ public class PartyApiController {
             time = new Date(new DateTime(timestamp).getMillis());
         }
         drinkCounterService.addDrink(participantId, time, alcoholAmount);
-    }
-
-    /**
-     * Throws exception if user is not allowed to access the party
-     * @param partyid Party to check access for
-     * @throws NotEnoughRightsException
-     */
-    private void authorizeForParty(int partyid) throws NotEnoughRightsException, NotLoggedInException {
-        if(currentUser.getUser() == null){
-            throw new NotLoggedInException();
-        }
-        if(!drinkCounterService.isUserParticipant(partyid, currentUser.getUser().getId())){
-            throw new NotEnoughRightsException();
-        }
     }
 }

@@ -20,5 +20,11 @@
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/v2/parties/*/**" />
+            <bean class="drinkcounter.web.controllers.api.v2.PartyAuthorizationInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
     <context:component-scan base-package="drinkcounter.web.controllers.api"/>
 </beans>
