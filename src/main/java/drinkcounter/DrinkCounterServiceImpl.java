@@ -55,7 +55,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    @PreAuthorize("hasPermission(#partyId, 'Party', 'read')")
     public Party getParty(int partyId) {
         return partyDao.findOne(partyId);
     }

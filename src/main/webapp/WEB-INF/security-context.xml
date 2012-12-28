@@ -5,15 +5,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
        ">
-    <global-method-security pre-post-annotations="enabled">
-        <expression-handler ref="expressionHandler" />
-    </global-method-security>
-    
-    <beans:bean id="expressionHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
-        <beans:property name="permissionEvaluator" ref="drinkPermissionEvaluator"/>
-    </beans:bean>
-    
-    <beans:bean id="drinkPermissionEvaluator" class="drinkcounter.security.DrinkPermissionEvaluator" />
     
     <http entry-point-ref="loginUrlEntryPoint">
         <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
@@ -22,7 +13,7 @@
         <intercept-url pattern="/ui/adduser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/timezone/*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/API/passphrase/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /> <!-- TODO TONI KORJAA -->
+        <intercept-url pattern="/API/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /> <!-- Authorization in Spring MVC -->
         <intercept-url pattern="/favicon.ico" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="ROLE_USER" />
         <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
