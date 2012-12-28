@@ -41,7 +41,7 @@ public class DrinkPermissionEvaluator implements PermissionEvaluator, Applicatio
         if(!targetType.equals("Party")){
             return true;
         }
-        Party party = getPartyDAO().readByPrimaryKey((Integer)targetId);
+        Party party = getPartyDAO().findOne((Integer)targetId);
         return party.getParticipants().contains(getUser(authentication));
     }
 
@@ -51,7 +51,7 @@ public class DrinkPermissionEvaluator implements PermissionEvaluator, Applicatio
     }
     
     private User getUser(Authentication authentication){
-        return applicationContext.getBean(UserDAO.class).readByPrimaryKey(getUserId(authentication));
+        return applicationContext.getBean(UserDAO.class).findOne(getUserId(authentication));
     }
     
     private PartyDAO getPartyDAO(){
