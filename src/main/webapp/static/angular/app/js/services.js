@@ -85,6 +85,8 @@
 
 
     function NotificationService() {
+        $.pnotify.defaults.pnotify_history = false;
+
         this.success = function (title, text) {
             $.pnotify({
                 title: title,
