@@ -3,7 +3,7 @@
 /* Controllers */
 
 
-function UserCtrl($scope, $http, RyyppyAPI) {
+function UserCtrl($scope, RyyppyAPI) {
     RyyppyAPI.getProfile(function (data) {
         $scope.profile = data;
     });
@@ -12,19 +12,19 @@ function UserCtrl($scope, $http, RyyppyAPI) {
         $scope.parties = data;
     });
 }
-UserCtrl.$inject = ['$scope', '$http', 'RyyppyAPI'];
+UserCtrl.$inject = ['$scope', 'RyyppyAPI'];
 
 
-function PartyCtrl($scope, $http, $routeParams, $timeout) {
+function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     var self = this;
     $scope.active = "party";
 
-    $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
+    RyyppyAPI.getParty($routeParams.partyId, function (data) {
         $scope.party = data;
     });
 
     (function tick() {
-        $http.get("/API/v2/parties/" + $routeParams.partyId + "/participants").success(function (data) {
+        RyyppyAPI.getPartyParticipants($routeParams.partyId, function (data) {
             $scope.participants = data;
 
             var rowsAmount = Math.ceil(data.length / 3);
@@ -49,7 +49,8 @@ function PartyCtrl($scope, $http, $routeParams, $timeout) {
 
     $scope.addDrink = function (participant) {
         console.log("Adding drink to " + participant.name);
-        $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id + "/drinks", {"volume": 0.33, "alcohol": 0.5, "timestamp": null}).success(function (data) {
+        var drink = {"volume": 0.33, "alcohol": 0.5, "timestamp": null};
+        RyyppyAPI.addDrink($routeParams.partyId, participant, drink, function (data) {
             console.log("Added drink.");
             $scope.successMessage = "Added a drink to " + participant.name;
             self.playSound();
@@ -90,7 +91,7 @@ function PartyCtrl($scope, $http, $routeParams, $timeout) {
         }
     };
 }
-PartyCtrl.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
+PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI'];
 
 
 function PartyAdminCtrl($scope, $http, $routeParams) {
