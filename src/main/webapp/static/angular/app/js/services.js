@@ -84,6 +84,17 @@
     }
 
 
+    function NotificationService() {
+        this.success = function (title, text) {
+            $.pnotify({
+                title: title,
+                text: text,
+                type: 'success'
+            });
+        };
+    }
+
+
     /**
      * RyyppyAPI object is registered as an Angular service so that controllers or
      * other services can depend on it.
@@ -96,6 +107,10 @@
         $provide.factory('Sound', ['$window', function ($window) {
             return new SoundService($window);
         }]);
+
+        $provide.factory('Notify', function () {
+            return new NotificationService();
+        });
     });
 })(angular);
 
