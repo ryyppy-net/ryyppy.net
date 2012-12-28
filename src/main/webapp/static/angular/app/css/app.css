@@ -28,3 +28,9 @@
   content: "";
   padding: 0;
 }
+
+.drinker {
+    border: 1px solid #000000;
+    height: 100px;
+    margin-bottom: 5px;
+}
