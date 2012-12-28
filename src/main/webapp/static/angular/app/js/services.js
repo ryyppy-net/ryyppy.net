@@ -49,6 +49,41 @@
         }
     }
 
+
+    function SoundService(win) {
+        this.playSound = function () {
+            var audio = win.document.createElement("audio");
+            var source = win.document.createElement('source');
+            var filename = "/static/sounds/" + Math.floor(Math.random() * 7 + 1);
+
+            if (!audio.canPlayType) return; // no html5 audio support
+
+            if (win.navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
+                source.type= 'audio/wav';
+                source.src= '/static/sounds/7.wav';
+                audio.appendChild(source);
+                audio.play();
+                return;
+            }
+
+            var ogg = audio.canPlayType('audio/ogg; codecs="vorbis"');
+            var mp3 = audio.canPlayType('audio/mpeg; codecs="mp3"');
+            if (ogg == "probably" || ogg == "maybe") {
+                source.type= 'audio/ogg';
+                source.src= filename + '.ogg';
+            } else if (mp3 == "probably" || mp3 == "maybe") {
+                source.type= 'audio/mpeg';
+                source.src= filename + '.mp3';
+            }
+
+            if (source.src.length > 1) {
+                audio.appendChild(source);
+                audio.play();
+            }
+        };
+    }
+
+
     /**
      * RyyppyAPI object is registered as an Angular service so that controllers or
      * other services can depend on it.
@@ -56,6 +91,10 @@
     angular.module('ryyppy.services', [], function ($provide) {
         $provide.factory('RyyppyAPI', ['$http', function ($http) {
             return new RyyppyAPI($http);
+        }]);
+
+        $provide.factory('Sound', ['$window', function ($window) {
+            return new SoundService($window);
         }]);
     });
 })(angular);
