@@ -17,6 +17,7 @@ UserCtrl.$inject = ['$scope', '$http'];
 
 function PartyCtrl($scope, $http, $routeParams, $timeout) {
     var self = this;
+    $scope.active = "party";
 
     $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
         $scope.party = data;
@@ -50,11 +51,21 @@ function PartyCtrl($scope, $http, $routeParams, $timeout) {
         console.log("Adding drink to " + participant.name);
         $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id + "/drinks", {"volume": 0.33, "alcohol": 0.5, "timestamp": null}).success(function (data) {
             console.log("Added drink.");
+            $scope.successMessage = "Added a drink to " + participant.name;
+            $timeout(function () {
+                $scope.successMessage = null;
+            }, 5000);
         });
-        $scope.successMessage = "Added a drink to " + participant.name;
-        $timeout(function () {
-            $scope.successMessage = null;
-        }, 5000);
     };
 }
 PartyCtrl.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
+
+
+function PartyAdminCtrl($scope, $http, $routeParams) {
+    $scope.active = "admin";
+
+    $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
+        $scope.party = data;
+    });
+}
+PartyAdminCtrl.$inject = ['$scope', '$http', '$routeParams'];
