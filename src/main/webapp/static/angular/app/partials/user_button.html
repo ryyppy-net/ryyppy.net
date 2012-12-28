@@ -1,6 +1,6 @@
 <a ng-click="addDrink(participant)">
     <div class="drinker">
-        <gravatar-image data-email="participant.email" data-rating="pg" data-default="404" ></gravatar-image>
+        <img ng-src="{{ participant.profilePictureUrl }}" />
         {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles | number: 2 }}&permil;
     </div>
 </a>
