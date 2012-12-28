@@ -15,7 +15,7 @@ function UserCtrl($scope, RyyppyAPI) {
 UserCtrl.$inject = ['$scope', 'RyyppyAPI'];
 
 
-function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
+function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound) {
     var self = this;
     $scope.active = "party";
 
@@ -53,50 +53,17 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
         RyyppyAPI.addDrink($routeParams.partyId, participant, drink, function (data) {
             console.log("Added drink.");
             $scope.successMessage = "Added a drink to " + participant.name;
-            self.playSound();
+            Sound.playSound();
             $timeout(function () {
                 $scope.successMessage = null;
             }, 5000);
         });
     };
-
-    this.playSound = function () {
-        var audio = document.createElement("audio");
-        var source = document.createElement('source');
-        var filename = "/static/sounds/" + Math.floor(Math.random() * 7 + 1);
-
-        if (!audio.canPlayType) return; // no html5 audio support
-
-        if (navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
-            source.type= 'audio/wav';
-            source.src= '/static/sounds/7.wav';
-            audio.appendChild(source);
-            audio.play();
-            return;
-        }
-
-        var ogg = audio.canPlayType('audio/ogg; codecs="vorbis"');
-        var mp3 = audio.canPlayType('audio/mpeg; codecs="mp3"');
-        if (ogg == "probably" || ogg == "maybe") {
-            source.type= 'audio/ogg';
-            source.src= filename + '.ogg';
-        } else if (mp3 == "probably" || mp3 == "maybe") {
-            source.type= 'audio/mpeg';
-            source.src= filename + '.mp3';
-        }
-
-        if (source.src.length > 1) {
-            audio.appendChild(source);
-            audio.play();
-        }
-    };
 }
-PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI'];
+PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI', 'Sound'];
 
 
 function PartyAdminCtrl($scope, $routeParams, RyyppyAPI) {
-
-
     $scope.active = "admin";
 
     RyyppyAPI.getParty($routeParams.partyId, function (data) {
