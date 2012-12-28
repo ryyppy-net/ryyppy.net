@@ -35,7 +35,7 @@
 
         this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, $.param({ email: email }), callbackSuccess);
+            http.post(url, $.param({ email: email })).success(callbackSuccess);
         };
 
         this.addGuestToParty = function (partyId, guest, callbackSuccess) {
