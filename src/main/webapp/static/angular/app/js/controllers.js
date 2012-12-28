@@ -52,10 +52,42 @@ function PartyCtrl($scope, $http, $routeParams, $timeout) {
         $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id + "/drinks", {"volume": 0.33, "alcohol": 0.5, "timestamp": null}).success(function (data) {
             console.log("Added drink.");
             $scope.successMessage = "Added a drink to " + participant.name;
+            self.playSound();
             $timeout(function () {
                 $scope.successMessage = null;
             }, 5000);
         });
+    };
+
+    this.playSound = function () {
+        var audio = document.createElement("audio");
+        var source = document.createElement('source');
+        var filename = "/static/sounds/" + Math.floor(Math.random() * 7 + 1);
+
+        if (!audio.canPlayType) return; // no html5 audio support
+
+        if (navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
+            source.type= 'audio/wav';
+            source.src= '/static/sounds/7.wav';
+            audio.appendChild(source);
+            audio.play();
+            return;
+        }
+
+        var ogg = audio.canPlayType('audio/ogg; codecs="vorbis"');
+        var mp3 = audio.canPlayType('audio/mpeg; codecs="mp3"');
+        if (ogg == "probably" || ogg == "maybe") {
+            source.type= 'audio/ogg';
+            source.src= filename + '.ogg';
+        } else if (mp3 == "probably" || mp3 == "maybe") {
+            source.type= 'audio/mpeg';
+            source.src= filename + '.mp3';
+        }
+
+        if (source.src.length > 1) {
+            audio.appendChild(source);
+            audio.play();
+        }
     };
 }
 PartyCtrl.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
