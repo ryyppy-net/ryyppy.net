@@ -12,8 +12,10 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="twelve columns" ng-repeat="participant in participants">
-        <div ng-include="'partials/user_button.html'"></div>
+<div ng-repeat="row in rows">
+    <div class="row">
+        <div class="four columns" ng-repeat="participant in row">
+            <div ng-include="'partials/user_button.html'"></div>
+        </div>
     </div>
 </div>
