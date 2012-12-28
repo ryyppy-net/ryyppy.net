@@ -94,15 +94,15 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
 PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI'];
 
 
-function PartyAdminCtrl($scope, $http, $routeParams) {
-    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+function PartyAdminCtrl($scope, $routeParams, RyyppyAPI) {
+
 
     $scope.active = "admin";
 
-    $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
+    RyyppyAPI.getParty($routeParams.partyId, function (data) {
         $scope.party = data;
     });
-    $http.get("/API/v2/parties/" + $routeParams.partyId + "/participants").success(function (data) {
+    RyyppyAPI.getPartyParticipants($routeParams.partyId, function (data) {
         $scope.participants = data;
     });
 
@@ -113,23 +113,20 @@ function PartyAdminCtrl($scope, $http, $routeParams) {
 
     $scope.addUser = function () {
         if ($scope.selectedUserTypeId == 1) {
-            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", $.param({
-                email: $scope.email
-            })).success(function (data) {
+            RyyppyAPI.addRegisteredUserToParty($routeParams.partyId, $scope.email, function (data) {
                 alert($scope.email);
             });
         }
         else {
-            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", $.param({
-                name: $scope.name, sex: $scope.sex, weight: $scope.weight
-            })).success(function (data) {
+            var guest = { name: $scope.name, sex: $scope.sex, weight: $scope.weight };
+            RyyppyAPI.addGuestToParty($routeParams.partyId, guest, function (data) {
                 alert($scope.name + $scope.sex + $scope.weight);
             });
         }
     };
 
     $scope.removeUser = function (participant) {
-        $http.delete("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id).success(function (data) {
+        RyyppyAPI.removeUser($routeParams.partyId, participant, function (data) {
             alert($scope.email);
         });
     };
@@ -140,4 +137,4 @@ function PartyAdminCtrl($scope, $http, $routeParams) {
     ];
     $scope.selectedUserTypeId = 1;
 }
-PartyAdminCtrl.$inject = ['$scope', '$http', '$routeParams'];
+PartyAdminCtrl.$inject = ['$scope', '$routeParams', 'RyyppyAPI'];
