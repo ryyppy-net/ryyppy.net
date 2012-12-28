@@ -12,6 +12,10 @@
     </div>
 </div>
 
+<div class="alert alert-success" ng-show="successMessage">
+    <p>{{ successMessage }}</p>
+</div>
+
 <div ng-repeat="row in rows">
     <div class="row">
         <div class="span4" ng-repeat="participant in row">

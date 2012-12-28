@@ -51,6 +51,10 @@ function PartyCtrl($scope, $http, $routeParams, $timeout) {
         $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id + "/drinks", {"volume": 0.33, "alcohol": 0.5, "timestamp": null}).success(function (data) {
             console.log("Added drink.");
         });
+        $scope.successMessage = "Added a drink to " + participant.name;
+        $timeout(function () {
+            $scope.successMessage = null;
+        }, 5000);
     };
 }
 PartyCtrl.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
