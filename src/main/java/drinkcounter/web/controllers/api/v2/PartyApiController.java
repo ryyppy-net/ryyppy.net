@@ -90,6 +90,12 @@ public class PartyApiController {
         userService.addUser(user);
         drinkCounterService.linkUserToParty(user.getId(), partyId);
     }
+
+    @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method=RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    public void removeParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
+        drinkCounterService.unlinkUserFromParty(participantId, partyId);
+    }
     
     @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
