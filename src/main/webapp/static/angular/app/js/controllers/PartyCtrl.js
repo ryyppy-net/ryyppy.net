@@ -1,6 +1,6 @@
 "use strict";
 
-function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound) {
+function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound, Notify) {
     var self = this;
     $scope.active = "party";
 
@@ -36,14 +36,10 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound) {
         console.log("Adding drink to " + participant.name);
         var drink = {"volume": 0.33, "alcohol": 0.5, "timestamp": null};
         RyyppyAPI.addDrink($routeParams.partyId, participant, drink, function (data) {
-            console.log("Added drink.");
-            $scope.successMessage = "Added a drink to " + participant.name;
+            Notify.success("New drink!", "Added a drink to " + participant.name + ".");
             Sound.playSound();
-            $timeout(function () {
-                $scope.successMessage = null;
-            }, 5000);
         });
     };
 }
 
-PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI', 'Sound'];
+PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
