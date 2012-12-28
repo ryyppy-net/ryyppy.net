@@ -5,12 +5,27 @@
  * service.
  */
 function RyyppyAPI(http) {
+    this._baseUrl = "/API/v2";
+
     this.getProfile = function (callbackSuccess) {
-        http.get("/API/v2/profile").success(callbackSuccess);
+        http.get(this._baseUrl + "/profile").success(callbackSuccess);
     };
 
     this.getParties = function (callbackSuccess) {
-        http.get("/API/v2/parties").success(callbackSuccess);
+        http.get(this._baseUrl + "/parties").success(callbackSuccess);
+    };
+
+    this.getParty = function (partyId, callbackSuccess) {
+        http.get(this._baseUrl + "/parties/" + partyId).success(callbackSuccess);
+    };
+
+    this.getPartyParticipants = function (partyId, callbackSuccess) {
+        http.get(this._baseUrl + "/parties/" + partyId + "/participants").success(callbackSuccess);
+    };
+
+    this.addDrink = function (partyId, participant, drink, callbackSuccess) {
+        var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id + "/drinks";
+        http.post(url, drink).success(callbackSuccess);
     };
 }
 
