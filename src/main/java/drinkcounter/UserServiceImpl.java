@@ -32,18 +32,6 @@ public class UserServiceImpl implements UserService{
         userDAO.save(user);
     }
 
-    // this doesn't include anonymous users
-    @Override
-    public List<User> listUsers() {
-        List<User> list = userDAO.readAll();
-        List<User> list2 = new LinkedList<User>();
-        for (User user : list) {
-            if (!user.isGuest())
-                list2.add(user);
-        }
-        return list2;
-    }
-
     @Override
     @Transactional
     public User addUser(User user) {
@@ -56,7 +44,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUser(int userId) {
-        return userDAO.readByPrimaryKey(userId);
+        return userDAO.findOne(userId);
     }
 
     @Override

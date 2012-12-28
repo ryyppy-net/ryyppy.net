@@ -40,7 +40,6 @@ public class PartyController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", drinkCounterService.getParty(pid));
-        mav.addObject("allUsers", userService.listUsers());
         mav.addObject("users", drinkCounterService.listUsersByParty(pid));
         return mav;
     }
@@ -71,7 +70,6 @@ public class PartyController {
     @RequestMapping("/removeUserFromParty")
     public @ResponseBody String removeUserFromParty(HttpSession session, @RequestParam("partyId") String partyId,
             @RequestParam("userId") String userId){
-        String openId = currentUser.getUser().getOpenId();
         int pid = Integer.parseInt(partyId);
         int uid = Integer.parseInt(userId);
         authenticationChecks.checkRightsForParty(pid);

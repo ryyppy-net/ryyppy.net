@@ -11,8 +11,6 @@ public interface UserService {
 
     void updateUser(User user);
 
-    List<User> listUsers();
-
     User addUser(User user);
 
     User getUser(int userId);

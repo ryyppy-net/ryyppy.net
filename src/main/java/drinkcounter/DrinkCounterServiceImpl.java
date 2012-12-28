@@ -6,6 +6,8 @@ import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,20 +55,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
-    @Transactional
-    public void updateParty(Party party) {
-        partyDao.save(party);
-    }
-
-    @Override
-    public List<Party> listParties() {
-        return partyDao.readAll();
-    }
-
-    @Override
     @PreAuthorize("hasPermission(#partyId, 'Party', 'read')")
     public Party getParty(int partyId) {
-        return partyDao.readByPrimaryKey(partyId);
+        return partyDao.findOne(partyId);
     }
 
     @Override
@@ -78,7 +69,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public void linkUserToParty(int userId, int partyIdentifier) {
         Party party = getParty(partyIdentifier);
-        User user = userDAO.readByPrimaryKey(userId);
+        User user = userDAO.findOne(userId);
         
         for (User current : getParty(party.getId()).getParticipants()) {
             if (current.getId() == user.getId()) {
@@ -96,7 +87,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public void unlinkUserFromParty(int userId, int partyId) {
         Party party = getParty(partyId);
-        User user = userDAO.readByPrimaryKey(userId);
+        User user = userDAO.findOne(userId);
         party.removeParticipant(user);
         partyDao.save(party);
         log.info("{} was removed from party {}", user, party.getName());
@@ -107,18 +98,12 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public int addDrink(int userIdentifier) {
         return addDrink(userIdentifier, new Date());
     }
-    
-    @Override
-    public List<Drink> getDrinks(int userIdentifier) {
-        User user = userDAO.readByPrimaryKey(userIdentifier);
-        return drinkDao.findByDrinker(user);
-    }
 
     @Override
     @Transactional
     public void removeDrinkFromUser(int userId, int drinkId) {
-        User user = userDAO.readByPrimaryKey(userId);
-        Drink drink = drinkDao.readByPrimaryKey(drinkId);
+        User user = userDAO.findOne(userId);
+        Drink drink = drinkDao.findOne(drinkId);
         user.removeDrink(drink);
         drinkDao.delete(drink);
     }
@@ -138,7 +123,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public int addDrink(int userId, Date date) {
         if (date.after(new Date())) throw new IllegalArgumentException("date");
-        User user = userDAO.readByPrimaryKey(userId);
+        User user = userDAO.findOne(userId);
         Drink drink = new Drink();
         drink.setTimeStamp(date);
         user.drink(drink);
@@ -160,7 +145,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public int addDrink(int userId, float alcoholAmount) {
-        User user = userDAO.readByPrimaryKey(userId);
+        User user = userDAO.findOne(userId);
         Drink drink = new Drink();
         drink.setTimeStamp(new Date());
         drink.setAlcohol(alcoholAmount);
@@ -173,7 +158,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public void addDrink(int userId, Date date, Float alcoholAmount) {
-        User user = userDAO.readByPrimaryKey(userId);
+        User user = userDAO.findOne(userId);
         Drink drink = new Drink();
         if(date != null){
             drink.setTimeStamp(date);

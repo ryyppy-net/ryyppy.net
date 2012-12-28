@@ -1,13 +1,13 @@
 package drinkcounter.dao;
 
 import drinkcounter.model.User;
-import org.synyx.hades.dao.GenericDao;
+import org.springframework.data.repository.CrudRepository;
 
 /**
  *
  * @author Toni
  */
-public interface UserDAO extends GenericDao<User, Integer> {
+public interface UserDAO extends CrudRepository<User, Integer> {
     User findByOpenId(String openId);
     User findByEmail(String email);
     User findByPassphrase(String passphrase);
