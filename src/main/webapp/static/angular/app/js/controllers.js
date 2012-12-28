@@ -95,6 +95,12 @@ function PartyAdminCtrl($scope, $http, $routeParams) {
         }
     };
 
+    $scope.removeUser = function (participant) {
+        $http.delete("/API/v2/parties/" + $routeParams.partyId + "/participants/" + participant.id).success(function (data) {
+            alert($scope.email);
+        });
+    };
+
     $scope.userTypes = [
         {TypeId: 1, TypeName: 'Rekisteröitynyt käyttäjä'},
         {TypeId: 2, TypeName: 'Vieras'}
