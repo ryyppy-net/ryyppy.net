@@ -21,6 +21,7 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
     <mvc:interceptors>
+        <bean class="drinkcounter.web.controllers.api.v2.LoggedInInterceptor" />
         <mvc:interceptor>
             <mvc:mapping path="/v2/parties/*/**" />
             <bean class="drinkcounter.web.controllers.api.v2.PartyAuthorizationInterceptor" />
