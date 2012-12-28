@@ -1,12 +1,21 @@
-<div class="row">
-    <div class="span12">
-        <h1>{{ profile.name }}</h1>
+<div class="navbar">
+    <div class="navbar-inner">
+        <span class="brand">Ryyppy.net</span>
+        <ul class="nav">
+            <li class="active"><a href="#">Sinä</a></li>
+            <li><a href="#">Asetukset</a></li>
+        </ul>
+        <ul class="nav pull-right">
+            <li><a href="/ui/logout">Kirjaudu ulos</a></li>
+        </ul>
     </div>
 </div>
 
+<h1>{{ profile.name }}</h1>
+
 <div class="row">
     <div class="span12">
-        <h1>Bileesi</h1>
+        <h2>Bileesi</h2>
 
         <ul>
             <li ng-repeat="party in parties" ng-include="'partials/party_button.html'"></li>
