@@ -1,16 +1,4 @@
-<div class="navbar">
-    <div class="navbar-inner">
-        <span class="brand">{{ party.name }}</span>
-        <ul class="nav">
-            <li class="active"><a href="#">Bileet!</a></li>
-            <li><a href="#">Muokkaa</a></li>
-            <li><a href="#">Ryhmägraafi</a></li>
-        </ul>
-        <ul class="nav pull-right">
-            <li><a href="index.html">Palaa takaisin</a></li>
-        </ul>
-    </div>
-</div>
+<div ng-include="'partials/party_menu.html'"></div>
 
 <div class="alert alert-success" ng-show="successMessage">
     <p>{{ successMessage }}</p>
