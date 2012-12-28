@@ -16,6 +16,7 @@ import drinkcounter.model.User.Sex;
 public class ParticipantDTO {
     private Integer id;
     private String name;
+    private String email;
     private Integer totalDrinks;
     private User.Sex sex;
     private Float promilles;
@@ -36,7 +37,6 @@ public class ParticipantDTO {
     public void setName(String name) {
         this.name = name;
     }
-
     
     public Float getPromilles() {
         return promilles;
