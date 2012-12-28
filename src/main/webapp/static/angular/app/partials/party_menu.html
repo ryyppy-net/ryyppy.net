@@ -1,0 +1,12 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <span class="brand">{{ party.name }}</span>
+        <ul class="nav">
+            <li ng-class="active == 'party' && 'active'"><a ng-href="#/party/{{ party.id }}">Bileet!</a></li>
+            <li ng-class="active == 'admin' && 'active'"><a ng-href="#/party-admin/{{ party.id }}">Muokkaa</a></li>
+        </ul>
+        <ul class="nav pull-right">
+            <li><a href="index.html">Palaa takaisin</a></li>
+        </ul>
+    </div>
+</div>

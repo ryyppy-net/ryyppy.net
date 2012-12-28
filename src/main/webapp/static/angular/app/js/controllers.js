@@ -67,5 +67,32 @@ function PartyAdminCtrl($scope, $http, $routeParams) {
     $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
         $scope.party = data;
     });
+    $http.get("/API/v2/parties/" + $routeParams.partyId + "/participants").success(function (data) {
+        $scope.participants = data;
+    });
+
+    $scope.email = null;
+    $scope.name = null;
+    $scope.sex = 'MALE';
+    $scope.weight = null;
+
+    $scope.addUser = function () {
+        if ($scope.selectedUserTypeId == 1) {
+            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", {"email": $scope.email}).success(function (data) {
+                alert($scope.email);
+            });
+        }
+        else {
+            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", {"name": $scope.name, "sex": $scope.sex, "weight": $scope.weight}).success(function (data) {
+                alert($scope.name + $scope.sex + $scope.weight);
+            });
+        }
+    };
+
+    $scope.userTypes = [
+        {TypeId: 1, TypeName: 'Rekisteröitynyt käyttäjä'},
+        {TypeId: 2, TypeName: 'Vieras'}
+    ];
+    $scope.selectedUserTypeId = 1;
 }
 PartyAdminCtrl.$inject = ['$scope', '$http', '$routeParams'];
