@@ -4,6 +4,8 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
+import com.timgroup.jgravatar.Gravatar;
+import com.timgroup.jgravatar.GravatarDefaultImage;
 import drinkcounter.model.User;
 import drinkcounter.model.User.Sex;
 
@@ -14,10 +16,10 @@ import drinkcounter.model.User.Sex;
 public class ParticipantDTO {
     private Integer id;
     private String name;
-    private String email;
     private Integer totalDrinks;
     private User.Sex sex;
     private Float promilles;
+    private String profilePictureUrl;
 
     public Integer getId() {
         return id;
@@ -33,14 +35,6 @@ public class ParticipantDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     
@@ -67,15 +61,25 @@ public class ParticipantDTO {
     public void setTotalDrinks(Integer totalDrinks) {
         this.totalDrinks = totalDrinks;
     }
-    
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
+    }
+
     public static ParticipantDTO fromUser(User user){
         ParticipantDTO participant = new ParticipantDTO();
         participant.setId(user.getId());
         participant.setName(user.getName());
-        participant.setEmail(user.getEmail());
         participant.setPromilles(user.getPromilles());
         participant.setSex(user.getSex());
         participant.setTotalDrinks(user.getTotalDrinks());
+        if(user.getEmail() != null){
+            participant.setProfilePictureUrl(new Gravatar().setDefaultImage(GravatarDefaultImage.WAVATAR).getUrl(user.getEmail()));
+        }
         return participant;
     }
 }
