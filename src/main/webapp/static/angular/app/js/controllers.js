@@ -3,16 +3,16 @@
 /* Controllers */
 
 
-function UserCtrl($scope, $http) {
-    $http.get("/API/v2/profile").success(function (data) {
+function UserCtrl($scope, $http, RyyppyAPI) {
+    RyyppyAPI.getProfile(function (data) {
         $scope.profile = data;
     });
 
-    $http.get("/API/v2/parties").success(function (data) {
+    RyyppyAPI.getParties(function (data) {
         $scope.parties = data;
     });
 }
-UserCtrl.$inject = ['$scope', '$http'];
+UserCtrl.$inject = ['$scope', '$http', 'RyyppyAPI'];
 
 
 function PartyCtrl($scope, $http, $routeParams, $timeout) {
