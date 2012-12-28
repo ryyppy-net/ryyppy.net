@@ -74,7 +74,6 @@ public class ParticipantDTO {
         ParticipantDTO participant = new ParticipantDTO();
         participant.setId(user.getId());
         participant.setName(user.getName());
-        participant.setEmail(user.getEmail());
         participant.setPromilles(user.getPromilles());
         participant.setSex(user.getSex());
         participant.setTotalDrinks(user.getTotalDrinks());
