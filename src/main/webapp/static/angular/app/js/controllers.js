@@ -62,6 +62,8 @@ PartyCtrl.$inject = ['$scope', '$http', '$routeParams', '$timeout'];
 
 
 function PartyAdminCtrl($scope, $http, $routeParams) {
+    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+
     $scope.active = "admin";
 
     $http.get("/API/v2/parties/" + $routeParams.partyId).success(function (data) {
@@ -78,12 +80,16 @@ function PartyAdminCtrl($scope, $http, $routeParams) {
 
     $scope.addUser = function () {
         if ($scope.selectedUserTypeId == 1) {
-            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", {"email": $scope.email}).success(function (data) {
+            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", $.param({
+                email: $scope.email
+            })).success(function (data) {
                 alert($scope.email);
             });
         }
         else {
-            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", {"name": $scope.name, "sex": $scope.sex, "weight": $scope.weight}).success(function (data) {
+            $http.post("/API/v2/parties/" + $routeParams.partyId + "/participants", $.param({
+                name: $scope.name, sex: $scope.sex, weight: $scope.weight
+            })).success(function (data) {
                 alert($scope.name + $scope.sex + $scope.weight);
             });
         }

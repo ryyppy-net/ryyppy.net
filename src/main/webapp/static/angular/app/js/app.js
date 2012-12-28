@@ -1,6 +1,5 @@
 'use strict';
 
-
 // Declare app level module which depends on filters, and services
 angular.module('ryyppy', ['ryyppy.filters', 'ryyppy.services', 'ryyppy.directives', 'ui-gravatar']).
   config(['$routeProvider', function($routeProvider) {
