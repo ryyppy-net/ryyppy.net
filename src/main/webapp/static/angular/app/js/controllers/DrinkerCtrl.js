@@ -24,6 +24,15 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         $scope.editingDrink = false;
         $scope.drink = drink;
 
+        var i = 0;
+        (function tick() {
+            $('.bar').css('width', i + '%');
+            i++;
+
+            if (i < 100)
+                setTimeout(tick, 40);
+        })();
+
         this.timeoutId = setTimeout($.proxy(function() {
             if (participant.type == 'participant')
                 RyyppyAPI.addDrink(participant.partyId, participant, drink, function (data) {
@@ -118,6 +127,58 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         }
         return alcoholPercentage;
     };
+
+    String.prototype.format = function() {
+        var formatted = this;
+        for (var i = 0; i < arguments.length; i++) {
+            var regexp = new RegExp('\\{'+i+'\\}', 'gi');
+            formatted = formatted.replace(regexp, arguments[i]);
+        }
+        return formatted;
+    };
+
+    this.getUserHistory = function(userId, callback) {
+        $.get('/API/users/{0}/show-history'.format(userId), callback);
+    };
+
+    function historyLoaded(data) {
+        var histories = [];
+
+        var rows = data.split('\n');
+        for (var i = 1; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.length == 0) continue;
+            var columns = row.split(',');
+
+            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+
+            var history = [Number(columns[0]) + timezoneoffset, Number(columns[1])];
+            histories.push(history);
+        }
+
+        var series = {data: histories, color: 'rgb(0, 0, 0)'};
+        series = [series];
+
+        this.graphElement = $('#graph' + $scope.participant.id);
+
+        if (this.graphElement == undefined)
+            return;
+
+        if (series == null)
+            return;
+
+        this.graphOptions = {
+            crosshair: {mode: null},
+            yaxis: {min: 0},
+            xaxis: {mode: "time", timeformat: "%H:%M", show:true}
+        };
+
+        this.graphElement.show();
+        $.plot(this.graphElement, series, this.graphOptions);
+    }
+
+    if (typeof $scope.participant != 'undefined')
+        this.getUserHistory($scope.participant.id, historyLoaded);
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', 'RyyppyAPI', 'Sound', 'Notify'];
