@@ -22,6 +22,14 @@ label {
     font-size: 1em;
 }
 
+.modal, .modal-footer {
+    background-color: black;
+}
+
+.modal-body {
+    background-color: #505050;
+}
+
 .color1 { background-color: #65E6A4; }
 .color2 { background-color: #65A8E6; }
 .color3 { background-color: #68E665; }
