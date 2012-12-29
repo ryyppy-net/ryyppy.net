@@ -10,6 +10,7 @@ import drinkcounter.model.User;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,12 @@ public class PartyApiController {
         List<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (User participant : participants) {
-            participantDTOs.add(ParticipantDTO.fromUser(participant));
+            ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
+            
+            List<HistoryPoint> history = SlopeService.getSlopes(participant, false);
+            participantDTO.setHistory(history);
+            
+            participantDTOs.add(participantDTO);
         }
         return gson.toJson(participantDTOs);
     }

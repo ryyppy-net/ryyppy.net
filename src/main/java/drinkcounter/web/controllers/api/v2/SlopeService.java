@@ -14,13 +14,13 @@ import org.joda.time.DateTime;
  * @author thardas
  */
 public class SlopeService {
-    public static List<String[]> getSlopes(User user, boolean getId) {
+    public static List<HistoryPoint> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;
         DateTime now = new DateTime();
         DateTime start = now.minusMinutes(300);
 
         List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
-        List<String[]> slopes = new LinkedList<String[]>();
+        List<HistoryPoint> slopes = new LinkedList<HistoryPoint>();
 
         double lastSlope = Double.MAX_VALUE;
         Long lastX = null;
@@ -32,9 +32,16 @@ public class SlopeService {
             double slope = y / (x / 31536000000L);
             if (Math.abs(slope - lastSlope) >= 0.000000001) {
                 if (lastX != null && lastY != null && lastInserted != lastX) {
-                    slopes.add(getCsvValues(lastX, lastY, user, getId));
+                    HistoryPoint point = new HistoryPoint();
+                    point.setTimestamp(lastX);
+                    point.setPromilles(lastY);
+                    slopes.add(point);
                 }
-                slopes.add(getCsvValues(x, y, user, getId));
+                
+                HistoryPoint point = new HistoryPoint();
+                point.setTimestamp(x);
+                point.setPromilles(y);
+                slopes.add(point);
                 lastInserted = x;
             }
             lastSlope = slope;
@@ -42,13 +49,11 @@ public class SlopeService {
             lastY = y;
             x += intervalMs;
         }
-        slopes.add(getCsvValues(new DateTime().getMillis(), user.getPromilles(), user, getId));
+        
+        HistoryPoint point = new HistoryPoint();
+        point.setTimestamp(new DateTime().getMillis());
+        point.setPromilles(user.getPromilles());
+        slopes.add(point);
         return slopes;
-    }
-
-    private static String[] getCsvValues(long x, float y, User user, boolean getId) {
-        if (getId)
-            return new String[]{Integer.toString(user.getId()), Long.toString(x), Float.toString(y)};
-        return new String[]{Long.toString(x), Float.toString(y)};
     }
 }

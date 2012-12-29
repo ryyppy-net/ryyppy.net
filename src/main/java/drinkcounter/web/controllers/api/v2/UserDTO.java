@@ -23,15 +23,7 @@ public class UserDTO {
     private Float promilles;
     private Integer totalDrinks;
     private String profilePictureUrl;
-    private List<String[]> history;
-
-    public List<String[]> getHistory() {
-        return history;
-    }
-
-    public void setHistory(List<String[]> history) {
-        this.history = history;
-    }
+    private List<HistoryPoint> history;
 
     public String getEmail() {
         return email;
@@ -95,6 +87,14 @@ public class UserDTO {
 
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
+    }
+    
+    public List<HistoryPoint> getHistory() {
+        return history;
+    }
+    
+    public void setHistory(List<HistoryPoint> history) {
+        this.history = history;
     }
     
     public static UserDTO fromUser(User user){

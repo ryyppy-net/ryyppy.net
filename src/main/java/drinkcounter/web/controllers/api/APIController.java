@@ -176,7 +176,7 @@ public class APIController {
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
         User user = userService.getUser(id);
-        List<String[]> history = SlopeService.getSlopes(user, false);
+        List<String[]> history = new LinkedList<String[]>(); // SlopeService.getSlopes(user, true);
 
         for (String[] s : history) {
             csvWriter.writeRecord(s);
@@ -202,7 +202,7 @@ public class APIController {
         List<User> users = drinkCounterService.listUsersByParty(id);
         
         for (User user : users) {
-            List<String[]> history = SlopeService.getSlopes(user, true);
+            List<String[]> history = new LinkedList<String[]>(); // SlopeService.getSlopes(user, true);
             DateTime time = start;
             for (String[] s : history) {
                 csvWriter.writeRecord(s);
