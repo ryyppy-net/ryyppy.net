@@ -57,6 +57,11 @@
         this.removeUser = function (partyId, participant, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
             http.delete(url).success(callbackSuccess);
+        };
+
+        this.addParty = function (partyName, callbackSuccess) {
+            var url = this._baseUrl + "/parties";
+            http.post(url, $.param({ name: partyName })).success(callbackSuccess);
         }
     }
 

@@ -10,6 +10,21 @@
             <ul>
                 <li ng-repeat="party in parties" ng-include="'partials/party_button.html'"></li>
             </ul>
+
+            <form class="form-horizontal" ng-submit="addParty()">
+                <div class="control-group">
+                    <label class="control-label" for="partyName">Bileiden nimi</label>
+                    <div class="controls">
+                        <input id="partyName" type="text" ng-model="partyName" />
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn btn-success">Lisää bileet</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

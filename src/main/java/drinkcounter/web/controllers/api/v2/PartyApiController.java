@@ -45,6 +45,14 @@ public class PartyApiController {
         return gson.toJson(partyDTOs);
     }
     
+    @RequestMapping(value="/parties", method= RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void addParty(@RequestParam("name") String partyName){
+        User user = currentUser.getUser();
+        Party party = drinkCounterService.startParty(partyName);
+        drinkCounterService.linkUserToParty(user.getId(), party.getId());
+    }
+    
     @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getParty(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
