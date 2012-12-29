@@ -1,17 +1,25 @@
 body {
     background-color: #505050;
+    color: white;
+    font-size: 1.5em;
 }
 
 .drinker {
-    border: 1px solid #000000;
+    border: 2px solid black;
+    border-radius: 5px;
     color: black;
     margin-bottom: 20px;
+    font-size: 0.8em;
 }
 
 .navbar-inner {
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;
     border-radius: 0px;
+}
+
+label {
+    font-size: 1em;
 }
 
 .color1 { background-color: #65E6A4; }
