@@ -1,13 +1,27 @@
 "use strict";
 
 function UserCtrl($scope, RyyppyAPI) {
-    RyyppyAPI.getProfile(function (data) {
-        data.type = 'profile';
-        $scope.participant = data;
-    });
+    var self = this;
 
-    RyyppyAPI.getParties(function (data) {
-        $scope.parties = data;
+    this.refreshProfile = function () {
+        RyyppyAPI.getProfile(function (data) {
+            data.type = 'profile';
+            $scope.participant = data;
+        });
+    };
+
+    this.refreshParties = function () {
+        RyyppyAPI.getParties(function (data) {
+            $scope.parties = data;
+        });
+    };
+
+
+    this.refreshProfile();
+    this.refreshParties();
+
+    $scope.$on('drinkAdded', function () {
+        self.refreshProfile();
     });
 }
 

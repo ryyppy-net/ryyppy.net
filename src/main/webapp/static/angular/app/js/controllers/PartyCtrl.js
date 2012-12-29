@@ -2,13 +2,15 @@
 
 function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     var self = this;
-    $scope.active = "party";
 
-    RyyppyAPI.getParty($routeParams.partyId, function (data) {
-        $scope.party = data;
-    });
 
-    (function tick() {
+    this.refreshParty = function () {
+        RyyppyAPI.getParty($routeParams.partyId, function (data) {
+            $scope.party = data;
+        });
+    };
+
+    this.refreshParticipants = function () {
         RyyppyAPI.getPartyParticipants($routeParams.partyId, function (data) {
             // Should this be added in backend?
             for (var i = 0; i < data.length; i++) {
@@ -30,12 +32,32 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
             }
             $scope.rows = rows;
         });
-        console.log("Polling...");
-        self.timeoutPromise = $timeout(tick, 60000);
-    })();
+    };
 
-    $scope.$on('$destroy', function cleanup() {
+    this.startPolling = function () {
+        (function tick() {
+            self.refreshParticipants();
+            console.log("Polling...");
+            self.timeoutPromise = $timeout(tick, 60000);
+        })();
+    };
+
+    this.endPolling = function () {
         $timeout.cancel(self.timeoutPromise);
+    };
+
+
+    // Initialization:
+    $scope.active = "party";
+    this.refreshParty();
+
+    self.startPolling();
+    $scope.$on('$destroy', function () {
+        self.endPolling();
+    });
+
+    $scope.$on('drinkAdded', function () {
+        self.refreshParticipants();
     });
 }
 
