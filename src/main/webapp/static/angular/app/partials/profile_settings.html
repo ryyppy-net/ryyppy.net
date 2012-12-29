@@ -1,0 +1,48 @@
+<div ng-include="'partials/user_menu.html'"></div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <h1>Muokkaa tietojasi</h1>
+
+            <form class="form-horizontal" ng-submit="updateProfile()">
+                <div class="control-group">
+                    <label class="control-label" for="name">Nimi</label>
+                    <div class="controls">
+                        <input id="name" type="text" ng-model="name" />
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="email">Sähköposti</label>
+                    <div class="controls">
+                        <input id="email" type="email" ng-model="email" />
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="weight">Sukupuoli</label>
+                    <div class="controls">
+                        <select id="sex" ng-model="sex">
+                            <option value="MALE">Mies</option>
+                            <option value="FEMALE">Nainen</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="weight">Paino</label>
+                    <div class="controls">
+                        <input id="weight" type="password" ng-model="weight" />
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn btn-success">Tallenna</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
