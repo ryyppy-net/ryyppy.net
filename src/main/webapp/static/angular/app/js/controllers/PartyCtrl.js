@@ -18,8 +18,6 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
                 data[i].partyId = $routeParams.partyId;
             }
 
-            $scope.participants = data;
-
             var rowsAmount = Math.ceil(data.length / 3);
             var rows = new Array(rowsAmount);
             for (var i = 0; i < rowsAmount; i++) {
@@ -37,7 +35,6 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     this.startPolling = function () {
         (function tick() {
             self.refreshParticipants();
-            console.log("Polling...");
             self.timeoutPromise = $timeout(tick, 60000);
         })();
     };

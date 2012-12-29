@@ -1,6 +1,5 @@
 function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     $scope.addDrink = function (participant) {
-        console.log("Adding drink to " + participant.name);
         var drink = {"volume": 0.33, "alcohol": 0.5, "timestamp": null};
 
         if (participant.type == 'participant')
