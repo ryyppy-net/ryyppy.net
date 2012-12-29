@@ -2,6 +2,7 @@
 
 function UserCtrl($scope, $timeout, RyyppyAPI) {
     var self = this;
+    $scope.active = 'user';
 
     this.refreshProfile = function () {
         RyyppyAPI.getProfile(function (data) {

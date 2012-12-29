@@ -16,6 +16,10 @@
             http.get(this._baseUrl + "/profile").success(callbackSuccess);
         };
 
+        this.updateProfile = function (profile, callbackSuccess) {
+            http.post(this._baseUrl + "/profile", $.param(profile)).success(callbackSuccess);
+        };
+
         this.getParties = function (callbackSuccess) {
             http.get(this._baseUrl + "/parties").success(callbackSuccess);
         };
