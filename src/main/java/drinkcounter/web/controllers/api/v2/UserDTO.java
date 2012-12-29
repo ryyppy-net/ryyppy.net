@@ -8,6 +8,7 @@ import com.timgroup.jgravatar.Gravatar;
 import com.timgroup.jgravatar.GravatarDefaultImage;
 import drinkcounter.model.User;
 import drinkcounter.model.User.Sex;
+import java.util.List;
 
 /**
  *
@@ -22,6 +23,7 @@ public class UserDTO {
     private Float promilles;
     private Integer totalDrinks;
     private String profilePictureUrl;
+    private List<HistoryPoint> history;
 
     public String getEmail() {
         return email;
@@ -85,6 +87,14 @@ public class UserDTO {
 
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
+    }
+    
+    public List<HistoryPoint> getHistory() {
+        return history;
+    }
+    
+    public void setHistory(List<HistoryPoint> history) {
+        this.history = history;
     }
     
     public static UserDTO fromUser(User user){

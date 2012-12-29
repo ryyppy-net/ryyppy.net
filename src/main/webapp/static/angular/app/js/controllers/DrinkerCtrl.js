@@ -127,6 +127,45 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         }
         return alcoholPercentage;
     };
+
+    function historyLoaded() {
+        var histories = [];
+
+        var rows = $scope.participant.history;
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            if (row.length == 0) continue;
+
+            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+
+            var history = [row.timestamp + timezoneoffset, row.promilles];
+            histories.push(history);
+        }
+
+        var series = {data: histories, color: 'rgb(0, 0, 0)'};
+        series = [series];
+
+        this.graphElement = $('#graph' + $scope.participant.id);
+
+        if (this.graphElement == undefined)
+            return;
+
+        if (series == null)
+            return;
+
+        this.graphOptions = {
+            crosshair: {mode: null},
+            yaxis: {min: 0},
+            xaxis: {mode: "time", timeformat: "%H:%M", show:true}
+        };
+
+        this.graphElement.show();
+        $.plot(this.graphElement, series, this.graphOptions);
+    }
+
+    setTimeout(function () {
+        historyLoaded();
+    }, 0);
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', 'RyyppyAPI', 'Sound', 'Notify'];

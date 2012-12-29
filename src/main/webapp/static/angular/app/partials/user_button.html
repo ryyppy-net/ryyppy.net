@@ -3,6 +3,8 @@
         <div class="drinker">
             <img ng-src="{{ participant.profilePictureUrl }}" />
             {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles | number: 2 }}&permil;
+
+            <div id="graph{{ participant.id }}" style="border: 1px solid red; width: 150px; height: 150px;"></div>
         </div>
     </a>
 
