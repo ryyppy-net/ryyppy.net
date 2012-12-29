@@ -10,6 +10,7 @@ import drinkcounter.model.User;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,12 @@ public class PartyApiController {
         List<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (User participant : participants) {
-            participantDTOs.add(ParticipantDTO.fromUser(participant));
+            ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
+            
+            List<HistoryPoint> history = getSlopes(participant, false);
+            participantDTO.setHistory(history);
+            
+            participantDTOs.add(participantDTO);
         }
         return gson.toJson(participantDTOs);
     }
@@ -123,5 +129,48 @@ public class PartyApiController {
             time = new Date(new DateTime(timestamp).getMillis());
         }
         drinkCounterService.addDrink(participantId, time, alcoholAmount);
+    }
+    
+    private List<HistoryPoint> getSlopes(User user, boolean getId) {
+        int intervalMs = 60 * 1000;
+        DateTime now = new DateTime();
+        DateTime start = now.minusMinutes(300);
+
+        List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
+        List<HistoryPoint> slopes = new LinkedList<HistoryPoint>();
+
+        double lastSlope = Double.MAX_VALUE;
+        Long lastX = null;
+        Float lastY = null;
+        long lastInserted = 0;
+        
+        Long x = start.getMillis();
+        for (Float y : history) {
+            double slope = y / (x / 31536000000L);
+            if (Math.abs(slope - lastSlope) >= 0.000000001) {
+                if (lastX != null && lastY != null && lastInserted != lastX) {
+                    HistoryPoint point = new HistoryPoint();
+                    point.setTimestamp(lastX);
+                    point.setPromilles(lastY);
+                    slopes.add(point);
+                }
+                
+                HistoryPoint point = new HistoryPoint();
+                point.setTimestamp(x);
+                point.setPromilles(y);
+                slopes.add(point);
+                lastInserted = x;
+            }
+            lastSlope = slope;
+            lastX = x;
+            lastY = y;
+            x += intervalMs;
+        }
+        
+        HistoryPoint point = new HistoryPoint();
+        point.setTimestamp(new DateTime().getMillis());
+        point.setPromilles(user.getPromilles());
+        slopes.add(point);
+        return slopes;
     }
 }

@@ -137,22 +137,16 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         return formatted;
     };
 
-    this.getUserHistory = function(userId, callback) {
-        $.get('/API/users/{0}/show-history'.format(userId), callback);
-    };
-
-    function historyLoaded(data) {
+    function historyLoaded() {
         var histories = [];
+        var data = $scope.participant.history;
 
-        var rows = data.split('\n');
-        for (var i = 1; i < rows.length; i++) {
-            var row = rows[i];
-            if (row.length == 0) continue;
-            var columns = row.split(',');
+        for (var i = 1; i < data.length; i++) {
+            var row = data[i];
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
-            var history = [Number(columns[0]) + timezoneoffset, Number(columns[1])];
+            var history = [row.timestamp + timezoneoffset, row.promilles];
             histories.push(history);
         }
 
@@ -174,11 +168,10 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         };
 
         this.graphElement.show();
-        $.plot(this.graphElement, series, this.graphOptions);
+        //$.plot(this.graphElement, series, this.graphOptions);
     }
 
-    if (typeof $scope.participant != 'undefined')
-        this.getUserHistory($scope.participant.id, historyLoaded);
+    historyLoaded();
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', 'RyyppyAPI', 'Sound', 'Notify'];
