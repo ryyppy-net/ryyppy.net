@@ -8,3 +8,11 @@
     -moz-border-radius: 0px;
     border-radius: 0px;
 }
+
+.free-spirit {
+    /*position: absolute;
+    top: 10px;
+    left: 10px;*/
+    background-color: black;
+    color: white;
+}
