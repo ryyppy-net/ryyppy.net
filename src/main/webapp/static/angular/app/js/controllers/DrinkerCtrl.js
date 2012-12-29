@@ -156,7 +156,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         this.graphOptions = {
             crosshair: {mode: null},
             yaxis: {min: 0},
-            xaxis: {mode: "time", timeformat: "%H:%M", show:true}
+            xaxis: {mode: "time", timeformat: "%H", show:true}
         };
 
         this.graphElement.show();
