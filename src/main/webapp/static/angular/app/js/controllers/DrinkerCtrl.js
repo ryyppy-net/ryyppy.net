@@ -8,13 +8,13 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.addDefaultDrink = function (participant) {
-        var defaultDrink = {"volume": 0.33, "alcohol": 0.047, "timestamp": null};
+        var defaultDrink = {volume: 0.33, alcohol: 0.047, timestamp: null};
         $scope.participant = participant;
         this.addDrink(participant, defaultDrink);
     };
 
     $scope.addEditedDrink = function () {
-        var editedDrink = {"volume": $scope.selectedPortionSize, "alcohol": $scope.selectedAlcoholPercentage, "timestamp": null};
+        var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage, timestamp: null};
         this.addDrink($scope.participant, editedDrink);
     };
 

@@ -34,12 +34,14 @@
 
         this.addDrink = function (partyId, participant, drink, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id + "/drinks";
-            http.post(url, drink).success(callbackSuccess);
+            drink.timestamp = (new Date()).toISOString();
+            http.post(url, $.param(drink)).success(callbackSuccess);
         };
 
         this.addDrinkToCurrentUser = function (drink, callbackSuccess) {
             var url = this._baseUrl + "/profile/drinks";
-            http.post(url, drink).success(callbackSuccess);
+            drink.timestamp = (new Date()).toISOString();
+            http.post(url, $.param(drink)).success(callbackSuccess);
         };
 
         this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
