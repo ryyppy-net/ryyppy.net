@@ -8,7 +8,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.addDefaultDrink = function (participant) {
-        var defaultDrink = {"volume": 0.33, "alcohol": 0.05, "timestamp": null};
+        var defaultDrink = {"volume": 0.33, "alcohol": 0.047, "timestamp": null};
         $scope.participant = participant;
         this.addDrink(participant, defaultDrink);
     };
@@ -94,6 +94,24 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         { value: '0.80', text: '80.0%' }
     ];
     $scope.selectedAlcoholPercentage = 0.047;
+
+    $scope.formattedAlcoholSize = function () {
+        var alcoholSize = '???';
+        for (var i = 0; i < $scope.portionSizes.length; i++) {
+            if ($scope.portionSizes[i].value == $scope.drink.volume)
+                alcoholSize = $scope.portionSizes[i].text;
+        }
+        return alcoholSize;
+    }
+
+    $scope.formattedAlcoholPercentage = function () {
+        var alcoholPercentage = '???';
+        for (var i = 0; i < $scope.portionAlcoholPercentages.length; i++) {
+            if ($scope.portionAlcoholPercentages[i].value == $scope.selectedAlcoholPercentage)
+                alcoholPercentage = $scope.portionAlcoholPercentages[i].text;
+        }
+        return alcoholPercentage;
+    };
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', 'RyyppyAPI', 'Sound', 'Notify'];
