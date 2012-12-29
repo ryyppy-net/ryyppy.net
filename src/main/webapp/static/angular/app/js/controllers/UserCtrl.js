@@ -7,6 +7,7 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     this.refreshProfile = function () {
         RyyppyAPI.getProfile(function (data) {
             data.type = 'profile';
+            data.color = 1;
             $scope.participants = [data];
         });
     };

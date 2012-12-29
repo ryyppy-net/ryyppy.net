@@ -1,3 +1,7 @@
+body {
+    background-color: #505050;
+}
+
 .drinker {
     border: 1px solid #000000;
     color: black;
@@ -9,3 +13,20 @@
     -moz-border-radius: 0px;
     border-radius: 0px;
 }
+
+.color1 { background-color: #65E6A4; }
+.color2 { background-color: #65A8E6; }
+.color3 { background-color: #68E665; }
+.color4 { background-color: #1DB466; }
+.color5 { background-color: #A8E665; }
+.color6 { background-color: #DD318A; }
+.color7 { background-color: #E6E465; }
+.color8 { background-color: #E66568; }
+.color9 { background-color: #65E6E4; }
+.color10 { background-color: #6568E6; }
+.color11 { background-color: #31DD84; }
+.color12 { background-color: #A465E6; }
+.color13 { background-color: #B41D6B; }
+.color14 { background-color: #E465E6; }
+.color15 { background-color: #E6A465; }
+.color16 { background-color: #E665A8; }
