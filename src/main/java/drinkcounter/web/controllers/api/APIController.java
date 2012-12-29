@@ -10,7 +10,6 @@ import drinkcounter.authentication.NotEnoughRightsException;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
-import drinkcounter.web.controllers.api.v2.SlopeService;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -176,7 +175,7 @@ public class APIController {
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
         User user = userService.getUser(id);
-        List<String[]> history = new LinkedList<String[]>(); // SlopeService.getSlopes(user, true);
+        List<String[]> history = getSlopes(user, false);
 
         for (String[] s : history) {
             csvWriter.writeRecord(s);
@@ -202,7 +201,7 @@ public class APIController {
         List<User> users = drinkCounterService.listUsersByParty(id);
         
         for (User user : users) {
-            List<String[]> history = new LinkedList<String[]>(); // SlopeService.getSlopes(user, true);
+            List<String[]> history = getSlopes(user, true);
             DateTime time = start;
             for (String[] s : history) {
                 csvWriter.writeRecord(s);
@@ -247,6 +246,44 @@ public class APIController {
 //        authenticationChecks.checkHighLevelRightsToUser(openId, uid); // TODO privacy
         drinkCounterService.linkUserToParty(uid, pid);
         return "";
+    }
+
+    private List<String[]> getSlopes(User user, boolean getId) {
+        int intervalMs = 60 * 1000;
+        DateTime now = new DateTime();
+        DateTime start = now.minusMinutes(300);
+
+        List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
+        List<String[]> slopes = new LinkedList<String[]>();
+
+        double lastSlope = Double.MAX_VALUE;
+        Long lastX = null;
+        Float lastY = null;
+        long lastInserted = 0;
+        
+        Long x = start.getMillis();
+        for (Float y : history) {
+            double slope = y / (x / 31536000000L);
+            if (Math.abs(slope - lastSlope) >= 0.000000001) {
+                if (lastX != null && lastY != null && lastInserted != lastX) {
+                    slopes.add(getCsvValues(lastX, lastY, user, getId));
+                }
+                slopes.add(getCsvValues(x, y, user, getId));
+                lastInserted = x;
+            }
+            lastSlope = slope;
+            lastX = x;
+            lastY = y;
+            x += intervalMs;
+        }
+        slopes.add(getCsvValues(new DateTime().getMillis(), user.getPromilles(), user, getId));
+        return slopes;
+    }
+
+    private String[] getCsvValues(long x, float y, User user, boolean getId) {
+        if (getId)
+            return new String[]{Integer.toString(user.getId()), Long.toString(x), Float.toString(y)};
+        return new String[]{Long.toString(x), Float.toString(y)};
     }
     
     @ExceptionHandler(NotEnoughRightsException.class)
