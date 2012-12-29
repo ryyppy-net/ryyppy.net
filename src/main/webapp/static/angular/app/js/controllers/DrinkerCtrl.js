@@ -24,6 +24,15 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         $scope.editingDrink = false;
         $scope.drink = drink;
 
+        var i = 0;
+        (function tick() {
+            $('.bar').css('width', i + '%');
+            i++;
+
+            if (i < 100)
+                setTimeout(tick, 40);
+        })();
+
         this.timeoutId = setTimeout($.proxy(function() {
             if (participant.type == 'participant')
                 RyyppyAPI.addDrink(participant.partyId, participant, drink, function (data) {
