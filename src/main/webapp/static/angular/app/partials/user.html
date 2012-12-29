@@ -11,16 +11,16 @@
     </div>
 </div>
 
-<h1>{{ profile.name }}</h1>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <h1>{{ profile.name }}</h1>
 
-<div class="row">
-    <div class="span12">
-        <h2>Bileesi</h2>
+            <h2>Bileesi</h2>
 
-        <ul>
-            <li ng-repeat="party in parties" ng-include="'partials/party_button.html'"></li>
-        </ul>
+            <ul>
+                <li ng-repeat="party in parties" ng-include="'partials/party_button.html'"></li>
+            </ul>
+        </div>
     </div>
 </div>
-
-
