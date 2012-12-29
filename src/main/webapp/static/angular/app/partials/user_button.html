@@ -1,16 +1,54 @@
-<a ng-click="addDrink(participant)">
-    <div class="drinker">
-        <img ng-src="{{ participant.profilePictureUrl }}" />
-        {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles | number: 2 }}&permil;
+<div ng-controller="DrinkerCtrl">
+    <a ng-click="addDefaultDrink(participant)">
+        <div class="drinker">
+            <img ng-src="{{ participant.profilePictureUrl }}" />
+            {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles | number: 2 }}&permil;
+        </div>
+    </a>
+
+
+    <div class="free-spirit" ng-show="showFreeSpirit">
+        <div ng-show="addingDrink">
+            <h1>Lisätään juomaa...</h1>
+
+            <p>{{ participant.name }}</p>
+            <p>{{ drink.volume }} @ {{ drink.alcohol }}</p>
+
+            <div class="btn" ng-click="editDrink()">Muokkaa</div>
+            <div class="btn btn-danger" ng-click="cancelDrink()">Peru</div>
+        </div>
+
+        <div ng-show="editingDrink">
+            <h1>Muokkaa juomaa</h1>
+
+            <form class="form-horizontal" ng-submit="addEditedDrink()">
+                <div class="control-group">
+                    <label class="control-label" for="portionSize">Annoskoko</label>
+                    <div class="controls">
+                        <select id="portionSize"
+                                ng-model="selectedPortionSize"
+                                ng-options="portionSize.value as portionSize.text for portionSize in portionSizes">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="portionAlcoholPercentage">Alkoholi-%</label>
+                    <div class="controls">
+                        <select id="portionAlcoholPercentage"
+                                ng-model="selectedAlcoholPercentage"
+                                ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in portionAlcoholPercentages">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn btn-success">Lisää</button>
+                        <div class="btn btn-danger" ng-click="hideDialog()">Peru</div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</a>
-
-
-<div class="free-spirit" ng-show="showFreeSpirit">
-    <h1>Lisätään juomaa...</h1>
-
-    <p>{{ participant.name }}</p>
-
-    <div>Muokkaa</div>
-    <div class="btn btn-danger" ng-click="cancelDrink()">Peru</div>
 </div>
