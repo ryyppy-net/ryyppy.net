@@ -75,7 +75,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         { value: '0.6', text: '0.6 l' },
         { value: '1.0', text: '1.0 l' }
     ];
-    $scope.selectedPortionSize = 0.04;
+    $scope.selectedPortionSize = '0.33';
 
     $scope.portionAlcoholPercentages = [
         { value: '0.028', text: '2.8%' },
@@ -93,7 +93,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         { value: '0.48', text: '48.0%' },
         { value: '0.80', text: '80.0%' }
     ];
-    $scope.selectedAlcoholPercentage = 0.047;
+    $scope.selectedAlcoholPercentage = '0.047';
 
     $scope.formattedAlcoholSize = function () {
         var alcoholSize = '???';
