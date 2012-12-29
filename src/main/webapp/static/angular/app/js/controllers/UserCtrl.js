@@ -1,6 +1,6 @@
 "use strict";
 
-function UserCtrl($scope, $timeout, RyyppyAPI) {
+function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     var self = this;
     $scope.active = 'user';
 
@@ -28,6 +28,12 @@ function UserCtrl($scope, $timeout, RyyppyAPI) {
         $timeout.cancel(self.timeoutPromise);
     };
 
+    $scope.addParty = function () {
+        RyyppyAPI.addParty($scope.partyName, function () {
+            self.refreshParties();
+            Notify.success("New party added", "Let's get this party started!")
+        });
+    };
 
     this.refreshProfile();
     this.refreshParties();
@@ -43,4 +49,4 @@ function UserCtrl($scope, $timeout, RyyppyAPI) {
     });
 }
 
-UserCtrl.$inject = ['$scope', '$timeout', 'RyyppyAPI'];
+UserCtrl.$inject = ['$scope', '$timeout', 'RyyppyAPI', 'Notify'];
