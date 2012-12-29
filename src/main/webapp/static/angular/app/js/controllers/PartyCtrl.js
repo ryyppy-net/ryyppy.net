@@ -16,6 +16,7 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
             for (var i = 0; i < data.length; i++) {
                 data[i].type = 'participant';
                 data[i].partyId = $routeParams.partyId;
+                data[i].color = (i % 12) + 1;
             }
 
             var rowsAmount = Math.ceil(data.length / 3);
