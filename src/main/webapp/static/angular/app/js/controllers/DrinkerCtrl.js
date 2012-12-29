@@ -128,12 +128,6 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         return alcoholPercentage;
     };
 
-    this.getUserHistory = function() {
-        setTimeout(function () {
-            historyLoaded();
-        }, 0);
-    };
-
     function historyLoaded() {
         var histories = [];
 
@@ -144,7 +138,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
-            var history = [row[0] + timezoneoffset, row[1]];
+            var history = [row.timestamp + timezoneoffset, row.promilles];
             histories.push(history);
         }
 
@@ -169,8 +163,9 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         $.plot(this.graphElement, series, this.graphOptions);
     }
 
-    if (typeof $scope.participant != 'undefined')
-        this.getUserHistory($scope.participant.id, historyLoaded);
+    setTimeout(function () {
+        historyLoaded();
+    }, 0);
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', 'RyyppyAPI', 'Sound', 'Notify'];
