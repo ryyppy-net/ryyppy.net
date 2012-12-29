@@ -1,4 +1,6 @@
 function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
+    "use strict";
+
     var self = this;
 
 
@@ -8,14 +10,14 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.addDefaultDrink = function (participant) {
-        var defaultDrink = {volume: 0.33, alcohol: 0.047, timestamp: null};
+        var defaultDrink = {volume: '0.33', alcohol: '0.047', timestamp: null};
         $scope.participant = participant;
-        this.addDrink(participant, defaultDrink);
+        self.addDrink(participant, defaultDrink);
     };
 
     $scope.addEditedDrink = function () {
         var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage, timestamp: null};
-        this.addDrink($scope.participant, editedDrink);
+        self.addDrink($scope.participant, editedDrink);
     };
 
     this.addDrink = function (participant, drink) {
@@ -29,22 +31,24 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
             $('.bar').css('width', i + '%');
             i++;
 
-            if (i < 100)
+            if (i < 100) {
                 setTimeout(tick, 40);
+            }
         })();
 
         this.timeoutId = setTimeout($.proxy(function() {
-            if (participant.type == 'participant')
-                RyyppyAPI.addDrink(participant.partyId, participant, drink, function (data) {
+            if (participant.type === 'participant') {
+                RyyppyAPI.addDrink(participant.partyId, participant, drink, function () {
                     Notify.success("New drink!", "Added a drink to " + participant.name + ".");
                     self.drinkSuccessfullyAdded(participant, drink);
                 });
-            else
-                RyyppyAPI.addDrinkToCurrentUser(drink, function (data) {
+            }
+            else {
+                RyyppyAPI.addDrinkToCurrentUser(drink, function () {
                     Notify.success("New drink!", "Added a drink to you!");
                     self.drinkSuccessfullyAdded(participant, drink);
                 });
-
+            }
             $scope.hideDialog();
         }, this), 5000);
     };
@@ -105,27 +109,29 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     $scope.selectedAlcoholPercentage = '0.047';
 
     $scope.formattedAlcoholSize = function () {
-        if (typeof $scope.drink == 'undefined')
+        if (typeof $scope.drink === 'undefined') {
             return '';
-
-        var alcoholSize = '???';
-        for (var i = 0; i < $scope.portionSizes.length; i++) {
-            if ($scope.portionSizes[i].value == $scope.drink.volume)
-                alcoholSize = $scope.portionSizes[i].text;
         }
-        return alcoholSize;
-    }
+
+        for (var i = 0; i < $scope.portionSizes.length; i++) {
+            if ($scope.portionSizes[i].value === $scope.drink.volume) {
+                return $scope.portionSizes[i].text;
+            }
+        }
+        return '???';
+    };
 
     $scope.formattedAlcoholPercentage = function () {
-        if (typeof $scope.drink == 'undefined')
+        if (typeof $scope.drink === 'undefined') {
             return '';
-
-        var alcoholPercentage = '???';
-        for (var i = 0; i < $scope.portionAlcoholPercentages.length; i++) {
-            if ($scope.portionAlcoholPercentages[i].value == $scope.selectedAlcoholPercentage)
-                alcoholPercentage = $scope.portionAlcoholPercentages[i].text;
         }
-        return alcoholPercentage;
+
+        for (var i = 0; i < $scope.portionAlcoholPercentages.length; i++) {
+            if ($scope.portionAlcoholPercentages[i].value === $scope.selectedAlcoholPercentage) {
+                return $scope.portionAlcoholPercentages[i].text;
+            }
+        }
+        return '???';
     };
 
     function historyLoaded() {
@@ -134,7 +140,9 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         var rows = $scope.participant.history;
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
-            if (row.length == 0) continue;
+            if (row.length === 0) {
+                continue;
+            }
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
@@ -145,22 +153,23 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         var series = {data: histories, color: 'rgb(0, 0, 0)'};
         series = [series];
 
-        this.graphElement = $('#graph' + $scope.participant.id);
-
-        if (this.graphElement == undefined)
+        var graphElement = $('#graph' + $scope.participant.id);
+        if (typeof graphElement === 'undefined') {
             return;
+        }
 
-        if (series == null)
+        if (series === null) {
             return;
+        }
 
-        this.graphOptions = {
+        var graphOptions = {
             crosshair: {mode: null},
             yaxis: {min: 0},
             xaxis: {mode: "time", timeformat: "%H", show:true}
         };
 
-        this.graphElement.show();
-        $.plot(this.graphElement, series, this.graphOptions);
+        graphElement.show();
+        $.plot(graphElement, series, graphOptions);
     }
 
     setTimeout(function () {
