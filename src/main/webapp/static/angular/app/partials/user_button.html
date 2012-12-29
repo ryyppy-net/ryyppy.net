@@ -1,10 +1,33 @@
 <div ng-controller="DrinkerCtrl">
     <a ng-click="addDefaultDrink(participant)">
         <div class="drinker">
-            <img ng-src="{{ participant.profilePictureUrl }}" />
-            {{ participant.name }} {{ participant.totalDrinks }} {{ participant.promilles | number: 2 }}&permil;
+            <div class="container-fluid" style="margin-top: 10px;">
+                <div class="row-fluid">
+                    <div class="span4" style="text-align: center;">
+                        <img ng-src="{{ participant.profilePictureUrl }}" />
+                        <p>{{ participant.name }}</p>
+                    </div>
 
-            <div id="graph{{ participant.id }}" style="border: 1px solid red; width: 150px; height: 150px;"></div>
+                    <div class="span8">
+                        <div class="container-fluid">
+                            <div class="row-fluid">
+                                <div class="span12">
+                                    <div id="graph{{ participant.id }}" style="height: 100px;"></div>
+                                </div>
+                            </div>
+
+                            <div class="row-fluid">
+                                <div class="span12" style="text-align: center;">
+                                    <p>
+                                        Juomia: {{ participant.totalDrinks }} kpl |
+                                        Promilleja:  {{ participant.promilles | number: 2 }}&permil;
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </a>
 
