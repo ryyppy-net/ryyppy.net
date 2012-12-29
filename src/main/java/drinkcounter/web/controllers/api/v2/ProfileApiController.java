@@ -41,7 +41,9 @@ public class ProfileApiController {
     
     @RequestMapping(value="/profile", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
     public @ResponseBody String getUser() {
-        UserDTO userDTO = UserDTO.fromUser(currentUser.getUser());
+        User user = currentUser.getUser();
+        UserDTO userDTO = UserDTO.fromUser(user);
+        userDTO.setHistory(SlopeService.getSlopes(user, false));
         return gson.toJson(userDTO);
     }
     
