@@ -30,6 +30,15 @@ label {
     background-color: #505050;
 }
 
+.ui-pnotify-title {
+    font-size: 1.2em;
+    line-height: 1.5em;
+}
+
+.ui-pnotify-text {
+    font-size: 0.9em;
+}
+
 .color1 { background-color: #65E6A4; }
 .color2 { background-color: #65A8E6; }
 .color3 { background-color: #68E665; }
