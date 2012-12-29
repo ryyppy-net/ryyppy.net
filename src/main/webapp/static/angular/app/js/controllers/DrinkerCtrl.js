@@ -96,6 +96,9 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     $scope.selectedAlcoholPercentage = '0.047';
 
     $scope.formattedAlcoholSize = function () {
+        if (typeof $scope.drink == 'undefined')
+            return '';
+
         var alcoholSize = '???';
         for (var i = 0; i < $scope.portionSizes.length; i++) {
             if ($scope.portionSizes[i].value == $scope.drink.volume)
@@ -105,6 +108,9 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     }
 
     $scope.formattedAlcoholPercentage = function () {
+        if (typeof $scope.drink == 'undefined')
+            return '';
+
         var alcoholPercentage = '???';
         for (var i = 0; i < $scope.portionAlcoholPercentages.length; i++) {
             if ($scope.portionAlcoholPercentages[i].value == $scope.selectedAlcoholPercentage)
