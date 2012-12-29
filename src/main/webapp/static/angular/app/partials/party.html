@@ -3,7 +3,7 @@
 <div class="container-fluid" ng-repeat="row in rows">
     <div class="row-fluid">
         <div class="span4" ng-repeat="participant in row">
-            <div ng-include="'partials/user_button.html'"></div>
+            <div ng-include="'partials/user_button.html'" ng-controller="DrinkerCtrl"></div>
         </div>
     </div>
 </div>

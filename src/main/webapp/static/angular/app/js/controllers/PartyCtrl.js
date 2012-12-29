@@ -1,6 +1,6 @@
 "use strict";
 
-function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound, Notify) {
+function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     var self = this;
     $scope.active = "party";
 
@@ -10,6 +10,12 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound, Notify) {
 
     (function tick() {
         RyyppyAPI.getPartyParticipants($routeParams.partyId, function (data) {
+            // Should this be added in backend?
+            for (var i = 0; i < data.length; i++) {
+                data[i].type = 'participant';
+                data[i].partyId = $routeParams.partyId;
+            }
+
             $scope.participants = data;
 
             var rowsAmount = Math.ceil(data.length / 3);
@@ -31,15 +37,6 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI, Sound, Notify) {
     $scope.$on('$destroy', function cleanup() {
         $timeout.cancel(self.timeoutPromise);
     });
-
-    $scope.addDrink = function (participant) {
-        console.log("Adding drink to " + participant.name);
-        var drink = {"volume": 0.33, "alcohol": 0.5, "timestamp": null};
-        RyyppyAPI.addDrink($routeParams.partyId, participant, drink, function (data) {
-            Notify.success("New drink!", "Added a drink to " + participant.name + ".");
-            Sound.playSound();
-        });
-    };
 }
 
-PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
+PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI'];

@@ -2,7 +2,8 @@
 
 function UserCtrl($scope, RyyppyAPI) {
     RyyppyAPI.getProfile(function (data) {
-        $scope.profile = data;
+        data.type = 'profile';
+        $scope.participant = data;
     });
 
     RyyppyAPI.getParties(function (data) {

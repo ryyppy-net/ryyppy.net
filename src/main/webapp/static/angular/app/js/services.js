@@ -33,6 +33,11 @@
             http.post(url, drink).success(callbackSuccess);
         };
 
+        this.addDrinkToCurrentUser = function (drink, callbackSuccess) {
+            var url = this._baseUrl + "/profile/drinks";
+            http.post(url, drink).success(callbackSuccess);
+        };
+
         this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants";
             http.post(url, $.param({ email: email })).success(callbackSuccess);
