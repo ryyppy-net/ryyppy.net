@@ -7,21 +7,28 @@
     </a>
 
 
-    <div class="free-spirit" ng-show="showFreeSpirit">
-        <div ng-show="addingDrink">
-            <h1>Lisätään juomaa...</h1>
+    <div class="modal" ng-show="showDrinkDialog && addingDrink" style="text-align: center">
+        <div class="modal-header">
+            <h1>Lisätään juomaa käyttäjälle {{ participant.name }}...</h1>
+        </div>
 
-            <p>{{ participant.name }}</p>
+        <div class="modal-body">
             <p>{{ drink.volume }} @ {{ drink.alcohol }}</p>
+        </div>
 
+        <div class="modal-footer">
             <div class="btn" ng-click="editDrink()">Muokkaa</div>
             <div class="btn btn-danger" ng-click="cancelDrink()">Peru</div>
         </div>
+    </div>
 
-        <div ng-show="editingDrink">
-            <h1>Muokkaa juomaa</h1>
+    <div class="modal" ng-show="showDrinkDialog && editingDrink" style="text-align: center">
+        <div class="modal-header">
+            <h1>Muokkaa käyttäjän {{ participant.name }} juomaa</h1>
+        </div>
 
-            <form class="form-horizontal" ng-submit="addEditedDrink()">
+        <form class="form-horizontal" ng-submit="addEditedDrink()" style="margin-bottom: 0px;">
+            <div class="modal-body">
                 <div class="control-group">
                     <label class="control-label" for="portionSize">Annoskoko</label>
                     <div class="controls">
@@ -41,14 +48,12 @@
                         </select>
                     </div>
                 </div>
+            </div>
 
-                <div class="control-group">
-                    <div class="controls">
-                        <button type="submit" class="btn btn-success">Lisää</button>
-                        <div class="btn btn-danger" ng-click="hideDialog()">Peru</div>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Lisää</button>
+                <div class="btn btn-danger" ng-click="hideDialog()">Peru</div>
+            </div>
+        </form>
     </div>
 </div>

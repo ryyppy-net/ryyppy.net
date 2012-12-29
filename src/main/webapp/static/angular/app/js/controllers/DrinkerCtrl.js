@@ -19,7 +19,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     };
 
     this.addDrink = function (participant, drink) {
-        $scope.showFreeSpirit = true;
+        $scope.showDrinkDialog = true;
         $scope.addingDrink = true;
         $scope.editingDrink = false;
         $scope.drink = drink;
@@ -52,7 +52,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.hideDialog = function () {
-        $scope.showFreeSpirit = false;
+        $scope.showDrinkDialog = false;
         $scope.editingDrink = false;
         $scope.addingDrink = false;
     };
