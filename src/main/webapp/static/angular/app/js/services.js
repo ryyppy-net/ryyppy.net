@@ -1,6 +1,8 @@
-'use strict';
+/*global angular */
 
 (function (angular) {
+    'use strict';
+
     /**
      * RyyppyAPI is used to handle all API operations. It depends on Angular $http
      * service.
@@ -62,7 +64,7 @@
         this.addParty = function (partyName, callbackSuccess) {
             var url = this._baseUrl + "/parties";
             http.post(url, $.param({ name: partyName })).success(callbackSuccess);
-        }
+        };
     }
 
 
@@ -72,7 +74,10 @@
             var source = win.document.createElement('source');
             var filename = "/static/sounds/" + Math.floor(Math.random() * 7 + 1);
 
-            if (!audio.canPlayType) return; // no html5 audio support
+            if (!audio.canPlayType) {
+                // no html5 audio support
+                return;
+            }
 
             if (win.navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
                 source.type= 'audio/wav';
@@ -84,10 +89,10 @@
 
             var ogg = audio.canPlayType('audio/ogg; codecs="vorbis"');
             var mp3 = audio.canPlayType('audio/mpeg; codecs="mp3"');
-            if (ogg == "probably" || ogg == "maybe") {
+            if (ogg === "probably" || ogg === "maybe") {
                 source.type= 'audio/ogg';
                 source.src= filename + '.ogg';
-            } else if (mp3 == "probably" || mp3 == "maybe") {
+            } else if (mp3 === "probably" || mp3 === "maybe") {
                 source.type= 'audio/mpeg';
                 source.src= filename + '.mp3';
             }
