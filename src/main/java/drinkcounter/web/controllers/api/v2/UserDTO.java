@@ -4,6 +4,8 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
+import com.timgroup.jgravatar.Gravatar;
+import com.timgroup.jgravatar.GravatarDefaultImage;
 import drinkcounter.model.User;
 import drinkcounter.model.User.Sex;
 
@@ -19,6 +21,7 @@ public class UserDTO {
     private Float weight;
     private Float promilles;
     private Integer totalDrinks;
+    private String profilePictureUrl;
 
     public String getEmail() {
         return email;
@@ -76,6 +79,14 @@ public class UserDTO {
         this.totalDrinks = totalDrinks;
     }
     
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
+    }
+    
     public static UserDTO fromUser(User user){
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
@@ -85,6 +96,9 @@ public class UserDTO {
         userDTO.setWeight(user.getWeight());
         userDTO.setPromilles(user.getPromilles());
         userDTO.setTotalDrinks(user.getTotalDrinks());
+        if(user.getEmail() != null){
+            userDTO.setProfilePictureUrl(new Gravatar().setDefaultImage(GravatarDefaultImage.WAVATAR).getUrl(user.getEmail()));
+        }
         return userDTO;
     }
 }
