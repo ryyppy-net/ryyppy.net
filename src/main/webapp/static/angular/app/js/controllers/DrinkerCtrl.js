@@ -128,31 +128,23 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         return alcoholPercentage;
     };
 
-    String.prototype.format = function() {
-        var formatted = this;
-        for (var i = 0; i < arguments.length; i++) {
-            var regexp = new RegExp('\\{'+i+'\\}', 'gi');
-            formatted = formatted.replace(regexp, arguments[i]);
-        }
-        return formatted;
+    this.getUserHistory = function() {
+        setTimeout(function () {
+            historyLoaded();
+        }, 0);
     };
 
-    this.getUserHistory = function(userId, callback) {
-        $.get('/API/users/{0}/show-history'.format(userId), callback);
-    };
-
-    function historyLoaded(data) {
+    function historyLoaded() {
         var histories = [];
 
-        var rows = data.split('\n');
-        for (var i = 1; i < rows.length; i++) {
+        var rows = $scope.participant.history;
+        for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             if (row.length == 0) continue;
-            var columns = row.split(',');
 
             var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
-            var history = [Number(columns[0]) + timezoneoffset, Number(columns[1])];
+            var history = [row[0] + timezoneoffset, row[1]];
             histories.push(history);
         }
 
