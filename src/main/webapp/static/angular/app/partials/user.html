@@ -1,4 +1,4 @@
-<div ng-include="'partials/user_menu.html'" xmlns="http://www.w3.org/1999/html"></div>
+<div ng-include="'partials/user_menu.html'"></div>
 
 <div class="container-fluid">
     <div class="row-fluid">
@@ -15,20 +15,9 @@
                 </a>
             </div>
 
-            <form class="form-horizontal" ng-submit="addParty()">
-                <div class="control-group">
-                    <label class="control-label" for="partyName">Bileiden nimi</label>
-                    <div class="controls">
-                        <input id="partyName" type="text" ng-model="partyName" />
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <div class="controls">
-                        <button type="submit" class="btn btn-success">Lisää bileet</button>
-                    </div>
-                </div>
-            </form>
+            <p>
+                Jos haluat muokata bileitäsi, voit tehdä sen <a href="#/party-admin">bileiden hallinnassa</a>.
+            </p>
         </div>
     </div>
 </div>
