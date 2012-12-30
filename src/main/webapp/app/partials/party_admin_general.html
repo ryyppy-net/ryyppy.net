@@ -27,7 +27,7 @@
                     <div class="container-fluid">
                         <div class="row-fluid">
                             <div class="span10 party color{{ ($index % 12) + 1 }}">
-                                <div>{{ party.name }} <small style="float: right;">Alkamisaika: {{ party.startTime }}</small></div>
+                                <div>{{ party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ party.startTime | formatDateTime }}</small></div>
                                 <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
                                     <li ng-repeat="participantPreview in party.participants" participant-preview="participantPreview">
                                     </li>
