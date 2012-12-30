@@ -24,7 +24,7 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
 
     this._addRegisteredUser = function (partyId, email) {
         RyyppyAPI.addRegisteredUserToParty(partyId, email, function (data) {
-            Notify.success("Uusi käyttäjä!", "Lisätty käyttäjä sähköpostiosoitteella " + email + "!");
+            Notify.success("Tervetuloa takaisin!", "Lisätty käyttäjä sähköpostiosoitteella " + email + ".");
             self._updatePartyParticipants();
         });
     };
@@ -32,14 +32,14 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     this._addGuestUser = function (name, sex, weight) {
         var guest = { name: name, sex: sex, weight: weight };
         RyyppyAPI.addGuestToParty($routeParams.partyId, guest, function (data) {
-            Notify.success("Uusi vieras!", "Lisätty vieras " + $scope.name + "!");
+            Notify.success("Tervetuloa vieraalle!", "Lisätty vieras " + $scope.name + ".");
             self._updatePartyParticipants();
         });
     }
 
     this.removeUser = function (participant) {
         RyyppyAPI.removeUser($routeParams.partyId, participant, function (data) {
-            Notify.success("Poistettu käyttäjä!", "Poistettu käyttäjä " + participant.name + "!");
+            Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
             self._updatePartyParticipants();
         });
     };

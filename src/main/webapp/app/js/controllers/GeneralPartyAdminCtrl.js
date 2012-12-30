@@ -18,14 +18,14 @@ function GeneralPartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     $scope.addParty = function () {
         RyyppyAPI.addParty($scope.partyName, function () {
             self.refreshParties();
-            Notify.success("New party added", "Let's get this party started!");
+            Notify.success("Bileet pystyyn!", "Aloitettiin bileet " + $scope.partyName + ".");
             $scope.partyName = "";
         });
     };
 
     $scope.removeParticipant = function (party, participant) {
         RyyppyAPI.removeParticipant(party, participant, function (data) {
-            Notify.success("Poistuttu bileistä", "Sinut poistettiin bileistä " + party.name + "!");
+            Notify.success("Nyt jo kotiin?", "Lähdit bileistä " + party.name + ".");
             self.refreshParties();
         });
     };

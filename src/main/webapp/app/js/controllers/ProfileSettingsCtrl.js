@@ -24,7 +24,7 @@ function ProfileSettingsCtrl($scope, $location, RyyppyAPI, Notify) {
             profile.weight = $scope.profile.weight;
 
         RyyppyAPI.updateProfile(profile, function () {
-            Notify.success("Profile updated!", "Your profile was updated.");
+            Notify.success("Tiedot päivitetty!", "Uudet asetukset tallennettu.");
             $location.path("/");
         });
     };
