@@ -65,6 +65,11 @@
             var url = this._baseUrl + "/parties";
             http.post(url, $.param({ name: partyName })).success(callbackSuccess);
         };
+
+        this.removeParticipant = function (party, participant, callbackSuccess) {
+            var url = this._baseUrl + "/parties/" + party.id + "/participants/" + participant.id;
+            http.delete(url).success(callbackSuccess);
+        };
     }
 
 
