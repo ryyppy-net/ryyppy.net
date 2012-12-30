@@ -29,13 +29,6 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
         $timeout.cancel(self.timeoutPromise);
     };
 
-    $scope.addParty = function () {
-        RyyppyAPI.addParty($scope.partyName, function () {
-            self.refreshParties();
-            Notify.success("New party added", "Let's get this party started!")
-        });
-    };
-
     $scope.partySort = function (party) {
         return moment(party.startTime, 'MMM DD, YYYY h:mm:ss A');
     };
