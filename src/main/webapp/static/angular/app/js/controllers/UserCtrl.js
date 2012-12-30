@@ -46,6 +46,10 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
         });
     };
 
+    $scope.partySort = function (party) {
+        return moment(party.startTime, 'MMM DD, YYYY h:mm:ss A');
+    };
+
     this.refreshProfile();
     this.refreshParties();
 

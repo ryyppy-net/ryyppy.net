@@ -7,7 +7,7 @@
 
             <h2>Bileesi</h2>
 
-            <div ng-repeat="party in parties" ng-index="i">
+            <div ng-repeat="party in parties  | orderBy:partySort:true">
                 <a href="#/party/{{ party.id }}">
                     <div class="party color{{ ($index % 12) + 1 }}">
                         <div>{{ party.name }} <small style="float: right;">Alkamisaika: {{ party.startTime }}</small></div>
