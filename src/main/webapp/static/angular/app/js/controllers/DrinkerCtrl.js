@@ -36,7 +36,7 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
             }
         })();
 
-        this.timeoutId = setTimeout($.proxy(function() {
+        self.timeoutId = setTimeout(function () {
             if (participant.type === 'participant') {
                 RyyppyAPI.addDrink(participant.partyId, participant, drink, function () {
                     Notify.success("New drink!", "Added a drink to " + participant.name + ".");
@@ -50,17 +50,17 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
                 });
             }
             $scope.hideDialog();
-        }, this), 5000);
+        }, 5000);
     };
 
     $scope.editDrink = function() {
-        clearTimeout(this.timeoutId);
+        clearTimeout(self.timeoutId);
         $scope.editingDrink = true;
         $scope.addingDrink = false;
     };
 
     $scope.cancelDrink = function () {
-        clearTimeout(this.timeoutId);
+        clearTimeout(self.timeoutId);
         $scope.hideDialog();
     };
 
