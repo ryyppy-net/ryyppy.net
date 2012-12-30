@@ -14,7 +14,7 @@ import org.joda.time.DateTime;
  * @author thardas
  */
 public class SlopeService {
-    public static List<HistoryPoint> getSlopes(User user, boolean getId) {
+    public static List<HistoryPoint> getSlopes(User user) {
         int intervalMs = 60 * 1000;
         DateTime now = new DateTime();
         DateTime start = now.minusMinutes(300);
