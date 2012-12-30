@@ -70,11 +70,6 @@
             var url = this._baseUrl + "/parties/" + party.id + "/participants/" + participant.id;
             http.delete(url).success(callbackSuccess);
         };
-
-        this.getUserHistory = function (user, callbackSuccess) {
-            var url = "/API/users/" + user.id + "/drinks";
-            http.get(url).success(callbackSuccess);
-        };
     }
 
 
