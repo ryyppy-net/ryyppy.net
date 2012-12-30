@@ -38,13 +38,18 @@ label {
     background-color: #505050;
 }
 
+.ui-pnotify-icon {
+    display: none;
+}
+
 .ui-pnotify-title {
-    font-size: 1.2em;
-    line-height: 1.5em;
+    font-size: 1.0em;
+    line-height: 1.2em;
+    margin-bottom: 1.0em;
 }
 
 .ui-pnotify-text {
-    font-size: 0.9em;
+    font-size: 0.8em;
 }
 
 .color1 { background-color: #65E6A4; }
