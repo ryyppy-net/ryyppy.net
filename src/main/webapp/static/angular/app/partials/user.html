@@ -10,7 +10,11 @@
             <div ng-repeat="party in parties" ng-index="i">
                 <a href="#/party/{{ party.id }}">
                     <div class="party color{{ ($index % 12) + 1 }}">
-                        {{ party.name }} <small style="float: right;">Alkamisaika: {{ party.startTime }}</small>
+                        <div>{{ party.name }} <small style="float: right;">Alkamisaika: {{ party.startTime }}</small></div>
+                        <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
+                            <li ng-repeat="participantPreview in party.participants" participant-preview="participantPreview">
+                            </li>
+                        </ul>
                     </div>
                 </a>
             </div>

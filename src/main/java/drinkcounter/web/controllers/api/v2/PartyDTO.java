@@ -6,6 +6,8 @@ package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.model.Party;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -15,6 +17,7 @@ public class PartyDTO {
     private Integer id;
     private String name;
     private Date startTime;
+    private List<ParticipantPreviewDTO> participants = new LinkedList<ParticipantPreviewDTO>();
 
     public Integer getId() {
         return id;
@@ -38,6 +41,14 @@ public class PartyDTO {
 
     public Date getStartTime() {
         return this.startTime;
+    }
+
+    public void addParticipant(ParticipantPreviewDTO participant) {
+        participants.add(participant);
+    }
+
+    public List<ParticipantPreviewDTO> getParticipants() {
+        return participants;
     }
     
     public static PartyDTO fromParty(Party party){

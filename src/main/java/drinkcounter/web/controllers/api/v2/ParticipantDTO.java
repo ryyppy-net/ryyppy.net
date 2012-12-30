@@ -17,7 +17,6 @@ import java.util.List;
 public class ParticipantDTO {
     private Integer id;
     private String name;
-    private String email;
     private Integer totalDrinks;
     private User.Sex sex;
     private Float promilles;
