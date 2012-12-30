@@ -36,6 +36,12 @@
                 <div class="offset1 span10">
                     <h1>Tervetuloa!</h1>
                     <p>Olet näemmä ensimmäistä kertaa tällä sivulla. Ole hyvä ja täytä allaolevat tiedot, niin aletaan ryyppäämään!</p>
+                    
+                    <p>
+                        Sähköpostiosoitteellasi kaverit voivat kutsua sinut bileisiin. 
+                        Jos käytät <a href="https://www.gravatar.com">Gravatar</a>-palvelua, Gravatar-profiilikuvasi näytetään kavereillesi ryyppy.netissä.
+                        Me emme lähetä sinulle sähköpostia tai anna sähköpostiosoitettasi eteenpäin.
+                    </p>
 
                     <form class="form-horizontal" method="post" action="/ui/addUser">
                         <div class="control-group">

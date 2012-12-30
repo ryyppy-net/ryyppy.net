@@ -102,3 +102,7 @@ label {
 #historyGraph {
     height: 280px;
 }
+
+p {
+    line-height: 1.2em;
+}
