@@ -4,7 +4,10 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
+        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
+        
         <script type="text/javascript">
             function manualLogin() {
                 $("#manualLogin").show(300);
