@@ -1,4 +1,4 @@
-var drinksUrl = '/API/users/_userid_/drinks';
+var drinksUrl = '/API/v2/profile/drink-history';
 
 function UserHistoryGraph(user, element) {
     var that = this;

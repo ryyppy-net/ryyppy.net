@@ -4,6 +4,8 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
+import com.csvreader.CsvWriter;
+import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
@@ -11,13 +13,18 @@ import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import drinkcounter.web.controllers.ui.AuthenticationController;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.*;
+import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -99,5 +106,47 @@ public class ProfileApiController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteDrink(@RequestParam(value="drinkId") Integer drinkId){
         drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
+    }
+    
+    @RequestMapping("/profile/drink-history")
+    public ResponseEntity<byte[]> getDrinkHistory() throws IOException{
+        User user = currentUser.getUser();
+        List<Drink> drinks = user.getDrinks();
+
+        Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
+        String format = "YYYY-MM-dd";
+
+        for (Drink d : drinks) {
+            DateTime dt = new DateTime(d.getTimeStamp());
+            double timezoneOffset = 0; // (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
+            DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
+            dt = dt.toDateTime(dtz);
+            String s = dt.toString(format);
+
+            Integer i = 0;
+            if (drinksPerDay.containsKey(s))
+                i = drinksPerDay.get(s);
+            i += 1;
+            drinksPerDay.put(s, i);
+        }
+
+        String today = new DateTime().toString(format);
+        if (!drinksPerDay.containsKey(today))
+            drinksPerDay.put(today, 0);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "text/plain;charset=utf-8");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        csvWriter.writeRecord(new String[]{"Time", "Drinks"});
+
+        for (Map.Entry<String, Integer> p : drinksPerDay.entrySet()) {
+            DateTime dt = new DateTime(p.getKey());
+            csvWriter.writeRecord(new String[]{Long.toString(dt.getMillis()), p.getValue().toString()});
+        }
+
+        csvWriter.close();
+        byte[] bytes = baos.toByteArray();
+        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
 }
