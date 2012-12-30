@@ -89,3 +89,16 @@ label {
     color: white;
     text-decoration: underline;
 }
+
+.historyGraphContainer {
+    background-color: #E6A465;
+    height: 300px;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 10px;
+    padding-bottom: 0px;
+}
+
+#historyGraph {
+    height: 280px;
+}

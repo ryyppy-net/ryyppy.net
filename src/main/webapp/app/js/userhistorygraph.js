@@ -110,15 +110,3 @@ function UserHistoryGraph(user, element) {
         }
     }
 }
-
-function getPositionLeft(el){
-    var pL = 0;
-    while(el) {pL += el.offsetLeft;el = el.offsetParent;}
-    return pL;
-}
-
-function getPositionTop(el){
-    var pT = 0;
-    while(el) {pT += el.offsetTop;el = el.offsetParent;}
-    return pT;
-}
