@@ -101,11 +101,11 @@ function UserHistoryGraph(user, element) {
             if (found) {
                 var d = new Date(pos.x + 12 * 60 * 60 * 1000);
                 var s = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
-                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s + ": " + Math.round(series.data[j][1]) + getMessage('portions'));
+                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s + ": " + Math.round(series.data[j][1]) + ' annosta');
             } else {
                 var d2 = new Date(pos.x + 12 * 60 * 60 * 1000);
                 var s2 = d2.getDate() + "." + (d2.getMonth() + 1) + "." + d2.getFullYear();
-                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s2 + ": 0 " + getMessage('portions'));
+                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s2 + ": 0 " + ' annosta');
             }
         }
     }
