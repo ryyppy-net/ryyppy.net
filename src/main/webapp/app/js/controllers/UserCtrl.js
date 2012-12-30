@@ -9,6 +9,12 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
             data.type = 'profile';
             data.color = 1;
             $scope.participants = [data];
+
+            setTimeout(function () {
+                var graph = new UserHistoryGraph($scope.participants[0], $("#historyGraph"));
+                graph.update();
+                graph.render();
+            }, 0);
         });
     };
 
