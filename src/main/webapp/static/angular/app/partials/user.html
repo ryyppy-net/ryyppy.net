@@ -10,7 +10,7 @@
             <div ng-repeat="party in parties" ng-index="i">
                 <a href="#/party/{{ party.id }}">
                     <div class="party color{{ ($index % 12) + 1 }}">
-                        {{ party.name }}
+                        {{ party.name }} <small style="float: right;">Alkamisaika: {{ party.startTime }}</small>
                     </div>
                 </a>
             </div>

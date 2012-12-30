@@ -5,6 +5,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.model.Party;
+import java.util.Date;
 
 /**
  *
@@ -13,6 +14,7 @@ import drinkcounter.model.Party;
 public class PartyDTO {
     private Integer id;
     private String name;
+    private Date startTime;
 
     public Integer getId() {
         return id;
@@ -29,12 +31,20 @@ public class PartyDTO {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
 
+    public Date getStartTime() {
+        return this.startTime;
+    }
     
     public static PartyDTO fromParty(Party party){
         PartyDTO partyDTO = new PartyDTO();
         partyDTO.setId(party.getId());
         partyDTO.setName(party.getName());
+        partyDTO.setStartTime(party.getStartTime());
         return partyDTO;
     }
 }
