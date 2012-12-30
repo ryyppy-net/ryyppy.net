@@ -14,16 +14,6 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
 
     this.refreshParties = function () {
         RyyppyAPI.getParties(function (data) {
-            for (var i = 0; i < data.length; i++) {
-                var participantsWithPictures = [];
-                for (var j = 0; j < data[i].participants.length; j++) {
-                    if (typeof data[i].participants[j].profilePictureUrl !== 'undefined' &&
-                               data[i].participants[j].profilePictureUrl.length !== 0) {
-                        participantsWithPictures.push(data[i].participants[j]);
-                    }
-                }
-                data[i].participants = participantsWithPictures;
-            }
             $scope.parties = data;
         });
     };
