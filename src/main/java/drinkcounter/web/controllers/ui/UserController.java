@@ -95,7 +95,7 @@ public class UserController {
         userService.addUser(user);
         authenticate(user);
         session.removeAttribute(AuthenticationController.OPENID);
-        return "redirect:user";
+        return "redirect:/app/index.html#/";
     }
     
     private void authenticate(User user){

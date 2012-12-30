@@ -1,3 +1,3 @@
 <%
-response.sendRedirect("ui/user");
+response.sendRedirect("app/index.html#/");
 %>
