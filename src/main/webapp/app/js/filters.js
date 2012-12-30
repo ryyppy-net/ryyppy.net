@@ -3,8 +3,8 @@
 /* Filters */
 
 angular.module('ryyppy.filters', []).
-  filter('interpolate', ['version', function(version) {
-    return function(text) {
-      return String(text).replace(/\%VERSION\%/mg, version);
-    }
-  }]);
+    filter('formatDateTime', [function() {
+        return function(text) {
+            return moment(text, 'MMM DD, YYYY h:mm:ss A').format("DD.MM.YY klo H");
+        }
+    }]);
