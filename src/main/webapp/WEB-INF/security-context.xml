@@ -9,6 +9,7 @@
     <http entry-point-ref="loginUrlEntryPoint">
         <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/static/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/app/css/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/adduser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
