@@ -7,8 +7,8 @@
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         
-        <link rel="stylesheet" href="/static/angular/app/css/bootstrap.css"/>
-        <link rel="stylesheet" href="/static/angular/app/css/app.css"/>
+        <link rel="stylesheet" href="/app/css/bootstrap.css"/>
+        <link rel="stylesheet" href="/app/css/app.css"/>
         
         <link href="http://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
         
