@@ -12,6 +12,14 @@ body {
     font-size: 0.8em;
 }
 
+.party {
+    border: 2px solid black;
+    border-radius: 5px;
+    color: black;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+}
+
 .navbar-inner {
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;

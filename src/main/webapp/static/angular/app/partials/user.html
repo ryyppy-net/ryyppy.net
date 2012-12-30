@@ -1,4 +1,4 @@
-<div ng-include="'partials/user_menu.html'"></div>
+<div ng-include="'partials/user_menu.html'" xmlns="http://www.w3.org/1999/html"></div>
 
 <div class="container-fluid">
     <div class="row-fluid">
@@ -7,9 +7,13 @@
 
             <h2>Bileesi</h2>
 
-            <ul>
-                <li ng-repeat="party in parties" ng-include="'partials/party_button.html'"></li>
-            </ul>
+            <div ng-repeat="party in parties" ng-index="i">
+                <a href="#/party/{{ party.id }}">
+                    <div class="party color{{ ($index % 12) + 1 }}">
+                        {{ party.name }}
+                    </div>
+                </a>
+            </div>
 
             <form class="form-horizontal" ng-submit="addParty()">
                 <div class="control-group">
