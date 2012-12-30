@@ -6,58 +6,77 @@
     <jsp:attribute name="customHead">
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
+        
+        <link rel="stylesheet" href="/static/angular/app/css/bootstrap.css"/>
+        <link rel="stylesheet" href="/static/angular/app/css/app.css"/>
+        
+        <link href="http://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
+        
         <script type="text/javascript">
             $(document).ready(function() {
-                openDialog($("#addDrinkerDialog"));
                 $("#drinkerName").focus();
                 
                 $('.userField').live('keyup', function() { checkDrinkerFields(true); });
                 $('#email').live('keyup', function() { checkEmail($(this).val()); });
-                
-                repaint();
             });
-            
-            $(window).resize(function() {
-                repaint();
-            });
-            
-            function repaint() {
-                var windowWidth = $(window).width();
-                var bestWidth = Math.min(600, windowWidth - 20);
-                $("#registration").width(bestWidth);
-            }
         </script>
     </jsp:attribute>
     <jsp:body>
-        <div id="header">
-            <h1><spring:message code="newuser.welcome" /></h1>
+        <div class="navbar">
+            <div class="navbar-inner">
+                <span class="brand">Ryyppy.net</span>
+                <ul class="nav pull-right">
+                    <li><a href="/">Takaisin etusivulle</a></li>
+                </ul>
+            </div>
         </div>
 
-        <div id="container">
-            <div id="registration" class="dialog marginAuto">
-                <h2><spring:message code="newuser.title" /></h2>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="offset1 span10">
+                    <h1>Tervetuloa!</h1>
+                    <p>Olet näemmä ensimmäistä kertaa tällä sivulla. Ole hyvä ja täytä allaolevat tiedot, niin aletaan ryyppäämään!</p>
 
-                <p><spring:message code="newuser.first_timer" /></p>
+                    <form class="form-horizontal" method="post" action="/ui/addUser">
+                        <div class="control-group">
+                            <label class="control-label" for="drinkerName">Nimi</label>
+                            <div class="controls">
+                                <input id="drinkerName" class="userField" type="text" name="name" />
+                            </div>
+                        </div>
 
-                <form method="post" action="addUser">
-                    <label for="drinkerName"><spring:message code="form.name" /></label><br />
-                    <input id="drinkerName" class="userField" type="text" name="name" /><br />
+                        <div class="control-group">
+                            <label class="control-label" for="email">Sähköposti</label>
+                            <div class="controls">
+                                <input id="email" type="email" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
+                                <span id="emailCorrect">&nbsp;</span><br />
+                            </div>
+                        </div>
 
-                    <label for="email"><spring:message code="form.email" /></label><br />
-                    <input id="email" type="email" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
-                    <span id="emailCorrect">&nbsp;</span><br />
+                        <div class="control-group">
+                            <label class="control-label" for="sex">Sukupuoli</label>
+                            <div class="controls">
+                                <select id="sex" name="sex">
+                                    <option value="MALE">Mies</option>
+                                    <option value="FEMALE">Nainen</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <label for="sex"><spring:message code="form.sex" /></label><br />
-                    <select name="sex">
-                        <option value="MALE"><spring:message code="form.male" /></option>
-                        <option value="FEMALE"><spring:message code="form.female" /></option>
-                    </select><br />
+                        <div class="control-group">
+                            <label class="control-label" for="drinkerWeight">Paino</label>
+                            <div class="controls">
+                                <input id="drinkerWeight" class="userField" type="password" name="weight" autocomplete="off" />
+                            </div>
+                        </div>
 
-                    <label for="drinkerWeight"><spring:message code="form.weight" /></label><br />
-                    <input id="drinkerWeight" class="userField" type="password" name="weight" autocomplete="off" /><br />
-
-                    <input id="submitButton" type="submit" value="<spring:message code="form.add_drinker" />" />
-                </form>
+                        <div class="control-group">
+                            <div class="controls">
+                                <input id="submitButton" class="btn btn-success" type="submit" value="Rekisteröidy!" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </jsp:body>
