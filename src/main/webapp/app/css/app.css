@@ -69,6 +69,10 @@ label {
 .color15 { background-color: #E6A465; }
 .color16 { background-color: #E665A8; }
 
+.mobile-nav {
+    font-size: 0.75em;
+}
+
 .navbar {
     border: 0px;
 }
