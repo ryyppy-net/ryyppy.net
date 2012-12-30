@@ -1,5 +1,6 @@
 body {
     background-color: #252525;
+    font-family: 'Rum Raisin', sans-serif;
 }
 
 .login {
@@ -70,7 +71,6 @@ p.totalDrinkCount {
     width:300px;
     color: #333;
     font-size: 16px;
-    font-family: "Arial", "Helvetica", sans-serif;
 }
 
 table {
