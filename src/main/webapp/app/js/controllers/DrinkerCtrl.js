@@ -39,13 +39,13 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         self.timeoutId = setTimeout(function () {
             if (participant.type === 'participant') {
                 RyyppyAPI.addDrink(participant.partyId, participant, drink, function () {
-                    Notify.success(self.getRandomSalutation(), "Lisättiin juoma käyttäjälle " + participant.name + ".");
+                    Notify.success(self.getRandomSalutation(), "Käyttäjälle " + participant.name + " lisättiin juoma.");
                     self.drinkSuccessfullyAdded(participant, drink);
                 });
             }
             else {
                 RyyppyAPI.addDrinkToCurrentUser(drink, function () {
-                    Notify.success(self.getRandomSalutation(), "Lisättiin juoma sinulle!");
+                    Notify.success(self.getRandomSalutation(), "Sinulle lisättiin juoma.");
                     self.drinkSuccessfullyAdded(participant, drink);
                 });
             }
