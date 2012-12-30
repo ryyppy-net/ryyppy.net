@@ -63,3 +63,24 @@ label {
 .color14 { background-color: #E465E6; }
 .color15 { background-color: #E6A465; }
 .color16 { background-color: #E665A8; }
+
+.navbar {
+    border: 0px;
+}
+
+.navbar-inner {
+    border: 0px;
+    background-image: none;
+    background-color: black;
+    color: white;
+}
+
+.navbar .brand, .navbar .nav > li > a {
+    color: white;
+    text-shadow: 0 1px 0 #777;
+}
+
+.navbar .nav > li > a:focus, .navbar .nav > li > a:hover {
+    color: white;
+    text-decoration: underline;
+}
