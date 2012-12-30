@@ -8,6 +8,8 @@
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
         
+        <link href="http://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
+        
         <script type="text/javascript">
             function manualLogin() {
                 $("#manualLogin").show(300);
