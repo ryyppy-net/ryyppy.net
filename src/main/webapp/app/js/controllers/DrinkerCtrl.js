@@ -39,13 +39,13 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         self.timeoutId = setTimeout(function () {
             if (participant.type === 'participant') {
                 RyyppyAPI.addDrink(participant.partyId, participant, drink, function () {
-                    Notify.success("New drink!", "Added a drink to " + participant.name + ".");
+                    Notify.success(self.getRandomSalutation(), "Lisättiin juoma käyttäjälle " + participant.name + ".");
                     self.drinkSuccessfullyAdded(participant, drink);
                 });
             }
             else {
                 RyyppyAPI.addDrinkToCurrentUser(drink, function () {
-                    Notify.success("New drink!", "Added a drink to you!");
+                    Notify.success(self.getRandomSalutation(), "Lisättiin juoma sinulle!");
                     self.drinkSuccessfullyAdded(participant, drink);
                 });
             }
@@ -107,6 +107,31 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         { value: '0.80', text: '80.0%' }
     ];
     $scope.selectedAlcoholPercentage = '0.047';
+
+    // Source: http://en.wikipedia.org/wiki/Toast_(honor)#Worldwide
+    this.salutations = [
+        'Gëzuar!',
+        'Nazdravlje!',
+        'Наздраве!',
+        '干杯',
+        'Na zdraví!',
+        'Terviseks!',
+        'Kippis!',
+        'Hölökyn kölökyn!',
+        'Cul sec!',
+        'Saude!',
+        'Prost!',
+        '乾杯',
+        'Sláinte!',
+        'Skål!',
+        'Slàinte mhath!',
+        'Cheers!'
+    ];
+
+    this.getRandomSalutation = function () {
+        var salutation = self.salutations[Math.floor(Math.random() * self.salutations.length)];
+        return salutation;
+    };
 
     $scope.formattedAlcoholSize = function () {
         if (typeof $scope.drink === 'undefined') {
