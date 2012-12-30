@@ -4,8 +4,6 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
-import com.timgroup.jgravatar.Gravatar;
-import com.timgroup.jgravatar.GravatarDefaultImage;
 import drinkcounter.model.User;
 import drinkcounter.model.User.Sex;
 import java.util.List;
@@ -86,10 +84,7 @@ public class ParticipantDTO {
         participant.setPromilles(user.getPromilles());
         participant.setSex(user.getSex());
         participant.setTotalDrinks(user.getTotalDrinks());
-        
-        if(user.getEmail() != null){
-            participant.setProfilePictureUrl(new Gravatar().setDefaultImage(GravatarDefaultImage.WAVATAR).getUrl(user.getEmail()));
-        }
+        participant.setProfilePictureUrl(GravatarService.getGravatarUrl(user));
         return participant;
     }
 }
