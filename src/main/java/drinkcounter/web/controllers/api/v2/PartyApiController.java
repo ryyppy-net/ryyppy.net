@@ -40,7 +40,12 @@ public class PartyApiController {
         List<Party> parties = currentUser.getUser().getParties();
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
-            partyDTOs.add(PartyDTO.fromParty(party));
+            PartyDTO partyDTO = PartyDTO.fromParty(party);
+            List<User> participants = party.getParticipants();
+            for (User participant : participants) {
+                partyDTO.addParticipant(ParticipantPreviewDTO.fromUser(participant));
+            }
+            partyDTOs.add(partyDTO);
         }
         return gson.toJson(partyDTOs);
     }
