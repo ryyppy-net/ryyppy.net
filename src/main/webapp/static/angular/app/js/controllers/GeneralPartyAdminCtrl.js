@@ -34,7 +34,7 @@ function GeneralPartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
         return moment(party.startTime, 'MMM DD, YYYY h:mm:ss A');
     };
 
-    $scope.active = "admin";
+    $scope.active = 'general-party-admin';
 
     this.refreshProfile();
     this.refreshParties();
