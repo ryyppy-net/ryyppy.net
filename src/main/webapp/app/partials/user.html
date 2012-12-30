@@ -7,6 +7,10 @@
 
             <h2>Bileesi</h2>
 
+            <p>
+                Jos haluat muokata bileitäsi, voit tehdä sen <a href="#/party-admin">bileiden hallinnassa</a>.
+            </p>
+
             <div ng-repeat="party in parties  | orderBy:partySort:true">
                 <a href="#/party/{{ party.id }}">
                     <div class="party color{{ ($index % 12) + 1 }}">
@@ -18,10 +22,6 @@
                     </div>
                 </a>
             </div>
-
-            <p>
-                Jos haluat muokata bileitäsi, voit tehdä sen <a href="#/party-admin">bileiden hallinnassa</a>.
-            </p>
 
             <h2>Historia</h2>
 
