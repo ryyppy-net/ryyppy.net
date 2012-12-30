@@ -11,21 +11,6 @@ describe('UserCtrl', function(){
 
 
   it('should ....', function() {
-    //spec body
-  });
-});
-
-
-describe('PartyCtrl', function(){
-  var myCtrl2;
-
-
-  beforeEach(function(){
-    myCtrl2 = new PartyCtrl();
-  });
-
-
-  it('should ....', function() {
-    //spec body
+    expect(myCtrl1).toBeUndefined();
   });
 });
