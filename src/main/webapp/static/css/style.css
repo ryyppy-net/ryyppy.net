@@ -41,8 +41,6 @@ h1 {
     color: #ffffff;
     margin: 0px;
     padding: 5px;
-    text-shadow: #6a6a6a 2px 2px 0px;
-    font-variant: small-caps;
     font-size: 2.0em;
 }
 
@@ -59,13 +57,9 @@ h1 > a {
     color: #ffffff;
     margin: 0px;
     padding: 5px;
-    text-shadow: #6a6a6a 2px 2px 0px;
-    font-variant: small-caps;
 }
 
 h2 {
-    text-shadow: #6a6a6a 2px 2px 0px;
-    font-variant: small-caps;
     margin: 0px;
 }
 

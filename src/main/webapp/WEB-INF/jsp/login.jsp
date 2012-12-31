@@ -32,10 +32,6 @@
             <p class="totalDrinkCount">
                 <spring:message code="login.already_n_drinks" arguments="${totalDrinkCount}" />
             </p>
-            
-            <p class="langSelection">
-                <a href="?lang=en">In English</a> | <a href="?lang=fi">Suomeksi</a>
-            </p>
         </div>
         
         <div class="login">
