@@ -56,7 +56,7 @@
 
             <h1>Poista bilettäjä</h1>
 
-            <div class="row" ng-repeat="participant in participants" style="margin-bottom: 10px;">
+            <div class="row-fluid" ng-repeat="participant in participants" style="margin-bottom: 10px;">
                 <div class="span11">{{ participant.name }}</div>
                 <div class="span1"><button ng-click="removeUser(participant)" class="btn btn-danger">Poista</button></div>
             </div>
