@@ -24,18 +24,16 @@
                 <h2>Bileesi</h2>
 
                 <div ng-repeat="party in parties | orderBy:partySort:true">
-                    <div class="container-fluid">
-                        <div class="row-fluid">
-                            <div class="span10 party color{{ ($index % 12) + 1 }}">
-                                <div>{{ party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ party.startTime | formatDateTime }}</small></div>
-                                <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
-                                    <li ng-repeat="participantPreview in party.participants" participant-preview="participantPreview">
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="span2">
-                                <button ng-click="removeParticipant(party, participant)" class="btn btn-danger">Poistu bileistä</button>
-                            </div>
+                    <div class="row-fluid">
+                        <div class="span10 party color{{ ($index % 12) + 1 }}">
+                            <div>{{ party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ party.startTime | formatDateTime }}</small></div>
+                            <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
+                                <li ng-repeat="participantPreview in party.participants" participant-preview="participantPreview">
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="span2">
+                            <button ng-click="removeParticipant(party, participant)" class="btn btn-danger">Poistu bileistä</button>
                         </div>
                     </div>
                 </div>
