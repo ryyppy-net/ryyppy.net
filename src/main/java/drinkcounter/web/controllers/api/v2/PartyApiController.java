@@ -52,10 +52,12 @@ public class PartyApiController {
     
     @RequestMapping(value="/parties", method= RequestMethod.POST)
     @ResponseStatus(HttpStatus.OK)
-    public void addParty(@RequestParam("name") String partyName){
+    public @ResponseBody String addParty(@RequestParam("name") String partyName){
         User user = currentUser.getUser();
         Party party = drinkCounterService.startParty(partyName);
         drinkCounterService.linkUserToParty(user.getId(), party.getId());
+        PartyDTO partyDTO = PartyDTO.fromParty(party);
+        return gson.toJson(partyDTO);
     }
     
     @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})

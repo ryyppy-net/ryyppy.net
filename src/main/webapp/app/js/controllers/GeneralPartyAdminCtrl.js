@@ -1,6 +1,6 @@
 "use strict";
 
-function GeneralPartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
+function GeneralPartyAdminCtrl($scope, $location, RyyppyAPI, Notify) {
     var self = this;
 
     this.refreshProfile = function () {
@@ -16,10 +16,8 @@ function GeneralPartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     };
 
     $scope.addParty = function () {
-        RyyppyAPI.addParty($scope.partyName, function () {
-            self.refreshParties();
-            Notify.success("Bileet pystyyn!", "Aloitettiin bileet " + $scope.partyName + ".");
-            $scope.partyName = "";
+        RyyppyAPI.addParty($scope.partyName, function (party) {
+            $location.path('/party/' + party.id);
         });
     };
 
@@ -40,4 +38,4 @@ function GeneralPartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     this.refreshParties();
 }
 
-GeneralPartyAdminCtrl.$inject = ['$scope', '$routeParams', 'RyyppyAPI', 'Notify'];
+GeneralPartyAdminCtrl.$inject = ['$scope', '$location', 'RyyppyAPI', 'Notify'];
