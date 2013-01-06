@@ -16,6 +16,8 @@
         <intercept-url pattern="/ui/timezone/*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/API/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /> <!-- Authorization in Spring MVC -->
         <intercept-url pattern="/favicon.ico" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/apple-touch-icon.png" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/apple-touch-icon-precomposed.png" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="ROLE_USER" />
         <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
         <custom-filter  after="FORM_LOGIN_FILTER" ref="facebookAuthFilter" />
