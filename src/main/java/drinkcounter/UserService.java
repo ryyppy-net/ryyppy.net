@@ -1,7 +1,6 @@
 package drinkcounter;
 
 import drinkcounter.model.User;
-import java.util.List;
 
 /**
  *

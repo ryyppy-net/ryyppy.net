@@ -1,6 +1,7 @@
 package drinkcounter;
 
 import drinkcounter.model.Drink;
+import drinkcounter.model.Friend;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
 import java.util.Date;
@@ -28,5 +29,6 @@ public interface DrinkCounterService {
     int addDrink(int userId, Date date);
     void addDrink(int userId, Date date, Float alcoholAmount);
     long getTotalDrinkCount();
+    List<Friend> suggestInvitations(int forUser, int partyId, int amount);
 
 }
