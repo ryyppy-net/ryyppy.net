@@ -4,6 +4,7 @@ import drinkcounter.dao.DrinkDAO;
 import drinkcounter.dao.UserDAO;
 import drinkcounter.dao.PartyDAO;
 import drinkcounter.model.Drink;
+import drinkcounter.model.Friend;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
 
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import drinkcounter.web.controllers.api.v2.GravatarService;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -22,6 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 /**
  *
@@ -37,6 +44,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     private DrinkDAO drinkDao;
     @Autowired
     private UserDAO userDAO;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     @Transactional
@@ -69,7 +79,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public void linkUserToParty(int userId, int partyIdentifier) {
         Party party = getParty(partyIdentifier);
         User user = userDAO.findOne(userId);
-        
+
         for (User current : getParty(party.getId()).getParticipants()) {
             if (current.getId() == user.getId()) {
                 log.info("{} was already added to party {}. Skipping", user, party.getName());
@@ -134,6 +144,28 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     public long getTotalDrinkCount() {
         return drinkDao.count();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Friend> suggestInvitations(int forUser, int partyId, int amount) {
+        Query q = em.createQuery("select distinct par.id, p.startTime \n" +
+                " from Party p join p.participants par \n" +
+                " where par.id not in(select pp.id from Party p join p.participants pp where p.id = :partyId)\n" +
+                " and p in (select party from Party party join party.participants participant where participant.id = :userId)\n" +
+                " and par.guest = false\n" +
+                " order by p.startTime desc");
+        q.setParameter("partyId", partyId);
+        q.setParameter("userId", forUser);
+        q.setFirstResult(0);
+        q.setMaxResults(amount);
+        List<Object[]> results = q.getResultList();
+        List<Friend> friends = new ArrayList<Friend>();
+        for (Object[] tuple : results) {
+            User user = userDAO.findOne((Integer)tuple[0]);
+            friends.add(new Friend(user.getId(), user.getName(), GravatarService.getGravatarUrl(user)));
+        }
+        return friends;
     }
 
     @Override

@@ -5,6 +5,7 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
+import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.text.MessageFormat;
@@ -144,5 +145,12 @@ public class PartyApiController {
             time = new Date(new DateTime(timestamp).getMillis());
         }
         drinkCounterService.addDrink(participantId, time, alcoholAmount);
+    }
+
+    @RequestMapping(value="/parties/{partyId}/invitations", method=RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public @ResponseBody String suggestInvite(@PathVariable Integer partyId,  @RequestParam(defaultValue = "10", value="amount") int amount){
+        List<Friend> invitations = drinkCounterService.suggestInvitations(currentUser.getUser().getId(), partyId, amount);
+        return gson.toJson(invitations);
     }
 }
