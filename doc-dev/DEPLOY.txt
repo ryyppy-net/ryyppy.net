@@ -3,8 +3,7 @@
 2. Vastaa kysymyksiin oletusasetuksilla, versionumeroa voi tietty kasvattaa enemmän kuin oletuksena tulee jos on isompi muutos
 3. Aja mvn release:perform. Lopputuloksena target-hakemistossa pitäisi olla war-tiedosto.
 4. Kopioi war-tiedosto palvelimelle kotihakemistoon
-5. Siirrä palvelimella oleva war-tiedosto polkuun tomcat/webapps/ROOT.war
-6. Jos tomcat kaatuu, se pitää käynnistää uudestaan.
-    - Kokeile toimiiko sudo tomcat/bin/shutdown.sh
-    - Jos ei, tapa kill-komennolla
-    - Käynnistä uudestaan sudo tomcat/bin/startup.sh
+5. Aja tomcat alas komennolla: sudo /home/ec2-user/apache-tomcat-7.0.37/bin/shutdown.sh
+6. Poista vanha ROOT-hakemisto: sudo rm -rf /home/ec2-user/apache-tomcat-7.0.37/webapps/ROOT
+7. Kopioi uusi war polkuun /home/ec2-user/apache-tomcat-7.0.37/webapps/ROOT.war
+8. Käynnistä tomcat komennolla: sudo /home/ec2-user/apache-tomcat-7.0.37/bin/startup.sh
