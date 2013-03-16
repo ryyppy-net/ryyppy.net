@@ -4,7 +4,7 @@
     <groupId>juomalaskuri</groupId>
     <artifactId>Juomalaskuri</artifactId>
     <packaging>war</packaging>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.2</version>
     <name>Juomalaskuri</name>
     <url>http://ryyppy.net</url>
     <developers>
