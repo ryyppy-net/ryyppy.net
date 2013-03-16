@@ -38,6 +38,13 @@
                 <div id="historyGraph">
                 </div>
             </div>
+
+            <h2>5 viimeisintä juomaa</h2>
+
+            <div class="row-fluid" ng-repeat="drink in drinks | orderBy:drinkSort:true | limitTo:5" style="margin-top: 10px;">
+                <div class="span11">{{ drink.timestamp | formatISODateTime }} (Annoksia: {{ drink.amountOfShots | roundAmountOfShots }})</div>
+                <div class="span1"><button ng-click="removeDrink(drink)" class="btn btn-danger">Poista</button></div>
+            </div>
         </div>
     </div>
 </div>

@@ -97,14 +97,15 @@ public class ProfileApiController {
             DrinkDTO drinkDTO = new DrinkDTO();
             drinkDTO.setId(drink.getId());
             drinkDTO.setTimestamp(new DateTime(drink.getTimeStamp()).toString());
+            drinkDTO.setAmountOfShots(drink.getAmountOfShots());
             drinkDTOs.add(drinkDTO);
         }
         return gson.toJson(drinkDTOs);
     }
     
-    @RequestMapping(value="/profile/drinks", method=RequestMethod.DELETE)
+    @RequestMapping(value="/profile/drinks/{drinkId}", method=RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
-    public void deleteDrink(@RequestParam(value="drinkId") Integer drinkId){
+    public void deleteDrink(@PathVariable Integer drinkId){
         drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
     }
     

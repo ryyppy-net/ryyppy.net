@@ -22,6 +22,10 @@
             http.post(this._baseUrl + "/profile", $.param(profile)).success(callbackSuccess);
         };
 
+        this.getOwnDrinks = function (callbackSuccess) {
+            http.get(this._baseUrl + "/profile/drinks").success(callbackSuccess);
+        };
+
         this.getParties = function (callbackSuccess) {
             http.get(this._baseUrl + "/parties").success(callbackSuccess);
         };
@@ -58,6 +62,16 @@
 
         this.removeUser = function (partyId, participant, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
+            http.delete(url).success(callbackSuccess);
+        };
+
+        this.removeUser = function (partyId, participant, callbackSuccess) {
+            var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
+            http.delete(url).success(callbackSuccess);
+        };
+
+        this.removeDrink = function (drinkId, callbackSuccess) {
+            var url = this._baseUrl + "/profile/drinks/" + drinkId;
             http.delete(url).success(callbackSuccess);
         };
 
