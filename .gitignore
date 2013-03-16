@@ -2,5 +2,8 @@
 *.iml
 target
 
+src/main/resources/drinkcounter/general-configuration-default.properties
+src/main/resources/drinkcounter/jdbc-default.properties
+
 # Mac files
 .DS_Store
