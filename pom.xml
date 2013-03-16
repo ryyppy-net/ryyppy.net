@@ -22,6 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.framework.version>3.2.0.RELEASE</spring.framework.version>
         <org.springframework.social-version>1.0.2.RELEASE</org.springframework.social-version>
+        <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
     <build>
         <resources>
