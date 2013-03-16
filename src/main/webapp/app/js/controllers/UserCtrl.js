@@ -24,9 +24,16 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
         });
     };
 
+    this.refreshOwnDrinks = function () {
+        RyyppyAPI.getOwnDrinks(function (data) {
+            $scope.drinks = data;
+        });
+    };
+
     this.startPolling = function () {
         (function tick() {
             self.refreshProfile();
+            self.refreshOwnDrinks();
             self.timeoutPromise = $timeout(tick, 60000);
         })();
     };
@@ -39,18 +46,31 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
         return moment(party.startTime, 'MMM DD, YYYY h:mm:ss A');
     };
 
+    $scope.drinkSort = function (drink) {
+        return moment(drink.timestamp);
+    };
+
     this.refreshProfile();
+    this.refreshOwnDrinks();
     this.refreshParties();
 
     this.startPolling();
 
     $scope.$on('drinkAdded', function () {
         self.refreshProfile();
+        self.refreshOwnDrinks();
     });
 
     $scope.$on('$destroy', function () {
         self.endPolling();
     });
+
+    $scope.removeDrink = function (drink) {
+        RyyppyAPI.removeDrink(drink.id, function () {
+            self.refreshProfile();
+            self.refreshOwnDrinks();
+        });
+    };
 }
 
 UserCtrl.$inject = ['$scope', '$timeout', 'RyyppyAPI', 'Notify'];

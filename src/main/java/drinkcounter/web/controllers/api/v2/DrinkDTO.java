@@ -11,6 +11,7 @@ package drinkcounter.web.controllers.api.v2;
 public class DrinkDTO {
     private Integer id;
     private String timestamp;
+    private Float amountOfShots;
 
     public Integer getId() {
         return id;
@@ -26,5 +27,13 @@ public class DrinkDTO {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+    
+    public Float getAmountOfShots() {
+        return amountOfShots;
+    }
+    
+    public void setAmountOfShots(Float amountOfShots) {
+        this.amountOfShots = amountOfShots;
     }
 }
