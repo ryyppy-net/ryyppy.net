@@ -4,7 +4,7 @@
     <groupId>juomalaskuri</groupId>
     <artifactId>Juomalaskuri</artifactId>
     <packaging>war</packaging>
-    <version>3.0.3</version>
+    <version>3.0.4-SNAPSHOT</version>
     <name>Juomalaskuri</name>
     <url>http://ryyppy.net</url>
     <developers>
@@ -14,8 +14,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:ssh://git@github.com:ryyppy-net/ryyppy.net.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:ryyppy-net/ryyppy.net.git</developerConnection>
+        <connection>scm:git:ssh://git@github.com/ryyppy-net/ryyppy.net.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/ryyppy-net/ryyppy.net.git</developerConnection>
         <url>https://github.com/ryyppy-net/ryyppy.net</url>
     </scm>
     <properties>
