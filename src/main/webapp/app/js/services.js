@@ -34,6 +34,10 @@
             http.get(this._baseUrl + "/parties/" + partyId + "/participants").success(callbackSuccess);
         };
 
+        this.getPartyInvitations = function (partyId, callbackSuccess) {
+            http.get(this._baseUrl + "/parties/" + partyId + "/invitations").success(callbackSuccess);
+        };
+
         this.addDrink = function (partyId, participant, drink, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id + "/drinks";
             drink.timestamp = (new Date()).toISOString();
