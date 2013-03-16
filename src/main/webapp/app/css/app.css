@@ -24,6 +24,11 @@ body {
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;
     border-radius: 0px;
+    border: 0px;
+    background-image: none;
+    background-color: black;
+    color: white;
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
 
 label {
@@ -77,13 +82,6 @@ label {
 
 .navbar {
     border: 0px;
-}
-
-.navbar-inner {
-    border: 0px;
-    background-image: none;
-    background-color: black;
-    color: white;
 }
 
 .navbar .brand, .navbar .nav > li > a {
