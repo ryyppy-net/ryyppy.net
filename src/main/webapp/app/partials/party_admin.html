@@ -47,7 +47,14 @@
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group" ng-show="selectedUserTypeId == 3">
+                    <div ng-repeat="invitation in invitations" ng-click="" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
+                        <img src="{{ invitation.gravatarUrl }}&size=30" />
+                        {{ invitation.name }}
+                    </div>
+                </div>
+
+                <div class="control-group" ng-show="selectedUserTypeId != 3">
                     <div class="controls">
                         <button type="submit" class="btn btn-success">Lisää</button>
                     </div>

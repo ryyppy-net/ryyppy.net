@@ -15,6 +15,12 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
         });
     };
 
+    this._updatePartyInvitations = function () {
+        RyyppyAPI.getPartyInvitations($routeParams.partyId, function (data) {
+            $scope.invitations = data;
+        });
+    };
+
     this.addUser = function () {
         if ($scope.selectedUserTypeId == 1)
             self._addRegisteredUser($routeParams.partyId, $scope.email);
@@ -54,15 +60,17 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
 
     $scope.userTypes = [
         {TypeId: 1, TypeName: 'Rekisteröitynyt käyttäjä'},
-        {TypeId: 2, TypeName: 'Vieras'}
+        {TypeId: 2, TypeName: 'Vieras'},
+        {TypeId: 3, TypeName: 'Vanha ystävä'}
     ];
-    $scope.selectedUserTypeId = 1;
+    $scope.selectedUserTypeId = 3;
 
     $scope.addUser = this.addUser;
     $scope.removeUser = this.removeUser;
 
     this._updatePartyInformation();
     this._updatePartyParticipants();
+    this._updatePartyInvitations();
 }
 
 PartyAdminCtrl.$inject = ['$scope', '$routeParams', 'RyyppyAPI', 'Notify'];
