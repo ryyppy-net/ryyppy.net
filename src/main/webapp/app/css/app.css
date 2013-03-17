@@ -9,7 +9,23 @@ body {
     border-radius: 5px;
     color: black;
     margin-bottom: 20px;
-    font-size: 0.8em;
+    font-size: 0.8em;;
+}
+
+.drinker-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1000;
+    height: 100%;
+    width: 100%;
+
+    background-color: black;
+    border: 2px solid white;
+    border-radius: 5px;
+    color: white;
+
+    text-align: center;
 }
 
 .party {
