@@ -153,4 +153,10 @@ public class PartyApiController {
         List<Friend> invitations = drinkCounterService.suggestInvitations(currentUser.getUser().getId(), partyId, amount);
         return gson.toJson(invitations);
     }
+    
+    @RequestMapping(value="/parties/{partyId}/invitations", method=RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
+        drinkCounterService.linkUserToParty(userId, partyId);
+    }
 }
