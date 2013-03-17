@@ -22,9 +22,9 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     };
 
     this.addUser = function () {
-        if ($scope.selectedUserTypeId == 1)
+        if ($scope.selectedUserTypeId == 2)
             self._addRegisteredUser($routeParams.partyId, $scope.email);
-        else
+        if ($scope.selectedUserTypeId == 3)
             self._addGuestUser($scope.name, $scope.sex, $scope.weight);
     };
 
@@ -32,6 +32,7 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
         RyyppyAPI.addRegisteredUserToParty(partyId, email, function (data) {
             Notify.success("Tervetuloa takaisin!", "Lisätty käyttäjä sähköpostiosoitteella " + email + ".");
             self._updatePartyParticipants();
+            self._updatePartyInvitations();
         });
     };
 
@@ -43,10 +44,23 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
         });
     }
 
+    $scope.inviteUser = function (invitation) {
+        $scope.inviting = true;
+        $scope.invitedFriend = invitation;
+        RyyppyAPI.inviteUser(invitation.id, $routeParams.partyId, function () {
+            $scope.invitedFriend = undefined;
+            Notify.success("Pitkästä aikaa!", "Lisätty käyttäjä " + invitation.name + ".");
+            self._updatePartyParticipants();
+            self._updatePartyInvitations();
+            $scope.inviting = false;
+        });
+    }
+
     this.removeUser = function (participant) {
         RyyppyAPI.removeUser($routeParams.partyId, participant, function (data) {
             Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
             self._updatePartyParticipants();
+            self._updatePartyInvitations();
         });
     };
 
@@ -57,13 +71,14 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     $scope.name = null;
     $scope.sex = 'MALE';
     $scope.weight = null;
+    $scope.inviting = false;
 
     $scope.userTypes = [
-        {TypeId: 1, TypeName: 'Rekisteröitynyt käyttäjä'},
-        {TypeId: 2, TypeName: 'Vieras'},
-        {TypeId: 3, TypeName: 'Vanha ystävä'}
+        {TypeId: 1, TypeName: 'Vanha ystävä'},
+        {TypeId: 2, TypeName: 'Rekisteröitynyt käyttäjä'},
+        {TypeId: 3, TypeName: 'Vieras'}
     ];
-    $scope.selectedUserTypeId = 3;
+    $scope.selectedUserTypeId = 1;
 
     $scope.addUser = this.addUser;
     $scope.removeUser = this.removeUser;
