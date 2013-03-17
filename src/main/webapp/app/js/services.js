@@ -38,6 +38,15 @@
             http.get(this._baseUrl + "/parties/" + partyId + "/participants").success(callbackSuccess);
         };
 
+        this.getPartyInvitations = function (partyId, callbackSuccess) {
+            http.get(this._baseUrl + "/parties/" + partyId + "/invitations").success(callbackSuccess);
+        };
+
+        this.inviteUser = function (userId, partyId, callbackSuccess) {
+            var url = this._baseUrl + "/parties/" + partyId + "/invitations";
+            http.post(url, $.param({ userId : userId })).success(callbackSuccess);
+        };
+
         this.addDrink = function (partyId, participant, drink, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id + "/drinks";
             drink.timestamp = (new Date()).toISOString();
