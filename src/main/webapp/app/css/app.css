@@ -28,6 +28,23 @@ body {
     text-align: center;
 }
 
+form.edit-drink {
+    margin-left: 0px;
+    margin-bottom: 0px;
+    text-align: center;
+}
+
+.edit-drink-label {
+    float: left;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.edit-drink-input {
+    float: left;
+    width: auto;
+}
+
 .party {
     border: 2px solid black;
     border-radius: 5px;
