@@ -1,83 +1,68 @@
 <div ng-controller="DrinkerCtrl">
-    <a ng-click="addDefaultDrink(participant)">
-        <div class="drinker color{{ participant.color }}">
-            <div class="container-fluid" style="margin-top: 10px;">
-                <div class="row-fluid">
-                    <div class="span4" style="text-align: center;">
-                        <img ng-src="{{ participant.profilePictureUrl }}" />
-                        <p>{{ participant.name }}</p>
+    <div class="drinker color{{ participant.color }}" style="position: relative;">
+        <div ng-click="addDefaultDrink(participant)" class="container-fluid" style="margin-top: 10px;">
+            <div class="row-fluid">
+                <div class="span4" style="text-align: center;">
+                    <img ng-src="{{ participant.profilePictureUrl }}" />
+                    <p>{{ participant.name }}</p>
+                </div>
+
+                <div class="span8">
+                    <div class="row-fluid">
+                        <div class="span12">
+                            <div id="graph{{ participant.id }}" style="height: 100px;"></div>
+                        </div>
                     </div>
 
-                    <div class="span8">
-                        <div class="row-fluid">
-                            <div class="span12">
-                                <div id="graph{{ participant.id }}" style="height: 100px;"></div>
-                            </div>
-                        </div>
-
-                        <div class="row-fluid">
-                            <div class="span12" style="text-align: center;">
-                                <p>Juomia: {{ participant.totalDrinks }} kpl</p>
-                                <p>Promilleja:  {{ participant.promilles | number: 2 }}&permil;</p>
-                            </div>
+                    <div class="row-fluid">
+                        <div class="span12" style="text-align: center;">
+                            <p>Juomia: {{ participant.totalDrinks }} kpl</p>
+                            <p>Promilleja:  {{ participant.promilles | number: 2 }}&permil;</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </a>
 
+        <div ng-show="showDrinkDialog && addingDrink" class="drinker-overlay">
+            <p>Lisätään juomaa käyttäjälle {{ participant.name }}...</p>
 
-    <div class="modal" ng-show="showDrinkDialog && addingDrink" style="text-align: center">
-        <div class="modal-header">
-            <h1>Lisätään juomaa käyttäjälle {{ participant.name }}...</h1>
-        </div>
-
-        <div class="modal-body">
             <p>Juoman koko on {{ formattedAlcoholSize() }} ja vahvuus {{ formattedAlcoholPercentage() }}.</p>
             <div class="progress">
                 <div class="bar"></div>
             </div>
-        </div>
 
-        <div class="modal-footer">
             <div class="btn" ng-click="editDrink()">Muokkaa</div>
             <div class="btn btn-danger" ng-click="cancelDrink()">Peruuta</div>
         </div>
-    </div>
 
-    <div class="modal" ng-show="showDrinkDialog && editingDrink" style="text-align: center">
-        <div class="modal-header">
-            <h1>Muokkaa käyttäjän {{ participant.name }} juomaa</h1>
+        <div ng-show="showDrinkDialog && editingDrink" class="drinker-overlay">
+            <p>Muokkaa käyttäjän {{ participant.name }} juomaa</p>
+
+            <form class="form-horizontal" ng-submit="addEditedDrink()" style="margin-bottom: 0px;">
+                    <div class="control-group">
+                        <label class="control-label" for="portionSize">Annoskoko</label>
+                        <div class="controls">
+                            <select id="portionSize"
+                                    ng-model="selectedPortionSize"
+                                    ng-options="portionSize.value as portionSize.text for portionSize in portionSizes">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label" for="portionAlcoholPercentage">Alkoholi-%</label>
+                        <div class="controls">
+                            <select id="portionAlcoholPercentage"
+                                    ng-model="selectedAlcoholPercentage"
+                                    ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in portionAlcoholPercentages">
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Lisää</button>
+                    <div class="btn btn-danger" ng-click="hideDialog()">Peruuta</div>
+            </form>
         </div>
-
-        <form class="form-horizontal" ng-submit="addEditedDrink()" style="margin-bottom: 0px;">
-            <div class="modal-body">
-                <div class="control-group">
-                    <label class="control-label" for="portionSize">Annoskoko</label>
-                    <div class="controls">
-                        <select id="portionSize"
-                                ng-model="selectedPortionSize"
-                                ng-options="portionSize.value as portionSize.text for portionSize in portionSizes">
-                        </select>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="portionAlcoholPercentage">Alkoholi-%</label>
-                    <div class="controls">
-                        <select id="portionAlcoholPercentage"
-                                ng-model="selectedAlcoholPercentage"
-                                ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in portionAlcoholPercentages">
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Lisää</button>
-                <div class="btn btn-danger" ng-click="hideDialog()">Peruuta</div>
-            </div>
-        </form>
     </div>
 </div>
