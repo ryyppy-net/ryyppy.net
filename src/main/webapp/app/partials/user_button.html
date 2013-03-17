@@ -28,7 +28,7 @@
             <p>Lisätään juomaa käyttäjälle {{ participant.name }}...</p>
 
             <p>Juoman koko on {{ formattedAlcoholSize() }} ja vahvuus {{ formattedAlcoholPercentage() }}.</p>
-            <div class="progress">
+            <div class="progress" style="margin-left: 10px; margin-right: 10px;">
                 <div class="bar"></div>
             </div>
 
@@ -39,29 +39,29 @@
         <div ng-show="showDrinkDialog && editingDrink" class="drinker-overlay">
             <p>Muokkaa käyttäjän {{ participant.name }} juomaa</p>
 
-            <form class="form-horizontal" ng-submit="addEditedDrink()" style="margin-bottom: 0px;">
-                    <div class="control-group">
-                        <label class="control-label" for="portionSize">Annoskoko</label>
-                        <div class="controls">
-                            <select id="portionSize"
-                                    ng-model="selectedPortionSize"
-                                    ng-options="portionSize.value as portionSize.text for portionSize in portionSizes">
-                            </select>
-                        </div>
-                    </div>
+            <form ng-submit="addEditedDrink()" class="edit-drink">
+                <div style="clear: both;">
+                    <label for="portionSize" class="edit-drink-label">Annoskoko</label>
+                    <select id="portionSize"
+                            ng-model="selectedPortionSize"
+                            ng-options="portionSize.value as portionSize.text for portionSize in portionSizes"
+                            class="edit-drink-input">
+                    </select>
+                </div>
 
-                    <div class="control-group">
-                        <label class="control-label" for="portionAlcoholPercentage">Alkoholi-%</label>
-                        <div class="controls">
-                            <select id="portionAlcoholPercentage"
-                                    ng-model="selectedAlcoholPercentage"
-                                    ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in portionAlcoholPercentages">
-                            </select>
-                        </div>
-                    </div>
+                <div style="clear: both;">
+                    <label for="portionAlcoholPercentage" class="edit-drink-label">Alkoholi-%</label>
+                    <select id="portionAlcoholPercentage"
+                            ng-model="selectedAlcoholPercentage"
+                            ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in portionAlcoholPercentages"
+                            class="edit-drink-input">
+                    </select>
+                </div>
 
+                <div style="clear: both">
                     <button type="submit" class="btn btn-success">Lisää</button>
                     <div class="btn btn-danger" ng-click="hideDialog()">Peruuta</div>
+                </div>
             </form>
         </div>
     </div>
