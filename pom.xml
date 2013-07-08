@@ -219,6 +219,12 @@
         </dependency>
 
         <!-- Authentication and security -->
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>3.1.3.RELEASE</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
@@ -330,20 +336,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
-
-	
-    <repositories>
-<!--        <repository>
-            <id>JBoss</id>
-            <name>JBoss Repsitory</name>
-            <layout>default</layout>
-            <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-        </repository>
-        <repository>
-            <id>org.springframework.maven.milestone</id>
-            <name>Spring Maven Milestone Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
-        </repository>-->
-    </repositories>
 </project>
