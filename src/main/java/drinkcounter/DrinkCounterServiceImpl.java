@@ -112,6 +112,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         Drink drink = drinkDao.findOne(drinkId);
         user.removeDrink(drink);
         drinkDao.delete(drink);
+        log.info("{} has removed a drink {}", user, new DateTime(drink.getTimeStamp()).toString());
     }
 
     @Override
