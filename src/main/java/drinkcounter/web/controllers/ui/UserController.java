@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
+import org.springframework.security.openid.OpenIDAttribute;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -106,7 +107,7 @@ public class UserController {
                 authentication = new OpenIDAuthenticationToken(userDetails, 
                     userDetails.getAuthorities(), 
                     user.getOpenId(),
-                    Collections.EMPTY_LIST);
+                    Collections.<OpenIDAttribute>emptyList());
                 break;
             case FACEBOOK:
                 authentication = new FacebookAuthenticationToken(userDetails);

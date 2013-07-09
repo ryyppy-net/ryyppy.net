@@ -30,7 +30,7 @@ public class FacebookAuthenticationProvider implements AuthenticationProvider{
     }
 
     @Override
-    public boolean supports(Class<? extends Object> authentication) {
+    public boolean supports(Class<?> authentication) {
         return FacebookAuthenticationToken.class.isAssignableFrom(authentication);
     }
     
