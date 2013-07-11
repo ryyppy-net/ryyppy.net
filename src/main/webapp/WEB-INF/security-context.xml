@@ -6,26 +6,42 @@
           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
        ">
     
-    <http entry-point-ref="loginUrlEntryPoint">
+    <http entry-point-ref="daep"  >
+        <logout logout-url="/ui/logout" />
+        <intercept-url pattern="/frontpage.jsp" access="ROLE_USER" />
         <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/static/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/app/css/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/adduser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/checkemail" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/timezone/*" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/API/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /> <!-- Authorization in Spring MVC -->
-        <intercept-url pattern="/favicon.ico" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/apple-touch-icon.png" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/apple-touch-icon-precomposed.png" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <intercept-url pattern="/**" access="ROLE_USER" />
+        <intercept-url pattern="/ui/**" access="ROLE_USER" />
+        <intercept-url pattern="/app/css/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/app/**" access="ROLE_USER" />
+        <intercept-url pattern="/API/passphrase/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /> <!-- Authentication from the url -->
+        <intercept-url pattern="/API/**" access="ROLE_USER" />
+        <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
         <custom-filter  after="FORM_LOGIN_FILTER" ref="facebookAuthFilter" />
-        <logout logout-url="/ui/logout" />
     </http>
     
     <beans:bean id="loginUrlEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
         <beans:property name="loginFormUrl" value="/ui/login" />
+    </beans:bean>
+
+    <beans:bean id="daep" class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
+        <beans:constructor-arg>
+            <beans:map>
+                <beans:entry>
+                    <beans:key>
+                        <beans:bean class="org.springframework.security.web.util.AntPathRequestMatcher">
+                            <beans:constructor-arg value="/API/**" />
+                        </beans:bean>
+                    </beans:key>
+                    <beans:bean class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
+                </beans:entry>
+            </beans:map>
+        </beans:constructor-arg>
+        <beans:property name="defaultEntryPoint" ref="loginUrlEntryPoint"/>
     </beans:bean>
     
     <beans:bean id="abstractAuthFilter" abstract="true" class="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter">
