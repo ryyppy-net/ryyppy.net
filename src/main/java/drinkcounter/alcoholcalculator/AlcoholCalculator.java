@@ -31,6 +31,7 @@ public class AlcoholCalculator {
     
     public void setWeight(float weight) {
         synchronized(this) {
+            // Typical male burns one gram of alcohol for every 10 kilograms of weight in an hour.
             burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
         }
     }
