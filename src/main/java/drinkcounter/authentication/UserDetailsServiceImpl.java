@@ -30,8 +30,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         if(user == null){
             throw new UsernameNotFoundException("User with openid "+openId+" doesn't exist");
         }
-        return new DrinkcounterUserDetails(user.getOpenId(), 
-                "", 
+        return new DrinkcounterUserDetails(user.getEmail(),
+                user.getPassword(),
                 true, 
                 true, 
                 true, 

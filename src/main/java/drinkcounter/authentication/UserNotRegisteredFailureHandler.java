@@ -34,7 +34,6 @@ public class UserNotRegisteredFailureHandler extends SimpleUrlAuthenticationFail
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        
         if (exception instanceof UsernameNotFoundException) {
             Authentication authToken = exception.getAuthentication();
             log.info("User authenticated with token {} but has no account. Redirecting to registration...", authToken);

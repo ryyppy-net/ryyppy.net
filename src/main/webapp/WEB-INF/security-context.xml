@@ -8,6 +8,7 @@
     
     <http entry-point-ref="daep"  >
         <logout logout-url="/ui/logout" />
+        <form-login login-page="/ui/login" />
         <intercept-url pattern="/frontpage.jsp" access="ROLE_USER" />
         <intercept-url pattern="/ui/login" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/ui/newuser" access="IS_AUTHENTICATED_ANONYMOUSLY" />
@@ -20,8 +21,8 @@
         <intercept-url pattern="/API/passphrase/**" access="IS_AUTHENTICATED_ANONYMOUSLY" /> <!-- Authentication from the url -->
         <intercept-url pattern="/API/**" access="ROLE_USER" />
         <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-        <custom-filter position="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
-        <custom-filter  after="FORM_LOGIN_FILTER" ref="facebookAuthFilter" />
+        <custom-filter before="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
+        <custom-filter after="FORM_LOGIN_FILTER" ref="facebookAuthFilter" />
     </http>
     
     <beans:bean id="loginUrlEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
@@ -98,8 +99,16 @@
         <beans:property name="registrationURL" value="/ui/newuser" />
         <beans:property name="defaultFailureUrl" value="/ui/login" />
     </beans:bean>
+
+    <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+    <beans:bean id="usernamePasswordLoginProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <beans:property name="passwordEncoder" ref="passwordEncoder" />
+        <beans:property name="userDetailsService" ref="userDetailsService" />
+    </beans:bean>
     
     <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="usernamePasswordLoginProvider" />
         <authentication-provider ref="openIdAuthProvider"/>
         <authentication-provider ref="facebookAuthenticationProvider"/>
     </authentication-manager>

@@ -77,6 +77,13 @@
                         </div>
 
                         <div class="control-group">
+                            <label class="control-label" for="drinkerWeight">Salasana</label>
+                            <div class="controls">
+                                <input id="password" class="userField" type="password" name="password" autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <div class="control-group">
                             <div class="controls">
                                 <input id="submitButton" class="btn btn-success" type="submit" value="Rekisteröidy!" />
                             </div>

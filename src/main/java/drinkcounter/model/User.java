@@ -40,13 +40,13 @@ import javax.persistence.Transient;
 public class User extends AbstractEntity{
     public enum Sex {
         MALE(0.75f), FEMALE(0.66f);
-        public float factor;
+        public final float factor;
         Sex(float factor){
             this.factor = factor;
         }
     }
     public enum AuthMethod {
-        OPENID, FACEBOOK
+        OPENID, FACEBOOK, PASSWORD
     }
 
     private String email;
@@ -54,12 +54,13 @@ public class User extends AbstractEntity{
     private String name;
     private float weight = 70;
     private Sex sex = Sex.MALE;
-    private List<Drink> drinks = new ArrayList<Drink>();
+    private List<Drink> drinks = new ArrayList<>();
     private String passphrase;
     
     // authentication attributes
     private String openId;
     private AuthMethod authMethod = AuthMethod.OPENID;
+    private String password;
 
     /**
      * This user is a guest in the system, can be removed after sober
@@ -111,7 +112,6 @@ public class User extends AbstractEntity{
 
     /**
      * Weight in kilos
-     * @return
      */
     public float getWeight() {
         return weight;
@@ -128,7 +128,6 @@ public class User extends AbstractEntity{
 
     /**
      * Weight in kilos
-     * @param weightInKilos
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
@@ -220,6 +219,14 @@ public class User extends AbstractEntity{
     @Transient
     public float getBloodAlcoholGrams() {
         return AlcoholServiceImpl.getInstance().getBloodAlcoholGrams(this);
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

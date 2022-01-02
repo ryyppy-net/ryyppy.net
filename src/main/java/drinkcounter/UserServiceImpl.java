@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService{
         if (openId == null || openId.length() == 0)
             throw new IllegalArgumentException("openId");
 
-        return userDAO.findByOpenId(openId);
+        return userDAO.findByEmail(openId);
     }
     
     @Override

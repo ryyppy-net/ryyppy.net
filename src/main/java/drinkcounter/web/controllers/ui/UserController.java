@@ -1,5 +1,7 @@
 package drinkcounter.web.controllers.ui;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.openid.OpenIDAttribute;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,12 +47,10 @@ public class UserController {
     @Autowired private AuthenticationChecks authenticationChecks;
     @Autowired private UserDetailsService userDetailsService;
     @Autowired private CurrentUser currentUser;
+    @Autowired private PasswordEncoder passwordEncoder;
     
     @RequestMapping("/newuser")
     public String newUser(HttpSession session){
-        if(session.getAttribute(AuthenticationController.OPENID) == null){
-            return "redirect:/";
-        }
         return "newuser";
     }
     
@@ -59,15 +59,12 @@ public class UserController {
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight, 
-            @RequestParam("email") String email, 
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
             HttpSession session){
                 
         if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null){
             session.setAttribute(AuthenticationController.TIMEZONEOFFSET, new Double(0));
-        }
-
-        if (session.getAttribute(AuthenticationController.OPENID) == null) {
-            throw new NotLoggedInException();
         }
         
         if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null) {
@@ -81,26 +78,34 @@ public class UserController {
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
         user.setEmail(email);
-        
+        user.setPassword(passwordEncoder.encode(password));
+        user.setAuthMethod(User.AuthMethod.PASSWORD);
+
         Authentication authToken = (Authentication) session.getAttribute(AuthenticationController.OPENID);
-        if(authToken instanceof FacebookAuthenticationToken){
-            FacebookAuthenticationToken facebookToken = (FacebookAuthenticationToken) authToken;
-            user.setOpenId(facebookToken.getProfileId());
-            user.setAuthMethod(User.AuthMethod.FACEBOOK);
-        }else if(authToken instanceof OpenIDAuthenticationToken){
-            OpenIDAuthenticationToken openIdToken = (OpenIDAuthenticationToken) authToken;
-            user.setOpenId(openIdToken.getIdentityUrl());
-            user.setAuthMethod(User.AuthMethod.OPENID);
+        if(authToken != null) {
+            if(authToken instanceof FacebookAuthenticationToken){
+                FacebookAuthenticationToken facebookToken = (FacebookAuthenticationToken) authToken;
+                user.setOpenId(facebookToken.getProfileId());
+                user.setAuthMethod(User.AuthMethod.FACEBOOK);
+            }else if(authToken instanceof OpenIDAuthenticationToken){
+                OpenIDAuthenticationToken openIdToken = (OpenIDAuthenticationToken) authToken;
+                user.setOpenId(openIdToken.getIdentityUrl());
+                user.setAuthMethod(User.AuthMethod.OPENID);
+            }
         }
         
         userService.addUser(user);
         authenticate(user);
-        session.removeAttribute(AuthenticationController.OPENID);
+
+        if(authToken != null) {
+            session.removeAttribute(AuthenticationController.OPENID);
+        }
         return "redirect:/app/index.html#/";
     }
     
     private void authenticate(User user){
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getOpenId());
+        String username = user.getAuthMethod() == User.AuthMethod.PASSWORD ? user.getEmail() : user.getOpenId();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Authentication authentication = null;
         switch(user.getAuthMethod()){
             case OPENID:
@@ -111,6 +116,8 @@ public class UserController {
                 break;
             case FACEBOOK:
                 authentication = new FacebookAuthenticationToken(userDetails);
+            case PASSWORD:
+                authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

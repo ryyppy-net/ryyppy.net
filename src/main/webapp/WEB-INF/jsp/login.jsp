@@ -37,24 +37,20 @@
         <div class="login">
             <h2> <spring:message code="login.login_title" /> </h2>
             
-            <table>
-                <tr>
-                    <td>
-                        <img class="loginLogo" onclick="login('https://www.google.com/accounts/o8/id')" src="/static/images/google-icon.png" alt="Google" />
-                    </td>
-                    <td>
-                        <img class="loginLogo" onclick="login('https://steamcommunity.com/openid/')" src="/static/images/steam-icon2.png" alt="Steam" />
-                    </td>
-                    <td>
-                        <a href="facebook"><img class="loginLogo" src="/static/images/f_logo.png" alt="Facebook" /></a>
-                    </td>
-                    <td>
-                        <a href="#manualLogin" onclick="manualLogin()">
-                            <img class="loginLogo" src="/static/images/openid.png" alt="OpenID" />
-                        </a>
-                    </td>
-                </tr>
-            </table>
+            <p>
+                Kirjaudu käyttäjätunnuksella ja salasanalla
+                <form action="/j_spring_security_check" method="post" >
+                    <label for="username">Käyttäjätunnus</label>
+                    <input id="username" type="text" name="j_username"><br>
+                    <label for="password">Salasana</label>
+                    <input id="password" type="password" name="j_password"><br>
+                    <button>Kirjaudu</button>
+                </form>
+            </p>
+
+            <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>
+
+
             
             <p><spring:message code="login.security_info" /></p>
             <p><spring:message code="login.more_security_info" /></p>
