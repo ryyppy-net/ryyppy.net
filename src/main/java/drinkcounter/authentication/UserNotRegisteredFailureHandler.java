@@ -4,7 +4,6 @@
  */
 package drinkcounter.authentication;
 
-import drinkcounter.DrinkCounterServiceImpl;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.IOException;
 import javax.servlet.ServletException;

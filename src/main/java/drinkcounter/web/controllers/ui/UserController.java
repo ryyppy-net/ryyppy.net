@@ -12,7 +12,6 @@ import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.FacebookAuthenticationToken;
-import drinkcounter.authentication.NotLoggedInException;
 import drinkcounter.model.Party;
 import java.util.ArrayList;
 import java.util.Collections;
