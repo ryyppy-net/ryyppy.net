@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <script type="text/javascript" src="lib/jquery/jquery-1.6.2.js"></script>
+        <script type="text/javascript" src="lib/jquery.mobile/jquery.mobile-1.0b2.min.js"></script>
+        <script type="text/javascript" src="lib/underscore/underscore.js"></script>
+        <script type="text/javascript" src="lib/backbone/backbone.js"></script>
+        <script type="text/javascript" src="lib/handlebars/handlebars.1.0.0.beta.3.js"></script>
+        <script type="text/javascript" src="js/api.js"></script>
+        <script type="text/javascript" src="js/app.js"></script>
+        
+        <link rel="stylesheet" href="lib/jquery.mobile/jquery.mobile-1.0b2.min.css" type="text/css" media="screen" />
+    </head>
+    <body>
+        <div id="partyView" data-role="page">
+            <div data-role="header">
+                <h1>Hello</h1>
+            </div>
+            
+            <div data-role="content">
+                <form id="addDrinker" method="post" data-ajax="false">
+                    <label for="name">Name:</label>
+                    <input type="text" name="name" id="name" />
+                    
+                    <input type="submit" value="Add drinker" />
+                </form>
+                
+                <div id="drinkers"></div>
+            </div>
+            
+            <script id="drinkerTemplate" type="text/x-handlebars-template">
+                <div id="drinkerId{{attributes.id}}">
+                    <strong>{{attributes.name}}</strong> {{attributes.promilles}}
+                </div>
+            </script>
+        </div>
+    </body>
+</html>

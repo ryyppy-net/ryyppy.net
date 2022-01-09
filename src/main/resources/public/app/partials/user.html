@@ -1,0 +1,50 @@
+<div ng-include="'partials/user_menu.html'"></div>
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <div ng-repeat="participant in participants" ng-include="'partials/user_button.html'"></div>
+
+            <h2>Bileesi</h2>
+
+            <div ng-show="parties.length <= 0">
+                <p>
+                    Et näytä olevan vielä missään bileissä. Voit lisätä uudet bileet
+                    <a href="#/party-admin">bileiden hallinnassa</a> tai antaa rekisteröityessäsi käyttämäsi
+                    sähköpostiosoitteen kavereillesi, jotta he voivat kutsua sinut bileisiinsä.
+                </p>
+            </div>
+            <div ng-show="parties.length > 0">
+                <p>
+                    Jos haluat muokata bileitäsi, voit tehdä sen <a href="#/party-admin">bileiden hallinnassa</a>.
+                </p>
+
+                <div ng-repeat="party in parties | orderBy:partySort:true">
+                    <a href="#/party/{{ party.id }}">
+                        <div class="party color{{ ($index % 12) + 1 }}">
+                            <div>{{ party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ party.startTime | formatDateTime }}</small></div>
+                            <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
+                                <li ng-repeat="participantPreview in party.participants" participant-preview="participantPreview">
+                                </li>
+                            </ul>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <h2>Historia</h2>
+
+            <div class="historyGraphContainer">
+                <div id="historyGraph">
+                </div>
+            </div>
+
+            <h2>5 viimeisintä juomaa</h2>
+
+            <div class="row-fluid" ng-repeat="drink in drinks | orderBy:drinkSort:true | limitTo:5" style="margin-top: 10px;">
+                <div class="span11">{{ drink.timestamp | formatISODateTime }} (Annoksia: {{ drink.amountOfShots | roundAmountOfShots }})</div>
+                <div class="span1"><button ng-click="removeDrink(drink)" class="btn btn-danger">Poista</button></div>
+            </div>
+        </div>
+    </div>
+</div>
