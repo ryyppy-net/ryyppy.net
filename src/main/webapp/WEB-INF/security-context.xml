@@ -27,8 +27,6 @@
         <intercept-url pattern="/API/passphrase/**" access="permitAll" /> <!-- Authentication from the url -->
         <intercept-url pattern="/API/**" access="hasRole('USER')" />
         <intercept-url pattern="/**" access="permitAll" />
-        <custom-filter before="FORM_LOGIN_FILTER" ref="openIdAuthFilter" />
-        <custom-filter after="FORM_LOGIN_FILTER" ref="facebookAuthFilter" />
         <csrf disabled="true"/>
     </http>
     
@@ -54,7 +52,6 @@
     
     <beans:bean id="abstractAuthFilter" abstract="true" class="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter">
         <beans:property name="authenticationManager" ref="authenticationManager"/>
-        <beans:property name="authenticationFailureHandler" ref="userNotRegisteredHandler"/>
         <beans:property name="authenticationSuccessHandler">
             <beans:bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
                 <beans:property name="defaultTargetUrl" value="/"/>
@@ -62,50 +59,8 @@
         </beans:property>
     </beans:bean>
     
-    <!-- OpenId -->
-    <beans:bean id="openIdAuthFilter" parent="abstractAuthFilter" class="org.springframework.security.openid.OpenIDAuthenticationFilter">
-        <beans:property name="filterProcessesUrl" value="/ui/openId"/>
-        <beans:property name="returnToUrlParameters">
-            <beans:set>
-                <beans:value>is_return</beans:value>
-            </beans:set>
-        </beans:property>
-        <beans:property name="realmMapping">
-            <beans:map>
-                <beans:entry key="http://localhost:8080/ui/openId?is_return=true" value="http://localhost:8080/ui/openId?is_return=true" />
-                <beans:entry key="http://ryyppy.net/ui/openId?is_return=true" value="http://ryyppy.net/ui/openId?is_return=true" />
-            </beans:map>
-        </beans:property>
-        <beans:property name="consumer">
-            <beans:bean class="org.springframework.security.openid.OpenID4JavaConsumer"/>
-        </beans:property>
-    </beans:bean>
-    
-    <beans:bean id="openIdAuthProvider" class="org.springframework.security.openid.OpenIDAuthenticationProvider">
-        <beans:property name="userDetailsService" ref="userDetailsService" />
-    </beans:bean>
-    
-    <!-- Facebook -->
-    <beans:bean id="facebookAuthFilter" parent="abstractAuthFilter" class="drinkcounter.authentication.FacebookAuthenticationFilter">
-        <beans:property name="filterProcessesUrl" value="/ui/facebook"/>
-        <beans:property name="facebookConnectionFactory">
-            <beans:bean class="org.springframework.social.facebook.connect.FacebookConnectionFactory">
-                <beans:constructor-arg value="${facebook.app.id}" /> <!-- App id -->
-                <beans:constructor-arg value="${facebook.app.secret}" /> <!-- App secret -->
-            </beans:bean>
-        </beans:property>
-    </beans:bean>
-    
-    <beans:bean id="facebookAuthenticationProvider" class="drinkcounter.authentication.FacebookAuthenticationProvider">
-        <beans:property name="userDetailsService" ref="userDetailsService" />
-    </beans:bean>
-    
     <!-- Common stuff -->
     <beans:bean id="userDetailsService" class="drinkcounter.authentication.UserDetailsServiceImpl" />
-    <beans:bean id="userNotRegisteredHandler" class="drinkcounter.authentication.UserNotRegisteredFailureHandler">
-        <beans:property name="registrationURL" value="/ui/newuser" />
-        <beans:property name="defaultFailureUrl" value="/ui/login" />
-    </beans:bean>
 
     <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
@@ -116,9 +71,6 @@
     
     <authentication-manager alias="authenticationManager">
         <authentication-provider ref="usernamePasswordLoginProvider" />
-        <authentication-provider ref="openIdAuthProvider"/>
-        <authentication-provider ref="facebookAuthenticationProvider"/>
     </authentication-manager>
-    
     
 </beans:beans>

@@ -2,7 +2,6 @@ package drinkcounter.web.controllers.ui;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.openid.OpenIDAttribute;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,7 +10,6 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.CurrentUser;
-import drinkcounter.authentication.FacebookAuthenticationToken;
 import drinkcounter.model.Party;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +26,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.openid.OpenIDAuthenticationToken;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
@@ -81,24 +78,10 @@ public class UserController {
         user.setAuthMethod(User.AuthMethod.PASSWORD);
 
         Authentication authToken = (Authentication) session.getAttribute(AuthenticationController.OPENID);
-        if(authToken != null) {
-            if(authToken instanceof FacebookAuthenticationToken){
-                FacebookAuthenticationToken facebookToken = (FacebookAuthenticationToken) authToken;
-                user.setOpenId(facebookToken.getProfileId());
-                user.setAuthMethod(User.AuthMethod.FACEBOOK);
-            }else if(authToken instanceof OpenIDAuthenticationToken){
-                OpenIDAuthenticationToken openIdToken = (OpenIDAuthenticationToken) authToken;
-                user.setOpenId(openIdToken.getIdentityUrl());
-                user.setAuthMethod(User.AuthMethod.OPENID);
-            }
-        }
         
         userService.addUser(user);
         authenticate(user);
 
-        if(authToken != null) {
-            session.removeAttribute(AuthenticationController.OPENID);
-        }
         return "redirect:/app/index.html#/";
     }
     
@@ -107,14 +90,6 @@ public class UserController {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Authentication authentication = null;
         switch(user.getAuthMethod()){
-            case OPENID:
-                authentication = new OpenIDAuthenticationToken(userDetails, 
-                    userDetails.getAuthorities(), 
-                    user.getOpenId(),
-                    Collections.<OpenIDAttribute>emptyList());
-                break;
-            case FACEBOOK:
-                authentication = new FacebookAuthenticationToken(userDetails);
             case PASSWORD:
                 authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         }
