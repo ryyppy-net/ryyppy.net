@@ -11,22 +11,11 @@
           http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
           http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
 ">
-
-    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
-        <!--
-        *** Database configuration files ***
-            jdbc-dev.properties points to local development settings.
-            jdbc.properties points to production settings and those override values in development files.
-            In production you have to find a way to get the jdbc.properties file to the classpath
-            Alternatively you can set system properties that override the settings in these properties files
-            Maybe this setup could be replaced with jndi?
-        -->
-        <property name="locations">
-            <list>
-                <value>classpath:drinkcounter/jdbc.properties</value>
-            </list>
-        </property>
+    <context:property-placeholder properties-ref="yamlProperties" />
+    <bean id="yamlProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+        <property name="resources" value="classpath:application.yml"/>
     </bean>
+
     <context:component-scan base-package="drinkcounter"/>
     <jpa:repositories base-package="drinkcounter.dao" />
     <bean id="partyMarshaller" class="drinkcounter.util.PartyMarshaller" />
@@ -48,10 +37,10 @@
     </bean>
 
     <bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
-        <property name="driverClassName" value="${jdbc.driverClassName}" />
-        <property name="jdbcUrl" value="${jdbc.url}" />
-        <property name="username" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
+        <property name="driverClassName" value="${spring.datasource.driver-class-name}" />
+        <property name="jdbcUrl" value="${spring.datasource.url}" />
+        <property name="username" value="${spring.datasource.username}"/>
+        <property name="password" value="${spring.datasource.password}"/>
         <property name="maximumPoolSize" value="10" />
     </bean>
 

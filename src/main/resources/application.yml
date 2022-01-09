@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: ryyppy.net
+  datasource:
+    url: jdbc:postgresql://localhost/ryyppynet
+    username: ryyppynet
+    password: ryyppynet
+    driver-class-name: org.postgresql.Driver
+
+application:
+  version: "@project.version@"
