@@ -12,9 +12,7 @@
           http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
 ">
 
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="ignoreResourceNotFound" value="true" />
-        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
         <!--
         *** Database configuration files ***
             jdbc-dev.properties points to local development settings.
@@ -25,7 +23,6 @@
         -->
         <property name="locations">
             <list>
-                <value>classpath:drinkcounter/general-configuration.properties</value>
                 <value>classpath:drinkcounter/jdbc.properties</value>
             </list>
         </property>
