@@ -6,6 +6,12 @@ spring:
     username: ryyppynet
     password: ryyppynet
     driver-class-name: org.postgresql.Driver
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+  messages:
+    basename: messages,drinkcounter.version
 
 application:
   version: "@project.version@"

@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author murgo
  */
 @Controller
+@RequestMapping("ui")
 public class AuthenticationController {
     
     public static final String OPENID = "openId";

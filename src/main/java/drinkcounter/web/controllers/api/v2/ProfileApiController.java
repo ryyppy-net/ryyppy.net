@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
  * @author Toni
  */
 @Controller
-@RequestMapping("/v2")
+@RequestMapping("API/v2")
 public class ProfileApiController {
     
     @Autowired

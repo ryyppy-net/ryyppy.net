@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Toni
  */
 @Controller
+@RequestMapping("API")
 public class APIController {
 
     private static final Logger log = LoggerFactory.getLogger(APIController.class);

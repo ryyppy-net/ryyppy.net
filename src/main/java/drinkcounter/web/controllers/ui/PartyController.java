@@ -20,6 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Toni
  */
 @Controller
+@RequestMapping("ui")
 public class PartyController {
 
     @Autowired private DrinkCounterService drinkCounterService;

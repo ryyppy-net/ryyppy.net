@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author murgo
  */
 @Controller
+@RequestMapping("ui")
 public class UserController {
     public static final String OPENID_CREDENTIAL_KEY = "USER_OPENID_CREDENTIAL";
     
