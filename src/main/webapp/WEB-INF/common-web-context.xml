@@ -7,6 +7,7 @@
         <property name="basenames">
             <list>
                 <value>WEB-INF/messages</value>
+                <value>classpath:drinkcounter/version</value>
             </list>
         </property>
         <property name="cacheSeconds" value="1"/>
