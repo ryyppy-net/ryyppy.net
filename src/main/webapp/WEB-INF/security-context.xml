@@ -6,7 +6,7 @@
           http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-4.2.xsd
        ">
     
-    <http entry-point-ref="daep" disable-url-rewriting="false" >
+    <http disable-url-rewriting="false" >
         <logout logout-url="/ui/logout" />
         <form-login login-page="/ui/login"
                     username-parameter="j_username"
@@ -30,47 +30,15 @@
         <csrf disabled="true"/>
     </http>
     
-    <beans:bean id="loginUrlEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
-        <beans:constructor-arg value="/ui/login" />
-    </beans:bean>
-
-    <beans:bean id="daep" class="org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint">
-        <beans:constructor-arg>
-            <beans:map>
-                <beans:entry>
-                    <beans:key>
-                        <beans:bean class="org.springframework.security.web.util.matcher.AntPathRequestMatcher">
-                            <beans:constructor-arg value="/API/**" />
-                        </beans:bean>
-                    </beans:key>
-                    <beans:bean class="org.springframework.security.web.authentication.Http403ForbiddenEntryPoint" />
-                </beans:entry>
-            </beans:map>
-        </beans:constructor-arg>
-        <beans:property name="defaultEntryPoint" ref="loginUrlEntryPoint"/>
-    </beans:bean>
-    
-    <beans:bean id="abstractAuthFilter" abstract="true" class="org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter">
-        <beans:property name="authenticationManager" ref="authenticationManager"/>
-        <beans:property name="authenticationSuccessHandler">
-            <beans:bean class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
-                <beans:property name="defaultTargetUrl" value="/"/>
-            </beans:bean>
-        </beans:property>
-    </beans:bean>
-    
     <!-- Common stuff -->
     <beans:bean id="userDetailsService" class="drinkcounter.authentication.UserDetailsServiceImpl" />
 
     <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
-
-    <beans:bean id="usernamePasswordLoginProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
-        <beans:property name="passwordEncoder" ref="passwordEncoder" />
-        <beans:property name="userDetailsService" ref="userDetailsService" />
-    </beans:bean>
     
     <authentication-manager alias="authenticationManager">
-        <authentication-provider ref="usernamePasswordLoginProvider" />
+        <authentication-provider user-service-ref="userDetailsService">
+            <password-encoder ref="passwordEncoder" />
+        </authentication-provider>
     </authentication-manager>
     
 </beans:beans>
