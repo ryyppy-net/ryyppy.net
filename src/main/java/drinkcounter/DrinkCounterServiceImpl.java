@@ -8,7 +8,7 @@ import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.GravatarService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
