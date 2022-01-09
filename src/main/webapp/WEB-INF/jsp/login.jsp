@@ -38,36 +38,16 @@
             <h2> <spring:message code="login.login_title" /> </h2>
             
             <p>
-                Kirjaudu käyttäjätunnuksella ja salasanalla
-                <form action="/j_spring_security_check" method="post" >
+                <form action="/login" method="post" >
                     <label for="username">Käyttäjätunnus</label>
-                    <input id="username" type="text" name="j_username"><br>
+                    <input id="username" type="text" name="username"><br>
                     <label for="password">Salasana</label>
-                    <input id="password" type="password" name="j_password"><br>
-                    <button>Kirjaudu</button>
+                    <input id="password" type="password" name="password"><br>
+                    <input type="submit" value="Kirjaudu">
                 </form>
             </p>
 
             <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>
-
-
-            
-            <p><spring:message code="login.security_info" /></p>
-            <p><spring:message code="login.more_security_info" /></p>
-
-            <div id="manualLogin" style="display: none;">
-                <h2><spring:message code="login.login_manual"/></h2>
-                <form id="form" method="POST" action="<c:url value="/ui/openId?is_return=true" />">
-                    <input name="openid_identifier" type="text" maxlength="100" id="openId" />
-                    <div id="apNappula">
-                        <a href="#" onClick="$('#form').get(0).submit();"
-                           onmouseover="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo_2.png');"
-                           onmouseout="$('#submitButton').attr('src', '/static/images/kirjaudu_pullo.png');">
-                            <img id="submitButton" src="/static/images/kirjaudu_pullo.png" alt="kirjaudu" />
-                        </a>
-                    </div>
-                </form>
-            </div>
         </div>
         <div class="login">
             <h2><spring:message code="login.info.title" /></h2>

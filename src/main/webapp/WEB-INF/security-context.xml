@@ -6,13 +6,9 @@
           http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-4.2.xsd
        ">
     
-    <http disable-url-rewriting="false" >
-        <logout logout-url="/ui/logout" />
+    <http>
+        <logout />
         <form-login login-page="/ui/login"
-                    username-parameter="j_username"
-                    password-parameter="j_password"
-                    login-processing-url="/j_spring_security_check"
-                    authentication-failure-url="/ui/login?login_error=1"
                     default-target-url="/frontpage.jsp"
                     always-use-default-target="true"  />
         <intercept-url pattern="/frontpage.jsp" access="hasRole('USER')" />
