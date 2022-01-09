@@ -46,6 +46,11 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.2</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-maven-plugin</artifactId>
+                    <version>9.4.44.v20210927</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -60,78 +65,24 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>7</source>
-                    <target>7</target>
+                    <source>8</source>
+                    <target>8</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>maven-jetty-plugin</artifactId>
-                <version>6.1.10</version>
-                <configuration>
-                    <!-- this should end the stupid "user mapped section open" error on windows -->
-                    <webDefaultXml>src/main/resources/webdefault.xml</webDefaultXml>
-                    <stopPort>9966</stopPort>
-                    <stopKey>juomalaskuri</stopKey>
-                    <contextPath>/</contextPath>
-                </configuration>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
- 
-    <profiles>
-        
-        <profile>
-            <!-- Profile for connecting to local postgres database using jetty -->
-            <id>localpg</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.mortbay.jetty</groupId>
-                        <artifactId>maven-jetty-plugin</artifactId>
-                        <version>6.1.10</version>
-                        <configuration>
-                    <!-- this should end the stupid "user mapped section open" error on windows -->
-                            <webDefaultXml>src/main/resources/webdefault.xml</webDefaultXml>
-                            <stopPort>9966</stopPort>
-                            <stopKey>juomalaskuri</stopKey>
-                            <contextPath>/</contextPath>
-                            <systemProperties>
-                                <systemProperty>
-                                    <name>jdbc.driverClassName</name>
-                                    <value>org.postgresql.Driver</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jdbc.url</name>
-                                    <value>jdbc:postgresql://localhost/juomalaskuri</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jdbc.username</name>
-                                    <value>juomalaskuri</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jdbc.password</name>
-                                    <value>juomalaskuri</value>
-                                </systemProperty>
-                                <systemProperty>
-                                    <name>jdbc.dialect</name>
-                                    <value>org.hibernate.dialect.PostgreSQL82Dialect</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
-                <version>4.3.30.RELEASE</version>
+                <version>5.3.14</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -139,6 +90,13 @@
                 <groupId>org.springframework.security</groupId>
                 <artifactId>spring-security-bom</artifactId>
                 <version>4.2.20.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-bom</artifactId>
+                <version>2021.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -295,7 +253,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.3.11.Final</version>
+            <version>5.6.3.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -305,7 +263,6 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>1.11.23.RELEASE</version>
         </dependency>
 
         <!-- Test libraries -->

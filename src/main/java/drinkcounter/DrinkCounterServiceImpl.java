@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     public Party getParty(int partyId) {
-        return partyDao.findOne(partyId);
+        return partyDao.findById(partyId).orElseThrow(EntityNotFoundException::new);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public void linkUserToParty(int userId, int partyIdentifier) {
         Party party = getParty(partyIdentifier);
-        User user = userDAO.findOne(userId);
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
 
         for (User current : getParty(party.getId()).getParticipants()) {
             if (current.getId().equals(user.getId())) {
@@ -93,7 +94,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public void unlinkUserFromParty(int userId, int partyId) {
         Party party = getParty(partyId);
-        User user = userDAO.findOne(userId);
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         party.removeParticipant(user);
         partyDao.save(party);
         log.info("{} was removed from party {}", user, party.getName());
@@ -108,8 +109,8 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public void removeDrinkFromUser(int userId, int drinkId) {
-        User user = userDAO.findOne(userId);
-        Drink drink = drinkDao.findOne(drinkId);
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
         user.removeDrink(drink);
         drinkDao.delete(drink);
         log.info("{} has removed a drink {}", user, new DateTime(drink.getTimeStamp()).toString());
@@ -130,7 +131,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public int addDrink(int userId, Date date) {
         if (date.after(new Date())) throw new IllegalArgumentException("date");
-        User user = userDAO.findOne(userId);
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         drink.setTimeStamp(date);
         user.drink(drink);
@@ -160,7 +161,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         List<Object[]> results = q.getResultList();
         List<Friend> friends = new ArrayList<Friend>();
         for (Object[] tuple : results) {
-            User user = userDAO.findOne((Integer)tuple[0]);
+            User user = userDAO.findById((Integer)tuple[0]).orElseThrow(EntityNotFoundException::new);
             friends.add(new Friend(user.getId(), user.getName(), GravatarService.getGravatarUrl(user)));
         }
         return friends;
@@ -174,7 +175,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public int addDrink(int userId, float alcoholAmount) {
-        User user = userDAO.findOne(userId);
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         drink.setTimeStamp(new Date());
         drink.setAlcohol(alcoholAmount);
@@ -187,7 +188,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public void addDrink(int userId, Date date, Float alcoholAmount) {
-        User user = userDAO.findOne(userId);
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         if(date != null){
             drink.setTimeStamp(date);
