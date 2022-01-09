@@ -5,7 +5,6 @@
 package drinkcounter.web.controllers.api.v2;
 
 import com.csvreader.CsvWriter;
-import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
@@ -13,12 +12,11 @@ import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +136,7 @@ public class ProfileApiController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Drinks"});
 
         for (Map.Entry<String, Integer> p : drinksPerDay.entrySet()) {

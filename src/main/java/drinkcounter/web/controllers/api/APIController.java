@@ -1,7 +1,6 @@
 package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
-import com.google.common.base.Charsets;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
@@ -14,6 +13,7 @@ import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -151,7 +151,7 @@ public class APIController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Drinks"});
 
         for (Entry<String, Integer> p : drinksPerDay.entrySet()) {
@@ -171,7 +171,7 @@ public class APIController {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
         User user = userService.getUser(id);
@@ -191,7 +191,7 @@ public class APIController {
         authenticationChecks.checkRightsForParty(id);
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"UserID", "Time", "Alcohol"});
 
         DateTime now = new DateTime();
@@ -343,7 +343,7 @@ public class APIController {
     private String getUserCsv(User user) throws IOException {
         // I've had it with this motherfucking XML in this motherfucking Java
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, Charsets.UTF_8), ',');
+        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{user.getName(), Double.toString(user.getPromilles())});
         csvWriter.close();
 
