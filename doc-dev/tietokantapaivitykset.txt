@@ -1,1 +1,0 @@
-ALTER TABLE drink ADD COLUMN alcohol real NOT NULL default 12;

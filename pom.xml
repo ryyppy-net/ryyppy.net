@@ -7,18 +7,13 @@
         <version>2.6.2</version>
     </parent>
 
-    <groupId>juomalaskuri</groupId>
-    <artifactId>Juomalaskuri</artifactId>
+    <groupId>net.ryyppy</groupId>
+    <artifactId>ryyppynet</artifactId>
     <packaging>war</packaging>
     <version>3.1.0-SNAPSHOT</version>
-    <name>Juomalaskuri</name>
+    <name>ryyppy.net</name>
     <url>http://ryyppy.net</url>
-    <developers>
-        <developer>
-            <id>toni</id>
-            <name>Toni Paloniemi</name>
-        </developer>
-    </developers>
+
     <scm>
         <connection>scm:git:ssh://git@github.com/ryyppy-net/ryyppy.net.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/ryyppy-net/ryyppy.net.git</developerConnection>
@@ -194,6 +189,12 @@
             <artifactId>mockito-core</artifactId>
             <version>4.2.0</version>
             <scope>test</scope>
+        </dependency>
+        <!-- Development libraries -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>
