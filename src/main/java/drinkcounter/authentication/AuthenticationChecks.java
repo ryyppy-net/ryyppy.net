@@ -5,11 +5,13 @@ import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author murgo
  */
+@Component
 public class AuthenticationChecks {
     
     @Autowired

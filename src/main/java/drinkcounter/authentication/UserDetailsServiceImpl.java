@@ -6,7 +6,6 @@ package drinkcounter.authentication;
 
 import drinkcounter.UserService;
 import drinkcounter.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +19,12 @@ import java.util.Collections;
  * @author Toni
  */
 public class UserDetailsServiceImpl implements UserDetailsService{
-    
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
+
+    public UserDetailsServiceImpl(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String openId) throws UsernameNotFoundException, DataAccessException {
