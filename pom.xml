@@ -10,7 +10,7 @@
     <groupId>net.ryyppy</groupId>
     <artifactId>ryyppynet</artifactId>
     <packaging>war</packaging>
-    <version>3.1.0</version>
+    <version>3.2.0-SNAPSHOT</version>
     <name>ryyppy.net</name>
     <url>http://ryyppy.net</url>
 
