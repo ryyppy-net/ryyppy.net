@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class DefaultController {
 
+    public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#/";
+
     @GetMapping
     public String redirectToFrontPage() {
-        return "redirect:/frontpage.jsp";
+        return REDIRECT_TO_FRONTPAGE;
     }
 }

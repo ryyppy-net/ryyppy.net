@@ -28,6 +28,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
+
 /**
  *
  * @author murgo
@@ -83,7 +85,7 @@ public class UserController {
         userService.addUser(user);
         authenticate(user);
 
-        return "redirect:/app/index.html#/";
+        return REDIRECT_TO_FRONTPAGE;
     }
     
     private void authenticate(User user){

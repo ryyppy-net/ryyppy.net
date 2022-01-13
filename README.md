@@ -28,7 +28,7 @@ Requirements:
 Set configuration using environment variables:
 * SPRING_DATASOURCE_URL - JDBC Url to Postgresql database
 * SPRING_DATASOURCE_USERNAME - Database username
-* SPRING_DATASOURCE_USERNAME - Database password
+* SPRING_DATASOURCE_PASSWORD - Database password
 
 1. Copy `ryyppynet-<version>.war` to server
 3. Run application `java -jar ryyppynet-<version>.war`
