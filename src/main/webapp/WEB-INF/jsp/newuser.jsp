@@ -9,9 +9,7 @@
         
         <link rel="stylesheet" href="/app/css/bootstrap.css"/>
         <link rel="stylesheet" href="/app/css/app.css"/>
-        
-        <link href="http://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
-        
+
         <script type="text/javascript">
             $(document).ready(function() {
                 $("#drinkerName").focus();

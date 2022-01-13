@@ -1,3 +1,3 @@
 <%
-response.sendRedirect("frontpage.jsp");
+response.sendRedirect("app/index.html#/");
 %>
