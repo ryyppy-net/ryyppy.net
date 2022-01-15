@@ -25,6 +25,7 @@
         <java.version>11</java.version>
     </properties>
     <build>
+        <finalName>${project.artifactId}</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>
