@@ -12,4 +12,5 @@ artifacts:
   files:
     - target/ryyppynet.war
     - appspec.yml
+    - scripts
   discard-paths: yes

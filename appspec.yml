@@ -2,4 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: ./ryyppynet.war
-    destination: /ryyppynet/ryyppynet.war
+    destination: /opt/ryyppynet/ryyppynet.war
+hooks:
+  ApplicationStart:
+    - location: scripts/stop_ryyppynet.sh
+  ApplicationStop:
+    - location: scripts/start_ryyppynet.sh
