@@ -5,6 +5,6 @@ files:
     destination: /opt/ryyppynet
 hooks:
   ApplicationStart:
-    - location: scripts/stop_ryyppynet.sh
+    - location: start_ryyppynet.sh
   ApplicationStop:
-    - location: scripts/start_ryyppynet.sh
+    - location: stop_ryyppynet.sh
