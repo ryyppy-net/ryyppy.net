@@ -1,6 +1,5 @@
 package drinkcounter.web.controllers.api.v2;
 
-import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
@@ -11,33 +10,30 @@ import drinkcounter.model.User;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
  *
  * @author Toni
  */
-@Controller
-@RequestMapping("API/v2")
+@RestController
+@RequestMapping("API/v2/parties")
 public class PartyApiController {
-    
-    @Autowired
-    private CurrentUser currentUser;
-    @Autowired
-    private DrinkCounterService drinkCounterService;
-    @Autowired
-    private UserService userService;
-    
-    private Gson gson = new Gson();
-    
-    @RequestMapping(value="/parties", method= RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
-    public @ResponseBody String getParties(){
+
+    private final CurrentUser currentUser;
+    private final DrinkCounterService drinkCounterService;
+    private final UserService userService;
+
+    public PartyApiController(CurrentUser currentUser, DrinkCounterService drinkCounterService, UserService userService) {
+        this.currentUser = currentUser;
+        this.drinkCounterService = drinkCounterService;
+        this.userService = userService;
+    }
+
+    @GetMapping
+    public List<PartyDTO> getParties(){
         List<Party> parties = currentUser.getUser().getParties();
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
@@ -48,28 +44,25 @@ public class PartyApiController {
             }
             partyDTOs.add(partyDTO);
         }
-        return gson.toJson(partyDTOs);
+        return partyDTOs;
     }
     
-    @RequestMapping(value="/parties", method= RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody String addParty(@RequestParam("name") String partyName){
+    @PostMapping
+    public PartyDTO addParty(@RequestParam("name") String partyName){
         User user = currentUser.getUser();
         Party party = drinkCounterService.startParty(partyName);
         drinkCounterService.linkUserToParty(user.getId(), party.getId());
-        PartyDTO partyDTO = PartyDTO.fromParty(party);
-        return gson.toJson(partyDTO);
+        return PartyDTO.fromParty(party);
     }
-    
-    @RequestMapping(value="/parties/{partyId}", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
-    public @ResponseBody String getParty(@PathVariable Integer partyId){
+
+    @GetMapping("{partyId}")
+    public PartyDTO getParty(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
-        PartyDTO partyDTO = PartyDTO.fromParty(party);
-        return gson.toJson(partyDTO);
+        return PartyDTO.fromParty(party);
     }
-    
-    @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
-    public @ResponseBody String getParticipants(@PathVariable Integer partyId){
+
+    @GetMapping("{partyId}/participants")
+    public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         List<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
@@ -81,11 +74,10 @@ public class PartyApiController {
             
             participantDTOs.add(participantDTO);
         }
-        return gson.toJson(participantDTOs);
+        return participantDTOs;
     }
-    
-    @RequestMapping(value="/parties/{partyId}/participants", method=RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
+
+    @PostMapping("{partyId}/participants")
     public void addParticipant(@PathVariable Integer partyId, @RequestParam(value="email", required=false) String email,
             @RequestParam(value="name", required=false) String name,
             @RequestParam(value="sex", required=false) User.Sex sex,
@@ -109,24 +101,22 @@ public class PartyApiController {
         drinkCounterService.linkUserToParty(user.getId(), partyId);
     }
 
-    @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method=RequestMethod.DELETE)
-    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("{partyId}/participants/{participantId}")
     public void removeParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         drinkCounterService.unlinkUserFromParty(participantId, partyId);
     }
-    
-    @RequestMapping(value="/parties/{partyId}/participants/{participantId}", method= RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
-    public @ResponseBody String getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
+
+    @GetMapping("{partyId}/participants/{participantId}")
+    public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
         if(!party.getParticipants().contains(participant)){
             throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
         }
-        return gson.toJson(ParticipantDTO.fromUser(participant));
+        return ParticipantDTO.fromUser(participant);
     }
-    
-    @RequestMapping(value="/parties/{partyId}/participants/{participantId}/drinks", method=RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
+
+    @PostMapping("{partyId}/participants/{participantId}/drinks")
     public void drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
@@ -147,15 +137,12 @@ public class PartyApiController {
         drinkCounterService.addDrink(participantId, time, alcoholAmount);
     }
 
-    @RequestMapping(value="/parties/{partyId}/invitations", method=RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody String suggestInvite(@PathVariable Integer partyId,  @RequestParam(defaultValue = "10", value="amount") int amount){
-        List<Friend> invitations = drinkCounterService.suggestInvitations(currentUser.getUser().getId(), partyId, amount);
-        return gson.toJson(invitations);
+    @GetMapping("{partyId}/invitations")
+    public List<Friend> suggestInvite(@PathVariable Integer partyId,  @RequestParam(defaultValue = "10", value="amount") int amount){
+        return drinkCounterService.suggestInvitations(currentUser.getUser().getId(), partyId, amount);
     }
-    
-    @RequestMapping(value="/parties/{partyId}/invitations", method=RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
+
+    @PostMapping("/parties/{partyId}/invitations")
     public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
         drinkCounterService.linkUserToParty(userId, partyId);
     }

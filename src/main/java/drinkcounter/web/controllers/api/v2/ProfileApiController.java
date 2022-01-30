@@ -5,7 +5,6 @@
 package drinkcounter.web.controllers.api.v2;
 
 import com.csvreader.CsvWriter;
-import com.google.gson.Gson;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
@@ -19,42 +18,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 /**
  *
  * @author Toni
  */
-@Controller
-@RequestMapping("API/v2")
+@RestController
+@RequestMapping("API/v2/profile")
 public class ProfileApiController {
-    
-    @Autowired
-    private DrinkCounterService drinkCounterService;
-    
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private CurrentUser currentUser;
-    
-    private Gson gson = new Gson();
-    
-    @RequestMapping(value="/profile", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
-    public @ResponseBody String getUser() {
+
+    private final DrinkCounterService drinkCounterService;
+    private final UserService userService;
+    private final CurrentUser currentUser;
+
+    public ProfileApiController(DrinkCounterService drinkCounterService, UserService userService, CurrentUser currentUser) {
+        this.drinkCounterService = drinkCounterService;
+        this.userService = userService;
+        this.currentUser = currentUser;
+    }
+
+    @GetMapping
+    public UserDTO getUser() {
         User user = currentUser.getUser();
         UserDTO userDTO = UserDTO.fromUser(user);
         userDTO.setHistory(SlopeService.getSlopes(user));
-        return gson.toJson(userDTO);
+        return userDTO;
     }
-    
-    @RequestMapping(value="/profile", method=RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
+
+    @PostMapping
     public void updateUser(
                         @RequestParam("name") String name,
                         @RequestParam("email") String email,
@@ -67,9 +62,8 @@ public class ProfileApiController {
         user.setWeight(weight); 
         userService.updateUser(user);
     }
-    
-    @RequestMapping(value="/profile/drinks", method= RequestMethod.POST)
-    @ResponseStatus(HttpStatus.OK)
+
+    @PostMapping("drinks")
     public void drink(
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
@@ -86,9 +80,9 @@ public class ProfileApiController {
         drinkCounterService.addDrink(userId, time, (float)alcoholAmount);
         
     }
-    
-    @RequestMapping(value="/profile/drinks", method=RequestMethod.GET, produces = {"application/json;charset=UTF-8"})
-    public @ResponseBody String getDrinks(){
+
+    @GetMapping("drinks")
+    public List<DrinkDTO> getDrinks(){
         List<Drink> drinks = currentUser.getUser().getDrinks();
         List<DrinkDTO> drinkDTOs = new ArrayList<DrinkDTO>();
         for (Drink drink : drinks) {
@@ -98,16 +92,16 @@ public class ProfileApiController {
             drinkDTO.setAmountOfShots(drink.getAmountOfShots());
             drinkDTOs.add(drinkDTO);
         }
-        return gson.toJson(drinkDTOs);
+        return drinkDTOs;
     }
-    
-    @RequestMapping(value="/profile/drinks/{drinkId}", method=RequestMethod.DELETE)
-    @ResponseStatus(HttpStatus.OK)
+
+    @DeleteMapping
+    @RequestMapping(value="drinks/{drinkId}", method=RequestMethod.DELETE)
     public void deleteDrink(@PathVariable Integer drinkId){
         drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
     }
-    
-    @RequestMapping("/profile/drink-history")
+
+    @GetMapping("drink-history")
     public ResponseEntity<byte[]> getDrinkHistory() throws IOException{
         User user = currentUser.getUser();
         List<Drink> drinks = user.getDrinks();
