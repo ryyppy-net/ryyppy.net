@@ -11,11 +11,9 @@ import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Party;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.beanutils.BeanComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -63,7 +61,7 @@ public class UserController {
             HttpSession session){
                 
         if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null){
-            session.setAttribute(AuthenticationController.TIMEZONEOFFSET, new Double(0));
+            session.setAttribute(AuthenticationController.TIMEZONEOFFSET, (double) 0);
         }
         
         if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null) {
@@ -161,9 +159,10 @@ public class UserController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
         mav.addObject("user", user);
-        List<Party> parties = new ArrayList<Party>(user.getParties());
-        Collections.sort(parties, new BeanComparator("startTime"));
-        mav.addObject("parties", user.getParties());
+        mav.addObject("parties", user.getParties().stream()
+            .sorted(Comparator.comparing(Party::getStartTime))
+            .collect(Collectors.toList())
+        );
         
         return mav;
     }

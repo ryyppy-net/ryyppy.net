@@ -8,7 +8,6 @@ import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.GravatarService;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -23,10 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -49,7 +45,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     @Transactional
     public Party startParty(String partyName) {
-        if(StringUtils.isBlank(partyName)){
+        if(partyName == null || partyName.isBlank()) {
             throw new IllegalArgumentException("Party name cannot be empty");
         }
 
