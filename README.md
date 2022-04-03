@@ -26,9 +26,12 @@ Requirements:
 
 ## Configure and run on server
 Set configuration using environment variables:
-* SPRING_DATASOURCE_URL - JDBC Url to Postgresql database
-* SPRING_DATASOURCE_USERNAME - Database username
-* SPRING_DATASOURCE_PASSWORD - Database password
+* `SPRING_DATASOURCE_URL` - JDBC Url to Postgresql database
+* `SPRING_DATASOURCE_USERNAME` - Database username
+* `SPRING_DATASOURCE_PASSWORD` - Database password
+* `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENT_ID` - Client ID for the AWS Cognito Client
+* `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENT_SECRET` - Client Secret for the AWS Cognito Client
+* `SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_COGNITO_ISSUER_URI` - Issuer Uri for the Cognito client. For example https://cognito-idp.us-east-1.amazonaws.com/us-east-1_yj5BNzce5
 
 1. Copy `ryyppynet-<version>.war` to server
-3. Run application `java -jar ryyppynet-<version>.war`
+2. Run application `java -jar ryyppynet-<version>.war`

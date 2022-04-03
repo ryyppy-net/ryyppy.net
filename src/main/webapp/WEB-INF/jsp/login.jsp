@@ -45,6 +45,7 @@
             </p>
 
             <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>
+            <div><a href="/oauth2/authorization/cognito">Cognito</a></div>
         </div>
         <div class="login">
             <h2><spring:message code="login.info.title" /></h2>
