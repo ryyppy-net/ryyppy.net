@@ -20,6 +20,3 @@ jobs:
 
       - name: Build with Maven
         run: ./mvnw clean package
-
-      - name: Run tests
-        run: ./mvnw test
