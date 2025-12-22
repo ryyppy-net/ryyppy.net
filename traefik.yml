@@ -29,11 +29,3 @@ log:
   level: INFO
 
 accessLog: {}
-
-certificatesResolvers:
-  letsencrypt:
-    acme:
-      email: ${LETSENCRYPT_EMAIL}
-      storage: /traefik-data/acme.json
-      httpChallenge:
-        entryPoint: web
