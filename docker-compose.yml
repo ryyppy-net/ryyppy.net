@@ -12,7 +12,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/traefik.yml:ro
-      - ./traefik-data:/traefik-data
+      - traefik-data:/traefik-data
     networks:
       - traefik-net
 
@@ -32,3 +32,6 @@ services:
 networks:
   traefik-net:
     name: traefik-net
+
+volumes:
+  traefik-data:
