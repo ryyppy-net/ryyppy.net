@@ -29,3 +29,11 @@ log:
   level: INFO
 
 accessLog: {}
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: toni.paloniemi@gmail.com
+      storage: /traefik-data/acme.json
+      httpChallenge:
+        entryPoint: web

@@ -3,12 +3,6 @@ services:
     image: traefik:v3
     container_name: traefik
     restart: unless-stopped
-    command:
-      - --configFile=/traefik.yml
-      - --certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}
-      - --certificatesresolvers.letsencrypt.acme.storage=/traefik-data/acme.json
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
     ports:
       - "80:80"
       - "443:443"
