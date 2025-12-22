@@ -12,3 +12,9 @@ src/main/resources/drinkcounter/jdbc-default.properties
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Environment variables
+.env
+
+# Traefik data
+traefik-data/

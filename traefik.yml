@@ -9,6 +9,11 @@ api:
 entryPoints:
   web:
     address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
   websecure:
     address: ":443"
 
@@ -23,5 +28,12 @@ providers:
 log:
   level: INFO
 
-# Access logs (optional, can disable for less noise)
 accessLog: {}
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: ${LETSENCRYPT_EMAIL}
+      storage: /traefik-data/acme.json
+      httpChallenge:
+        entryPoint: web
