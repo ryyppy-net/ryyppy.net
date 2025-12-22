@@ -1,0 +1,27 @@
+# Traefik Static Configuration
+
+# API and Dashboard
+api:
+  dashboard: true
+  insecure: true  # WARNING: Only for testing! Dashboard on :8080 without auth
+
+# Entrypoints (ports Traefik listens on)
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+# Docker provider - automatically discover containers
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false  # Only expose containers with traefik.enable=true
+    network: traefik-net
+
+# Log level
+log:
+  level: INFO
+
+# Access logs (optional, can disable for less noise)
+accessLog: {}
