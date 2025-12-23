@@ -18,7 +18,7 @@ services:
   ryyppynet:
     build: .
     container_name: ryyppynet
-    restart: unless-stopped
+    restart: on-failure:2
     environment:
       - SPRING_DATASOURCE_URL=${DB_URL}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
