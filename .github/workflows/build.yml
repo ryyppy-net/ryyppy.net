@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+    environment: hetzner
 
     steps:
       - name: Checkout code
@@ -25,6 +26,9 @@ jobs:
       - name: Create environment file
         run: |
           echo "LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}" > .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
       - name: Deploy with Docker Compose
         run: docker compose up -d

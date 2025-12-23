@@ -14,13 +14,31 @@ services:
     networks:
       - traefik-net
 
+  # Spring Boot application
+  ryyppynet:
+    build: .
+    container_name: ryyppynet
+    restart: unless-stopped
+    environment:
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ryyppynet.rule=Host(`test.ryyppy.net`)"
+      - "traefik.http.routers.ryyppynet.entrypoints=websecure"
+      - "traefik.http.routers.ryyppynet.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ryyppynet.loadbalancer.server.port=8080"
+    networks:
+      - traefik-net
+
   # Simple test service
   whoami:
     image: traefik/whoami
     container_name: whoami
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`test.ryyppy.net`)"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.test.ryyppy.net`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
       - "traefik.http.services.whoami.loadbalancer.server.port=80"
