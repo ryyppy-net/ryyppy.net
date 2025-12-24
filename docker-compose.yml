@@ -31,7 +31,7 @@ services:
       start_period: 5s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ryyppynet.rule=Host(`test.ryyppy.net`) || Host(`ryyppy.net`)"
+      - "traefik.http.routers.ryyppynet.rule=Host(`ryyppy.net`)"
       - "traefik.http.routers.ryyppynet.entrypoints=websecure"
       - "traefik.http.routers.ryyppynet.tls.certresolver=letsencrypt"
       - "traefik.http.services.ryyppynet.loadbalancer.server.port=8080"
