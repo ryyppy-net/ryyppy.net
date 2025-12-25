@@ -58,3 +58,12 @@ jobs:
           method: service-account
           k8s-url: ${{ vars.K3S_API_SERVER }}
           k8s-secret: ${{ secrets.K3S_SA_TOKEN }}
+
+      - name: Create database secret
+        run: |
+          kubectl create secret generic ryyppynet-db-secret \
+            --from-literal=db-url="${{ vars.DB_URL }}" \
+            --from-literal=db-username="${{ vars.DB_USERNAME }}" \
+            --from-literal=db-password="${{ secrets.DB_PASSWORD }}" \
+            --namespace=ryyppynet \
+            --dry-run=client -o yaml | kubectl apply -f -
