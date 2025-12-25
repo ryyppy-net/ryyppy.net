@@ -8,7 +8,8 @@
       "WebFetch(domain:doc.traefik.io)",
       "WebFetch(domain:linuxblog.xyz)",
       "WebFetch(domain:www.simplehomelab.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(ls:*)"
     ]
   }
 }
