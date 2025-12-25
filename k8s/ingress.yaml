@@ -20,7 +20,18 @@ spec:
                 name: ryyppynet
                 port:
                   number: 80
+    - host: ryyppy.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ryyppynet
+                port:
+                  number: 80
   tls:
     - hosts:
         - test.ryyppy.net
+        - ryyppy.net
       secretName: ryyppynet-tls
