@@ -52,26 +52,12 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
-      - name: Set up kubectl
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.K3S_CA_CERT }}" | base64 -d > /tmp/ca.crt
-
-          kubectl config set-cluster k3s \
-            --server=${{ vars.K3S_API_SERVER }} \
-            --certificate-authority=/tmp/ca.crt \
-            --embed-certs=true
-
-          kubectl config set-credentials github-deployer \
-            --token=${{ secrets.K3S_SA_TOKEN }}
-
-          kubectl config set-context k3s \
-            --cluster=k3s \
-            --user=github-deployer \
-            --namespace=ryyppynet
-
-          kubectl config use-context k3s
-          rm /tmp/ca.crt
+      - name: Set up kubectl context
+        uses: azure/k8s-set-context@v4
+        with:
+          method: service-account
+          k8s-url: ${{ vars.K3S_API_SERVER }}
+          k8s-secret: ${{ secrets.K3S_SA_TOKEN }}
 
       - name: Test kubectl connection
         run: kubectl get nodes
