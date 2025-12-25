@@ -67,3 +67,9 @@ jobs:
             --from-literal=db-password="${{ secrets.DB_PASSWORD }}" \
             --namespace=ryyppynet \
             --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy application
+        run: kubectl apply -f k8s/deployment.yaml

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ryyppynet
+  namespace: ryyppynet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ryyppynet
+  template:
+    metadata:
+      labels:
+        app: ryyppynet
+    spec:
+      containers:
+      - name: ryyppynet
+        image: ghcr.io/ryyppy-net/ryyppy.net:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            secretKeyRef:
+              name: ryyppynet-db-secret
+              key: db-url
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ryyppynet-db-secret
+              key: db-username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ryyppynet-db-secret
+              key: db-password
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
