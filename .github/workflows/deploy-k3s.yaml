@@ -60,4 +60,4 @@ jobs:
           k8s-secret: ${{ secrets.K3S_SA_TOKEN }}
 
       - name: Test kubectl connection
-        run: kubectl get nodes
+        run: kubectl get all -n ryyppynet
