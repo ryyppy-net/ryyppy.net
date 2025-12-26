@@ -1,0 +1,24 @@
+githubConfigUrl: "https://github.com/ryyppy-net/ryyppy.net"
+githubConfigSecret: github-pat
+
+minRunners: 0
+maxRunners: 3
+
+containerMode:
+  type: "dind"  # Docker-in-Docker for building images
+
+template:
+  spec:
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        command: ["/home/runner/run.sh"]
+        env:
+          - name: DOCKER_HOST
+            value: unix:///var/run/docker.sock
+        volumeMounts:
+          - name: work
+            mountPath: /home/runner/_work
+    volumes:
+      - name: work
+        emptyDir: {}
