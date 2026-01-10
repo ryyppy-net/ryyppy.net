@@ -13,7 +13,7 @@ import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Party;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 

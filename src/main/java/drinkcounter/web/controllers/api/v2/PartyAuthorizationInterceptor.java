@@ -4,16 +4,16 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.authentication.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Checks that current user is a member of a party that he is trying to access. Sends forbidden exception if user doesn't
  * have enough rights
  */
-public class PartyAuthorizationInterceptor extends HandlerInterceptorAdapter {
+public class PartyAuthorizationInterceptor implements HandlerInterceptor {
 
     @Autowired
     private CurrentUser currentUser;

@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="jakarta.tags.core" prefix="c" %>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="${party.name}">
     <jsp:attribute name="customHead">

@@ -2,13 +2,13 @@ package drinkcounter.model;
 
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Temporal;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.Transient;
 
 /**
  *
@@ -37,7 +37,7 @@ public class Drink extends AbstractEntity {
         this.drinker = drinkerKey;
     }
 
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
     public Date getTimeStamp() {
         return timeStamp;
     }
