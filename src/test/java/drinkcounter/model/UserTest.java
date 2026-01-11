@@ -4,9 +4,9 @@ import drinkcounter.AlcoholServiceImpl;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import java.util.List;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import org.junit.Before;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
     private User man80 = new User();
@@ -16,7 +16,7 @@ public class UserTest {
 
     private static final float TOLERANCE = 0.05f;
 
-    @Before
+    @BeforeEach
     public void setUp () {
         man80.setWeight(80);
         man80.setSex(User.Sex.MALE);
