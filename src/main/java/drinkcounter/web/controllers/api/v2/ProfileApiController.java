@@ -95,8 +95,7 @@ public class ProfileApiController {
         return drinkDTOs;
     }
 
-    @DeleteMapping
-    @RequestMapping(value="drinks/{drinkId}", method=RequestMethod.DELETE)
+    @DeleteMapping("drinks/{drinkId}")
     public void deleteDrink(@PathVariable Integer drinkId){
         drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
     }
