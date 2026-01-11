@@ -13,6 +13,7 @@ spring:
     timeout: 90d
     jdbc:
       initialize-schema: always
+      cleanup-cron: "0 */15 * * * *"
   mvc:
     view:
       prefix: /WEB-INF/jsp/
