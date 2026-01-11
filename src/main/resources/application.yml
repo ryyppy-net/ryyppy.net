@@ -15,6 +15,9 @@ spring:
       suffix: .jsp
   messages:
     basename: messages,drinkcounter.version
+  docker:
+    compose:
+      file: docker/docker-compose.yml
 
 application:
   version: "@project.version@"
