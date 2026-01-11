@@ -2,7 +2,28 @@
 
 ## Remaining Tasks
 
-### 1. Social Connection Entity and Table
+### 1. Feature Flag for Google Login
+Add a configuration flag to enable/disable Google authentication, allowing safe development on the main branch without affecting production users.
+
+**Implementation:**
+- Add property in `application.properties`: `google.auth.enabled=false` (default off)
+- Create configuration class or use `@ConditionalOnProperty` to conditionally enable:
+  - Google OAuth2 client configuration
+  - `CustomOAuth2UserService` bean
+  - Google login button on login page
+- When disabled:
+  - Google OAuth2 endpoints should return 404 or redirect to login
+  - Login page should not show "Login with Google" button
+  - No Google-related beans should be loaded
+- Add environment variable override: `GOOGLE_AUTH_ENABLED=true` for production
+
+**Benefits:**
+- Safe to merge Google auth code to main without enabling it
+- Easy toggle for testing in different environments
+- Can enable per-environment (dev/staging/production)
+- Gradual rollout capability
+
+### 2. Social Connection Entity and Table
 Create a separate entity to connect users with 0 or more social providers instead of storing provider-specific fields in the User entity.
 
 **Implementation:**
@@ -23,7 +44,7 @@ Create a separate entity to connect users with 0 or more social providers instea
 - Users can disconnect/reconnect accounts
 - Standard OAuth2 pattern
 
-### 2. Registration Page for New Users
+### 3. Registration Page for New Users
 Currently, new users are auto-created with default values (weight=70kg, sex=MALE). Instead, redirect new users to a registration form to collect necessary information for BAC calculations.
 
 **Implementation:**
@@ -38,7 +59,7 @@ Currently, new users are auto-created with default values (weight=70kg, sex=MALE
 - On form submit, create User and SocialConnection
 - Complete authentication and redirect to app
 
-### 3. Account Linking Confirmation Screen
+### 4. Account Linking Confirmation Screen
 When a user logs in with Google and their email matches an existing account (created via password registration), ask for confirmation before linking the accounts.
 
 **Implementation:**
