@@ -9,6 +9,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  session:
+    timeout: 90d
+    jdbc:
+      initialize-schema: always
   mvc:
     view:
       prefix: /WEB-INF/jsp/
