@@ -24,5 +24,13 @@ spring:
     compose:
       file: docker/docker-compose.yml
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 6115241938-fkfn0jc12l66aelicc3v19so1e9gl58o.apps.googleusercontent.com
+            client-secret: REPLACE_THIS
+
 application:
   version: "@project.version@"

@@ -19,6 +19,34 @@ Requirements:
 3. Open browser at `localhost:8080`
 4. Make changes to resources or compile Java code. Browser should automatically refresh with changes.
 
+### Google OAuth2 Configuration
+To enable Google login during development, set the client secret as an environment variable:
+
+**PowerShell:**
+```powershell
+$env:SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET="YOUR_GOOGLE_CLIENT_SECRET"
+mvn spring-boot:run
+```
+
+**Command Prompt:**
+```cmd
+set SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
+mvn spring-boot:run
+```
+
+**Linux/Mac:**
+```bash
+export SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
+mvn spring-boot:run
+```
+
+Alternatively, use Maven arguments:
+```cmd
+mvn spring-boot:run "-Dspring-boot.run.arguments=--spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET"
+```
+
+For production, set the environment variable `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET`.
+
 ## Release
 1. Update version number in pom.xml
 2. Make a git TAG with the version number

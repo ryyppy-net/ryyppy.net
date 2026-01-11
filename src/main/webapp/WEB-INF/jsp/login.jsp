@@ -44,6 +44,12 @@
                 </form>
             </p>
 
+            <p style="text-align: center; margin: 20px 0;">
+                <a href="/oauth2/authorization/google" style="display: inline-block; padding: 10px 20px; background-color: #4285f4; color: white; text-decoration: none; border-radius: 4px; font-weight: 500;">
+                    Kirjaudu Google-tilillä
+                </a>
+            </p>
+
             <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>
         </div>
         <div class="login">
