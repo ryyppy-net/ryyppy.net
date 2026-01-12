@@ -34,3 +34,7 @@ spring:
 
 application:
   version: "@project.version@"
+
+google:
+  auth:
+    enabled: false  # Set to true or use GOOGLE_AUTH_ENABLED=true environment variable to enable Google authentication

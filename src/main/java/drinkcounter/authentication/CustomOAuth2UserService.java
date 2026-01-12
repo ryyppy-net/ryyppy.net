@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,8 +20,8 @@ import java.util.Set;
 /**
  * Custom OAuth2UserService that handles Google login.
  * Looks up existing users by email or creates new users with default values.
+ * Note: This is instantiated as a bean in GoogleAuthConfiguration when google.auth.enabled=true
  */
-@Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private static final Logger log = LoggerFactory.getLogger(CustomOAuth2UserService.class);
