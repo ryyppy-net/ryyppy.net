@@ -24,7 +24,7 @@ public class WebSecurityConfiguration {
     @Autowired
     public WebSecurityConfiguration(
             UserService userService,
-            @Autowired(required = false) Customizer<HttpSecurity> oauth2LoginCustomizer) {
+            Customizer<HttpSecurity> oauth2LoginCustomizer) {
         this.userService = userService;
         this.oauth2LoginCustomizer = oauth2LoginCustomizer;
     }
@@ -55,21 +55,14 @@ public class WebSecurityConfiguration {
                         "/ui/checkEmail*",
                         "/ui/timezone/*",
                         "/app/css/**",
-                        "/API/passphrase/**"
-                    ).permitAll();
-
-                // Conditionally permit OAuth2 endpoints only when Google auth is enabled
-                if (oauth2LoginCustomizer != null) {
-                    authorize.requestMatchers("/oauth2/**").permitAll();
-                }
-
-                authorize.anyRequest().authenticated();
+                        "/API/passphrase/**",
+                        "/oauth2/**"
+                    ).permitAll()
+                    .anyRequest().authenticated();
             });
 
-        // Conditionally apply OAuth2 login configuration if available
-        if (oauth2LoginCustomizer != null) {
-            oauth2LoginCustomizer.customize(http);
-        }
+        // Apply OAuth2 login configuration
+        oauth2LoginCustomizer.customize(http);
 
         return http.build();
     }

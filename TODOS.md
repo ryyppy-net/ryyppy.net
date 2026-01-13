@@ -2,28 +2,7 @@
 
 ## Remaining Tasks
 
-### 1. Feature Flag for Google Login
-Add a configuration flag to enable/disable Google authentication, allowing safe development on the main branch without affecting production users.
-
-**Implementation:**
-- Add property in `application.properties`: `google.auth.enabled=false` (default off)
-- Create configuration class or use `@ConditionalOnProperty` to conditionally enable:
-  - Google OAuth2 client configuration
-  - `CustomOAuth2UserService` bean
-  - Google login button on login page
-- When disabled:
-  - Google OAuth2 endpoints should return 404 or redirect to login
-  - Login page should not show "Login with Google" button
-  - No Google-related beans should be loaded
-- Add environment variable override: `GOOGLE_AUTH_ENABLED=true` for production
-
-**Benefits:**
-- Safe to merge Google auth code to main without enabling it
-- Easy toggle for testing in different environments
-- Can enable per-environment (dev/staging/production)
-- Gradual rollout capability
-
-### 2. Social Connection Entity and Table
+### 1. Social Connection Entity and Table
 Create a separate entity to connect users with 0 or more social providers instead of storing provider-specific fields in the User entity.
 
 **Implementation:**
@@ -44,7 +23,7 @@ Create a separate entity to connect users with 0 or more social providers instea
 - Users can disconnect/reconnect accounts
 - Standard OAuth2 pattern
 
-### 3. Registration Page for New Users
+### 2. Registration Page for New Users
 Currently, new users are auto-created with default values (weight=70kg, sex=MALE). Instead, redirect new users to a registration form to collect necessary information for BAC calculations.
 
 **Implementation:**
@@ -59,7 +38,7 @@ Currently, new users are auto-created with default values (weight=70kg, sex=MALE
 - On form submit, create User and SocialConnection
 - Complete authentication and redirect to app
 
-### 4. Account Linking Confirmation Screen
+### 3. Account Linking Confirmation Screen
 When a user logs in with Google and their email matches an existing account (created via password registration), ask for confirmation before linking the accounts.
 
 **Implementation:**
@@ -87,6 +66,33 @@ When a user logs in with Google and their email matches an existing account (cre
 ✅ OAuth2 configuration and security setup
 ✅ Login page with Google button
 ✅ Debug logging enabled
+✅ **Feature flagging based on configured providers** - Automatically detects which OAuth2 providers have valid credentials and shows corresponding login buttons
+
+**Feature Flagging Implementation:**
+- OAuth2 infrastructure (`OAuth2Configuration`) is always enabled and provider-agnostic
+- `GlobalControllerAdvice` auto-detects providers with valid credentials from `ClientRegistrationRepository`
+- Checks that client-id and client-secret are not empty or placeholder values (REPLACE_THIS, CHANGEME, etc.)
+- Provides simple boolean flags for each provider: `${googleAuthEnabled}`, `${githubAuthEnabled}`, `${facebookAuthEnabled}`
+- Login page conditionally shows buttons using simple checks: `<c:if test="${googleAuthEnabled}">`
+- No manual feature flags needed - just configure provider credentials
+- Easily extensible: add new `@ModelAttribute` method for each provider
+
+**Easy Configuration via Environment Variables:**
+- Google login: Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` environment variables
+- GitHub login: Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables
+- Facebook login: Set `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET` environment variables
+- Much simpler than Spring's default long names (e.g., `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET`)
+- Works in development and production
+
+**Simple JSP API:**
+```jsp
+<c:if test="${googleAuthEnabled}">
+  <a href="/oauth2/authorization/google">Login with Google</a>
+</c:if>
+<c:if test="${githubAuthEnabled}">
+  <a href="/oauth2/authorization/github">Login with GitHub</a>
+</c:if>
+```
 
 ❌ Social connection entity/table
 ❌ Registration page for new users

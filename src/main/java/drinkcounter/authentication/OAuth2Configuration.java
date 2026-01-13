@@ -1,7 +1,6 @@
 package drinkcounter.authentication;
 
 import drinkcounter.UserService;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -9,16 +8,15 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
 /**
- * Configuration for Google OAuth2 authentication.
- * Only loaded when google.auth.enabled=true
+ * Configuration for OAuth2/OIDC social authentication.
+ * Supports any OAuth2/OIDC provider configured in application.yml
+ * (Google, GitHub, Facebook, etc.).
  */
 @Configuration
-@ConditionalOnProperty(name = "google.auth.enabled", havingValue = "true", matchIfMissing = false)
-public class GoogleAuthConfiguration {
+public class OAuth2Configuration {
 
     /**
      * Provides a customizer that configures OAuth2 login for the security filter chain.
-     * This allows WebSecurityConfiguration to conditionally apply OAuth2 configuration.
      */
     @Bean
     public Customizer<HttpSecurity> oauth2LoginCustomizer(
@@ -51,7 +49,8 @@ public class GoogleAuthConfiguration {
     }
 
     /**
-     * Creates the custom OAuth2 user service for Google login.
+     * Creates the custom OAuth2 user service for social login.
+     * Handles user lookup and creation for any OAuth2/OIDC provider.
      */
     @Bean
     public CustomOAuth2UserService customOAuth2UserService(UserService userService) {

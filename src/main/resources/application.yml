@@ -29,12 +29,8 @@ spring:
       client:
         registration:
           google:
-            client-id: 6115241938-fkfn0jc12l66aelicc3v19so1e9gl58o.apps.googleusercontent.com
-            client-secret: REPLACE_THIS
+            client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
+            client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
 
 application:
   version: "@project.version@"
-
-google:
-  auth:
-    enabled: false  # Set to true or use GOOGLE_AUTH_ENABLED=true environment variable to enable Google authentication
