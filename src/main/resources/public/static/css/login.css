@@ -30,7 +30,7 @@ body {
 }
 
 .login p {
-    margin-top: 0px;
+    margin-top: 0;
     margin-bottom: 20px;
 }
 
@@ -94,4 +94,62 @@ table {
     border: none;
     margin-left: 5px;
     margin-right: 5px;
+}
+
+/* Google Sign-In Button - Following official branding guidelines */
+.login .google-signin-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFFFFF;
+    border: 1px solid #747775;
+    border-radius: 4px;
+    padding: 0;
+    height: 40px;
+    min-width: 200px;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1F1F1F;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.login .google-signin-button:hover {
+    background-color: #F8F9FA;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15);
+    color: #1F1F1F;
+    text-decoration: none;
+}
+
+.login .google-signin-button:active {
+    background-color: #F1F3F4;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    color: #1F1F1F;
+}
+
+.login .google-signin-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.3);
+    color: #1F1F1F;
+}
+
+.google-logo {
+    width: 18px;
+    height: 18px;
+    margin-left: 8px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.google-signin-text {
+    flex-grow: 1;
+    text-align: center;
+    padding-right: 8px;
+}
+
+.login .google-signin-button .google-signin-text {
+    color: #1F1F1F;
 }
