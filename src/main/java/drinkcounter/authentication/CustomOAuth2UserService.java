@@ -18,9 +18,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Custom OAuth2UserService that handles Google login.
- * Looks up existing users by email or creates new users with default values.
- * Note: This is instantiated as a bean in GoogleAuthConfiguration when google.auth.enabled=true
+ * Handles OAuth2/OIDC social login by looking up or creating users.
+ *
+ * User lookup: First by openId (Google's sub claim), then by email.
+ * If found by email, stores the Google ID in openId for future lookups.
+ * If not found, creates a new user with defaults (70kg, MALE, OPENID).
  */
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
@@ -37,7 +39,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // Get OAuth2 user info from Google
         OAuth2User oauth2User = super.loadUser(userRequest);
 
-        // Extract email from Google profile
+        // Extract attributes from Google profile
+        String sub = oauth2User.getAttribute("sub"); // Google's unique user ID
         String email = oauth2User.getAttribute("email");
         String givenName = oauth2User.getAttribute("given_name");
         String familyName = oauth2User.getAttribute("family_name");
@@ -47,33 +50,48 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Email not found from OAuth2 provider");
         }
 
-        // Look up existing user by email
-        User user = userService.getUserByEmail(email);
+        if (sub == null) {
+            throw new OAuth2AuthenticationException("User ID (sub) not found from OAuth2 provider");
+        }
+
+        // Look up existing user by Google ID (openId)
+        User user = userService.getUserByOpenId(sub);
 
         if (user == null) {
-            // Create new user with default values
-            user = new User();
-            user.setEmail(email);
+            // Fallback: try to find user by email (for account linking)
+            user = userService.getUserByEmail(email);
 
-            // Set name from Google profile
-            if (name != null && !name.isEmpty()) {
-                user.setName(name);
-            } else if (givenName != null) {
-                user.setName(givenName + (familyName != null ? " " + familyName : ""));
+            if (user != null) {
+                // Existing user found by email - link Google account automatically
+                user.setOpenId(sub);
+                userService.updateUser(user);
+                log.info("Linked Google account to existing user: email={}, userId={}, googleId={}", email, user.getId(), sub);
             } else {
-                user.setName(email); // Fallback to email if no name provided
+                // Create new user with default values
+                user = new User();
+                user.setEmail(email);
+                user.setOpenId(sub);
+
+                // Set name from Google profile
+                if (name != null && !name.isEmpty()) {
+                    user.setName(name);
+                } else if (givenName != null) {
+                    user.setName(givenName + (familyName != null ? " " + familyName : ""));
+                } else {
+                    user.setName(email); // Fallback to email if no name provided
+                }
+
+                // Set defaults
+                user.setWeight(70f);
+                user.setSex(User.Sex.MALE);
+                user.setAuthMethod(User.AuthMethod.OPENID);
+                user.setGuest(false);
+
+                user = userService.addUser(user);
+                log.info("Created new user via Google OAuth2: email={}, name={}, googleId={}", email, user.getName(), sub);
             }
-
-            // Set defaults
-            user.setWeight(70f);
-            user.setSex(User.Sex.MALE);
-            user.setAuthMethod(User.AuthMethod.PASSWORD);
-            user.setGuest(false);
-
-            user = userService.addUser(user);
-            log.info("Created new user via Google OAuth2: email={}, name={}", email, user.getName());
         } else {
-            log.info("Existing user logged in via Google OAuth2: email={}, userId={}", email, user.getId());
+            log.info("Existing user logged in via Google OAuth2: email={}, userId={}, googleId={}", email, user.getId(), sub);
         }
 
         // Create authorities

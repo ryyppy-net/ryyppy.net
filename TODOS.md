@@ -38,33 +38,35 @@ Currently, new users are auto-created with default values (weight=70kg, sex=MALE
 - On form submit, create User and SocialConnection
 - Complete authentication and redirect to app
 
-### 3. Account Linking Confirmation Screen
-When a user logs in with Google and their email matches an existing account (created via password registration), ask for confirmation before linking the accounts.
+### 3. ~~Account Linking Confirmation Screen~~ (IMPLEMENTED with automatic linking)
+✅ **Current Implementation**: Automatic account linking without confirmation screen
+- When a user logs in with Google and their email matches an existing account, the accounts are automatically linked
+- Google's sub (user ID) is stored in the openId field
+- This is safe because Google verifies email addresses
 
-**Implementation:**
-- Detect when OAuth2 email matches existing User but no SocialConnection exists
+**Future Enhancement (Optional):**
+If you want to add a confirmation screen for extra security:
+- Detect when OAuth2 email matches existing User but openId is null
 - Store OAuth2 user info in session temporarily
 - Redirect to confirmation screen showing:
   - "An account with email {email} already exists"
   - "Do you want to link your Google account to this existing account?"
   - Options: "Yes, link accounts" / "No, cancel"
-- If confirmed:
-  - Create SocialConnection linking the accounts
-  - Complete authentication
-- If cancelled:
-  - Clear session and redirect to login page
+- If confirmed: Store Google ID in openId field
+- If cancelled: Clear session and redirect to login page
 
-**Security Consideration:**
-- Since the user successfully authenticated with Google and the email is verified by Google, it's safe to link the accounts without requiring password re-entry
-- However, could optionally require password confirmation for extra security
+**Security Note:**
+- Current automatic linking is safe because Google verifies email ownership
+- Optional enhancement: Could require password confirmation for extra security
 
 ## Current Status
 
 ✅ Basic Google OAuth2 login working
-✅ User lookup by email
-✅ Auto-creation of new users with defaults
+✅ User lookup by Google ID (openId/sub claim) with email fallback
+✅ **Automatic account linking** - Existing users can log in with Google and accounts are automatically linked
+✅ Auto-creation of new users with defaults (weight=70kg, sex=MALE, authMethod=OPENID, openId=Google's sub ID)
 ✅ OAuth2 configuration and security setup
-✅ Login page with Google button
+✅ Login page with official Google-branded button
 ✅ Debug logging enabled
 ✅ **Feature flagging based on configured providers** - Automatically detects which OAuth2 providers have valid credentials and shows corresponding login buttons
 
@@ -96,4 +98,4 @@ When a user logs in with Google and their email matches an existing account (cre
 
 ❌ Social connection entity/table
 ❌ Registration page for new users
-❌ Account linking confirmation screen
+✅ Automatic account linking (implemented without confirmation screen)
