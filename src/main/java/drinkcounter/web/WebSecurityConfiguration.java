@@ -56,7 +56,8 @@ public class WebSecurityConfiguration {
                         "/ui/timezone/*",
                         "/app/css/**",
                         "/API/passphrase/**",
-                        "/oauth2/**"
+                        "/oauth2/**",
+                        "/api/auth/google/one-tap"
                     ).permitAll()
                     .anyRequest().authenticated();
             });

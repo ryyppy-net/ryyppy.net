@@ -15,10 +15,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 
-        <title><c:out value="${title}"/></title>
+        <title><c:out value="${title}"/> hahaa!</title>
 
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
 
         <jsp:invoke fragment="customHead" />

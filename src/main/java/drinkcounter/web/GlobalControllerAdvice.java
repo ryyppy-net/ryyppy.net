@@ -29,6 +29,34 @@ public class GlobalControllerAdvice {
     }
 
     /**
+     * Returns whether to use FedCM for Google One Tap.
+     * Disabled by default, enable with GOOGLE_FEDCM_ENABLED=true environment variable.
+     * Available in JSP as ${useFedCm}
+     */
+    @ModelAttribute("useFedCm")
+    public boolean useFedCm() {
+        String value = System.getenv("GOOGLE_FEDCM_ENABLED");
+        return "true".equalsIgnoreCase(value);
+    }
+
+    /**
+     * Returns Google Client ID for One Tap JavaScript.
+     * Available in JSP as ${googleClientId}
+     */
+    @ModelAttribute("googleClientId")
+    public String getGoogleClientId() {
+        try {
+            ClientRegistration registration = clientRegistrationRepository.findByRegistrationId("google");
+            if (registration != null && isValidCredential(registration.getClientId())) {
+                return registration.getClientId();
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        return null;
+    }
+
+    /**
      * Checks if GitHub OAuth2 login is enabled.
      * Available in JSP as ${githubAuthEnabled}
      */
