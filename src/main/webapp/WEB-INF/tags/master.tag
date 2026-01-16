@@ -19,6 +19,7 @@
 
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
         <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
 
         <jsp:invoke fragment="customHead" />

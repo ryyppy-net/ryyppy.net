@@ -7,13 +7,16 @@
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
         <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
-        
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
+
         <script type="text/javascript">
             function manualLogin() {
                 $("#manualLogin").show(300);
                 $("#openId").focus();
             }
-            
+
             function login(openId){
                 $('#openId').val(openId);
                 $('#form').submit();
@@ -43,6 +46,30 @@
                     <input type="submit" value="Kirjaudu">
                 </form>
             </p>
+
+            <c:if test="${googleAuthEnabled}">
+                        <div id="g_id_onload"
+                             data-client_id="${googleClientId}"
+                             data-context="use"
+                             data-ux_mode="popup"
+                             data-login_uri="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}/api/auth/google/one-tap"
+                             data-auto_select="${param.logout == null}"
+                             data-itp_support="true"
+                             data-use_fedcm_for_prompt="${useFedCm}">
+                        </div>
+
+                        <div style="display: flex; justify-content: center; margin: 20px 0;">
+                            <div class="g_id_signin"
+                                 data-type="standard"
+                                 data-shape="pill"
+                                 data-theme="outline"
+                                 data-text="continue_with"
+                                 data-size="large"
+                                 data-locale="fi"
+                                 data-logo_alignment="left">
+                            </div>
+                        </div>
+                    </c:if>
 
             <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>
         </div>
