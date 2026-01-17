@@ -142,7 +142,7 @@ public class PartyApiController {
         return drinkCounterService.suggestInvitations(currentUser.getUser().getId(), partyId, amount);
     }
 
-    @PostMapping("/parties/{partyId}/invitations")
+    @PostMapping("{partyId}/invitations")
     public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
         drinkCounterService.linkUserToParty(userId, partyId);
     }
