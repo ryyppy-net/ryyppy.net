@@ -49,6 +49,8 @@ public class WebSecurityConfiguration {
                     .requestMatchers(
                         "/login",
                         "/ui/login",
+                        "/ui/privacy",
+                        "/ui/terms",
                         "/static/**",
                         "/ui/newuser",
                         "/ui/addUser",

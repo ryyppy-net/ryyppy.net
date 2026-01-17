@@ -93,6 +93,12 @@
                 <g:plusone size="medium" href="http://ryyppy.net"></g:plusone>
             </p>
         </div>
+
+        <div style="text-align: center; margin-top: 20px; color: #888;">
+            <a href="/ui/privacy" style="color: #aaa; text-decoration: none;">Tietosuojaseloste</a>
+            <span style="margin: 0 10px;">|</span>
+            <a href="/ui/terms" style="color: #aaa; text-decoration: none;">Käyttöehdot</a>
+        </div>
     </jsp:body>
 </t:master>
 
