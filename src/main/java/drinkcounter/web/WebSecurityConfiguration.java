@@ -59,7 +59,8 @@ public class WebSecurityConfiguration {
                         "/app/css/**",
                         "/API/passphrase/**",
                         "/oauth2/**",
-                        "/api/auth/google/one-tap"
+                        "/api/auth/google/one-tap",
+                        "/actuator/health"
                     ).permitAll()
                     .anyRequest().authenticated();
             });
