@@ -10,14 +10,13 @@ On a technical level ryyppy.net consists of a backend written in Java and an HTM
 
 ## Development
 Requirements:
-* Java 11 to run the application
+* Java 21 to run the application
 * Maven 3 to build the application
 * Docker to run the database server
 
-1. Start database server `docker compose -f docker/docker-compose.yml up`
-2. Start application `mvn spring-boot:run`
-3. Open browser at `localhost:8080`
-4. Make changes to resources or compile Java code. Browser should automatically refresh with changes.
+1. Start application `mvn spring-boot:run` (this automatically starts the PostgreSQL database via Docker Compose)
+2. Open browser at `localhost:8080`
+3. Make changes to resources or compile Java code. Browser should automatically refresh with changes.
 
 ### Google OAuth2 Configuration
 To enable Google login, set the Google OAuth2 credentials as environment variables:
