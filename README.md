@@ -59,3 +59,15 @@ Set configuration using environment variables:
 
 1. Copy `ryyppynet-<version>.war` to server
 3. Run application `java -jar ryyppynet-<version>.war`
+
+## Railway deployment notes
+
+* `railway.json` sets a `healthcheckPath` of `/actuator/health` so Railway
+  waits for the app to report healthy before routing traffic to a new
+  deployment (avoids bad gateway during redeploys).
+* Railway's "Serverless" (scale-to-zero) mode has no built-in queueing: the
+  request that wakes a sleeping app can itself get a 502. Since
+  `ryyppy.net` is proxied through Cloudflare, `infra/cloudflare-worker/wake-retry-worker.js`
+  runs at the edge and retries the origin on 502/503 before the response
+  reaches the browser. See the comment at the top of that file for deploy
+  steps.
