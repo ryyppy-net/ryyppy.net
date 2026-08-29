@@ -10,6 +10,10 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
   timeout: 30_000,
+  // The dashboard fires several sequential AJAX calls (profile, parties,
+  // drink-history, templates) before it's done rendering; the default 5s
+  // expect() timeout is too tight for that under sandboxed/CI network conditions.
+  expect: { timeout: 15_000 },
 
   use: {
     baseURL: BASE_URL,
