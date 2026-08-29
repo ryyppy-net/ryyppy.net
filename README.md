@@ -10,7 +10,7 @@ On a technical level ryyppy.net consists of a backend written in Java and an HTM
 
 ## Development
 Requirements:
-* Java 21 to run the application
+* Java 25 to run the application
 * Maven 3 to build the application
 * Docker to run the database server
 
