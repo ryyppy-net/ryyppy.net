@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
+  // Registration alone takes ~25-30s to fully render in this sandboxed
+  // environment, and this test also creates a party and waits through the
+  // drink's 5s "undo" countdown afterward, so the default 30s budget
+  // doesn't leave enough room for the whole sequence.
+  test.setTimeout(60_000);
+
   const user = makeTestUser('party');
   await registerUser(page, user);
 
@@ -21,8 +27,12 @@ test('a user can create a party, appear as a participant, and logging a drink up
   // (toggled via ng-show), so scope to the one shown right after a click.
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
 
+  // On the party page, PartyCtrl tags every participant (self included) with
+  // type: 'participant', so DrinkerCtrl posts to the party-scoped drinks
+  // endpoint (/API/v2/parties/{id}/participants/{id}/drinks), not
+  // /API/v2/profile/drinks (that one's only used from the dashboard).
   const drinkResponse = await page.waitForResponse(
-    (response) => response.url().includes('/API/v2/profile/drinks') && response.request().method() === 'POST',
+    (response) => /\/drinks$/.test(response.url()) && response.request().method() === 'POST',
     { timeout: 10_000 }
   );
   expect(drinkResponse.ok()).toBeTruthy();
