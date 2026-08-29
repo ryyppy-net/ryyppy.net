@@ -5,6 +5,6 @@
     "buildCommand": "bash scripts/railway-build-aot-cache.sh"
   },
   "deploy": {
-    "startCommand": "bash scripts/railway-start.sh"
+    "startCommand": "bash target/railway-start.sh"
   }
 }

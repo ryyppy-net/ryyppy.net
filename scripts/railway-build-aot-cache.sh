@@ -77,4 +77,9 @@ else
   echo "!! AOT cache was not produced, deploy will fall back to a plain start" >&2
 fi
 
+# Railway's Java/Maven deploy step only carries target/. forward into the
+# runtime image (scripts/ is not included), so the start script needs to
+# live inside target/ too.
+cp scripts/railway-start.sh target/railway-start.sh
+
 exit 0
