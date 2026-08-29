@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="css/jquery.pnotify.default.css"/>
     <link rel="stylesheet" href="css/app.css"/>
 
-    <link href='https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <!-- media="print" + onload swap keeps this from blocking the synchronous
+         <script> tags below on a slow/unreachable Google Fonts request. -->
+    <link href='https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext' rel='stylesheet' type='text/css' media="print" onload="this.media='all'">
+    <noscript><link href='https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext' rel='stylesheet' type='text/css'></noscript>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>

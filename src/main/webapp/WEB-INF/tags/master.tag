@@ -20,7 +20,13 @@
         <script type="text/javascript" src="/static/js/jquery.js"></script>
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
-        <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" />
+        <%-- Loaded non-render-blocking: a pending <link rel="stylesheet"> in <head>
+             delays every synchronous <script> that follows it (and the scripts
+             customHead adds), so a slow/unreachable Google Fonts request would
+             otherwise stall the whole page. media="print" makes the browser fetch
+             it without waiting on it, then the onload swap applies it once ready. --%>
+        <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
+        <noscript><link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" /></noscript>
 
         <jsp:invoke fragment="customHead" />
     </head>
