@@ -5,7 +5,7 @@
   },
   "deploy": {
     "variables": {
-      "JAVA_OPTS": "-XX:AOTCache=target/app.aot"
+      "JAVA_OPTS": "-Dspring.aot.enabled=true -XX:AOTCache=target/app.aot"
     }
   }
 }
