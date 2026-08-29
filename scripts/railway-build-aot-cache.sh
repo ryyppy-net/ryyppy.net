@@ -19,12 +19,27 @@ echo "==> mvn package"
 mvn -B -DskipTests package
 
 WAR=target/ryyppynet.war
+EXTRACTED_DIR=target/extracted
+EXTRACTED_WAR="$EXTRACTED_DIR/ryyppynet.war"
 AOT_CACHE=target/app.aot
 TRAIN_LOG=target/aot-train.log
 TRAIN_PORT=8080
 
 if [ ! -f "$WAR" ]; then
   echo "!! $WAR not found after mvn package, aborting" >&2
+  exit 1
+fi
+
+# Extract the WAR into a thin executable WAR plus a flat lib/ directory
+# (see issue #15). The JDK AOT cache is layout-specific, so it has to be
+# trained against this extracted layout rather than the nested-jar WAR -
+# that's also what the production start command now launches.
+echo "==> extracting WAR"
+rm -rf "$EXTRACTED_DIR"
+java -Djarmode=tools -jar "$WAR" extract --destination "$EXTRACTED_DIR"
+
+if [ ! -f "$EXTRACTED_WAR" ]; then
+  echo "!! $EXTRACTED_WAR not found after extraction, aborting" >&2
   exit 1
 fi
 
@@ -39,7 +54,7 @@ set +e
 # for this subprocess so the profile's own datasource config applies.
 env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
   java -XX:AOTCacheOutput="$AOT_CACHE" \
-  -jar "$WAR" \
+  -jar "$EXTRACTED_WAR" \
   --spring.profiles.active=aot-train \
   --server.port="$TRAIN_PORT" \
   > "$TRAIN_LOG" 2>&1 &
