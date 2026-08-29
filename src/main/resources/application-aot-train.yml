@@ -1,7 +1,11 @@
 # Used only to produce the JDK 25 AOT cache during the build (see
-# scripts/railway-build-aot-cache.sh). Boots against an in-memory HSQLDB
-# instead of the real Postgres so the training run has no external
-# dependencies and never touches production data.
+# scripts/railway-build-aot-cache.sh, which also unsets SPRING_DATASOURCE_*
+# for this profile's boot - Railway injects those as env vars for the real
+# Postgres, and an env var outranks this file's spring.datasource.url,
+# which broke the training run against the driver-class-name below).
+# Boots against an in-memory HSQLDB instead of the real Postgres so the
+# training run has no external dependencies and never touches production
+# data.
 spring:
   datasource:
     url: jdbc:hsqldb:mem:aottrain
@@ -11,13 +15,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-  session:
-    # The base config selects the JDBC session store, which on context
-    # startup probes the DB platform via PlatformPlaceholderDatabaseDriverResolver
-    # to pick a schema-*.sql script. On Railway that probe has twice crashed
-    # the training run before it reaches "Started RyyppyApplication" (see
-    # scripts/railway-build-aot-cache.sh), so the cache ends up built from a
-    # truncated boot. The training run never exercises persisted sessions,
-    # so fall back to plain in-memory servlet sessions here instead of
-    # chasing why the probe fails on Railway's build container.
-    store-type: none
