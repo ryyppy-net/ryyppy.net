@@ -11,6 +11,11 @@ test('a new user can register and lands on their dashboard', async ({ page }) =>
 });
 
 test('a registered user can log out and log back in', async ({ page }) => {
+  // This test does two full dashboard loads (register, then login), and each
+  // one alone takes ~25-30s in a sandboxed/headless environment, so the
+  // default per-test timeout doesn't leave enough room for both.
+  test.setTimeout(60_000);
+
   const user = makeTestUser('relogin');
   await registerUser(page, user);
 
