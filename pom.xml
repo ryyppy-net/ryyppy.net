@@ -30,6 +30,110 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!--
+                Precompile the JSPs at build time (see issue #14). JspC (bundled in
+                tomcat-embed-jasper) generates one servlet class per JSP/tag file plus a
+                web-fragment snippet listing servlet-name/class/url-pattern per JSP.
+                Since this app runs on Spring Boot's embedded Tomcat rather than a
+                classic web.xml-driven deployment, that fragment isn't auto-merged by
+                the container - PrecompiledJspServletInitializer parses it at startup
+                and registers each generated servlet directly, bypassing Jasper's
+                request-time compilation and TLD lookups entirely.
+            -->
+            <plugin>
+                <!-- JspC doesn't create its own output directory -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>create-jspc-output-dir</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/generated-sources/jsp"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>precompile-jsps</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>java</executable>
+                            <!-- JspC needs ant (provided-scope, see below) on the classpath -->
+                            <classpathScope>compile</classpathScope>
+                            <arguments>
+                                <argument>-cp</argument>
+                                <classpath/>
+                                <argument>org.apache.jasper.JspC</argument>
+                                <argument>-webapp</argument>
+                                <argument>${project.basedir}/src/main/webapp</argument>
+                                <argument>-d</argument>
+                                <argument>${project.build.directory}/generated-sources/jsp</argument>
+                                <argument>-webinc</argument>
+                                <argument>${project.build.directory}/generated-sources/jsp/jsp-web-fragment.xml</argument>
+                                <argument>-die</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>add-precompiled-jsp-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/jsp</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-precompiled-jsp-fragment</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-sources/jsp</directory>
+                                    <includes>
+                                        <include>jsp-web-fragment.xml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -101,6 +205,32 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
+            <!-- ecj is Jasper's runtime JSP compiler. With every JSP precompiled
+                 and registered directly (see PrecompiledJspServletInitializer),
+                 nothing ever compiles a JSP at runtime, so it can be dropped. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jdt</groupId>
+                    <artifactId>ecj</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Build-time only, for the JspC invocation in pom.xml's exec-maven-plugin
+             execution: JspC (org.apache.jasper.JspC) extends an Ant Task, and needs
+             a compiler on its classpath to compile referenced tag files. provided
+             scope keeps both off the runtime classpath and out of the packaged WAR. -->
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.10.15</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>ecj</artifactId>
+            <version>3.45.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
