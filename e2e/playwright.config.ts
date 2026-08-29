@@ -9,13 +9,7 @@ export default defineConfig({
   // tests are independent and safe to run concurrently against the same
   // server/DB.
   fullyParallel: true,
-  // 2, not 4: registerUser() fills the signup form via fill(), which sets
-  // values without firing keyup, so the checkEmail AJAX callback that
-  // re-enables the submit button can race a not-yet-filled weight field.
-  // Higher concurrency makes that race easier to hit. Follow-up: fix
-  // registerUser() to drive the form with real keystrokes so it can't race,
-  // then this can go back up.
-  workers: 2,
+  workers: 4,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
   timeout: 30_000,
