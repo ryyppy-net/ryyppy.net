@@ -32,7 +32,13 @@ rm -f "$AOT_CACHE" "$TRAIN_LOG"
 
 echo "==> AOT training run"
 set +e
-java -XX:AOTCacheOutput="$AOT_CACHE" \
+# Railway sets SPRING_DATASOURCE_URL/USERNAME/PASSWORD for the real Postgres
+# on this service, and env vars outrank application-aot-train.yml's
+# spring.datasource.*, so left alone they point this HSQLDB-driven boot at
+# the production JDBC URL and it fails to construct a DataSource. Unset them
+# for this subprocess so the profile's own datasource config applies.
+env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
+  java -XX:AOTCacheOutput="$AOT_CACHE" \
   -jar "$WAR" \
   --spring.profiles.active=aot-train \
   --server.port="$TRAIN_PORT" \
@@ -55,7 +61,8 @@ done
 
 if [ -z "$STARTED" ]; then
   echo "!! AOT training run did not start within 60s, skipping AOT cache" >&2
-  tail -50 "$TRAIN_LOG" >&2 || true
+  echo "!! full training log follows:" >&2
+  cat "$TRAIN_LOG" >&2 || true
   kill "$TRAIN_PID" 2>/dev/null || true
   wait "$TRAIN_PID" 2>/dev/null || true
   exit 0
