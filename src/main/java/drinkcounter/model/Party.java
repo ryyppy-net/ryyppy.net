@@ -1,13 +1,14 @@
 package drinkcounter.model;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Temporal;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  *
@@ -17,14 +18,16 @@ import jakarta.persistence.Temporal;
 public class Party extends AbstractEntity{
     private List<User> participants;
     private String name;
-    private Date startTime;
+    private Instant startTime;
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
 
-    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
-    public Date getStartTime() {
+    // Keep the existing "timestamp without time zone" column instead of Hibernate's
+    // default TIMESTAMP_UTC mapping for Instant, which would map to timestamptz.
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    public Instant getStartTime() {
         return this.startTime;
     }
 

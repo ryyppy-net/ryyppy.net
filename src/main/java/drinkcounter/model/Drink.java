@@ -1,14 +1,15 @@
 package drinkcounter.model;
 
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import java.util.Date;
+import java.time.Instant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
-import jakarta.persistence.Temporal;
 import jakarta.persistence.Transient;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  *
@@ -21,11 +22,11 @@ import jakarta.persistence.Transient;
 public class Drink extends AbstractEntity {
 
     private User drinker;
-    private Date timeStamp;
+    private Instant timeStamp;
     private float alcohol = (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
 
     public Drink() {
-        timeStamp = new Date();
+        timeStamp = Instant.now();
     }
 
     @ManyToOne(fetch=FetchType.LAZY)
@@ -37,12 +38,14 @@ public class Drink extends AbstractEntity {
         this.drinker = drinkerKey;
     }
 
-    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
-    public Date getTimeStamp() {
+    // Keep the existing "timestamp without time zone" column instead of Hibernate's
+    // default TIMESTAMP_UTC mapping for Instant, which would map to timestamptz.
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    public Instant getTimeStamp() {
         return timeStamp;
     }
 
-    public void setTimeStamp(Date timeStamp) {
+    public void setTimeStamp(Instant timeStamp) {
         this.timeStamp = timeStamp;
     }
 

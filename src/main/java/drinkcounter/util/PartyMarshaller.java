@@ -76,7 +76,7 @@ public class PartyMarshaller {
 
         if (user.getDrinks().size() > 0) {
             Drink lastDrink = user.getDrinks().get(user.getDrinks().size() - 1);
-            long millis = System.currentTimeMillis() - lastDrink.getTimeStamp().getTime();
+            long millis = System.currentTimeMillis() - lastDrink.getTimeStamp().toEpochMilli();
             String seconds = Long.toString(millis / 1000);
             userNode.appendChild(createTextContentElement("idle", seconds, doc));
         } else {
@@ -99,7 +99,7 @@ public class PartyMarshaller {
             i++;
             Drink drink = iter.previous();
             Node drinkNode = d.createElement("drink");
-            DateTime dateTime = new DateTime(drink.getTimeStamp());
+            DateTime dateTime = new DateTime(drink.getTimeStamp().toEpochMilli());
 
             drinkNode.appendChild(createTextContentElement("id", Integer.toString(drink.getId()), d));
             drinkNode.appendChild(createTextContentElement("timestamp", Long.toString(dateTime.toInstant().getMillis()), d));

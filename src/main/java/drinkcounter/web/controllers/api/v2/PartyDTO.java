@@ -55,7 +55,7 @@ public class PartyDTO {
         PartyDTO partyDTO = new PartyDTO();
         partyDTO.setId(party.getId());
         partyDTO.setName(party.getName());
-        partyDTO.setStartTime(party.getStartTime());
+        partyDTO.setStartTime(Date.from(party.getStartTime()));
         return partyDTO;
     }
 }

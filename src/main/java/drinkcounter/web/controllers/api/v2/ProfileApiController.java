@@ -88,7 +88,7 @@ public class ProfileApiController {
         for (Drink drink : drinks) {
             DrinkDTO drinkDTO = new DrinkDTO();
             drinkDTO.setId(drink.getId());
-            drinkDTO.setTimestamp(new DateTime(drink.getTimeStamp()).toString());
+            drinkDTO.setTimestamp(new DateTime(drink.getTimeStamp().toEpochMilli()).toString());
             drinkDTO.setAmountOfShots(drink.getAmountOfShots());
             drinkDTOs.add(drinkDTO);
         }
@@ -109,7 +109,7 @@ public class ProfileApiController {
         String format = "YYYY-MM-dd";
 
         for (Drink d : drinks) {
-            DateTime dt = new DateTime(d.getTimeStamp());
+            DateTime dt = new DateTime(d.getTimeStamp().toEpochMilli());
             double timezoneOffset = 0; // (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
             DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
             dt = dt.toDateTime(dtz);

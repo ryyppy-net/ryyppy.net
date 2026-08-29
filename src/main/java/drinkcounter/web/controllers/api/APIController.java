@@ -132,7 +132,7 @@ public class APIController {
         String format = "YYYY-MM-dd";
 
         for (Drink d : drinks) {
-            DateTime dt = new DateTime(d.getTimeStamp());
+            DateTime dt = new DateTime(d.getTimeStamp().toEpochMilli());
             double timezoneOffset = (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
             DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
             dt = dt.toDateTime(dtz);

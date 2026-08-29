@@ -9,6 +9,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            # Skip Hibernate's Connection.createClob() capability probe at
+            # startup. CockroachDB (used in production on Railway) doesn't
+            # implement it and throws SQLFeatureNotSupportedException, which
+            # Hibernate catches and logs noisily even though it's harmless -
+            # we have no @Lob fields, so force the in-memory LOB creator
+            # instead of probing for one.
+            non_contextual_creation: true
   session:
     timeout: 90d
     jdbc:
