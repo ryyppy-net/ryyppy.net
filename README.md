@@ -10,7 +10,7 @@ On a technical level ryyppy.net consists of a backend written in Java and an HTM
 
 ## Development
 Requirements:
-* Java 21 to run the application
+* Java 25 to run the application
 * Maven 3 to build the application
 * Docker to run the database server
 
@@ -59,3 +59,17 @@ Set configuration using environment variables:
 
 1. Copy `ryyppynet-<version>.war` to server
 3. Run application `java -jar ryyppynet-<version>.war`
+
+### Railway
+
+Railway builds this app with [Railpack](https://railpack.com). `railpack.json`
+pins the JDK to 25 and sets `JAVA_OPTS=-XX:AOTCache=target/app.aot`.
+`railway.json`'s build command (`scripts/railway-build-aot-cache.sh`) runs
+`mvn package`, then trains a JDK AOT cache (`target/app.aot`, JEP 483/514)
+against an in-memory HSQLDB — cuts boot time ~30%, regenerated every build,
+best-effort (a failed training run just skips the cache, build still
+succeeds). Its start command fixes Railpack's default jar glob, which
+doesn't match this project's `.war` artifact.
+
+Postgres/OAuth2 config is read from env vars exactly as above; the
+training run only ever touches its own throwaway in-memory database.

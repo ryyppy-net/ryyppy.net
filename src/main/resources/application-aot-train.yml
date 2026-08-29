@@ -1,0 +1,13 @@
+# Used only to produce the JDK 25 AOT cache during the build (see
+# scripts/railway-build-aot-cache.sh). Boots against an in-memory HSQLDB
+# instead of the real Postgres so the training run has no external
+# dependencies and never touches production data.
+spring:
+  datasource:
+    url: jdbc:hsqldb:mem:aottrain
+    username: sa
+    password:
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
