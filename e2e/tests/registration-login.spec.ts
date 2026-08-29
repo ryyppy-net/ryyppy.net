@@ -21,7 +21,7 @@ test('a registered user can log out and log back in', async ({ page }) => {
 });
 
 test('an unknown email/password combination is rejected', async ({ page }) => {
-  await page.goto('/ui/login');
+  await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
   await page.fill('#username', 'no-such-user@example.com');
   await page.fill('#password', 'whatever');
   await page.click('input[type="submit"]');

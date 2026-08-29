@@ -20,7 +20,7 @@ export function makeTestUser(label: string): TestUser {
 
 /** Registers a new user via /ui/newuser and waits until the dashboard has loaded. */
 export async function registerUser(page: Page, user: TestUser): Promise<void> {
-  await page.goto('/ui/newuser');
+  await page.goto('/ui/newuser', { waitUntil: 'domcontentloaded' });
   await page.fill('#drinkerName', user.name);
   await page.fill('#email', user.email);
   await page.selectOption('#sex', 'MALE');
@@ -34,7 +34,7 @@ export async function registerUser(page: Page, user: TestUser): Promise<void> {
 
 /** Logs an already-registered user in via the /ui/login form. */
 export async function loginUser(page: Page, user: Pick<TestUser, 'email' | 'password'>): Promise<void> {
-  await page.goto('/ui/login');
+  await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
   await page.fill('#username', user.email);
   await page.fill('#password', user.password);
   await page.click('input[type="submit"]');
@@ -45,7 +45,7 @@ export async function loginUser(page: Page, user: Pick<TestUser, 'email' | 'pass
 
 /** Creates a party via the party-admin UI and follows the redirect to its page. */
 export async function createParty(page: Page, partyName: string): Promise<void> {
-  await page.goto('/app/index.html#/party-admin/');
+  await page.goto('/app/index.html#/party-admin/', { waitUntil: 'domcontentloaded' });
   await page.fill('#partyName', partyName);
   await page.click('button[type="submit"]');
 
