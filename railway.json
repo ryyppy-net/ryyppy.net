@@ -5,6 +5,6 @@
     "buildCommand": "bash scripts/railway-build-aot-cache.sh"
   },
   "deploy": {
-    "startCommand": "bash target/railway-start.sh"
+    "startCommand": "java -Dserver.port=$PORT $JAVA_OPTS -jar target/ryyppynet.war"
   }
 }

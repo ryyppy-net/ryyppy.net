@@ -7,8 +7,10 @@
 #
 # The AOT cache is best-effort: if training fails for any reason, this
 # script logs a warning and still exits 0 so the deploy proceeds without
-# it. railway-start.sh falls back to a plain start when the cache file is
-# missing.
+# it. The deploy command (railpack.json's JAVA_OPTS) always passes
+# -XX:AOTCache=target/app.aot; if the file is missing or invalid the JVM
+# just logs a warning and boots normally, so no fallback logic is needed
+# at start time.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -76,10 +78,5 @@ if [ -f "$AOT_CACHE" ]; then
 else
   echo "!! AOT cache was not produced, deploy will fall back to a plain start" >&2
 fi
-
-# Railway's Java/Maven deploy step only carries target/. forward into the
-# runtime image (scripts/ is not included), so the start script needs to
-# live inside target/ too.
-cp scripts/railway-start.sh target/railway-start.sh
 
 exit 0

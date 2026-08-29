@@ -2,5 +2,10 @@
   "$schema": "https://schema.railpack.com",
   "packages": {
     "java": "25"
+  },
+  "deploy": {
+    "variables": {
+      "JAVA_OPTS": "-XX:AOTCache=target/app.aot"
+    }
   }
 }

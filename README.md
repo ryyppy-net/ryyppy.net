@@ -62,19 +62,29 @@ Set configuration using environment variables:
 
 ### Railway
 
-`railway.json` overrides Railway's default build/start commands (still on
-its normal Nixpacks builder, so JDK 25 is picked up from `pom.xml` as
-usual):
+Railway builds this app with [Railpack](https://railpack.com), its default
+builder (not Nixpacks). `railpack.json` pins the JDK to 25 (Railpack's
+own JDK provisioning defaults to 21 and doesn't read `java.version` from
+`pom.xml`), and `railway.json` overrides the build command to also produce
+a JDK AOT cache:
 
-* Build: `scripts/railway-build-aot-cache.sh` runs `mvn package`, then does
-  a short training run against an in-memory HSQLDB
-  (`application-aot-train.yml`) to produce a JDK AOT cache
+* Build (`railway.json` → `scripts/railway-build-aot-cache.sh`): runs
+  `mvn package`, then does a short training run against an in-memory
+  HSQLDB (`application-aot-train.yml`) to produce a JDK AOT cache
   (`target/app.aot`, JEP 483/514). This cuts boot time by roughly 30%. The
   cache is regenerated on every build, so it's never stale, and training
   is best-effort — if it fails, the build still succeeds and just skips
   the cache.
-* Start: `scripts/railway-start.sh` runs with `-XX:AOTCache=target/app.aot`
-  when the cache exists, otherwise falls back to a plain start.
+* Start: unchanged from Railpack's own default
+  (`java -Dserver.port=$PORT $JAVA_OPTS -jar target/*jar`).
+  `railpack.json` sets `JAVA_OPTS=-XX:AOTCache=target/app.aot`; if the
+  cache is missing or invalid the JVM just logs a warning and boots
+  normally, so no fallback logic is needed.
+
+Railway's Java/Maven deploy step only carries `target/.` forward from the
+build step into the runtime image — nothing else in the repo (including
+`scripts/`) is present at start time, which is why the AOT cache lives
+under `target/` and the start command only ever references paths there.
 
 The app still reads its Postgres/OAuth2 config from environment variables
 exactly as above; the training run only ever touches its own throwaway
