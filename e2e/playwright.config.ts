@@ -5,8 +5,11 @@ const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
-  workers: 1,
+  // Each test registers its own uniquely-emailed user (see helpers.ts), so
+  // tests are independent and safe to run concurrently against the same
+  // server/DB.
+  fullyParallel: true,
+  workers: 4,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
   timeout: 30_000,
