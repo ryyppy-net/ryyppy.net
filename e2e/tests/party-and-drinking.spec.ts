@@ -2,12 +2,6 @@ import { test, expect } from '@playwright/test';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
-  // Registration alone takes ~25-30s to fully render in this sandboxed
-  // environment, and this test also creates a party and waits through the
-  // drink's 5s "undo" countdown afterward, so the default 30s budget
-  // doesn't leave enough room for the whole sequence.
-  test.setTimeout(60_000);
-
   const user = makeTestUser('party');
   await registerUser(page, user);
 
