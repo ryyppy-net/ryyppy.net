@@ -28,7 +28,10 @@ export async function registerUser(page: Page, user: TestUser): Promise<void> {
   await page.fill('#password', user.password);
   await page.click('#submitButton');
 
-  await expect(page).toHaveURL(/\/app\/index\.html#\//);
+  // AngularJS normalizes the URL to a trailing "#/" once it bootstraps, but
+  // that can lag a beat behind the initial navigation, so don't require it
+  // here — the dashboard heading below is the real signal of readiness.
+  await expect(page).toHaveURL(/\/app\/index\.html/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 }
 
@@ -39,7 +42,10 @@ export async function loginUser(page: Page, user: Pick<TestUser, 'email' | 'pass
   await page.fill('#password', user.password);
   await page.click('input[type="submit"]');
 
-  await expect(page).toHaveURL(/\/app\/index\.html#\//);
+  // AngularJS normalizes the URL to a trailing "#/" once it bootstraps, but
+  // that can lag a beat behind the initial navigation, so don't require it
+  // here — the dashboard heading below is the real signal of readiness.
+  await expect(page).toHaveURL(/\/app\/index\.html/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 }
 

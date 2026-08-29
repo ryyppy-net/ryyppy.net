@@ -17,7 +17,9 @@ test('a user can create a party, appear as a participant, and logging a drink up
   // Clicking the tile starts a 5s "undo" countdown before the drink is
   // actually posted (see DrinkerCtrl.addDrink), so give it plenty of room.
   await drinkerTile.locator('.container-fluid').first().click();
-  await expect(drinkerTile.locator('.drinker-overlay')).toBeVisible();
+  // Both the "adding" and "editing" overlays exist in the DOM at once
+  // (toggled via ng-show), so scope to the one shown right after a click.
+  await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
 
   const drinkResponse = await page.waitForResponse(
     (response) => response.url().includes('/API/v2/profile/drinks') && response.request().method() === 'POST',
