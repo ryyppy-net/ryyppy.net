@@ -1,0 +1,10 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "bash scripts/railway-build-aot-cache.sh"
+  },
+  "deploy": {
+    "startCommand": "bash scripts/railway-start.sh"
+  }
+}

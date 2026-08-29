@@ -59,3 +59,23 @@ Set configuration using environment variables:
 
 1. Copy `ryyppynet-<version>.war` to server
 3. Run application `java -jar ryyppynet-<version>.war`
+
+### Railway
+
+`railway.json` overrides Railway's default build/start commands (still on
+its normal Nixpacks builder, so JDK 25 is picked up from `pom.xml` as
+usual):
+
+* Build: `scripts/railway-build-aot-cache.sh` runs `mvn package`, then does
+  a short training run against an in-memory HSQLDB
+  (`application-aot-train.yml`) to produce a JDK AOT cache
+  (`target/app.aot`, JEP 483/514). This cuts boot time by roughly 30%. The
+  cache is regenerated on every build, so it's never stale, and training
+  is best-effort — if it fails, the build still succeeds and just skips
+  the cache.
+* Start: `scripts/railway-start.sh` runs with `-XX:AOTCache=target/app.aot`
+  when the cache exists, otherwise falls back to a plain start.
+
+The app still reads its Postgres/OAuth2 config from environment variables
+exactly as above; the training run only ever touches its own throwaway
+in-memory database.
