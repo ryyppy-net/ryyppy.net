@@ -15,6 +15,21 @@ Ryyppy.net is a web application for tracking alcohol consumption. Users can crea
 
 ## Development Commands
 
+### JDK requirement
+
+The build targets Java 25 (`<java.version>25</java.version>`, Spring Boot 4.1.1),
+and production pins the same via `railpack.json`. Anything older fails at compile
+time with `release version 25 not supported`, so `JAVA_HOME` must point at a JDK 25+.
+
+Install one locally however you prefer (SDKMAN, Homebrew, `winget install
+EclipseAdoptium.Temurin.25.JDK`, or the Adoptium package).
+
+Claude Code on the web needs it too: the cloud image ships OpenJDK 21, so the
+environment's **Setup script** installs Temurin 25 to `/opt/java/jdk-25` and its
+**Environment variables** set `JAVA_HOME=/opt/java/jdk-25`. Both are configured per
+environment at claude.ai/code, not in this repo. The env var is the part that
+matters — Maven reads `JAVA_HOME` and ignores whichever `java` is on `PATH`.
+
 ### Start Development Environment
 ```bash
 # 1. Start PostgreSQL database
