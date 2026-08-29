@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Ryyppy.net is a web application for tracking alcohol consumption. Users can create parties and track their blood alcohol content (BAC) in real-time. The application calculates promille levels based on user weight, sex, and drink timestamps.
 
 **Tech Stack:**
-- Backend: Spring Boot 2.7.10 (Java 11)
+- Backend: Spring Boot 4.1.1 (Java 21)
 - Database: PostgreSQL (HSQLDB for testing)
 - Frontend: AngularJS (legacy), with experimental Backbone and Ember implementations
 - View Layer: JSP with JSTL
