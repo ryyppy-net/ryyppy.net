@@ -55,7 +55,8 @@ done
 
 if [ -z "$STARTED" ]; then
   echo "!! AOT training run did not start within 60s, skipping AOT cache" >&2
-  tail -50 "$TRAIN_LOG" >&2 || true
+  echo "!! full training log follows:" >&2
+  cat "$TRAIN_LOG" >&2 || true
   kill "$TRAIN_PID" 2>/dev/null || true
   wait "$TRAIN_PID" 2>/dev/null || true
   exit 0

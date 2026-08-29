@@ -11,3 +11,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  session:
+    # The base config selects the JDBC session store, which on context
+    # startup probes the DB platform via PlatformPlaceholderDatabaseDriverResolver
+    # to pick a schema-*.sql script. On Railway that probe has twice crashed
+    # the training run before it reaches "Started RyyppyApplication" (see
+    # scripts/railway-build-aot-cache.sh), so the cache ends up built from a
+    # truncated boot. The training run never exercises persisted sessions,
+    # so fall back to plain in-memory servlet sessions here instead of
+    # chasing why the probe fails on Railway's build container.
+    store-type: none
