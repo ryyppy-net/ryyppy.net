@@ -29,30 +29,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <!--
-                        provided-scope deps are packaged into WEB-INF/lib-provided, which
-                        the WarLauncher DOES put on the classpath for `java -jar` (how this
-                        app is started in production) - that directory only drops out when
-                        the WAR is deployed to a standalone container. ant and ecj are
-                        build-time only, needed just for the JspC invocation below, so
-                        exclude them from the archive outright.
-                    -->
-                    <excludes>
-                        <exclude>
-                            <groupId>org.apache.ant</groupId>
-                            <artifactId>ant</artifactId>
-                        </exclude>
-                        <exclude>
-                            <groupId>org.apache.ant</groupId>
-                            <artifactId>ant-launcher</artifactId>
-                        </exclude>
-                        <exclude>
-                            <groupId>org.eclipse.jdt</groupId>
-                            <artifactId>ecj</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <!--
                 Precompile the JSPs at build time (see issue #14). JspC (bundled in
@@ -97,8 +73,6 @@
                         </goals>
                         <configuration>
                             <executable>java</executable>
-                            <!-- JspC needs ant (provided-scope, see below) on the classpath -->
-                            <classpathScope>compile</classpathScope>
                             <arguments>
                                 <argument>-cp</argument>
                                 <classpath/>
@@ -229,34 +203,14 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
-            <!-- ecj is Jasper's runtime JSP compiler. With every JSP precompiled
-                 and registered directly (see PrecompiledJspServletInitializer),
-                 nothing ever compiles a JSP at runtime, so it can be dropped. -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.jdt</groupId>
-                    <artifactId>ecj</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- Build-time only, for the JspC invocation in pom.xml's exec-maven-plugin
-             execution: JspC (org.apache.jasper.JspC) extends an Ant Task, and needs
-             a compiler on its classpath to compile referenced tag files. provided
-             scope alone does NOT keep these out of an executable WAR - the launcher
-             reads WEB-INF/lib-provided too - so they are also excluded explicitly in
-             the spring-boot-maven-plugin configuration above. -->
+        <!-- Needed only for the JspC invocation in pom.xml's exec-maven-plugin
+             execution: JspC (org.apache.jasper.JspC) extends an Ant Task. -->
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
             <version>1.10.15</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jdt</groupId>
-            <artifactId>ecj</artifactId>
-            <version>3.45.0</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
