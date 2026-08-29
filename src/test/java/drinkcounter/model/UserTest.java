@@ -228,7 +228,7 @@ public class UserTest {
     public void drinkXDrinksNMinutesAgo(User user, int drinks, int minutes) {
         for (int i = 0; i < drinks; i++) {
             Drink drink = new Drink();
-            drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate());
+            drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate().toInstant());
             user.drink(drink);
         }
     }

@@ -155,7 +155,7 @@ public class User extends AbstractEntity{
         ListIterator<Drink> iterator = drinks.listIterator(drinks.size());
         while(iterator.hasPrevious()){
             Drink drink = iterator.previous();
-            if (drink.getTimeStamp().before(date))
+            if (drink.getTimeStamp().isBefore(date.toInstant()))
                 break;
             shots += drink.getAmountOfShots();
         }

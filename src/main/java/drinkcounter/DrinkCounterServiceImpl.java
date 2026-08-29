@@ -22,6 +22,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -51,7 +52,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
         Party party = new Party();
         party.setName(partyName);
-        party.setStartTime(new Date());
+        party.setStartTime(Instant.now());
         partyDao.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());
@@ -109,7 +110,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
         user.removeDrink(drink);
         drinkDao.delete(drink);
-        log.info("{} has removed a drink {}", user, new DateTime(drink.getTimeStamp()).toString());
+        log.info("{} has removed a drink {}", user, new DateTime(drink.getTimeStamp().toEpochMilli()).toString());
     }
 
     @Override
@@ -129,7 +130,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         if (date.after(new Date())) throw new IllegalArgumentException("date");
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
-        drink.setTimeStamp(date);
+        drink.setTimeStamp(date.toInstant());
         user.drink(drink);
         drinkDao.save(drink);
         log.info("{} has drunk a drink at {}", user, date.toString());
@@ -173,7 +174,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     public int addDrink(int userId, float alcoholAmount) {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
-        drink.setTimeStamp(new Date());
+        drink.setTimeStamp(Instant.now());
         drink.setAlcohol(alcoholAmount);
         user.drink(drink);
         drinkDao.save(drink);
@@ -187,9 +188,9 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         if(date != null){
-            drink.setTimeStamp(date);
+            drink.setTimeStamp(date.toInstant());
         }else{
-            drink.setTimeStamp(new Date());
+            drink.setTimeStamp(Instant.now());
         }
         
         if(alcoholAmount != null){
