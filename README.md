@@ -62,30 +62,14 @@ Set configuration using environment variables:
 
 ### Railway
 
-Railway builds this app with [Railpack](https://railpack.com), its default
-builder (not Nixpacks). `railpack.json` pins the JDK to 25 (Railpack's
-own JDK provisioning defaults to 21 and doesn't read `java.version` from
-`pom.xml`), and `railway.json` overrides the build command to also produce
-a JDK AOT cache:
+Railway builds this app with [Railpack](https://railpack.com). `railpack.json`
+pins the JDK to 25 and sets `JAVA_OPTS=-XX:AOTCache=target/app.aot`.
+`railway.json`'s build command (`scripts/railway-build-aot-cache.sh`) runs
+`mvn package`, then trains a JDK AOT cache (`target/app.aot`, JEP 483/514)
+against an in-memory HSQLDB — cuts boot time ~30%, regenerated every build,
+best-effort (a failed training run just skips the cache, build still
+succeeds). Its start command fixes Railpack's default jar glob, which
+doesn't match this project's `.war` artifact.
 
-* Build (`railway.json` → `scripts/railway-build-aot-cache.sh`): runs
-  `mvn package`, then does a short training run against an in-memory
-  HSQLDB (`application-aot-train.yml`) to produce a JDK AOT cache
-  (`target/app.aot`, JEP 483/514). This cuts boot time by roughly 30%. The
-  cache is regenerated on every build, so it's never stale, and training
-  is best-effort — if it fails, the build still succeeds and just skips
-  the cache.
-* Start: unchanged from Railpack's own default
-  (`java -Dserver.port=$PORT $JAVA_OPTS -jar target/*jar`).
-  `railpack.json` sets `JAVA_OPTS=-XX:AOTCache=target/app.aot`; if the
-  cache is missing or invalid the JVM just logs a warning and boots
-  normally, so no fallback logic is needed.
-
-Railway's Java/Maven deploy step only carries `target/.` forward from the
-build step into the runtime image — nothing else in the repo (including
-`scripts/`) is present at start time, which is why the AOT cache lives
-under `target/` and the start command only ever references paths there.
-
-The app still reads its Postgres/OAuth2 config from environment variables
-exactly as above; the training run only ever touches its own throwaway
-in-memory database.
+Postgres/OAuth2 config is read from env vars exactly as above; the
+training run only ever touches its own throwaway in-memory database.
