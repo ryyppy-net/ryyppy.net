@@ -29,6 +29,7 @@ spring:
     view:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
+
   messages:
     basename: messages,drinkcounter.version
   docker:
@@ -42,6 +43,13 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
+
+server:
+  tomcat:
+    # Safe only because every JSP is precompiled and registered directly by
+    # PrecompiledJspServletInitializer - nothing compiles a JSP at runtime, so
+    # nothing needs to resolve a taglib from a jar's TLD at request time.
+    additional-tld-skip-patterns: "*.jar"
 
 application:
   version: "@project.version@"
