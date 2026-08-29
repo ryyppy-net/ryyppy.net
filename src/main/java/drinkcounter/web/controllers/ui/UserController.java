@@ -21,10 +21,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
 
@@ -45,7 +51,9 @@ public class UserController {
     @Autowired private UserDetailsService userDetailsService;
     @Autowired private CurrentUser currentUser;
     @Autowired private PasswordEncoder passwordEncoder;
-    
+
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+
     @RequestMapping("/newuser")
     public String newUser(HttpSession session){
         return "newuser";
@@ -58,18 +66,20 @@ public class UserController {
             @RequestParam("weight") float weight, 
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            HttpSession session){
-                
+            HttpSession session,
+            HttpServletRequest request,
+            HttpServletResponse response){
+
         if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null){
             session.setAttribute(AuthenticationController.TIMEZONEOFFSET, (double) 0);
         }
-        
+
         if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null) {
             throw new IllegalArgumentException();
         }
-        
-        
-        
+
+
+
         User user = new User();
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
@@ -79,14 +89,14 @@ public class UserController {
         user.setAuthMethod(User.AuthMethod.PASSWORD);
 
         Authentication authToken = (Authentication) session.getAttribute(AuthenticationController.OPENID);
-        
+
         userService.addUser(user);
-        authenticate(user);
+        authenticate(user, request, response);
 
         return REDIRECT_TO_FRONTPAGE;
     }
-    
-    private void authenticate(User user){
+
+    private void authenticate(User user, HttpServletRequest request, HttpServletResponse response){
         String username = user.getAuthMethod() == User.AuthMethod.PASSWORD ? user.getEmail() : user.getOpenId();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Authentication authentication = null;
@@ -94,7 +104,11 @@ public class UserController {
             case PASSWORD:
                 authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         }
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, request, response);
     }
 
     @RequestMapping("/modifyUser")

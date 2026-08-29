@@ -134,3 +134,16 @@ Test files are in `src/test/java/drinkcounter/`:
 - Unit tests use JUnit 4 and Mockito
 - Limited test coverage (4 test files currently)
 - Run individual test: `mvn test -Dtest=ClassName`
+
+### End-to-end tests (Playwright)
+
+A Playwright suite in `e2e/` drives the real app through a browser — registration, login/logout, invalid-credentials rejection, and party creation/drink logging with promille updates. Use this to verify a change actually works end-to-end (auth flows, the AngularJS UI, REST API together), not just that units pass in isolation.
+
+```bash
+cd e2e
+npm install
+npx playwright install chromium   # first run only
+npm test                           # starts the app for you if it isn't already running
+```
+
+See `e2e/README.md` for details, including `PLAYWRIGHT_CHROMIUM_EXECUTABLE`/`SKIP_WEBSERVER` for sandboxed dev containers that pre-install their own Chromium build. When iterating, run one test at a time with `npx playwright test -g "<test name>"` and confirm it's green before moving to the next, rather than batching changes across the whole suite.
