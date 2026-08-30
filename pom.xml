@@ -39,6 +39,29 @@
                 </executions>
             </plugin>
             <!--
+                Build-time Hibernate bytecode enhancement. Without this, Hibernate
+                generates lazy-loading/dirty-checking bytecode for each @Entity at
+                startup via ByteBuddy; this plugin bakes that enhancement into the
+                compiled classes instead, so startup just loads them.
+            -->
+            <plugin>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-maven-plugin</artifactId>
+                <version>7.4.5.Final</version>
+                <executions>
+                    <execution>
+                        <id>enhance</id>
+                        <configuration>
+                            <enableLazyInitialization>true</enableLazyInitialization>
+                            <enableDirtyTracking>true</enableDirtyTracking>
+                        </configuration>
+                        <goals>
+                            <goal>enhance</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--
                 Precompile the JSPs at build time (see issue #14). JspC (bundled in
                 tomcat-embed-jasper) generates one servlet class per JSP/tag file plus a
                 web-fragment snippet listing servlet-name/class/url-pattern per JSP.
