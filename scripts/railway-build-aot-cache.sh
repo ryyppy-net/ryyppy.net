@@ -210,13 +210,35 @@ if [ -z "$STARTED" ]; then
   exit 0
 fi
 
-# Warm a couple of representative request paths (public, no auth needed)
-# so the cache covers MVC/JSP rendering and the DB health check, not just
-# the bare boot path.
+# Warm representative request paths so the cache covers more than just the
+# bare boot path. The first three are public; the rest register a throwaway
+# user (POST /ui/addUser auto-authenticates, saving the session into the
+# cookie jar below) and walk it through the app's actual hot paths -
+# profile/party JSON DTOs and, most importantly, logging a drink so
+# AlcoholCalculator's promille calculation actually runs. None of this
+# touched HSQLDB reliably before (Postgres-only null/DB quirks aside, it
+# just wasn't part of the old warm-up either), so it's new coverage on top
+# of the real-Postgres change above, not a duplicate of it.
+COOKIE_JAR="$PG_ROOT.cookies"
+BASE="http://localhost:${TRAIN_PORT}"
 sleep 1
-curl -fsS "http://localhost:${TRAIN_PORT}/actuator/health" -o /dev/null || true
-curl -fsS "http://localhost:${TRAIN_PORT}/ui/login" -o /dev/null || true
-curl -fsS "http://localhost:${TRAIN_PORT}/" -o /dev/null || true
+curl -fsS "$BASE/actuator/health" -o /dev/null || true
+curl -fsS "$BASE/ui/login" -o /dev/null || true
+curl -fsS -L "$BASE/" -o /dev/null || true
+curl -fsS -c "$COOKIE_JAR" -o /dev/null \
+  --data-urlencode "name=Warmup User" \
+  --data-urlencode "sex=MALE" \
+  --data-urlencode "weight=80" \
+  --data-urlencode "email=aot-warmup@example.com" \
+  --data-urlencode "password=aot-warmup-password" \
+  "$BASE/ui/addUser" || true
+curl -fsS -b "$COOKIE_JAR" -L "$BASE/" -o /dev/null || true
+curl -fsS -b "$COOKIE_JAR" "$BASE/API/v2/profile" -o /dev/null || true
+curl -fsS -b "$COOKIE_JAR" -X POST "$BASE/API/v2/profile/drinks" -o /dev/null || true
+curl -fsS -b "$COOKIE_JAR" "$BASE/API/v2/profile" -o /dev/null || true
+curl -fsS -b "$COOKIE_JAR" -X POST --data-urlencode "name=Warmup Party" "$BASE/API/v2/parties" -o /dev/null || true
+curl -fsS -b "$COOKIE_JAR" "$BASE/API/v2/parties" -o /dev/null || true
+rm -f "$COOKIE_JAR"
 sleep 1
 
 kill "$TRAIN_PID" 2>/dev/null || true
