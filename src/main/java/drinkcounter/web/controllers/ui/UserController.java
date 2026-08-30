@@ -41,9 +41,6 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @Controller
 @RequestMapping("ui")
 public class UserController {
-    public static final String OPENID_CREDENTIAL_KEY = "USER_OPENID_CREDENTIAL";
-    
-    
     @Autowired private DrinkCounterService drinkCounterService;
     @Autowired private UserService userService;
 
