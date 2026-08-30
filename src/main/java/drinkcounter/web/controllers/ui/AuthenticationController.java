@@ -25,8 +25,6 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @RequestMapping("ui")
 public class AuthenticationController {
     
-    public static final String OPENID = "openId";
-    public static final String DISCOVERYINFORMATION = "discoveryInformation";
     public static final String TIMEZONEOFFSET = "timeZoneOffset";
 
     @Autowired private DrinkCounterService drinkCounterService;

@@ -88,8 +88,6 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(password));
         user.setAuthMethod(User.AuthMethod.PASSWORD);
 
-        Authentication authToken = (Authentication) session.getAttribute(AuthenticationController.OPENID);
-
         userService.addUser(user);
         authenticate(user, request, response);
 
@@ -97,13 +95,8 @@ public class UserController {
     }
 
     private void authenticate(User user, HttpServletRequest request, HttpServletResponse response){
-        String username = user.getAuthMethod() == User.AuthMethod.PASSWORD ? user.getEmail() : user.getOpenId();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        Authentication authentication = null;
-        switch(user.getAuthMethod()){
-            case PASSWORD:
-                authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);

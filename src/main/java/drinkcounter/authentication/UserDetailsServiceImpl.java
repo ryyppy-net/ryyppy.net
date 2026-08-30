@@ -27,13 +27,10 @@ public class UserDetailsServiceImpl implements UserDetailsService{
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
-        User user = userService.getUserByEmail(username);
-        if (user == null) {
-            user = userService.getUserByOpenId(username);
-        }
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException, DataAccessException {
+        User user = userService.getUserByEmail(email);
         if(user == null){
-            throw new UsernameNotFoundException("User with username "+username+" doesn't exist");
+            throw new UsernameNotFoundException("User with username "+email+" doesn't exist");
         }
         return new DrinkcounterUserDetails(user.getEmail(),
                 user.getPassword(),

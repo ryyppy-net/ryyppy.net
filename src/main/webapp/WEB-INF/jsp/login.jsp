@@ -12,17 +12,6 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
         <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet"></noscript>
 
-        <script type="text/javascript">
-            function manualLogin() {
-                $("#manualLogin").show(300);
-                $("#openId").focus();
-            }
-
-            function login(openId){
-                $('#openId').val(openId);
-                $('#form').submit();
-            }
-        </script>
         <script type="text/javascript" src="/static/js/login.js"></script>
     </jsp:attribute>
     
