@@ -4,3 +4,13 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+
+  - package-ecosystem: "npm"
+    directory: "/e2e"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
