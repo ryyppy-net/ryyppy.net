@@ -39,16 +39,6 @@ body {
     text-decoration: none;
 }
 
-#apNappula {
-    height:67px;
-    z-index:2;
-}
-
-#apNappula img {
-    float: right;
-    border: none;
-}
-
 #logoContainer {
     margin-top: 10px;
     margin-left: auto;
@@ -63,13 +53,6 @@ p.totalDrinkCount {
 
 #logo {
     width: 100%;
-}
-
-#openId {
-    padding: 6px;
-    width:300px;
-    color: #333;
-    font-size: 16px;
 }
 
 table {

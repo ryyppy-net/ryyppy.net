@@ -16,8 +16,6 @@
             <h2><spring:message code="loginerror.title" /></h2>
             <p><spring:message code="loginerror.reasons" /></p>
             <ul>
-                <li><spring:message code="loginerror.list.bad_openid" /></li>
-                <li><spring:message code="loginerror.list.no_2_0_standard" /></li>
                 <li><spring:message code="loginerror.list.login_failed" /></li>
                 <li><spring:message code="loginerror.list.bug" />
                     <a href="mailto:ryyppy.net@gmail.com"><spring:message code="loginerror.list.tell_us" /></a></li>
