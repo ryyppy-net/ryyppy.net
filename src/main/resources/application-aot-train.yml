@@ -3,15 +3,21 @@
 # for this profile's boot - Railway injects those as env vars for the real
 # Postgres, and an env var outranks this file's spring.datasource.url,
 # which broke the training run against the driver-class-name below).
-# Boots against an in-memory HSQLDB instead of the real Postgres so the
-# training run has no external dependencies and never touches production
-# data.
+#
+# Boots against a real, ephemeral PostgreSQL instance that the build script
+# starts locally on 127.0.0.1 (Docker isn't available during a Railway
+# build, so the script runs actual Postgres server binaries directly - see
+# the script for how). Everything else - dialect, ddl-auto, session-jdbc
+# schema init - is left as the base application.yml configures it, since
+# the entire point of training against real Postgres instead of an
+# in-memory substitute is to exercise the same JDBC driver, SQL dialect,
+# and connection pool code paths production actually boots with.
 spring:
+  docker:
+    compose:
+      enabled: false
   datasource:
-    url: jdbc:hsqldb:mem:aottrain
-    username: sa
-    password:
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
+    url: jdbc:postgresql://127.0.0.1:${AOT_TRAIN_PG_PORT:5432}/ryyppynet
+    username: ryyppynet
+    password: ryyppynet
+    driver-class-name: org.postgresql.Driver
