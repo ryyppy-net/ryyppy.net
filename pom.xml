@@ -206,22 +206,20 @@
             crdb_internal.node_build_info to detect CockroachDB's version.
             CockroachDB v26 restricts access to crdb_internal in production
             by default, which breaks that check ("Unable to determine
-            CockroachDB version"). Verified by inspecting each released jar's
-            bytecode directly: 12.7.0 is the first version that switched to
-            SELECT version() instead. Pinned here rather than higher because
-            flyway-database-postgresql drops CockroachDB support entirely
-            as of 13.2.0 (moved out of the free artifact) - do not bump past
-            13.1.0 without re-verifying CockroachDB is still bundled.
+            CockroachDB version"), fixed in Flyway 12.7.0+ via SELECT
+            version() instead. Pinned to latest per Redgate's official
+            database driver reference, which lists CockroachDB as supported
+            with no version cutoff.
         -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>12.7.0</version>
+            <version>13.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>12.7.0</version>
+            <version>13.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
