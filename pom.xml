@@ -202,16 +202,10 @@
             <artifactId>spring-boot-flyway</artifactId>
         </dependency>
         <!--
-            Spring Boot 4.1.1 manages Flyway at 12.4.0, which queries
-            crdb_internal.node_build_info to detect CockroachDB's version.
-            CockroachDB v26 (used in production) restricts access to
-            crdb_internal by default, which breaks that check ("Unable to
-            determine CockroachDB version"); fixed in Flyway 12.7.0+, which
-            uses SELECT version() instead. Overridden here to the latest
-            release. CockroachDB support itself comes from the transitive
-            org.flywaydb:flyway-database-cockroachdb dependency pulled in by
-            flyway-database-postgresql below - no separate declaration
-            needed.
+            Spring Boot 4.1.1 manages Flyway at 12.4.0, whose CockroachDB
+            version check queries crdb_internal - blocked by CockroachDB v26
+            in production. Fixed in Flyway 12.7.0+ (uses SELECT version()
+            instead), so pinned to latest here.
         -->
         <dependency>
             <groupId>org.flywaydb</groupId>
