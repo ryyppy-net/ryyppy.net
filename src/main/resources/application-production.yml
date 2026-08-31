@@ -1,0 +1,7 @@
+# Flyway owns schema migrations, and CI/PR-preview environments already
+# validate schema/entity consistency, so the base ddl-auto: validate check
+# is redundant here and only adds startup latency (see #38).
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
