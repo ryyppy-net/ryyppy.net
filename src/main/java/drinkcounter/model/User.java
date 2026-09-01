@@ -46,7 +46,7 @@ public class User extends AbstractEntity{
         }
     }
     public enum AuthMethod {
-        OPENID, FACEBOOK, PASSWORD
+        OPENID, PASSWORD
     }
 
     private String email;

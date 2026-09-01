@@ -47,7 +47,7 @@
             <plugin>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-maven-plugin</artifactId>
-                <version>7.4.5.Final</version>
+                <version>7.4.6.Final</version>
                 <executions>
                     <execution>
                         <id>enhance</id>
@@ -196,6 +196,26 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
+        </dependency>
+        <!--
+            Spring Boot 4.1.1 manages Flyway at 12.4.0, whose CockroachDB
+            version check queries crdb_internal - blocked by CockroachDB v26
+            in production. Fixed in Flyway 12.7.0+ (uses SELECT version()
+            instead), so pinned to latest here.
+        -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>13.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <version>13.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
