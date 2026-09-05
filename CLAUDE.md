@@ -9,7 +9,7 @@ Ryyppy.net is a web application for tracking alcohol consumption. Users can crea
 **Tech Stack:**
 - Backend: Spring Boot 4.1.1 (Java 25)
 - Database: PostgreSQL (HSQLDB for testing)
-- Frontend: AngularJS (legacy), with experimental Backbone and Ember implementations
+- Frontend: AngularJS (legacy)
 - View Layer: JSP with JSTL
 - Build Tool: Maven 3
 
@@ -99,10 +99,7 @@ Configured in `WebSecurityConfiguration`:
 
 ### Frontend Architecture
 
-Three separate frontend implementations exist (legacy experimentation):
-1. **Primary**: AngularJS app in `src/main/resources/public/app/`
-2. **Experimental**: Backbone.js in `src/main/resources/public/static/backbone/`
-3. **Experimental**: Ember.js in `src/main/resources/public/static/ember/`
+AngularJS app in `src/main/resources/public/app/`. (Earlier experimental Backbone.js and Ember.js implementations under `src/main/resources/public/static/` were removed as dead code — unreferenced by any JSP view or route.)
 
 Server-side views use JSP templates in `src/main/webapp/WEB-INF/jsp/` with a master tag template system.
 
