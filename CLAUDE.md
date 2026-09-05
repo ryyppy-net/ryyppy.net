@@ -99,7 +99,7 @@ Configured in `WebSecurityConfiguration`:
 
 ### Frontend Architecture
 
-AngularJS app in `src/main/resources/public/app/`. (Earlier experimental Backbone.js and Ember.js implementations under `src/main/resources/public/static/` were removed as dead code — unreferenced by any JSP view or route.)
+AngularJS app in `src/main/resources/public/app/`.
 
 Server-side views use JSP templates in `src/main/webapp/WEB-INF/jsp/` with a master tag template system.
 
