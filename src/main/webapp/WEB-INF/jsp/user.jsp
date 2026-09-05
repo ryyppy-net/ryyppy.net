@@ -170,6 +170,7 @@
                     <td class="headerButton"><a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');"><div class="headerButton headerButtonLeft" id="goBack"></div></a></td>
                     <td class="topic"><h1 class="topic"><c:out value="${user.name}" /></h1></td>
                     <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.settings"/>" href="#"><div class="headerButton headerButtonRight" id="configureButton"></div></a></td>
+                    <td class="headerButton"><a class="headerButtonA" title="<spring:message code="ui.switch_to_modern"/>" href="/app/index.html#/"><div id="uiSwitchButton" class="headerButton headerButtonRight">UI</div></a></td>
                 </tr>
             </table>
         </div>
