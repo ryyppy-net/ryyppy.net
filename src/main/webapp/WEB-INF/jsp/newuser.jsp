@@ -7,7 +7,7 @@
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         
-        <link rel="stylesheet" href="/app/css/bootstrap.css"/>
+        <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.css"/>
         <link rel="stylesheet" href="/app/css/app.css"/>
 
         <script type="text/javascript">

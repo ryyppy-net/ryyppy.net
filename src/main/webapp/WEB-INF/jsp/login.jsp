@@ -5,7 +5,7 @@
 <t:master>
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
-        <link rel="stylesheet" href="/static/css/jquery.tooltip.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/vendor/jquery-tooltip/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
