@@ -18,6 +18,15 @@
         <title><c:out value="${title}"/></title>
 
         <script type="text/javascript" src="/webjars/jquery/1.8.3/jquery.min.js"></script>
+        <%-- jQuery UI 1.8.12 (bundled below on pages that need it) calls the
+             internal $.curCSS helper, which jQuery removed in 1.8.0. Without
+             this shim, that throws "curCSS is not a function" partway through
+             widget setup, silently aborting init calls like
+             $(dialog).dialog({autoOpen: false}) and leaving the dialog
+             visible instead of hidden. --%>
+        <script type="text/javascript">
+            jQuery.curCSS = jQuery.curCSS || jQuery.css;
+        </script>
         <script type="text/javascript" src="/static/vendor/jquery-tooltip/jquery.tooltip.min.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <%-- Loaded non-render-blocking: a pending <link rel="stylesheet"> in <head>
