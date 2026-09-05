@@ -59,3 +59,16 @@ server:
 
 application:
   version: "@project.version@"
+  # Cache-busting token baked in at build time (see maven.build.timestamp.format
+  # in pom.xml). Fingerprinted asset URLs are /v/<build id>/<path>, so every
+  # build hands out a fresh set of URLs and the previous ones can sit in browser
+  # caches indefinitely without ever going stale.
+  build-id: "@maven.build.timestamp@"
+  cache:
+    # How long a browser may keep a fingerprinted (/v/<build id>/...) asset
+    # without asking again. Zero means "revalidate every time", which is what
+    # local development wants: the build id doesn't change while
+    # spring-boot:run is up, so a long max-age would hide edits to files under
+    # resources/public until a hard refresh. Deployments override this - see
+    # application-production.yml.
+    fingerprinted-max-age: 0s

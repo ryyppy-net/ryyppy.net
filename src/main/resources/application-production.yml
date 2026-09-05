@@ -1,7 +1,24 @@
-# Flyway owns schema migrations, and CI/PR-preview environments already
-# validate schema/entity consistency, so the base ddl-auto: validate check
-# is redundant here and only adds startup latency (see #38).
 spring:
   jpa:
     hibernate:
+      # Flyway owns schema migrations, and CI/PR-preview environments already
+      # validate schema/entity consistency, so the base ddl-auto: validate check
+      # is redundant here and only adds startup latency (see #38).
       ddl-auto: none
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          # Resources still served from their plain path (/static/images/...,
+          # the sounds and jQuery templates that JS fetches by hard-coded URL,
+          # the favicons) can't be fingerprinted, so they get a short max-age
+          # instead of the heuristic freshness a browser would otherwise invent
+          # for itself from Last-Modified.
+          max-age: 1h
+
+application:
+  cache:
+    # Fingerprinted assets (/v/<build id>/...) are immutable for a year: the
+    # build id changes on every deploy, so a deploy hands out new URLs rather
+    # than waiting for cached copies of the old ones to expire.
+    fingerprinted-max-age: 365d
