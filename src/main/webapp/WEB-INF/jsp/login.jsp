@@ -4,20 +4,20 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/style.css"/>" />
         <link rel="stylesheet" href="/static/vendor/jquery-tooltip/jquery.tooltip.css" type="text/css" media="screen" />
-        <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
+        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
         <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet"></noscript>
 
-        <script type="text/javascript" src="/static/js/login.js"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/login.js"/>"></script>
     </jsp:attribute>
     
     <jsp:body>
         <div id="logoContainer">
-            <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
+            <img id="logo" src="<c:url value="/static/images/logo_ryyppy.png"/>" alt="Ryyppy.net" title="Ryyppy.net" />
             
             <p class="totalDrinkCount">
                 <spring:message code="login.already_n_drinks" arguments="${totalDrinkCount}" />

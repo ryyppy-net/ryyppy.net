@@ -4,12 +4,12 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="Ryyppy.net - Virhe!">
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
-        <script type="text/javascript" src="/static/js/login.js"></script>
+        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
+        <script type="text/javascript" src="<c:url value="/static/js/login.js"/>"></script>
     </jsp:attribute>
     <jsp:body>
         <div id="logoContainer">
-            <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" />
+            <img id="logo" src="<c:url value="/static/images/logo_ryyppy.png"/>" alt="Ryyppy.net" title="Ryyppy.net" />
         </div>
         
         <div class="login" style="text-align:left;padding-left:30px;">

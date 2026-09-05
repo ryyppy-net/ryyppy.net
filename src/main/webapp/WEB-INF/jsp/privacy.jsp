@@ -3,8 +3,8 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:master title="Tietosuojaseloste - Ryyppy.net">
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
-        <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
+        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/style.css"/>" />
+        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
         <style>
             .privacy-policy {
                 background-color: #000000;
@@ -65,7 +65,7 @@
     <jsp:body>
         <div id="logoContainer">
             <a href="/ui/login">
-                <img id="logo" src="/static/images/logo_ryyppy.png" alt="Ryyppy.net" title="Ryyppy.net" style="max-width: 300px;" />
+                <img id="logo" src="<c:url value="/static/images/logo_ryyppy.png"/>" alt="Ryyppy.net" title="Ryyppy.net" style="max-width: 300px;" />
             </a>
         </div>
 
