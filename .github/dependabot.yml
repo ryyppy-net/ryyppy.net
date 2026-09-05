@@ -6,8 +6,7 @@ updates:
       interval: "daily"
     ignore:
       # Frontend WebJars: held back until e2e coverage of a version bump is trusted.
-      - dependency-name: "org.webjars:jquery"
-      - dependency-name: "org.webjars:pnotify"
+      - dependency-name: "org.webjars:*"
 
   - package-ecosystem: "npm"
     directory: "/e2e"
