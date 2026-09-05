@@ -17,7 +17,7 @@
 
         <title><c:out value="${title}"/></title>
 
-        <script type="text/javascript" src="/static/js/jquery.js"></script>
+        <script type="text/javascript" src="/webjars/jquery/1.8.3/jquery.min.js"></script>
         <script type="text/javascript" src="/static/js/jquery.tooltip.min.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
         <%-- Loaded non-render-blocking: a pending <link rel="stylesheet"> in <head>
