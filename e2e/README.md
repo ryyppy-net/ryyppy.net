@@ -1,8 +1,9 @@
 # End-to-end tests
 
 Playwright tests that drive the real app through a browser: registration,
-login, party creation, and adding a drink (verifying the promille display
-updates). These exercise the actual AngularJS/JSP UI and REST API together,
+login, party creation, adding a drink (verifying the promille display
+updates), and switching between the modern (AngularJS) and classic (JSP)
+UIs. These exercise the actual AngularJS/JSP UI and REST API together,
 not just unit-level logic.
 
 ## Prerequisites
