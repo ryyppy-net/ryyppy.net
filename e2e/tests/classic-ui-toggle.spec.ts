@@ -20,7 +20,9 @@ test('a user can switch from the modern dashboard to the classic UI and back', a
   await expect(page.locator('h1.topic', { hasText: user.name })).toBeVisible();
   await expect(page.getByText(partyName)).toBeVisible();
 
-  await page.getByTitle('Vaihda uuteen käyttöliittymään').click();
+  // Not getByTitle here: common.js's tooltip plugin strips the title
+  // attribute from every .headerButtonA once it binds on document ready.
+  await page.locator('#uiSwitchButton').click();
 
   await expect(page).toHaveURL(/\/app\/index\.html/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
