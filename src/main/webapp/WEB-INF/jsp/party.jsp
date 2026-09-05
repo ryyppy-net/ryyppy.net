@@ -5,14 +5,14 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="${party.name}">
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.custom.css" type="text/css" media="screen" />
         
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/vendor/excanvas/excanvas.min.js"></script><![endif]-->
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
-        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
         
         <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>

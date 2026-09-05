@@ -4,11 +4,11 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.custom.css" type="text/css" media="screen" />
         
         <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
         <script type="text/javascript" src="<c:url value="/static/js/datetimepicker.js"/>"></script>
-        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/i18n/jquery.ui.datepicker-fi.js"></script>
         
