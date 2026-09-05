@@ -1,5 +1,7 @@
 package drinkcounter.web;
 
+import drinkcounter.authentication.Origins;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -54,6 +56,28 @@ public class GlobalControllerAdvice {
             // Ignore
         }
         return null;
+    }
+
+    /**
+     * The URL Google One Tap POSTs its credential to (data-login_uri in login.jsp).
+     *
+     * Google only accepts pre-registered login/redirect URIs, so every environment must point
+     * this at the same hub domain (the one actually registered in Google Cloud Console) rather
+     * than at itself - Railway's ephemeral PR environments get a fresh, unregistered domain every
+     * time and could never be registered individually. GoogleOneTapController relays the verified
+     * identity back to whichever environment the sign-in actually started on.
+     *
+     * GOOGLE_AUTH_HUB_URL (e.g. "https://ryyppy.net") configures the hub; unset falls back to
+     * this environment's own origin, preserving today's single-environment behavior.
+     * Available in JSP as ${oneTapLoginUri}
+     */
+    @ModelAttribute("oneTapLoginUri")
+    public String oneTapLoginUri(HttpServletRequest request) {
+        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
+        String base = (hubUrl != null && !hubUrl.isBlank())
+                ? hubUrl.replaceAll("/+$", "")
+                : Origins.of(request);
+        return base + "/api/auth/google/one-tap";
     }
 
     /**

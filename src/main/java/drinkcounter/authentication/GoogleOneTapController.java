@@ -4,41 +4,43 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import drinkcounter.UserService;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
 
 /**
- * Handles Google One Tap sign-in by verifying the credential token
- * and establishing a Spring Security session.
+ * Handles Google One Tap sign-in by verifying the credential token and either establishing a
+ * Spring Security session directly, or - when the sign-in was started on an environment other
+ * than the hub Google is actually registered for (see login.jsp's oneTapLoginUri) - relaying the
+ * verified identity back to that environment. See AuthRelayController and AuthRelayTokenService.
  */
 @Controller
 public class GoogleOneTapController {
 
     private static final Logger log = LoggerFactory.getLogger(GoogleOneTapController.class);
 
-    private final UserService userService;
+    private final GoogleIdentityLinkingService identityLinkingService;
+    private final AuthRelayTokenService relayTokenService;
     private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Autowired
-    public GoogleOneTapController(UserService userService, ClientRegistrationRepository clientRegistrationRepository) {
-        this.userService = userService;
+    public GoogleOneTapController(
+            GoogleIdentityLinkingService identityLinkingService,
+            AuthRelayTokenService relayTokenService,
+            ClientRegistrationRepository clientRegistrationRepository) {
+        this.identityLinkingService = identityLinkingService;
+        this.relayTokenService = relayTokenService;
         this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
@@ -93,70 +95,27 @@ public class GoogleOneTapController {
             return "redirect:/ui/login?error=email_not_provided";
         }
 
-        // Look up or create user (duplicated from CustomOAuth2UserService)
-        User user = userService.getUserByOpenId(sub);
+        // login.jsp always points One Tap's login_uri at the hub, so on any other environment
+        // this POST arrives here with a Referer pointing back at where the sign-in started.
+        String ownOrigin = Origins.of(request);
+        String refererOrigin = Origins.ofReferer(request);
+        boolean crossEnvironment = refererOrigin != null && !refererOrigin.equalsIgnoreCase(ownOrigin);
 
-        if (user == null) {
-            // Fallback: try to find user by email (for account linking)
-            user = userService.getUserByEmail(email);
-
-            if (user != null) {
-                // Existing user found by email - link Google account automatically
-                user.setOpenId(sub);
-                userService.updateUser(user);
-                log.info("One Tap: Linked Google account to existing user: email={}, userId={}, googleId={}", email, user.getId(), sub);
-            } else {
-                // Create new user with default values
-                user = new User();
-                user.setEmail(email);
-                user.setOpenId(sub);
-
-                // Set name from Google profile
-                if (name != null && !name.isEmpty()) {
-                    user.setName(name);
-                } else if (givenName != null) {
-                    user.setName(givenName + (familyName != null ? " " + familyName : ""));
-                } else {
-                    user.setName(email); // Fallback to email if no name provided
-                }
-
-                // Set defaults
-                user.setWeight(70f);
-                user.setSex(User.Sex.MALE);
-                user.setAuthMethod(User.AuthMethod.OPENID);
-                user.setGuest(false);
-
-                user = userService.addUser(user);
-                log.info("One Tap: Created new user: email={}, name={}, googleId={}", email, user.getName(), sub);
+        if (crossEnvironment) {
+            if (!relayTokenService.isEnabled()) {
+                log.error("One Tap credential POSTed cross-origin (referer={}) but AUTH_RELAY_SECRET is not configured", refererOrigin);
+                return "redirect:/ui/login?error=relay_not_configured";
             }
-        } else {
-            log.info("One Tap: Existing user logged in: email={}, userId={}, googleId={}", email, user.getId(), sub);
+
+            String token = relayTokenService.mint(sub, email, name, refererOrigin);
+            log.info("One Tap: relaying verified Google identity to {}", refererOrigin);
+            return "redirect:" + refererOrigin + "/api/auth/relay/complete?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
         }
 
-        // Create authentication and set in security context
-        List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        User user = identityLinkingService.findOrCreateUser(sub, email, name, givenName, familyName);
+        identityLinkingService.establishSession(user, email, request);
 
-        DrinkcounterUserDetails userDetails = new DrinkcounterUserDetails(
-                email,
-                "", // No password for OAuth users
-                true, true, true, true,
-                authorities,
-                user.getId()
-        );
-
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Save security context to session
-        HttpSession session = request.getSession(true);
-        session.setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                SecurityContextHolder.getContext()
-        );
-
-        log.info("One Tap: Authentication successful for user: email={}, userId={}", email, user.getId());
+        log.info("One Tap: authentication successful for user: email={}, userId={}", email, user.getId());
 
         return "redirect:/app/index.html";
     }
