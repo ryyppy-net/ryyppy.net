@@ -15,12 +15,12 @@
         <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
         
-        <script type="text/javascript" src="/static/js/common.js"></script>
-        <script type="text/javascript" src="/static/js/userbutton.js"></script>
-        <script type="text/javascript" src="/static/js/userbuttongrid.js"></script>
-        <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
-        <script type="text/javascript" src="/static/js/partygraph.js"></script>
-        <script type="text/javascript" src="/static/js/party.js"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/userbutton.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/userbuttongrid.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/drinkerchecks.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/partygraph.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/party.js"/>"></script>
 
         <script type="text/javascript">
             var partyId = ${party.id};

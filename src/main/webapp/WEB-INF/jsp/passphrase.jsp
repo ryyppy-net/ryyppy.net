@@ -4,8 +4,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
-        <script type="text/javascript" src="/static/js/login.js"></script>
+        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
+        <script type="text/javascript" src="<c:url value="/static/js/login.js"/>"></script>
         <script type="text/javascript" src="/static/vendor/zeroclipboard/ZeroClipboard.js"></script>
         <script type="text/javascript">
             ZeroClipboard.setMoviePath("/static/vendor/zeroclipboard/ZeroClipboard.swf");

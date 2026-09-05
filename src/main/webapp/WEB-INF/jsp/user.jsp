@@ -6,8 +6,8 @@
     <jsp:attribute name="customHead">
         <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
         
-        <script type="text/javascript" src="/static/js/common.js"></script>
-        <script type="text/javascript" src="/static/js/datetimepicker.js"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/datetimepicker.js"/>"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/i18n/jquery.ui.datepicker-fi.js"></script>
@@ -17,10 +17,10 @@
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
-        <script type="text/javascript" src="/static/js/userbutton.js"></script>
-        <script type="text/javascript" src="/static/js/userbuttongrid.js"></script>
-        <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
-        <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/userbutton.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/userbuttongrid.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/drinkerchecks.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/userhistorygraph.js"/>"></script>
         <script type="text/javascript" src="/static/vendor/datejs/date.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
 
@@ -204,7 +204,7 @@
                             </span>
                         </a>
                             <a class="headerButtonA" title="<spring:message code="user.exit_dialog.title"/>" onClick="return confirm('<spring:message code="user.exit_dialog.msg"/>');" href="${leavePartyUrl}">
-                            <img src="/static/images/x.png" alt="sulje" style="float:right; margin-right: 5px;" />
+                            <img src="<c:url value="/static/images/x.png"/>" alt="sulje" style="float:right; margin-right: 5px;" />
                         </a>
                     </div>
                 </div>
