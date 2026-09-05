@@ -42,7 +42,7 @@
                              data-client_id="${googleClientId}"
                              data-context="use"
                              data-ux_mode="popup"
-                             data-login_uri="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}/api/auth/google/one-tap"
+                             data-login_uri="${oneTapLoginUri}"
                              data-auto_select="${param.logout == null}"
                              data-itp_support="true"
                              data-use_fedcm_for_prompt="${useFedCm}">
