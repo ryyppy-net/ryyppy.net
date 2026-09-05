@@ -9,8 +9,8 @@
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/datetimepicker.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
-        <script type="text/javascript" src="/static/js/jquery-ui-timepicker-addon.js"></script>
-        <script type="text/javascript" src="/static/js/jquery.ui.datepicker-fi.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-ui/i18n/jquery.ui.datepicker-fi.js"></script>
         
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
@@ -22,7 +22,7 @@
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
         <script type="text/javascript" src="/static/js/date.js"></script>
-        <script type="text/javascript" src="/static/js/jquery.tmpl.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
 
         <script type="text/javascript">
             var userButton = null;

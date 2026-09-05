@@ -13,7 +13,7 @@
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
-        <script type="text/javascript" src="/static/js/jquery.tmpl.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
         
         <script type="text/javascript" src="/static/js/common.js"></script>
         <script type="text/javascript" src="/static/js/userbutton.js"></script>
