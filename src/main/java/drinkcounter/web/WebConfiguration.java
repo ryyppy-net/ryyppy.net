@@ -37,10 +37,25 @@ public class WebConfiguration implements WebMvcConfigurer {
      * file changes. JSPs must reference these paths through <c:url> so that
      * ResourceUrlEncodingFilter (registered below) can rewrite them to the
      * hashed URL via response.encodeURL().
+     *
+     * Sound effects under /static/sounds/** are referenced by plain string
+     * paths from AngularJS code rather than through <c:url>, so they can't go
+     * through the same URL-rewriting versioning. They have no version in
+     * their URL, but rarely change and the app isn't under active
+     * development, so they're still cached for a year (without .immutable(),
+     * so a hard refresh still revalidates if a file is ever replaced).
+     *
+     * The favicon and Apple touch icons are requested by browsers/OS via
+     * fixed, well-known root paths (not referenced through any <c:url> or
+     * <link> tag), so they can't be versioned either. They change rarely, so
+     * they get a week-long cache - short enough to roll out a replacement
+     * without a URL change, unlike the year-long caches above.
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         CacheControl oneYearImmutable = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable();
+        CacheControl oneYear = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic();
+        CacheControl oneWeek = CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
 
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/")
@@ -55,6 +70,14 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .setCacheControl(oneYearImmutable)
                 .resourceChain(true)
                 .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+
+        registry.addResourceHandler("/static/sounds/**")
+                .addResourceLocations("classpath:/public/static/sounds/")
+                .setCacheControl(oneYear);
+
+        registry.addResourceHandler("/favicon.ico", "/apple-touch-icon.png", "/apple-touch-icon-precomposed.png")
+                .addResourceLocations("classpath:/public/")
+                .setCacheControl(oneWeek);
     }
 
     @Bean
