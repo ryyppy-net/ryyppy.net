@@ -79,7 +79,7 @@
                     <td class="topic"><h1 class="topic" id="topic">&nbsp;</h1></td>                    
                     <td class="headerButton"><a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
                     <td class="headerButton"><a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
-                    <td class="headerButton"><a class="headerButtonA" title="<spring:message code="ui.switch_to_modern"/>" href="/app/index.html#/"><div id="uiSwitchButton" class="headerButton headerButtonRight">UI</div></a></td>
+                    <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" title="<spring:message code="ui.switch_to_modern"/>" href="/app/index.html#/"><spring:message code="ui.modern_ui_label"/></a></td>
                 </tr>
             </table>
         </div>
