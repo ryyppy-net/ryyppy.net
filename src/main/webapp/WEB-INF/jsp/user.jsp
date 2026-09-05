@@ -201,7 +201,7 @@
                                 <c:out value="${party.name}" />
                             </span>
                             <span id="partyStartTime">
-                                <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
+                                <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.toEpochMilli()}" />)));</script>
                             </span>
                         </a>
                             <a class="headerButtonA" title="<spring:message code="user.exit_dialog.title"/>" onClick="return confirm('<spring:message code="user.exit_dialog.msg"/>');" href="${leavePartyUrl}">
