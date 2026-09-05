@@ -4,8 +4,8 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="Uusi juoja">
     <jsp:attribute name="customHead">
-        <script type="text/javascript" src="/static/js/common.js"></script>
-        <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
+        <script type="text/javascript" src="<c:url value="/static/js/drinkerchecks.js"/>"></script>
         
         <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.css"/>
         <link rel="stylesheet" href="/app/css/app.css"/>
