@@ -250,6 +250,11 @@
             <artifactId>pnotify</artifactId>
             <version>1.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>flot</artifactId>
+            <version>0.7</version>
+        </dependency>
 
         <!-- Database drivers. Currently supports hsqldb and postgresql -->
         <dependency>

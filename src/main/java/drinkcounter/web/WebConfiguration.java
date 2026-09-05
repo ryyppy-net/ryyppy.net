@@ -22,14 +22,24 @@ public class WebConfiguration implements WebMvcConfigurer {
     }
 
     /**
-     * WebJar assets are versioned in their URL path (e.g. /webjars/jquery/1.8.3/...),
-     * so a given URL's content never changes - safe to cache for a year.
+     * WebJar assets and hand-vendored third-party builds under /static/vendor/**
+     * are versioned in their URL path (e.g. /webjars/jquery/1.8.3/...,
+     * /static/vendor/jquery-ui/1.8.12.custom/...), so a given URL's content
+     * never changes - safe to cache for a year. First-party static resources
+     * (everything else under /static/**) are untouched and keep the default,
+     * unversioned caching behavior.
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        CacheControl oneYearImmutable = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable();
+
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/")
-                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable());
+                .setCacheControl(oneYearImmutable);
+
+        registry.addResourceHandler("/static/vendor/**")
+                .addResourceLocations("classpath:/public/static/vendor/")
+                .setCacheControl(oneYearImmutable);
     }
 
     @Bean
