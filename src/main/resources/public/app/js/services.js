@@ -97,37 +97,90 @@
 
 
     function SoundService(win) {
-        this.playSound = function () {
-            var audio = win.document.createElement("audio");
-            var source = win.document.createElement('source');
-            var filename = "/static/sounds/" + Math.floor(Math.random() * 7 + 1);
+        var doc = win.document;
+        var pool = [];
+        var unlocked = false;
 
-            if (!audio.canPlayType) {
+        function resolveFormat(probe) {
+            if (win.navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
+                return { type: 'audio/wav', files: ['/static/sounds/7.wav'] };
+            }
+
+            var ogg = probe.canPlayType('audio/ogg; codecs="vorbis"');
+            var mp3 = probe.canPlayType('audio/mpeg; codecs="mp3"');
+            var files = [];
+            for (var i = 1; i <= 7; i++) {
+                files.push("/static/sounds/" + i);
+            }
+
+            if (ogg === "probably" || ogg === "maybe") {
+                return { type: 'audio/ogg', files: files.map(function (f) { return f + '.ogg'; }) };
+            } else if (mp3 === "probably" || mp3 === "maybe") {
+                return { type: 'audio/mpeg', files: files.map(function (f) { return f + '.mp3'; }) };
+            }
+            return null;
+        }
+
+        function build() {
+            var probe = doc.createElement("audio");
+            if (!probe.canPlayType) {
                 // no html5 audio support
                 return;
             }
 
-            if (win.navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
-                source.type= 'audio/wav';
-                source.src= '/static/sounds/7.wav';
-                audio.appendChild(source);
-                audio.play();
+            var format = resolveFormat(probe);
+            if (!format) {
                 return;
             }
 
-            var ogg = audio.canPlayType('audio/ogg; codecs="vorbis"');
-            var mp3 = audio.canPlayType('audio/mpeg; codecs="mp3"');
-            if (ogg === "probably" || ogg === "maybe") {
-                source.type= 'audio/ogg';
-                source.src= filename + '.ogg';
-            } else if (mp3 === "probably" || mp3 === "maybe") {
-                source.type= 'audio/mpeg';
-                source.src= filename + '.mp3';
-            }
-
-            if (source.src.length > 1) {
+            pool = format.files.map(function (src) {
+                var audio = doc.createElement("audio");
+                var source = doc.createElement('source');
+                source.type = format.type;
+                source.src = src;
                 audio.appendChild(source);
-                audio.play();
+                return audio;
+            });
+        }
+
+        // iOS Safari only allows audio.play() unprompted when it runs synchronously
+        // inside a user gesture handler. playSound() is normally triggered later,
+        // from an async API response, so it gets silently blocked on iPhone.
+        // Unlocking each pooled <audio> element once during the first real tap
+        // lets later script-triggered play() calls on those same elements succeed.
+        function unlock() {
+            if (unlocked) return;
+            unlocked = true;
+            pool.forEach(function (audio) {
+                var playPromise = audio.play();
+                audio.pause();
+                audio.currentTime = 0;
+                if (playPromise && playPromise.catch) {
+                    playPromise.catch(function () {});
+                }
+            });
+        }
+
+        function addUnlockListener(evt) {
+            doc.addEventListener(evt, function onUnlock() {
+                doc.removeEventListener(evt, onUnlock);
+                unlock();
+            }, true);
+        }
+
+        build();
+        addUnlockListener('touchend');
+        addUnlockListener('click');
+
+        this.playSound = function () {
+            if (!pool.length) {
+                return;
+            }
+            var audio = pool[Math.floor(Math.random() * pool.length)];
+            audio.currentTime = 0;
+            var playPromise = audio.play();
+            if (playPromise && playPromise.catch) {
+                playPromise.catch(function () {});
             }
         };
     }
