@@ -6,9 +6,9 @@
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="/static/css/login.css" />
         <script type="text/javascript" src="/static/js/login.js"></script>
-        <script type="text/javascript" src="/static/js/zeroclipboard/ZeroClipboard.js"></script>
+        <script type="text/javascript" src="/static/vendor/zeroclipboard/ZeroClipboard.js"></script>
         <script type="text/javascript">
-            ZeroClipboard.setMoviePath("/static/js/zeroclipboard/ZeroClipboard.swf");
+            ZeroClipboard.setMoviePath("/static/vendor/zeroclipboard/ZeroClipboard.swf");
             var clip;
             $(document).ready(function() {
                 clip = new ZeroClipboard.Client();

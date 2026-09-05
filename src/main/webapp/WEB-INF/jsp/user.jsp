@@ -13,7 +13,7 @@
         <script type="text/javascript" src="/static/vendor/jquery-ui/i18n/jquery.ui.datepicker-fi.js"></script>
         
         <!-- hack -->
-        <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/js/flot/excanvas.min.js"></script><![endif]-->
+        <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/vendor/excanvas/excanvas.min.js"></script><![endif]-->
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
@@ -21,7 +21,7 @@
         <script type="text/javascript" src="/static/js/userbuttongrid.js"></script>
         <script type="text/javascript" src="/static/js/drinkerchecks.js"></script>
         <script type="text/javascript" src="/static/js/userhistorygraph.js"></script>
-        <script type="text/javascript" src="/static/js/date.js"></script>
+        <script type="text/javascript" src="/static/vendor/datejs/date.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
 
         <script type="text/javascript">
