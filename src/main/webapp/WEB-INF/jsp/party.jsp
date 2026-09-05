@@ -5,14 +5,14 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master title="${party.name}">
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.custom.css" type="text/css" media="screen" />
         
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/vendor/excanvas/excanvas.min.js"></script><![endif]-->
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
-        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
         
         <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
@@ -79,6 +79,7 @@
                     <td class="topic"><h1 class="topic" id="topic">&nbsp;</h1></td>                    
                     <td class="headerButton"><a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
                     <td class="headerButton"><a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
+                    <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" title="<spring:message code="ui.switch_to_modern"/>" href="/app/index.html#/"><spring:message code="ui.modern_ui_label"/></a></td>
                 </tr>
             </table>
         </div>
