@@ -14,4 +14,9 @@ public class DefaultController {
     public String redirectToFrontPage() {
         return REDIRECT_TO_FRONTPAGE;
     }
+
+    @GetMapping("/app/index.html")
+    public String appIndex() {
+        return "appIndex";
+    }
 }
