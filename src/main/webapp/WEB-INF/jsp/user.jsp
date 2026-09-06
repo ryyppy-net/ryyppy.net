@@ -4,11 +4,11 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.custom.css" type="text/css" media="screen" />
         
         <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
         <script type="text/javascript" src="<c:url value="/static/js/datetimepicker.js"/>"></script>
-        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.12.custom/jquery-ui-1.8.12.custom.min.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui-timepicker-addon/jquery-ui-timepicker-addon.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/i18n/jquery.ui.datepicker-fi.js"></script>
         
@@ -170,6 +170,7 @@
                     <td class="headerButton"><a class="headerButtonA" title="<spring:message code="user.logout_dialog.title"/>" href="logout" onClick="return confirm('<spring:message code="user.logout_dialog.msg"/>');"><div class="headerButton headerButtonLeft" id="goBack"></div></a></td>
                     <td class="topic"><h1 class="topic"><c:out value="${user.name}" /></h1></td>
                     <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA" title="<spring:message code="user.settings"/>" href="#"><div class="headerButton headerButtonRight" id="configureButton"></div></a></td>
+                    <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" title="<spring:message code="ui.switch_to_modern"/>" href="/app/index.html#/"><spring:message code="ui.modern_ui_label"/></a></td>
                 </tr>
             </table>
         </div>
@@ -200,7 +201,7 @@
                                 <c:out value="${party.name}" />
                             </span>
                             <span id="partyStartTime">
-                                <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.time}" />)));</script>
+                                <spring:message code="user.start_time"/> <script type="text/javascript">document.write(formatDate(new Date(<c:out value="${party.startTime.toEpochMilli()}" />)));</script>
                             </span>
                         </a>
                             <a class="headerButtonA" title="<spring:message code="user.exit_dialog.title"/>" onClick="return confirm('<spring:message code="user.exit_dialog.msg"/>');" href="${leavePartyUrl}">

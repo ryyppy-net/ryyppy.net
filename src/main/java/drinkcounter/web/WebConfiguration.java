@@ -27,7 +27,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     /**
      * WebJar assets and hand-vendored third-party builds under /static/vendor/**
      * are versioned in their URL path (e.g. /webjars/jquery/1.8.3/...,
-     * /static/vendor/jquery-ui/1.8.12.custom/...), so a given URL's content
+     * /static/vendor/jquery-ui/1.8.24/...), so a given URL's content
      * never changes - safe to cache for a year.
      *
      * First-party JSP-served resources under /static/css/**, /static/js/** and
