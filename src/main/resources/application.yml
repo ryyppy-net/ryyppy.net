@@ -51,6 +51,15 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
 
 server:
+  servlet:
+    session:
+      cookie:
+        # Without an explicit max-age the SESSION cookie has none of its own,
+        # making it a browser-session cookie that's dropped on browser/app
+        # restart - well short of the 90-day server-side timeout above
+        # (spring.session.timeout). Match it here so the cookie actually
+        # outlives a restart.
+        max-age: 90d
   tomcat:
     # Safe only because every JSP is precompiled and registered directly by
     # PrecompiledJspServletInitializer - nothing compiles a JSP at runtime, so
