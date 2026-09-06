@@ -1,6 +1,28 @@
 import { test, expect } from '@playwright/test';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
+test('a newly created party shows its actual start date, not a misparsed one', async ({ page }) => {
+  // Regression test: the party list used to parse the ISO-8601 startTime the
+  // API returns with a moment format string meant for a completely different
+  // date shape ('MMM DD, YYYY h:mm:ss A'), which silently misparsed today's
+  // date into a garbage one (see filters.js formatDateTime / partySort).
+  const user = makeTestUser('party-date');
+  await registerUser(page, user);
+
+  const partyName = `E2E Date Party ${Date.now()}`;
+  await createParty(page, partyName);
+
+  await page.goto('/app/index.html#/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
+
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const expectedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${pad(now.getFullYear() % 100)}`;
+
+  const partyTile = page.locator('.party', { has: page.getByText(partyName) });
+  await expect(partyTile.getByText('Alkamisaika:').locator('..')).toContainText(expectedDate);
+});
+
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
   const user = makeTestUser('party');
   await registerUser(page, user);
