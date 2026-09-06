@@ -43,7 +43,7 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     };
 
     $scope.partySort = function (party) {
-        return moment(party.startTime, 'MMM DD, YYYY h:mm:ss A');
+        return moment(party.startTime);
     };
 
     $scope.drinkSort = function (drink) {

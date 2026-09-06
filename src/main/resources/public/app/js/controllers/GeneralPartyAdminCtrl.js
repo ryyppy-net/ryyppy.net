@@ -29,7 +29,7 @@ function GeneralPartyAdminCtrl($scope, $location, RyyppyAPI, Notify) {
     };
 
     $scope.partySort = function (party) {
-        return moment(party.startTime, 'MMM DD, YYYY h:mm:ss A');
+        return moment(party.startTime);
     };
 
     $scope.active = 'general-party-admin';
