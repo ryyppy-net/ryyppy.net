@@ -1,6 +1,5 @@
 package drinkcounter.authentication;
 
-import drinkcounter.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -53,7 +52,7 @@ public class OAuth2Configuration {
      * Handles user lookup and creation for any OAuth2/OIDC provider.
      */
     @Bean
-    public CustomOAuth2UserService customOAuth2UserService(UserService userService) {
-        return new CustomOAuth2UserService(userService);
+    public CustomOAuth2UserService customOAuth2UserService(GoogleIdentityLinkingService identityLinkingService) {
+        return new CustomOAuth2UserService(identityLinkingService);
     }
 }
