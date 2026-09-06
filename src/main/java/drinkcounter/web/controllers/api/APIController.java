@@ -14,6 +14,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -21,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import jakarta.servlet.http.HttpSession;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,14 +133,12 @@ public class APIController {
         List<Drink> drinks = user.getDrinks();
 
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
-        String format = "YYYY-MM-dd";
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         for (Drink d : drinks) {
-            DateTime dt = new DateTime(d.getTimeStamp().toEpochMilli());
             double timezoneOffset = (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
-            DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
-            dt = dt.toDateTime(dtz);
-            String s = dt.toString(format);
+            ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+            String s = d.getTimeStamp().atZone(dtz).format(format);
 
             Integer i = 0;
             if (drinksPerDay.containsKey(s))
@@ -145,7 +147,7 @@ public class APIController {
             drinksPerDay.put(s, i);
         }
 
-        String today = new DateTime().toString(format);
+        String today = LocalDate.now(ZoneId.systemDefault()).format(format);
         if (!drinksPerDay.containsKey(today))
             drinksPerDay.put(today, 0);
 
@@ -156,8 +158,8 @@ public class APIController {
         csvWriter.writeRecord(new String[]{"Time", "Drinks"});
 
         for (Entry<String, Integer> p : drinksPerDay.entrySet()) {
-            DateTime dt = new DateTime(p.getKey());
-            csvWriter.writeRecord(new String[]{Long.toString(dt.getMillis()), p.getValue().toString()});
+            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            csvWriter.writeRecord(new String[]{Long.toString(millis), p.getValue().toString()});
         }
 
         csvWriter.close();
@@ -195,18 +197,18 @@ public class APIController {
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"UserID", "Time", "Alcohol"});
 
-        DateTime now = new DateTime();
-        DateTime start = now.minusMinutes(300);
+        Instant now = Instant.now();
+        Instant start = now.minus(Duration.ofMinutes(300));
         int intervalMs = 2 * 60 * 1000;
-        
+
         List<User> users = drinkCounterService.listUsersByParty(id);
-        
+
         for (User user : users) {
             List<String[]> history = getSlopes(user, true);
-            DateTime time = start;
+            Instant time = start;
             for (String[] s : history) {
                 csvWriter.writeRecord(s);
-                time = time.plusMillis(intervalMs);
+                time = time.plus(Duration.ofMillis(intervalMs));
             }
         }
         csvWriter.close();
@@ -250,18 +252,18 @@ public class APIController {
 
     private List<String[]> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;
-        DateTime now = new DateTime();
-        DateTime start = now.minusMinutes(300);
+        Instant now = Instant.now();
+        Instant start = now.minus(Duration.ofMinutes(300));
 
-        List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
+        List<Float> history = user.getPromillesAtInterval(Date.from(start), Date.from(now), intervalMs);
         List<String[]> slopes = new LinkedList<String[]>();
 
         double lastSlope = Double.MAX_VALUE;
         Long lastX = null;
         Float lastY = null;
         long lastInserted = 0;
-        
-        Long x = start.getMillis();
+
+        Long x = start.toEpochMilli();
         for (Float y : history) {
             double slope = y / (x / 31536000000L);
             if (Math.abs(slope - lastSlope) >= 0.000000001) {
@@ -276,7 +278,7 @@ public class APIController {
             lastY = y;
             x += intervalMs;
         }
-        slopes.add(getCsvValues(new DateTime().getMillis(), user.getPromilles(), user, getId));
+        slopes.add(getCsvValues(Instant.now().toEpochMilli(), user.getPromilles(), user, getId));
         return slopes;
     }
 
