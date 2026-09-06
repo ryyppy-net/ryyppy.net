@@ -76,6 +76,25 @@ public class AuthRelayTokenService {
     }
 
     /**
+     * Signs a plain origin string - used for the "return_to" a non-hub environment sends the hub
+     * when starting the classical OAuth2 flow (see AuthRelayController#redirect/#start). This
+     * proves the origin was produced by an environment holding our shared secret rather than an
+     * arbitrary caller, without needing to trust anything about the URL's shape - Railway's own
+     * domains aren't unique to us, so pattern-matching the hostname wouldn't be safe here.
+     */
+    public String signOrigin(String origin) {
+        return sign(origin, requireSecret());
+    }
+
+    public boolean verifyOriginSignature(String origin, String signature) {
+        String secret = getSecret();
+        if (secret == null || signature == null) {
+            return false;
+        }
+        return constantTimeEquals(signature, sign(origin, secret));
+    }
+
+    /**
      * Verifies signature, expiry, single-use, and that the token was minted for exactly this
      * origin (so a token intercepted en route can't be replayed against a different environment).
      */
