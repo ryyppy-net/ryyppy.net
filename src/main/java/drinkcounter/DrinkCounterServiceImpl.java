@@ -32,6 +32,8 @@ import java.util.*;
 public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     private static final Logger log = LoggerFactory.getLogger(DrinkCounterServiceImpl.class);
+    private static final DateTimeFormatter ADD_DRINK_TO_DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
     @Autowired
     private PartyDAO partyDao;
     @Autowired
@@ -115,8 +117,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Override
     public int addDrinkToDate(int userId, String date, double timezoneOffset) {
         ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
-        DateTimeFormatter parser = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-        Instant instant = LocalDateTime.parse(date, parser).toInstant(zoneOffset);
+        Instant instant = LocalDateTime.parse(date, ADD_DRINK_TO_DATE_FORMAT).toInstant(zoneOffset);
 
         if (instant.isAfter(Instant.now())) throw new IllegalArgumentException(date);
 
