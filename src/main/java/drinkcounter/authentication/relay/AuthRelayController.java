@@ -56,6 +56,8 @@ public class AuthRelayController {
         String ownOrigin = Origins.of(request);
         String signature = tokenService.signOrigin(ownOrigin);
 
+        log.info("Auth relay: {} starting sign-in via hub", ownOrigin);
+
         String target = hubUrl.replaceAll("/+$", "") + "/api/auth/relay/start"
                 + "?return_to=" + URLEncoder.encode(ownOrigin, StandardCharsets.UTF_8)
                 + "&sig=" + URLEncoder.encode(signature, StandardCharsets.UTF_8);
@@ -72,6 +74,8 @@ public class AuthRelayController {
             log.warn("Auth relay start rejected: invalid signature for return_to={}", returnTo);
             return "redirect:/ui/login?error=invalid_relay_request";
         }
+
+        log.info("Auth relay: hub received valid start request for {}", returnTo);
 
         request.getSession(true).setAttribute(RETURN_TO_SESSION_ATTR, returnTo);
         return "redirect:/oauth2/authorization/google";
