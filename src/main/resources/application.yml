@@ -21,7 +21,7 @@ spring:
             # instead of probing for one.
             non_contextual_creation: true
   session:
-    timeout: 90d
+    timeout: 365d
     jdbc:
       # Schema is now owned by the Flyway baseline migration (see
       # db/migration/V1__baseline.sql) instead of being (re-)applied on
@@ -51,6 +51,15 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
 
 server:
+  servlet:
+    session:
+      cookie:
+        # Without an explicit max-age the SESSION cookie has none of its own,
+        # making it a browser-session cookie that's dropped on browser/app
+        # restart - well short of the server-side timeout above
+        # (spring.session.timeout). Match it here so the cookie actually
+        # outlives a restart.
+        max-age: 365d
   tomcat:
     # Safe only because every JSP is precompiled and registered directly by
     # PrecompiledJspServletInitializer - nothing compiles a JSP at runtime, so

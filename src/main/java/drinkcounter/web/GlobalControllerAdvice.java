@@ -81,6 +81,29 @@ public class GlobalControllerAdvice {
     }
 
     /**
+     * Whether this environment is the hub Google is actually registered for.
+     *
+     * Google Identity Services (One Tap / the styled sign-in button) checks the page's own origin
+     * against Google's Authorized JavaScript origins before it lets sign-in proceed - a check that
+     * happens entirely on Google's side and can't be relayed. So on any environment that isn't the
+     * hub, login.jsp shows a plain link into the classical OAuth2 relay
+     * (/api/auth/relay/redirect) instead of the GSI widget, which would otherwise fail there with
+     * origin_mismatch.
+     *
+     * Unset GOOGLE_AUTH_HUB_URL means there's no separate hub configured (e.g. local dev, or a
+     * single-environment deployment), so every environment is treated as the hub.
+     * Available in JSP as ${isHubEnvironment}
+     */
+    @ModelAttribute("isHubEnvironment")
+    public boolean isHubEnvironment(HttpServletRequest request) {
+        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
+        if (hubUrl == null || hubUrl.isBlank()) {
+            return true;
+        }
+        return Origins.of(request).equalsIgnoreCase(hubUrl.replaceAll("/+$", ""));
+    }
+
+    /**
      * Checks if GitHub OAuth2 login is enabled.
      * Available in JSP as ${githubAuthEnabled}
      */
