@@ -55,7 +55,8 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     });
 
     $scope.$on('drinkAdded', function () {
-        self.refreshParticipants();
+        self.endPolling();
+        self.startPolling();
     });
 }
 

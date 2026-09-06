@@ -50,15 +50,13 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
         return moment(drink.timestamp);
     };
 
-    this.refreshProfile();
-    this.refreshOwnDrinks();
     this.refreshParties();
 
     this.startPolling();
 
     $scope.$on('drinkAdded', function () {
-        self.refreshProfile();
-        self.refreshOwnDrinks();
+        self.endPolling();
+        self.startPolling();
     });
 
     $scope.$on('$destroy', function () {
@@ -67,8 +65,8 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
 
     $scope.removeDrink = function (drink) {
         RyyppyAPI.removeDrink(drink.id, function () {
-            self.refreshProfile();
-            self.refreshOwnDrinks();
+            self.endPolling();
+            self.startPolling();
         });
     };
 }
