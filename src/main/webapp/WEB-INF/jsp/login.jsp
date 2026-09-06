@@ -38,27 +38,48 @@
             </p>
 
             <c:if test="${googleAuthEnabled}">
-                        <div id="g_id_onload"
-                             data-client_id="${googleClientId}"
-                             data-context="use"
-                             data-ux_mode="popup"
-                             data-login_uri="${oneTapLoginUri}"
-                             data-auto_select="${param.logout == null}"
-                             data-itp_support="true"
-                             data-use_fedcm_for_prompt="${useFedCm}">
-                        </div>
+                        <c:choose>
+                            <c:when test="${isHubEnvironment}">
+                                <div id="g_id_onload"
+                                     data-client_id="${googleClientId}"
+                                     data-context="use"
+                                     data-ux_mode="popup"
+                                     data-login_uri="${oneTapLoginUri}"
+                                     data-auto_select="${param.logout == null}"
+                                     data-itp_support="true"
+                                     data-use_fedcm_for_prompt="${useFedCm}">
+                                </div>
 
-                        <div style="display: flex; justify-content: center; margin: 20px 0;">
-                            <div class="g_id_signin"
-                                 data-type="standard"
-                                 data-shape="pill"
-                                 data-theme="outline"
-                                 data-text="continue_with"
-                                 data-size="large"
-                                 data-locale="fi"
-                                 data-logo_alignment="left">
-                            </div>
-                        </div>
+                                <div style="display: flex; justify-content: center; margin: 20px 0;">
+                                    <div class="g_id_signin"
+                                         data-type="standard"
+                                         data-shape="pill"
+                                         data-theme="outline"
+                                         data-text="continue_with"
+                                         data-size="large"
+                                         data-locale="fi"
+                                         data-logo_alignment="left">
+                                    </div>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <%-- Google's One Tap widget checks the page's own origin against
+                                     Google's Authorized JavaScript origins before allowing
+                                     sign-in, which always fails here since this isn't the
+                                     registered hub domain. Use the classical OAuth2 relay
+                                     instead, which only checks the redirect URI. --%>
+                                <div style="display: flex; justify-content: center; margin: 20px 0;">
+                                    <a href="/api/auth/relay/redirect"
+                                       style="display: inline-flex; align-items: center;
+                                              padding: 10px 24px; border-radius: 999px;
+                                              border: 1px solid #dadce0; background: #fff;
+                                              color: #3c4043; font-family: Roboto, sans-serif;
+                                              font-size: 14px; text-decoration: none;">
+                                        Continue with Google
+                                    </a>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </c:if>
 
             <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>

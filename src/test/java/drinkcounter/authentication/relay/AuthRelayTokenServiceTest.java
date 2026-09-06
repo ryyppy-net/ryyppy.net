@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AuthRelayTokenServiceTest {
 
@@ -72,6 +73,39 @@ public class AuthRelayTokenServiceTest {
         AuthRelayTokenService tokenService = withSecret("test-secret");
 
         assertThrows(AuthRelayException.class, () -> tokenService.verify("not-a-real-token", ORIGIN));
+    }
+
+    @Test
+    public void originSignatureRoundTrips() {
+        AuthRelayTokenService tokenService = withSecret("test-secret");
+
+        String signature = tokenService.signOrigin(ORIGIN);
+
+        assertTrue(tokenService.verifyOriginSignature(ORIGIN, signature));
+    }
+
+    @Test
+    public void originSignatureIsRejectedForADifferentOrigin() {
+        AuthRelayTokenService tokenService = withSecret("test-secret");
+
+        String signature = tokenService.signOrigin(ORIGIN);
+
+        assertFalse(tokenService.verifyOriginSignature("https://attacker.up.railway.app", signature));
+    }
+
+    @Test
+    public void originSignatureFromADifferentSecretIsRejected() {
+        String signature = withSecret("secret-a").signOrigin(ORIGIN);
+
+        assertFalse(withSecret("secret-b").verifyOriginSignature(ORIGIN, signature));
+    }
+
+    @Test
+    public void originSignatureVerificationFailsSafeWithoutASecret() {
+        AuthRelayTokenService tokenService = withSecret(null);
+
+        assertThrows(IllegalStateException.class, () -> tokenService.signOrigin(ORIGIN));
+        assertFalse(tokenService.verifyOriginSignature(ORIGIN, "anything"));
     }
 
     /** Uses the package-private test constructor to fix a secret instead of relying on the environment. */
