@@ -1,4 +1,4 @@
-package drinkcounter.authentication;
+package drinkcounter.authentication.relay;
 
 import org.junit.jupiter.api.Test;
 

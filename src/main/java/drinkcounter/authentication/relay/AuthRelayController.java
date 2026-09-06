@@ -1,5 +1,6 @@
-package drinkcounter.authentication;
+package drinkcounter.authentication.relay;
 
+import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;

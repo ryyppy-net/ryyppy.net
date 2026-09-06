@@ -1,4 +1,4 @@
-package drinkcounter.authentication;
+package drinkcounter.authentication.relay;
 
 /** Thrown when a cross-environment Google sign-in handoff token fails verification. */
 public class AuthRelayException extends RuntimeException {

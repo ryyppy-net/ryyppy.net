@@ -1,6 +1,6 @@
 package drinkcounter.web;
 
-import drinkcounter.authentication.Origins;
+import drinkcounter.authentication.relay.Origins;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
