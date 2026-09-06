@@ -9,9 +9,11 @@ import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.text.MessageFormat;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -145,5 +147,10 @@ public class PartyApiController {
     @PostMapping("{partyId}/invitations")
     public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
         drinkCounterService.linkUserToParty(userId, partyId);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<String> handleInvalidTimestamp(DateTimeParseException ex) {
+        return ResponseEntity.badRequest().body("Invalid timestamp: " + ex.getMessage());
     }
 }

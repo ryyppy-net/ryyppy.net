@@ -6,11 +6,15 @@ import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -55,5 +59,20 @@ public class PartyApiControllerTest {
         controller.drink(1, 2, null, null, null);
 
         verify(drinkCounterService).addDrink(eq(2), eq((Date) null), any(Float.class));
+    }
+
+    @Test
+    public void drinkRejectsMalformedTimestamp() {
+        assertThrows(DateTimeParseException.class,
+                () -> controller.drink(1, 2, null, null, "not-a-timestamp"));
+    }
+
+    @Test
+    public void handleInvalidTimestampReturnsBadRequest() {
+        DateTimeParseException ex = new DateTimeParseException("bad", "not-a-timestamp", 0);
+
+        ResponseEntity<String> response = controller.handleInvalidTimestamp(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }

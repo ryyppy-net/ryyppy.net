@@ -11,15 +11,18 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,6 +55,21 @@ public class ProfileApiControllerTest {
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
         verify(drinkCounterService).addDrink(eq(1), eq(expected), any(Float.class));
+    }
+
+    @Test
+    public void drinkRejectsMalformedTimestamp() {
+        assertThrows(DateTimeParseException.class,
+                () -> controller.drink(null, null, "not-a-timestamp"));
+    }
+
+    @Test
+    public void handleInvalidTimestampReturnsBadRequest() {
+        DateTimeParseException ex = new DateTimeParseException("bad", "not-a-timestamp", 0);
+
+        ResponseEntity<String> response = controller.handleInvalidTimestamp(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
