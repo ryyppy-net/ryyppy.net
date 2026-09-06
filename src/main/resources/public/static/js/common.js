@@ -9,7 +9,7 @@ var RyyppyNet = {
 
 function RyyppyAPI() {
     this.getUserData = function(userId, callback) {
-        $.get('/API/users/{0}/'.format(userId), callback);
+        $.get('/API/users/{0}'.format(userId), callback);
     }
 
     this.getUserDrinks = function(userId, callback) {
@@ -38,7 +38,7 @@ function RyyppyAPI() {
     }
 
     this.getPartyData = function(partyId, callback) {
-        $.get('/API/parties/{0}/'.format(partyId), callback);
+        $.get('/API/parties/{0}'.format(partyId), callback);
     }
     
     this.addAnonymousUserToParty = function(partyId, name, sex, weight, successCallback, errorCallback) {
