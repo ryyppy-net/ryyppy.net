@@ -18,7 +18,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
@@ -99,10 +98,9 @@ public class PartyMarshaller {
             i++;
             Drink drink = iter.previous();
             Node drinkNode = d.createElement("drink");
-            DateTime dateTime = new DateTime(drink.getTimeStamp().toEpochMilli());
 
             drinkNode.appendChild(createTextContentElement("id", Integer.toString(drink.getId()), d));
-            drinkNode.appendChild(createTextContentElement("timestamp", Long.toString(dateTime.toInstant().getMillis()), d));
+            drinkNode.appendChild(createTextContentElement("timestamp", Long.toString(drink.getTimeStamp().toEpochMilli()), d));
             drinksNode.appendChild(drinkNode);
         }
         return drinksNode;

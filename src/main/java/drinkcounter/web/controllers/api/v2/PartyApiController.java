@@ -8,10 +8,12 @@ import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.joda.time.DateTime;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -132,7 +134,7 @@ public class PartyApiController {
         }
         Date time = null;
         if(timestamp != null){
-            time = new Date(new DateTime(timestamp).getMillis());
+            time = Date.from(Instant.parse(timestamp));
         }
         drinkCounterService.addDrink(participantId, time, alcoholAmount);
     }
@@ -145,5 +147,10 @@ public class PartyApiController {
     @PostMapping("{partyId}/invitations")
     public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
         drinkCounterService.linkUserToParty(userId, partyId);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<String> handleInvalidTimestamp(DateTimeParseException ex) {
+        return ResponseEntity.badRequest().body("Invalid timestamp: " + ex.getMessage());
     }
 }

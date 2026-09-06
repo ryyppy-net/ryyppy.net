@@ -5,9 +5,11 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.model.User;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.joda.time.DateTime;
 
 /**
  *
@@ -16,18 +18,18 @@ import org.joda.time.DateTime;
 public class SlopeService {
     public static List<HistoryPoint> getSlopes(User user) {
         int intervalMs = 60 * 1000;
-        DateTime now = new DateTime();
-        DateTime start = now.minusMinutes(300);
+        Instant now = Instant.now();
+        Instant start = now.minus(Duration.ofMinutes(300));
 
-        List<Float> history = user.getPromillesAtInterval(start.toDate(), now.toDate(), intervalMs);
+        List<Float> history = user.getPromillesAtInterval(Date.from(start), Date.from(now), intervalMs);
         List<HistoryPoint> slopes = new LinkedList<HistoryPoint>();
 
         double lastSlope = Double.MAX_VALUE;
         Long lastX = null;
         Float lastY = null;
         long lastInserted = 0;
-        
-        Long x = start.getMillis();
+
+        Long x = start.toEpochMilli();
         for (Float y : history) {
             double slope = y / (x / 31536000000L);
             if (Math.abs(slope - lastSlope) >= 0.000000001) {
@@ -51,7 +53,7 @@ public class SlopeService {
         }
         
         HistoryPoint point = new HistoryPoint();
-        point.setTimestamp(new DateTime().getMillis());
+        point.setTimestamp(Instant.now().toEpochMilli());
         point.setPromilles(user.getPromilles());
         slopes.add(point);
         return slopes;

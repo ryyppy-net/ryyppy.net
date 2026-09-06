@@ -15,9 +15,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +79,7 @@ public class ProfileApiController {
         }
         Date time = null;
         if(timestamp != null){
-            time = new Date(new DateTime(timestamp).getMillis());
+            time = Date.from(Instant.parse(timestamp));
         }
         drinkCounterService.addDrink(userId, time, (float)alcoholAmount);
         
@@ -88,7 +92,7 @@ public class ProfileApiController {
         for (Drink drink : drinks) {
             DrinkDTO drinkDTO = new DrinkDTO();
             drinkDTO.setId(drink.getId());
-            drinkDTO.setTimestamp(new DateTime(drink.getTimeStamp().toEpochMilli()).toString());
+            drinkDTO.setTimestamp(drink.getTimeStamp().toString());
             drinkDTO.setAmountOfShots(drink.getAmountOfShots());
             drinkDTOs.add(drinkDTO);
         }
@@ -106,14 +110,12 @@ public class ProfileApiController {
         List<Drink> drinks = user.getDrinks();
 
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
-        String format = "YYYY-MM-dd";
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         for (Drink d : drinks) {
-            DateTime dt = new DateTime(d.getTimeStamp().toEpochMilli());
             double timezoneOffset = 0; // (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
-            DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
-            dt = dt.toDateTime(dtz);
-            String s = dt.toString(format);
+            ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+            String s = d.getTimeStamp().atZone(dtz).format(format);
 
             Integer i = 0;
             if (drinksPerDay.containsKey(s))
@@ -122,7 +124,7 @@ public class ProfileApiController {
             drinksPerDay.put(s, i);
         }
 
-        String today = new DateTime().toString(format);
+        String today = LocalDate.now(ZoneId.systemDefault()).format(format);
         if (!drinksPerDay.containsKey(today))
             drinksPerDay.put(today, 0);
 
@@ -133,12 +135,17 @@ public class ProfileApiController {
         csvWriter.writeRecord(new String[]{"Time", "Drinks"});
 
         for (Map.Entry<String, Integer> p : drinksPerDay.entrySet()) {
-            DateTime dt = new DateTime(p.getKey());
-            csvWriter.writeRecord(new String[]{Long.toString(dt.getMillis()), p.getValue().toString()});
+            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            csvWriter.writeRecord(new String[]{Long.toString(millis), p.getValue().toString()});
         }
 
         csvWriter.close();
         byte[] bytes = baos.toByteArray();
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<String> handleInvalidTimestamp(DateTimeParseException ex) {
+        return ResponseEntity.badRequest().body("Invalid timestamp: " + ex.getMessage());
     }
 }

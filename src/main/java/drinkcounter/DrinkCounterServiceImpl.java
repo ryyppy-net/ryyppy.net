@@ -8,10 +8,6 @@ import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.GravatarService;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +19,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -33,6 +32,8 @@ import java.util.*;
 public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     private static final Logger log = LoggerFactory.getLogger(DrinkCounterServiceImpl.class);
+    private static final DateTimeFormatter ADD_DRINK_TO_DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
     @Autowired
     private PartyDAO partyDao;
     @Autowired
@@ -110,18 +111,17 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
         user.removeDrink(drink);
         drinkDao.delete(drink);
-        log.info("{} has removed a drink {}", user, new DateTime(drink.getTimeStamp().toEpochMilli()).toString());
+        log.info("{} has removed a drink {}", user, drink.getTimeStamp());
     }
 
     @Override
     public int addDrinkToDate(int userId, String date, double timezoneOffset) {
-        DateTimeZone dtz = DateTimeZone.forOffsetMillis((int)(-timezoneOffset * 60 * 1000));
-        DateTimeFormatter parser = DateTimeFormat.forPattern("dd.MM.yyyy HH:mm").withZone(dtz);
-        DateTime dt = parser.parseDateTime(date);
+        ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+        Instant instant = LocalDateTime.parse(date, ADD_DRINK_TO_DATE_FORMAT).toInstant(zoneOffset);
 
-        if (dt.isAfterNow()) throw new IllegalArgumentException(date);
+        if (instant.isAfter(Instant.now())) throw new IllegalArgumentException(date);
 
-        return addDrink(userId, dt.toDate());
+        return addDrink(userId, Date.from(instant));
     }
 
     @Override
@@ -198,6 +198,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         }
         user.drink(drink);
         drinkDao.save(drink);
-        log.info("{} has drunk a drink at {}", user, new DateTime(date).toString());
+        log.info("{} has drunk a drink at {}", user, drink.getTimeStamp());
     }
 }

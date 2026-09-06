@@ -2,8 +2,10 @@ package drinkcounter.model;
 
 import drinkcounter.AlcoholServiceImpl;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
@@ -228,7 +230,7 @@ public class UserTest {
     public void drinkXDrinksNMinutesAgo(User user, int drinks, int minutes) {
         for (int i = 0; i < drinks; i++) {
             Drink drink = new Drink();
-            drink.setTimeStamp(new DateTime().minusMinutes(minutes).toDate().toInstant());
+            drink.setTimeStamp(Instant.now().minus(Duration.ofMinutes(minutes)));
             user.drink(drink);
         }
     }
@@ -251,11 +253,11 @@ public class UserTest {
         user2.drink(new Drink());
         user2.drink(new Drink());
 
-        DateTime now = new DateTime();
-        DateTime end = now.plusHours(24);
+        Instant now = Instant.now();
+        Instant end = now.plus(Duration.ofHours(24));
 
-        List<Float> user1promilles = user.getPromillesAtInterval(now.toDate(), end.toDate(), 10000);
-        List<Float> user2promilles = user2.getPromillesAtInterval(now.toDate(), end.toDate(), 10000);
+        List<Float> user1promilles = user.getPromillesAtInterval(Date.from(now), Date.from(end), 10000);
+        List<Float> user2promilles = user2.getPromillesAtInterval(Date.from(now), Date.from(end), 10000);
 
         int len1 = user1promilles.size();
 
