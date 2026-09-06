@@ -7,17 +7,21 @@ import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.io.ByteArrayInputStream;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -47,6 +51,76 @@ public class ProfileApiControllerTest {
         when(currentUser.getUser()).thenReturn(user);
 
         controller = new ProfileApiController(drinkCounterService, userService, currentUser);
+    }
+
+    private TimeZone originalDefaultTimeZone;
+
+    @AfterEach
+    public void restoreDefaultTimeZone() {
+        if (originalDefaultTimeZone != null) {
+            TimeZone.setDefault(originalDefaultTimeZone);
+        }
+    }
+
+    // Issue #55: the bucketing offset here is currently hardcoded to 0 (UTC)
+    // -- see the commented-out session read in getDrinkHistory -- so the
+    // "Time" column must represent midnight UTC, not midnight in whatever
+    // zone the JVM happens to default to.
+    @Test
+    public void getDrinkHistoryTimeColumnRepresentsMidnightUtc_issue55() throws Exception {
+        originalDefaultTimeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
+
+        Drink drink = new Drink();
+        drink.setTimeStamp(Instant.parse("2024-03-06T01:00:00Z")); // 2024-03-06 in UTC
+        user.drink(drink);
+
+        ResponseEntity<byte[]> response = controller.getDrinkHistory();
+
+        long millis = findMillisForUtcDay(response.getBody(), "2024-03-06");
+
+        long utcMidnightMillis = Instant.parse("2024-03-06T00:00:00Z").toEpochMilli();
+        assertEquals(utcMidnightMillis, millis,
+                "Time column should be midnight 2024-03-06 UTC, not midnight in the server's zone (America/Los_Angeles)");
+    }
+
+    // Issue #55: "today" must be decided in the same zone the bucketing
+    // uses (currently hardcoded UTC), not the server's systemDefault().
+    @Test
+    public void getDrinkHistoryTodayBucketUsesUtc_issue55() throws Exception {
+        originalDefaultTimeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles")); // UTC-8
+
+        // 2024-03-06T02:00:00Z is already 2024-03-05 in America/Los_Angeles.
+        Clock fixedClock = Clock.fixed(Instant.parse("2024-03-06T02:00:00Z"), ZoneOffset.UTC);
+        ReflectionTestUtils.setField(controller, "clock", fixedClock);
+
+        // no drinks: only the "today" bucket will be present
+
+        ResponseEntity<byte[]> response = controller.getDrinkHistory();
+
+        Map<String, Integer> countsByDay = parseTimeCountCsv(response.getBody());
+
+        assertTrue(countsByDay.containsKey("2024-03-06"),
+                "today's bucket should be 2024-03-06 (UTC date), not 2024-03-05 (server's America/Los_Angeles date)");
+    }
+
+    private long findMillisForUtcDay(byte[] csv, String targetDay) throws Exception {
+        CsvReader reader = new CsvReader(new ByteArrayInputStream(csv), java.nio.charset.StandardCharsets.UTF_8);
+        reader.readHeaders();
+        long result = -1;
+        while (reader.readRecord()) {
+            long millis = Long.parseLong(reader.get(0));
+            String dayUtc = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toString();
+            if (dayUtc.equals(targetDay)) {
+                result = millis;
+            }
+        }
+        reader.close();
+        if (result == -1) {
+            throw new AssertionError("No row found for UTC day " + targetDay);
+        }
+        return result;
     }
 
     @Test
@@ -96,11 +170,15 @@ public class ProfileApiControllerTest {
 
         ResponseEntity<byte[]> response = controller.getDrinkHistory();
 
+        // The bucketing offset here is hardcoded to UTC, so the "Time"
+        // column is only meaningful when decoded in UTC too -- not the
+        // server's systemDefault(), which is fixed separately (see
+        // getDrinkHistoryTimeColumnRepresentsMidnightUtc_issue55).
         Map<String, Integer> countsByDay = parseTimeCountCsv(response.getBody());
         assertEquals(1, countsByDay.getOrDefault("2024-03-05", 0));
         assertEquals(1, countsByDay.getOrDefault("2024-03-06", 0));
 
-        String today = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String today = LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
         assertTrue(countsByDay.containsKey(today), "should always include today's bucket");
     }
 
@@ -111,7 +189,7 @@ public class ProfileApiControllerTest {
         while (reader.readRecord()) {
             long millis = Long.parseLong(reader.get(0));
             int count = Integer.parseInt(reader.get(1));
-            String day = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+            String day = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
                     .format(DateTimeFormatter.ISO_LOCAL_DATE);
             result.put(day, count);
         }

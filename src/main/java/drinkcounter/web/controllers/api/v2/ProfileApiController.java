@@ -15,9 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -38,6 +38,8 @@ public class ProfileApiController {
     private final DrinkCounterService drinkCounterService;
     private final UserService userService;
     private final CurrentUser currentUser;
+
+    private Clock clock = Clock.systemUTC();
 
     public ProfileApiController(DrinkCounterService drinkCounterService, UserService userService, CurrentUser currentUser) {
         this.drinkCounterService = drinkCounterService;
@@ -112,9 +114,10 @@ public class ProfileApiController {
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        double timezoneOffset = 0; // (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
+        ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+
         for (Drink d : drinks) {
-            double timezoneOffset = 0; // (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
-            ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
             String s = d.getTimeStamp().atZone(dtz).format(format);
 
             Integer i = 0;
@@ -124,7 +127,7 @@ public class ProfileApiController {
             drinksPerDay.put(s, i);
         }
 
-        String today = LocalDate.now(ZoneId.systemDefault()).format(format);
+        String today = LocalDate.now(clock.withZone(dtz)).format(format);
         if (!drinksPerDay.containsKey(today))
             drinksPerDay.put(today, 0);
 
@@ -135,7 +138,7 @@ public class ProfileApiController {
         csvWriter.writeRecord(new String[]{"Time", "Drinks"});
 
         for (Map.Entry<String, Integer> p : drinksPerDay.entrySet()) {
-            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(dtz).toInstant().toEpochMilli();
             csvWriter.writeRecord(new String[]{Long.toString(millis), p.getValue().toString()});
         }
 

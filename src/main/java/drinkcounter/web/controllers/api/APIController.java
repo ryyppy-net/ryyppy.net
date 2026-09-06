@@ -14,10 +14,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -66,6 +66,8 @@ public class APIController {
 
     @Autowired
     private UserService userService;
+
+    private Clock clock = Clock.systemUTC();
 
     @RequestMapping("/parties/{partyId}")
     public @ResponseBody byte[] printXml(HttpSession session, @PathVariable String partyId) throws IOException{
@@ -135,9 +137,10 @@ public class APIController {
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        double timezoneOffset = (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
+        ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+
         for (Drink d : drinks) {
-            double timezoneOffset = (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
-            ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
             String s = d.getTimeStamp().atZone(dtz).format(format);
 
             Integer i = 0;
@@ -147,7 +150,7 @@ public class APIController {
             drinksPerDay.put(s, i);
         }
 
-        String today = LocalDate.now(ZoneId.systemDefault()).format(format);
+        String today = LocalDate.now(clock.withZone(dtz)).format(format);
         if (!drinksPerDay.containsKey(today))
             drinksPerDay.put(today, 0);
 
@@ -158,7 +161,7 @@ public class APIController {
         csvWriter.writeRecord(new String[]{"Time", "Drinks"});
 
         for (Entry<String, Integer> p : drinksPerDay.entrySet()) {
-            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(dtz).toInstant().toEpochMilli();
             csvWriter.writeRecord(new String[]{Long.toString(millis), p.getValue().toString()});
         }
 
