@@ -8,10 +8,10 @@ import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.joda.time.DateTime;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -132,7 +132,7 @@ public class PartyApiController {
         }
         Date time = null;
         if(timestamp != null){
-            time = new Date(new DateTime(timestamp).getMillis());
+            time = Date.from(Instant.parse(timestamp));
         }
         drinkCounterService.addDrink(participantId, time, alcoholAmount);
     }
