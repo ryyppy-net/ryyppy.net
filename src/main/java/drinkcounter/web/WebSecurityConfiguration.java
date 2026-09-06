@@ -60,6 +60,7 @@ public class WebSecurityConfiguration {
                         "/API/passphrase/**",
                         "/oauth2/**",
                         "/api/auth/google/one-tap",
+                        "/api/auth/relay/**",
                         "/actuator/health"
                     ).permitAll()
                     .anyRequest().authenticated();
