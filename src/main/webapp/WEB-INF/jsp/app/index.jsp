@@ -23,20 +23,21 @@
     <div ng-view></div>
 
     <%--
-        Pre-populate $templateCache for the default route's templates so
-        Angular doesn't have to fetch them over XHR after bootstrap. Normally
-        $http (and therefore ngRoute's templateUrl / ng-include) checks this
-        cache before issuing a network request; a script[type=text/ng-template]
-        tag with id=<templateUrl> is Angular's built-in way to seed it from
-        static HTML shipped with the page. DefaultController.appIndex() reads
-        each file straight from app/partials/ on the classpath into the model,
-        so there's no separate copy to drift out of sync with the originals.
-        ${...} is deliberately unescaped here (JSP EL doesn't HTML-escape by
-        default) - this is trusted server-side markup, not user input.
+        Pre-populate Angular's $templateCache for every route's template so
+        it never has to fetch one over XHR after bootstrap, on the default
+        route or any other. Normally $http (and therefore ngRoute's
+        templateUrl / ng-include) checks this cache before issuing a network
+        request; a script[type=text/ng-template] tag with id=<templateUrl> is
+        Angular's built-in way to seed it from static HTML shipped with the
+        page. DefaultController.appIndex() reads each file straight from
+        app/partials/ on the classpath into the model, so there's no separate
+        copy to drift out of sync with the originals. ${...} is deliberately
+        unescaped here (JSP EL doesn't HTML-escape by default) - this is
+        trusted server-side markup, not user input.
     --%>
-    <script type="text/ng-template" id="partials/user.html">${userTemplate}</script>
-    <script type="text/ng-template" id="partials/user_menu.html">${userMenuTemplate}</script>
-    <script type="text/ng-template" id="partials/user_button.html">${userButtonTemplate}</script>
+    <c:forEach var="template" items="${templates}">
+        <script type="text/ng-template" id="${template.key}">${template.value}</script>
+    </c:forEach>
 
     <script src="/static/vendor/angular/angular.min.js"></script>
     <script src="<c:url value="/app/js/app.js"/>"></script>
