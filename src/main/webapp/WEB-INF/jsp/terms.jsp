@@ -3,7 +3,6 @@
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <t:master title="Käyttöehdot - Ryyppy.net">
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/style.css"/>" />
         <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
         <style>
             .terms {

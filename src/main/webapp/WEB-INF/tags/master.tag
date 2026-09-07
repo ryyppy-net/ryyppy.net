@@ -28,7 +28,7 @@
         <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
         <noscript><link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" /></noscript>
 
-        <link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="<c:url value="/static/css/style.css"/>" type="text/css" media="screen" />
         <jsp:invoke fragment="customHead" />
     </head>
     <body>
