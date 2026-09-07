@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib xmlns="https://jakarta.ee/xml/ns/jakartaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-jsptaglibrary_3_1.xsd"
+        version="3.1">
+    <description>Ryyppy.net custom JSP tags</description>
+    <tlib-version>1.0</tlib-version>
+    <short-name>rt</short-name>
+    <uri>http://ryyppy.net/tags</uri>
+
+    <tag>
+        <description>
+            Emits a script[type=text/ng-template] block whose content is read
+            from a classpath:/public/ resource, so the same partial HTML file
+            backs both this pre-populated $templateCache entry and any
+            regular templateUrl/ng-include fetch of it.
+        </description>
+        <name>ngTemplate</name>
+        <tag-class>drinkcounter.web.tags.NgTemplateTag</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>id</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>path</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+</taglib>
