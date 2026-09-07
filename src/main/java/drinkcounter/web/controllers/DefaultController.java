@@ -17,6 +17,6 @@ public class DefaultController {
 
     @GetMapping("/app/index.html")
     public String appIndex() {
-        return "app/appIndex";
+        return "app/index";
     }
 }
