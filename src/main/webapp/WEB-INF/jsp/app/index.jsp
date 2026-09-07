@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib uri="http://ryyppy.net/tags" prefix="rt" %>
 <!doctype html>
 <html lang="en" ng-app="ryyppy">
 <head>
@@ -29,14 +28,15 @@
         $http (and therefore ngRoute's templateUrl / ng-include) checks this
         cache before issuing a network request; a script[type=text/ng-template]
         tag with id=<templateUrl> is Angular's built-in way to seed it from
-        static HTML shipped with the page. rt:ngTemplate (see
-        drinkcounter.web.tags.NgTemplateTag) reads each file straight from
-        app/partials/ on the classpath, so there's no separate copy to drift
-        out of sync with the originals.
+        static HTML shipped with the page. DefaultController.appIndex() reads
+        each file straight from app/partials/ on the classpath into the model,
+        so there's no separate copy to drift out of sync with the originals.
+        ${...} is deliberately unescaped here (JSP EL doesn't HTML-escape by
+        default) - this is trusted server-side markup, not user input.
     --%>
-    <rt:ngTemplate id="partials/user.html" path="app/partials/user.html"/>
-    <rt:ngTemplate id="partials/user_menu.html" path="app/partials/user_menu.html"/>
-    <rt:ngTemplate id="partials/user_button.html" path="app/partials/user_button.html"/>
+    <script type="text/ng-template" id="partials/user.html">${userTemplate}</script>
+    <script type="text/ng-template" id="partials/user_menu.html">${userMenuTemplate}</script>
+    <script type="text/ng-template" id="partials/user_button.html">${userButtonTemplate}</script>
 
     <script src="/static/vendor/angular/angular.min.js"></script>
     <script src="<c:url value="/app/js/app.js"/>"></script>

@@ -62,31 +62,6 @@
                 </executions>
             </plugin>
             <!--
-                JspC below loads any custom JSP tag handler class at JSP-translation
-                time (to tell SimpleTag-based tags from classic Tag-based ones when
-                generating code), so tag handler classes must already exist as
-                .class files before it runs in generate-sources - ahead of this
-                project's normal compile phase. Compile just that package here first.
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile-jsp-tag-handlers</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <includes>
-                                <include>drinkcounter/web/tags/**</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--
                 Precompile the JSPs at build time (see issue #14). JspC (bundled in
                 tomcat-embed-jasper) generates one servlet class per JSP/tag file plus a
                 web-fragment snippet listing servlet-name/class/url-pattern per JSP.
