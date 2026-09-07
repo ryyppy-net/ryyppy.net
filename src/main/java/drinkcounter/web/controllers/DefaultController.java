@@ -1,12 +1,12 @@
 package drinkcounter.web.controllers;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
@@ -34,12 +34,8 @@ public class DefaultController {
     }
 
     private static String readClasspathResource(String path) {
-        String resourcePath = "public/" + path;
-        try (InputStream in = DefaultController.class.getClassLoader().getResourceAsStream(resourcePath)) {
-            if (in == null) {
-                throw new IllegalStateException("Missing classpath resource: " + resourcePath);
-            }
-            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        try {
+            return new ClassPathResource("public/" + path).getContentAsString(StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
