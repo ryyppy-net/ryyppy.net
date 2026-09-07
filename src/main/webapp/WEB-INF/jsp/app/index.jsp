@@ -1,3 +1,5 @@
+<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
+<%@taglib uri="jakarta.tags.core" prefix="c" %>
 <!doctype html>
 <html lang="en" ng-app="ryyppy">
 <head>
@@ -7,7 +9,7 @@
     <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.css"/>
     <link rel="stylesheet" href="/webjars/pnotify/1.2.0/jquery.pnotify.default.css"/>
-    <link rel="stylesheet" href="css/app.css"/>
+    <link rel="stylesheet" href="<c:url value="/app/css/app.css"/>"/>
 
     <!-- media="print" + onload swap keeps this from blocking the synchronous
          <script> tags below on a slow/unreachable Google Fonts request. -->
@@ -21,22 +23,22 @@
     <div ng-view></div>
 
     <script src="/static/vendor/angular/angular.min.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/services.js"></script>
+    <script src="<c:url value="/app/js/app.js"/>"></script>
+    <script src="<c:url value="/app/js/services.js"/>"></script>
 
     <script src="/static/vendor/moment/moment.min.js"></script>
 
-    <script src="js/controllers/UserCtrl.js"></script>
-    <script src="js/controllers/ProfileSettingsCtrl.js"></script>
-    <script src="js/controllers/DrinkerCtrl.js"></script>
-    <script src="js/controllers/PartyCtrl.js"></script>
-    <script src="js/controllers/GeneralPartyAdminCtrl.js"></script>
-    <script src="js/controllers/PartyAdminCtrl.js"></script>
+    <script src="<c:url value="/app/js/controllers/UserCtrl.js"/>"></script>
+    <script src="<c:url value="/app/js/controllers/ProfileSettingsCtrl.js"/>"></script>
+    <script src="<c:url value="/app/js/controllers/DrinkerCtrl.js"/>"></script>
+    <script src="<c:url value="/app/js/controllers/PartyCtrl.js"/>"></script>
+    <script src="<c:url value="/app/js/controllers/GeneralPartyAdminCtrl.js"/>"></script>
+    <script src="<c:url value="/app/js/controllers/PartyAdminCtrl.js"/>"></script>
 
-    <script src="js/userhistorygraph.js"></script>
+    <script src="<c:url value="/app/js/userhistorygraph.js"/>"></script>
 
-    <script src="js/filters.js"></script>
-    <script src="js/directives.js"></script>
+    <script src="<c:url value="/app/js/filters.js"/>"></script>
+    <script src="<c:url value="/app/js/directives.js"/>"></script>
 
     <script src="/webjars/jquery/1.8.3/jquery.min.js"></script>
     <script src="/webjars/pnotify/1.2.0/jquery.pnotify.js"></script>

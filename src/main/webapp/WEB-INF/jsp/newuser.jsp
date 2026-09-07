@@ -8,7 +8,7 @@
         <script type="text/javascript" src="<c:url value="/static/js/drinkerchecks.js"/>"></script>
         
         <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.css"/>
-        <link rel="stylesheet" href="/app/css/app.css"/>
+        <link rel="stylesheet" href="<c:url value="/app/css/app.css"/>"/>
 
         <script type="text/javascript">
             $(document).ready(function() {

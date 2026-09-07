@@ -30,13 +30,16 @@ public class WebConfiguration implements WebMvcConfigurer {
      * /static/vendor/jquery-ui/1.8.24/...), so a given URL's content
      * never changes - safe to cache for a year.
      *
-     * First-party JSP-served resources under /static/css/**, /static/js/** and
-     * /static/images/** are not versioned by path, so they get a content-hash
-     * VersionResourceResolver instead: the resource chain rewrites the actual
-     * URL (e.g. /static/js/party.js -> /static/js/party-<hash>.js) whenever the
-     * file changes. JSPs must reference these paths through <c:url> so that
-     * ResourceUrlEncodingFilter (registered below) can rewrite them to the
-     * hashed URL via response.encodeURL().
+     * First-party JSP-served resources under /static/css/**, /static/js/**,
+     * /static/images/**, /app/css/** and /app/js/** are not versioned by
+     * path, so they get a content-hash VersionResourceResolver instead: the
+     * resource chain rewrites the actual URL (e.g. /static/js/party.js ->
+     * /static/js/party-<hash>.js) whenever the file changes. JSPs must
+     * reference these paths through <c:url> so that ResourceUrlEncodingFilter
+     * (registered below) can rewrite them to the hashed URL via
+     * response.encodeURL(). This is why the AngularJS app's index.html is a
+     * JSP (appIndex.jsp) rather than a static file - only JSP's <c:url>
+     * triggers the rewrite.
      *
      * Sound effects under /static/sounds/** are referenced by plain string
      * paths from AngularJS code rather than through <c:url>, so they can't go
@@ -67,6 +70,12 @@ public class WebConfiguration implements WebMvcConfigurer {
 
         registry.addResourceHandler("/static/css/**", "/static/js/**", "/static/images/**")
                 .addResourceLocations("classpath:/public/static/css/", "classpath:/public/static/js/", "classpath:/public/static/images/")
+                .setCacheControl(oneYearImmutable)
+                .resourceChain(true)
+                .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+
+        registry.addResourceHandler("/app/css/**", "/app/js/**")
+                .addResourceLocations("classpath:/public/app/css/", "classpath:/public/app/js/")
                 .setCacheControl(oneYearImmutable)
                 .resourceChain(true)
                 .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
