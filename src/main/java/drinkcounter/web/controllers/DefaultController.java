@@ -60,30 +60,17 @@ public class DefaultController {
         // fetches immediately on load - same shapes as GET /API/v2/profile,
         // /API/v2/parties, /API/v2/profile/drinks and
         // /API/v2/profile/drink-history - so it can skip those first fetches.
-        // See the comment in app/index.jsp.
-        model.addAttribute("initialProfile", toScriptSafeJson(loadInitialProfile()));
-        model.addAttribute("initialParties", toScriptSafeJson(loadInitialParties()));
-        model.addAttribute("initialDrinks", toScriptSafeJson(loadInitialDrinks()));
-        model.addAttribute("initialDrinkHistory", toScriptSafeJson(loadInitialDrinkHistory()));
+        // Each is JSON-serialized then run through Spring's
+        // JavaScriptUtils.javaScriptEscape() for safe embedding as a
+        // single-quoted JS string literal - the JSP then wraps it as
+        // JSON.parse('...') rather than splicing it in as a raw object
+        // literal. See the comment in app/index.jsp for why (JSTL's usual
+        // fn:escapeXml is the wrong tool here).
+        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialProfile())));
+        model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties())));
+        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinks())));
+        model.addAttribute("initialDrinkHistory", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinkHistory())));
         return "app/index";
-    }
-
-    /**
-     * Serializes to JSON, then escapes it for safe embedding as a single-quoted
-     * JS string literal inside a JSP {@code <script>} block - the JSP then
-     * wraps it as {@code JSON.parse('...')} rather than splicing it in as a
-     * raw object literal. JSTL's usual fn:escapeXml is the wrong tool here: it
-     * HTML-entity-encodes quotes, but a browser's HTML parser never decodes
-     * entities inside <script> text content, so an entity-encoded string just
-     * fails to parse. Spring's JavaScriptUtils.javaScriptEscape() is the
-     * correct tool for this exact context: besides the quote/backslash/control
-     * character escaping a JS string literal needs, it also hex-escapes "<"
-     * and ">" (preventing a literal "</script" from ever closing the tag
-     * early) and the JSON-legal-but-JS-source-illegal U+2028/U+2029 line
-     * separators.
-     */
-    private String toScriptSafeJson(Object value) {
-        return JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(value));
     }
 
     private UserDTO loadInitialProfile() {
