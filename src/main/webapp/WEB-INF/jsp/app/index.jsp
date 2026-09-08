@@ -33,19 +33,22 @@
     </c:forEach>
 
     <%--
-        Embed the current user's own profile (DefaultController.appIndex(),
-        same JSON shape as GET /API/v2/profile) so UserCtrl can skip its first
-        fetch on load. Unlike the trusted-markup templates above, this JSON can
-        contain user-controlled strings (name, email), so it can't be embedded
-        with plain unescaped EL as-is - but the usual JSTL fix for that,
-        fn:escapeXml, is the wrong tool here: a browser's HTML parser never
-        decodes entities inside <script> text content, so entity-escaped JSON
-        just fails to parse. DefaultController.toScriptSafeJson() does the
+        Embed the data UserCtrl fetches immediately on load
+        (DefaultController.appIndex(), same JSON shapes as GET /API/v2/profile,
+        /API/v2/parties and /API/v2/profile/drinks) so it can skip those first
+        fetches. Unlike the trusted-markup templates above, this JSON can
+        contain user-controlled strings (name, email, party name), so it can't
+        be embedded with plain unescaped EL as-is - but the usual JSTL fix for
+        that, fn:escapeXml, is the wrong tool here: a browser's HTML parser
+        never decodes entities inside <script> text content, so entity-escaped
+        JSON just fails to parse. DefaultController.toScriptSafeJson() does the
         escaping that's actually needed for this context instead (only "<"
         and the JS line separators), so ${...} is safe unescaped here.
     --%>
     <script>
         window.__INITIAL_PROFILE__ = ${initialProfile};
+        window.__INITIAL_PARTIES__ = ${initialParties};
+        window.__INITIAL_DRINKS__ = ${initialDrinks};
     </script>
 
     <script src="/static/vendor/angular/angular.min.js"></script>

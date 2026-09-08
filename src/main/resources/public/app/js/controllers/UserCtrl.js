@@ -30,12 +30,28 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     };
 
     this.refreshParties = function () {
+        // See refreshProfile above - same skip-first-fetch pattern using data
+        // embedded by the server (app/index.jsp).
+        if (window.__INITIAL_PARTIES__) {
+            var initialParties = window.__INITIAL_PARTIES__;
+            window.__INITIAL_PARTIES__ = null;
+            $scope.parties = initialParties;
+            return;
+        }
         RyyppyAPI.getParties(function (data) {
             $scope.parties = data;
         });
     };
 
     this.refreshOwnDrinks = function () {
+        // See refreshProfile above - same skip-first-fetch pattern using data
+        // embedded by the server (app/index.jsp).
+        if (window.__INITIAL_DRINKS__) {
+            var initialDrinks = window.__INITIAL_DRINKS__;
+            window.__INITIAL_DRINKS__ = null;
+            $scope.drinks = initialDrinks;
+            return;
+        }
         RyyppyAPI.getOwnDrinks(function (data) {
             $scope.drinks = data;
         });

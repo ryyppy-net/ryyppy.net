@@ -1,7 +1,12 @@
 package drinkcounter.web.controllers;
 
 import drinkcounter.authentication.CurrentUser;
+import drinkcounter.model.Drink;
+import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.web.controllers.api.v2.DrinkDTO;
+import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
+import drinkcounter.web.controllers.api.v2.PartyDTO;
 import drinkcounter.web.controllers.api.v2.SlopeService;
 import drinkcounter.web.controllers.api.v2.UserDTO;
 import org.springframework.core.io.Resource;
@@ -15,7 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RequestMapping("/")
@@ -46,9 +53,12 @@ public class DefaultController {
         // the comment in app/index.jsp. Read fresh on every request for now
         // (no caching yet).
         model.addAttribute("templates", loadPartialTemplates());
-        // Embed the current user's own profile (same shape as GET /API/v2/profile)
-        // so UserCtrl can skip its first fetch - see the comment in app/index.jsp.
+        // Embed the data UserCtrl fetches immediately on load (same shapes as
+        // GET /API/v2/profile, /API/v2/parties and /API/v2/profile/drinks) so
+        // it can skip those first fetches - see the comment in app/index.jsp.
         model.addAttribute("initialProfile", toScriptSafeJson(loadInitialProfile()));
+        model.addAttribute("initialParties", toScriptSafeJson(loadInitialParties()));
+        model.addAttribute("initialDrinks", toScriptSafeJson(loadInitialDrinks()));
         return "app/index";
     }
 
@@ -74,6 +84,32 @@ public class DefaultController {
         UserDTO userDTO = UserDTO.fromUser(user);
         userDTO.setHistory(SlopeService.getSlopes(user));
         return userDTO;
+    }
+
+    private List<PartyDTO> loadInitialParties() {
+        List<Party> parties = currentUser.getUser().getParties();
+        List<PartyDTO> partyDTOs = new ArrayList<>();
+        for (Party party : parties) {
+            PartyDTO partyDTO = PartyDTO.fromParty(party);
+            for (User participant : party.getParticipants()) {
+                partyDTO.addParticipant(ParticipantPreviewDTO.fromUser(participant));
+            }
+            partyDTOs.add(partyDTO);
+        }
+        return partyDTOs;
+    }
+
+    private List<DrinkDTO> loadInitialDrinks() {
+        List<Drink> drinks = currentUser.getUser().getDrinks();
+        List<DrinkDTO> drinkDTOs = new ArrayList<>();
+        for (Drink drink : drinks) {
+            DrinkDTO drinkDTO = new DrinkDTO();
+            drinkDTO.setId(drink.getId());
+            drinkDTO.setTimestamp(drink.getTimeStamp().toString());
+            drinkDTO.setAmountOfShots(drink.getAmountOfShots());
+            drinkDTOs.add(drinkDTO);
+        }
+        return drinkDTOs;
     }
 
     private Map<String, String> loadPartialTemplates() {
