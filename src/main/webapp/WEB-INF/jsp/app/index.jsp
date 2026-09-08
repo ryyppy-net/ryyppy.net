@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="jakarta.tags.core" prefix="c" %>
+<%@taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!doctype html>
 <html lang="en" ng-app="ryyppy">
 <head>
@@ -31,6 +32,18 @@
     <c:forEach var="template" items="${templates}">
         <script type="text/ng-template" id="${template.key}">${template.value}</script>
     </c:forEach>
+
+    <%--
+        Embed the current user's own profile (DefaultController.appIndex(),
+        same JSON shape as GET /API/v2/profile) so UserCtrl can skip its first
+        fetch on load. Unlike the trusted-markup templates above, this JSON can
+        contain user-controlled strings (name, email), so it's HTML-escaped
+        with fn:escapeXml and re-parsed at runtime rather than embedded as raw
+        EL - that avoids both a premature </script> close and HTML injection.
+    --%>
+    <script>
+        window.__INITIAL_PROFILE__ = JSON.parse('${fn:escapeXml(initialProfile)}');
+    </script>
 
     <script src="/static/vendor/angular/angular.min.js"></script>
     <script src="<c:url value="/app/js/app.js"/>"></script>

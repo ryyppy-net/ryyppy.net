@@ -4,18 +4,29 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     var self = this;
     $scope.active = 'user';
 
-    this.refreshProfile = function () {
-        RyyppyAPI.getProfile(function (data) {
-            data.type = 'profile';
-            data.color = 1;
-            $scope.participants = [data];
+    function applyProfile(data) {
+        data.type = 'profile';
+        data.color = 1;
+        $scope.participants = [data];
 
-            setTimeout(function () {
-                var graph = new UserHistoryGraph($scope.participants[0], $("#historyGraph"));
-                graph.update();
-                graph.render();
-            }, 0);
-        });
+        setTimeout(function () {
+            var graph = new UserHistoryGraph($scope.participants[0], $("#historyGraph"));
+            graph.update();
+            graph.render();
+        }, 0);
+    }
+
+    this.refreshProfile = function () {
+        // The server embeds the profile into the page on load (see
+        // app/index.jsp) so the very first refresh can skip the XHR. Once
+        // used it's cleared so later polling ticks always hit the API.
+        if (window.__INITIAL_PROFILE__) {
+            var initialProfile = window.__INITIAL_PROFILE__;
+            window.__INITIAL_PROFILE__ = null;
+            applyProfile(initialProfile);
+            return;
+        }
+        RyyppyAPI.getProfile(applyProfile);
     };
 
     this.refreshParties = function () {
