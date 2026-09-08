@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.util.JavaScriptUtils;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -68,20 +69,21 @@ public class DefaultController {
     }
 
     /**
-     * Serializes to JSON safe to embed directly (unescaped) inside a JSP
-     * {@code <script>} block. JSTL's usual fn:escapeXml is the wrong tool
-     * here: it HTML-entity-encodes quotes, but a browser's HTML parser never
-     * decodes entities inside <script> text content, so an entity-encoded
-     * JSON string just fails to parse. Escaping "<" instead prevents the
-     * output from ever containing a literal "</script" that would close the
-     * tag early; U+2028/U+2029 are legal in JSON strings but illegal
-     * unescaped in a JS source, where a <script> block is parsed as one.
+     * Serializes to JSON, then escapes it for safe embedding as a single-quoted
+     * JS string literal inside a JSP {@code <script>} block - the JSP then
+     * wraps it as {@code JSON.parse('...')} rather than splicing it in as a
+     * raw object literal. JSTL's usual fn:escapeXml is the wrong tool here: it
+     * HTML-entity-encodes quotes, but a browser's HTML parser never decodes
+     * entities inside <script> text content, so an entity-encoded string just
+     * fails to parse. Spring's JavaScriptUtils.javaScriptEscape() is the
+     * correct tool for this exact context: besides the quote/backslash/control
+     * character escaping a JS string literal needs, it also hex-escapes "<"
+     * and ">" (preventing a literal "</script" from ever closing the tag
+     * early) and the JSON-legal-but-JS-source-illegal U+2028/U+2029 line
+     * separators.
      */
     private String toScriptSafeJson(Object value) {
-        return objectMapper.writeValueAsString(value)
-                .replace("<", "\\u003c")
-                .replace("\u2028", "\\u2028")
-                .replace("\u2029", "\\u2029");
+        return JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(value));
     }
 
     private UserDTO loadInitialProfile() {
