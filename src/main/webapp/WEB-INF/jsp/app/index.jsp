@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
 <%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib uri="jakarta.tags.functions" prefix="fn" %>
 <!doctype html>
 <html lang="en" ng-app="ryyppy">
 <head>
@@ -37,12 +36,16 @@
         Embed the current user's own profile (DefaultController.appIndex(),
         same JSON shape as GET /API/v2/profile) so UserCtrl can skip its first
         fetch on load. Unlike the trusted-markup templates above, this JSON can
-        contain user-controlled strings (name, email), so it's HTML-escaped
-        with fn:escapeXml and re-parsed at runtime rather than embedded as raw
-        EL - that avoids both a premature </script> close and HTML injection.
+        contain user-controlled strings (name, email), so it can't be embedded
+        with plain unescaped EL as-is - but the usual JSTL fix for that,
+        fn:escapeXml, is the wrong tool here: a browser's HTML parser never
+        decodes entities inside <script> text content, so entity-escaped JSON
+        just fails to parse. DefaultController.toScriptSafeJson() does the
+        escaping that's actually needed for this context instead (only "<"
+        and the JS line separators), so ${...} is safe unescaped here.
     --%>
     <script>
-        window.__INITIAL_PROFILE__ = JSON.parse('${fn:escapeXml(initialProfile)}');
+        window.__INITIAL_PROFILE__ = ${initialProfile};
     </script>
 
     <script src="/static/vendor/angular/angular.min.js"></script>

@@ -48,8 +48,25 @@ public class DefaultController {
         model.addAttribute("templates", loadPartialTemplates());
         // Embed the current user's own profile (same shape as GET /API/v2/profile)
         // so UserCtrl can skip its first fetch - see the comment in app/index.jsp.
-        model.addAttribute("initialProfile", objectMapper.writeValueAsString(loadInitialProfile()));
+        model.addAttribute("initialProfile", toScriptSafeJson(loadInitialProfile()));
         return "app/index";
+    }
+
+    /**
+     * Serializes to JSON safe to embed directly (unescaped) inside a JSP
+     * {@code <script>} block. JSTL's usual fn:escapeXml is the wrong tool
+     * here: it HTML-entity-encodes quotes, but a browser's HTML parser never
+     * decodes entities inside <script> text content, so an entity-encoded
+     * JSON string just fails to parse. Escaping "<" instead prevents the
+     * output from ever containing a literal "</script" that would close the
+     * tag early; U+2028/U+2029 are legal in JSON strings but illegal
+     * unescaped in a JS source, where a <script> block is parsed as one.
+     */
+    private String toScriptSafeJson(Object value) {
+        return objectMapper.writeValueAsString(value)
+                .replace("<", "\\u003c")
+                .replace("\u2028", "\\u2028")
+                .replace("\u2029", "\\u2029");
     }
 
     private UserDTO loadInitialProfile() {
