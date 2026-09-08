@@ -27,6 +27,16 @@ function UserHistoryGraph(user, element) {
     this.update = function() {
         this.render();
 
+        // The server embeds this user's own drink-history CSV into the page
+        // on load (see app/index.jsp) so the very first update() can skip the
+        // XHR. Once used it's cleared so later refreshes always hit the API.
+        if (window.__INITIAL_DRINK_HISTORY__) {
+            var initialDrinkHistory = window.__INITIAL_DRINK_HISTORY__;
+            window.__INITIAL_DRINK_HISTORY__ = null;
+            that.gotData(initialDrinkHistory);
+            return;
+        }
+
         $.get(drinksUrl.replace('_userid_', this.user.id), function(data) {that.gotData(data);} );
     }
 

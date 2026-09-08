@@ -4,22 +4,16 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
-import com.csvreader.CsvWriter;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import org.springframework.http.HttpHeaders;
@@ -109,42 +103,11 @@ public class ProfileApiController {
     @GetMapping("drink-history")
     public ResponseEntity<byte[]> getDrinkHistory() throws IOException{
         User user = currentUser.getUser();
-        List<Drink> drinks = user.getDrinks();
-
-        Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        double timezoneOffset = 0; // (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
-        ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
-
-        for (Drink d : drinks) {
-            String s = d.getTimeStamp().atZone(dtz).format(format);
-
-            Integer i = 0;
-            if (drinksPerDay.containsKey(s))
-                i = drinksPerDay.get(s);
-            i += 1;
-            drinksPerDay.put(s, i);
-        }
-
-        String today = LocalDate.now(clock.withZone(dtz)).format(format);
-        if (!drinksPerDay.containsKey(today))
-            drinksPerDay.put(today, 0);
+        String csv = DrinkHistoryService.buildCsv(user.getDrinks(), clock);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{"Time", "Drinks"});
-
-        for (Map.Entry<String, Integer> p : drinksPerDay.entrySet()) {
-            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(dtz).toInstant().toEpochMilli();
-            csvWriter.writeRecord(new String[]{Long.toString(millis), p.getValue().toString()});
-        }
-
-        csvWriter.close();
-        byte[] bytes = baos.toByteArray();
-        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
+        return new ResponseEntity<byte[]>(csv.getBytes(StandardCharsets.UTF_8), headers, HttpStatus.OK);
     }
 
     @ExceptionHandler(DateTimeParseException.class)

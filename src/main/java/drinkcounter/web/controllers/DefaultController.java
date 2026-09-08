@@ -5,6 +5,7 @@ import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.DrinkDTO;
+import drinkcounter.web.controllers.api.v2.DrinkHistoryService;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
 import drinkcounter.web.controllers.api.v2.SlopeService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,12 +55,15 @@ public class DefaultController {
         // the comment in app/index.jsp. Read fresh on every request for now
         // (no caching yet).
         model.addAttribute("templates", loadPartialTemplates());
-        // Embed the data UserCtrl fetches immediately on load (same shapes as
-        // GET /API/v2/profile, /API/v2/parties and /API/v2/profile/drinks) so
-        // it can skip those first fetches - see the comment in app/index.jsp.
+        // Embed the data UserCtrl (and the promille history graph it renders)
+        // fetches immediately on load - same shapes as GET /API/v2/profile,
+        // /API/v2/parties, /API/v2/profile/drinks and
+        // /API/v2/profile/drink-history - so it can skip those first fetches.
+        // See the comment in app/index.jsp.
         model.addAttribute("initialProfile", toScriptSafeJson(loadInitialProfile()));
         model.addAttribute("initialParties", toScriptSafeJson(loadInitialParties()));
         model.addAttribute("initialDrinks", toScriptSafeJson(loadInitialDrinks()));
+        model.addAttribute("initialDrinkHistory", toScriptSafeJson(loadInitialDrinkHistory()));
         return "app/index";
     }
 
@@ -110,6 +115,14 @@ public class DefaultController {
             drinkDTOs.add(drinkDTO);
         }
         return drinkDTOs;
+    }
+
+    private String loadInitialDrinkHistory() {
+        try {
+            return DrinkHistoryService.buildCsv(currentUser.getUser().getDrinks(), Clock.systemUTC());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private Map<String, String> loadPartialTemplates() {

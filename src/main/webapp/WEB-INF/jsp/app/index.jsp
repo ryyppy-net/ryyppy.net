@@ -49,6 +49,7 @@
         window.__INITIAL_PROFILE__ = ${initialProfile};
         window.__INITIAL_PARTIES__ = ${initialParties};
         window.__INITIAL_DRINKS__ = ${initialDrinks};
+        window.__INITIAL_DRINK_HISTORY__ = ${initialDrinkHistory};
     </script>
 
     <script src="/static/vendor/angular/angular.min.js"></script>
