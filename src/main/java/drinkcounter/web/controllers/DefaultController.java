@@ -56,16 +56,8 @@ public class DefaultController {
         // the comment in app/index.jsp. Read fresh on every request for now
         // (no caching yet).
         model.addAttribute("templates", loadPartialTemplates());
-        // Embed the data UserCtrl (and the promille history graph it renders)
-        // fetches immediately on load - same shapes as GET /API/v2/profile,
-        // /API/v2/parties, /API/v2/profile/drinks and
-        // /API/v2/profile/drink-history - so it can skip those first fetches.
-        // Each is JSON-serialized then run through Spring's
-        // JavaScriptUtils.javaScriptEscape() for safe embedding as a
-        // single-quoted JS string literal - the JSP then wraps it as
-        // JSON.parse('...') rather than splicing it in as a raw object
-        // literal. See the comment in app/index.jsp for why (JSTL's usual
-        // fn:escapeXml is the wrong tool here).
+        // Dashboard data UserCtrl (and its promille history graph) would
+        // otherwise fetch over the API right after load - see app/index.jsp.
         model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialProfile())));
         model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties())));
         model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinks())));

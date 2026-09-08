@@ -33,21 +33,9 @@
     </c:forEach>
 
     <%--
-        Embed the data UserCtrl (and the promille history graph it renders)
-        fetches immediately on load (DefaultController.appIndex(), same JSON
-        shapes as GET /API/v2/profile, /API/v2/parties, /API/v2/profile/drinks
-        and /API/v2/profile/drink-history) so it can skip those first fetches.
-        Unlike the trusted-markup templates above, this data can contain
-        user-controlled strings (name, email, party name), so it can't be
-        embedded with plain unescaped EL as-is - but the usual JSTL fix for
-        that, fn:escapeXml, is the wrong tool here: a browser's HTML parser
-        never decodes entities inside <script> text content, so entity-escaped
-        JSON just fails to parse. Instead, DefaultController.toScriptSafeJson()
-        JSON-serializes each value and then runs it through Spring's
-        JavaScriptUtils.javaScriptEscape() - the purpose-built utility for
-        embedding a value as a JS string literal - so each ${...} below is a
-        safely-escaped string, wrapped here in single quotes and re-parsed via
-        JSON.parse() rather than spliced in as a raw object literal.
+        The current user's profile, parties, own drinks, and drink-history
+        graph data (DefaultController.appIndex()), so UserCtrl and the
+        promille history graph it renders can skip their first API fetch.
     --%>
     <script>
         window.__INITIAL_PROFILE__ = JSON.parse('${initialProfile}');
