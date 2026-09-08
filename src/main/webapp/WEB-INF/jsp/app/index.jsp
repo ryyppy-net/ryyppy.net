@@ -32,6 +32,18 @@
         <script type="text/ng-template" id="${template.key}">${template.value}</script>
     </c:forEach>
 
+    <%--
+        The current user's profile, parties, own drinks, and drink-history
+        graph data (DefaultController.appIndex()), so UserCtrl and the
+        promille history graph it renders can skip their first API fetch.
+    --%>
+    <script>
+        window.__INITIAL_PROFILE__ = JSON.parse('${initialProfile}');
+        window.__INITIAL_PARTIES__ = JSON.parse('${initialParties}');
+        window.__INITIAL_DRINKS__ = JSON.parse('${initialDrinks}');
+        window.__INITIAL_DRINK_HISTORY__ = JSON.parse('${initialDrinkHistory}');
+    </script>
+
     <script src="/static/vendor/angular/angular.min.js"></script>
     <script src="<c:url value="/app/js/app.js"/>"></script>
     <script src="<c:url value="/app/js/services.js"/>"></script>
