@@ -4,7 +4,6 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <t:master>
     <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/style.css"/>" />
         <link rel="stylesheet" href="/static/vendor/jquery-tooltip/jquery.tooltip.css" type="text/css" media="screen" />
         <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
