@@ -22,6 +22,16 @@
 <body>
     <div ng-view></div>
 
+    <%--
+        Pre-populate $templateCache with every route's template (loaded from
+        app/partials/ by DefaultController.appIndex()) so Angular never
+        fetches one over XHR. ${...} is intentionally unescaped: trusted
+        server-side markup, not user input.
+    --%>
+    <c:forEach var="template" items="${templates}">
+        <script type="text/ng-template" id="${template.key}">${template.value}</script>
+    </c:forEach>
+
     <script src="/static/vendor/angular/angular.min.js"></script>
     <script src="<c:url value="/app/js/app.js"/>"></script>
     <script src="<c:url value="/app/js/services.js"/>"></script>
