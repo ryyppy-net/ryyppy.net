@@ -1,4 +1,13 @@
 spring:
+  config:
+    # Re-imported fresh by Spring Cloud's context refresh on every CRaC
+    # restore (unlike ${ENV_VAR} placeholders, which resolve from
+    # System.getenv() - a JVM-wide cache populated once at startup and
+    # frozen into the checkpoint image, so it never reflects the
+    # restoring process's actual environment). This file is where
+    # restore-time secrets belong; see CheckpointListener and
+    # railway-build-aot-cache.sh for how it gets written.
+    import: "optional:file:./crac-runtime-config.yml"
   application:
     name: ryyppy.net
   datasource:
