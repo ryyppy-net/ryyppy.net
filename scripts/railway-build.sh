@@ -219,15 +219,27 @@ fi
 echo "==> AOT training Postgres ready on 127.0.0.1:$PG_PORT"
 # ------------------------------------------------------------------------
 
+# Point both training runs at it through the same spring.config.import
+# file production restore later overwrites with real credentials (see
+# application.yml and scripts/railway-start.sh) - not through
+# application-aot-train.yml's own spring.datasource.*, and not through
+# SPRING_DATASOURCE_* env vars either. Either of those would keep
+# outranking that file forever after a CRaC restore: active profiles and
+# the checkpoint's frozen environment snapshot both survive restore, so
+# whichever source the checkpoint saw as authoritative at training time
+# would keep winning on every refresh no matter what the file said. Using
+# the same file for training too means there's only ever one source.
+cat > crac-runtime-config.yml <<EOF
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:$PG_PORT/$PG_DB
+    username: $PG_DB
+    password: $PG_DB
+EOF
+
 echo "==> AOT training run"
 set +e
-# Railway sets SPRING_DATASOURCE_URL/USERNAME/PASSWORD for the real Postgres
-# on this service, and env vars outrank application-aot-train.yml's
-# spring.datasource.*, so left alone they'd point this boot at the
-# production JDBC URL instead of the training Postgres above. Unset them
-# for this subprocess so the profile's own datasource config applies.
 env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
-  AOT_TRAIN_PG_PORT="$PG_PORT" \
   java -Dspring.aot.enabled=true -XX:AOTCacheOutput="$AOT_CACHE" \
   -jar "$EXTRACTED_WAR" \
   --spring.profiles.active=aot-train \
@@ -339,7 +351,6 @@ echo "==> CRaC checkpoint training run"
 # checkpoint time only; restore doesn't need a matching flag.
 set +e
 env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
-  AOT_TRAIN_PG_PORT="$PG_PORT" \
   java -XX:CRaCCheckpointTo="$CRAC_CHECKPOINT_DIR" \
   -XX:CPUFeatures=generic \
   -jar "$EXTRACTED_WAR" \

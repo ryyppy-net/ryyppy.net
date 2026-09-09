@@ -1,26 +1,29 @@
-# Used only to produce the JDK 25 AOT cache during the build (see
-# scripts/railway-build-aot-cache.sh, which also unsets SPRING_DATASOURCE_*
-# for this profile's boot - Railway injects those as env vars for the real
-# Postgres, and an env var outranks this file's spring.datasource.url,
-# which broke the training run against the driver-class-name below).
+# Used only during the build (see scripts/railway-build.sh, both the JDK
+# AOT cache pass and the CRaC checkpoint pass) - boots against a real,
+# ephemeral PostgreSQL instance the build script starts locally on
+# 127.0.0.1 (Docker isn't available during a Railway build, so the script
+# runs actual Postgres server binaries directly - see the script for how).
+# Everything else - dialect, ddl-auto, session-jdbc schema init - is left
+# as the base application.yml configures it, since the entire point of
+# training against real Postgres instead of an in-memory substitute is to
+# exercise the same JDBC driver, SQL dialect, and connection pool code
+# paths production actually boots with.
 #
-# Boots against a real, ephemeral PostgreSQL instance that the build script
-# starts locally on 127.0.0.1 (Docker isn't available during a Railway
-# build, so the script runs actual Postgres server binaries directly - see
-# the script for how). Everything else - dialect, ddl-auto, session-jdbc
-# schema init - is left as the base application.yml configures it, since
-# the entire point of training against real Postgres instead of an
-# in-memory substitute is to exercise the same JDBC driver, SQL dialect,
-# and connection pool code paths production actually boots with.
+# Deliberately not setting spring.datasource.* here even though this
+# profile is exactly where the training database's connection details are
+# needed: this file's precedence, as a profile-specific document, is
+# *above* the config-imported file production restore relies on (see
+# application.yml's spring.config.import and CheckpointListener) to swap
+# in real credentials after a CRaC restore - active profiles stay frozen
+# in the checkpoint, so any spring.datasource.* set here would keep
+# winning over that file forever after restore, no matter its content.
+# scripts/railway-build.sh instead points the training runs at the
+# training database through that same config-imported file, so there's
+# only ever one source to consider, not two competing ones.
 spring:
   docker:
     compose:
       enabled: false
-  datasource:
-    url: jdbc:postgresql://127.0.0.1:${AOT_TRAIN_PG_PORT:5432}/ryyppynet
-    username: ryyppynet
-    password: ryyppynet
-    driver-class-name: org.postgresql.Driver
   # The build script applies V1__baseline.sql to the training database
   # directly (see scripts/railway-build.sh) instead of relying on this
   # boot to run it: Flyway's classpath scan for db/migration doesn't find
