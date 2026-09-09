@@ -53,12 +53,23 @@ public class WebConfiguration implements WebMvcConfigurer {
      * <link> tag), so they can't be versioned either. They change rarely, so
      * they get a week-long cache - short enough to roll out a replacement
      * without a URL change, unlike the year-long caches above.
+     *
+     * /sw.js (the Gravatar stale-while-revalidate service worker) must be
+     * served from the root path so its default scope covers the whole app,
+     * and explicitly with no-cache: browsers already re-check a service
+     * worker script periodically, but an HTTP cache sitting in front of that
+     * check would delay how quickly a new worker version can be picked up.
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         CacheControl oneYearImmutable = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable();
         CacheControl oneYear = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic();
         CacheControl oneWeek = CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
+        CacheControl noCache = CacheControl.noCache();
+
+        registry.addResourceHandler("/sw.js")
+                .addResourceLocations("classpath:/public/")
+                .setCacheControl(noCache);
 
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/")

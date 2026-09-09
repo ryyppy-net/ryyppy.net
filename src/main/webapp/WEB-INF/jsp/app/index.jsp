@@ -20,6 +20,15 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+    <%-- Stale-while-revalidate cache for Gravatar avatar images, see sw.js. --%>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+
     <div ng-view></div>
 
     <%--
