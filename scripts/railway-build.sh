@@ -329,10 +329,19 @@ echo "==> CRaC checkpoint training run"
 # captures this run's own JIT-compiled code directly. The AOT cache
 # stays useful only for the plain-boot fallback path (see
 # scripts/railway-start.sh).
+# -XX:CPUFeatures=generic: without it the checkpoint records the exact
+# CPU features of *this* build machine, and restore refuses to run if
+# the container it lands in - almost certainly a different physical
+# host - is missing even one of them ("Image constraint 'cpu.features'
+# does not match", confirmed against a real Railway deploy). generic
+# restricts the checkpoint to the baseline every x86-64 CPU has, trading
+# some peak performance for actually being restorable. Goes at
+# checkpoint time only; restore doesn't need a matching flag.
 set +e
 env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
   AOT_TRAIN_PG_PORT="$PG_PORT" \
   java -XX:CRaCCheckpointTo="$CRAC_CHECKPOINT_DIR" \
+  -XX:CPUFeatures=generic \
   -jar "$EXTRACTED_WAR" \
   --spring.profiles.active=aot-train \
   --server.port="$TRAIN_PORT" \
