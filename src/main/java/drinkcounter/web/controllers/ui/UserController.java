@@ -164,7 +164,7 @@ public class UserController {
         mav.setViewName("user");
         mav.addObject("user", user);
         mav.addObject("parties", user.getParties().stream()
-            .sorted(Comparator.comparing(Party::getStartTime))
+            .sorted(Comparator.comparing(Party::getStartTime).reversed())
             .collect(Collectors.toList())
         );
         
