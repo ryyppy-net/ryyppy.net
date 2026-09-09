@@ -21,9 +21,10 @@ ENV PATH="$JAVA_HOME/bin:$PATH"
 FROM jdk AS build
 # maven: builds the app. musl: needed by railway-build.sh's ephemeral
 # training Postgres (the io.zonky.test.postgres alpine/musl-linked
-# binaries - see that script for why). sudo isn't needed; this build
-# stage already runs as root.
-RUN apt-get update && apt-get install -y --no-install-recommends maven musl \
+# binaries - see that script for why). unzip: that script also unpacks
+# the Postgres binaries jar with it. sudo isn't needed; this build stage
+# already runs as root.
+RUN apt-get update && apt-get install -y --no-install-recommends maven musl unzip \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . .
