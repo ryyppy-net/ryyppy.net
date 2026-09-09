@@ -6,6 +6,12 @@ spring:
     username: ryyppynet
     password: ryyppynet
     driver-class-name: org.postgresql.Driver
+    hikari:
+      # Required for HikariCheckpointRestoreLifecycle to suspend the pool
+      # (rather than just evicting connections while new ones keep getting
+      # opened) so a CRaC checkpoint can actually be taken - see
+      # CheckpointListener and railway-build-aot-cache.sh.
+      allow-pool-suspension: true
   jpa:
     hibernate:
       ddl-auto: validate
@@ -41,6 +47,14 @@ spring:
   docker:
     compose:
       file: docker/docker-compose.yml
+  cloud:
+    refresh:
+      # Rebind these beans against the live environment after a CRaC
+      # restore, instead of reusing whatever connection details were baked
+      # in when the checkpoint was taken - see CheckpointListener.
+      extra-refreshable:
+        - javax.sql.DataSource
+        - com.zaxxer.hikari.HikariDataSource
 
   security:
     oauth2:
