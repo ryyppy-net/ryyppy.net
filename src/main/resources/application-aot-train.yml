@@ -21,3 +21,13 @@ spring:
     username: ryyppynet
     password: ryyppynet
     driver-class-name: org.postgresql.Driver
+  # The build script applies V1__baseline.sql to the training database
+  # directly (see scripts/railway-build.sh) instead of relying on this
+  # boot to run it: Flyway's classpath scan for db/migration doesn't find
+  # anything from the extracted thin-war layout the training run boots
+  # from (its resources land at the war root, not under WEB-INF/classes,
+  # there). Leaving Flyway enabled here would have it try, fail to find
+  # any migrations, and then fail Hibernate's schema validation once it
+  # (wrongly) concludes the schema is still empty.
+  flyway:
+    enabled: false

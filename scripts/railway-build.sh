@@ -163,6 +163,37 @@ run_as "$MUSL_LOADER $PG_BIN/initdb -D $PG_DATA -U $PG_DB --pwfile=$PG_ROOT/pwfi
 echo "CREATE DATABASE $PG_DB;" > "$PG_ROOT/createdb.sql"
 run_as "$MUSL_LOADER $PG_BIN/postgres --single -D $PG_DATA template1 < $PG_ROOT/createdb.sql" > "$PG_ROOT/createdb.log" 2>&1
 
+# Apply the baseline schema directly via the same single-user mode, rather
+# than letting the app's own Flyway migration do it on boot. Flyway's
+# classpath scan for db/migration doesn't find anything when running from
+# the extracted thin-war layout (its resources land at the war root
+# instead of under WEB-INF/classes there) - production never notices
+# because its schema already exists, but a training run against this
+# fresh database needs the tables created some other way, so do it here
+# and disable Flyway for the aot-train profile (see
+# application-aot-train.yml) instead of fighting that classpath mismatch.
+#
+# Single-user mode's parser isn't psql: it doesn't wait for a semicolon
+# across multiple lines, so a statement split across lines (like every
+# CREATE TABLE below) comes apart into line fragments and fails with
+# syntax errors. Collapse comments/newlines away and re-split on
+# semicolons instead, so each line it reads is one complete statement.
+BASELINE_SQL=src/main/resources/db/migration/V1__baseline.sql
+BASELINE_SQL_SINGLE_LINE="$PG_ROOT/baseline-single-statement-per-line.sql"
+grep -v '^--' "$BASELINE_SQL" | tr '\n' ' ' | sed 's/;/;\n/g' > "$BASELINE_SQL_SINGLE_LINE"
+run_as "$MUSL_LOADER $PG_BIN/postgres --single -D $PG_DATA $PG_DB < $BASELINE_SQL_SINGLE_LINE" > "$PG_ROOT/baseline.log" 2>&1
+
+# Defensive: also grant on the table/sequences to $PG_DB's own role, in
+# case a different embedded-postgres version ever bootstraps with a
+# separate superuser instead of initdb -U $PG_DB making $PG_DB itself
+# the superuser (as it does today) - information_schema, which is what
+# Hibernate's schema validator queries, only lists objects the
+# *connecting* role owns or has been granted on, so a superuser/app-role
+# split here would otherwise fail ddl-auto=validate with "missing
+# sequence" even though the sequence visibly exists.
+echo "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $PG_DB; GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $PG_DB;" > "$PG_ROOT/grant.sql"
+run_as "$MUSL_LOADER $PG_BIN/postgres --single -D $PG_DATA $PG_DB < $PG_ROOT/grant.sql" > "$PG_ROOT/grant.log" 2>&1
+
 run_as "exec $MUSL_LOADER $PG_BIN/postgres -D $PG_DATA -p $PG_PORT -k $PG_SOCK -c listen_addresses=127.0.0.1" \
   > "$PG_ROOT/pg.log" 2>&1 &
 PG_PID=$!
@@ -289,15 +320,19 @@ rm -rf "$CRAC_CHECKPOINT_DIR" "$CRAC_TRAIN_LOG"
 mkdir -p "$CRAC_CHECKPOINT_DIR"
 
 echo "==> CRaC checkpoint training run"
-AOT_CACHE_OPTS=()
-if [ -f "$AOT_CACHE" ]; then
-  AOT_CACHE_OPTS=(-Dspring.aot.enabled=true "-XX:AOTCache=$AOT_CACHE")
-fi
-
+# Deliberately *not* passing -XX:AOTCache here even though $AOT_CACHE
+# exists by this point: combining it with CRaC checkpoint/restore
+# crashes the JVM (SIGSEGV in AdapterHandlerLibrary::lookup, during
+# "Refreshing context on restart" on the restore side) - a real
+# incompatibility between JEP 483's AOT cache and CRaC, not something
+# fixable from here. The checkpoint doesn't need it anyway: it already
+# captures this run's own JIT-compiled code directly. The AOT cache
+# stays useful only for the plain-boot fallback path (see
+# scripts/railway-start.sh).
 set +e
 env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
   AOT_TRAIN_PG_PORT="$PG_PORT" \
-  java "${AOT_CACHE_OPTS[@]}" -XX:CRaCCheckpointTo="$CRAC_CHECKPOINT_DIR" \
+  java -XX:CRaCCheckpointTo="$CRAC_CHECKPOINT_DIR" \
   -jar "$EXTRACTED_WAR" \
   --spring.profiles.active=aot-train \
   --server.port="$TRAIN_PORT" \
