@@ -1,5 +1,6 @@
 package drinkcounter.authentication.relay;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,7 @@ public class AuthRelayTokenService {
     // here would otherwise freeze whatever AUTH_RELAY_SECRET (or its absence) looked like during
     // the CRaC training pass, forever - the same staleness app.auth-relay-secret's
     // spring.config.import-backed value (see application.yml) is meant to avoid.
+    @Autowired
     public AuthRelayTokenService(Environment environment) {
         this.environment = environment;
         this.fixedSecretForTesting = null;
