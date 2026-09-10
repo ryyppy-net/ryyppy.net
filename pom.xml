@@ -188,6 +188,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
         </dependency>
+        <!--
+            JSP-to-Thymeleaf migration in progress: pages already converted
+            resolve here (src/main/resources/templates/), everything else
+            still falls through to the InternalResourceViewResolver's JSP
+            lookup below. ThymeleafViewResolver has a lower @Order than the
+            JSP resolver, so it's tried first and only returns a view when a
+            matching .html template actually exists.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>

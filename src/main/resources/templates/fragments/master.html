@@ -1,0 +1,31 @@
+<!--
+    Thymeleaf equivalent of WEB-INF/tags/master.tag. Pages include it with:
+
+        <div th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+
+    passing their own <title>, a #customHead element (page-specific
+    stylesheets/scripts, th:remove="tag" so only its children are kept) and a
+    #content element (the page body, same th:remove="tag" treatment).
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, customHead, content)">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+        <title th:replace="${title}">Ryyppy.net</title>
+
+        <script type="text/javascript" src="/webjars/jquery/1.8.3/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/vendor/jquery-tooltip/jquery.tooltip.min.js"></script>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <!-- Loaded non-render-blocking: see master.tag for why. -->
+        <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
+        <noscript><link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" /></noscript>
+
+        <link rel="stylesheet" th:href="@{/static/css/style.css}" type="text/css" media="screen" />
+        <th:block th:replace="${customHead}" />
+    </head>
+    <body>
+        <th:block th:replace="${content}" />
+    </body>
+</html>
