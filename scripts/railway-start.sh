@@ -33,12 +33,42 @@ cd "$(dirname "$0")/.."
 # app.google-auth-hub-url (read fresh per-call via Environment instead of
 # System.getenv() - see AuthRelayTokenService, AuthRelayController,
 # GlobalControllerAdvice).
+#
+# spring.datasource.hikari.* below are the same fix again, for a bug that
+# was actually blocking Railway's sleep feature entirely: unset during
+# training, these silently stayed unset after every restore too, so
+# HikariCP fell back to its own default of minimum-idle == maximum-pool-size
+# (10) - a combination where HikariCP documents that idle-timeout eviction
+# never kicks in. The restored pool held up to 10 connections open to the
+# real database permanently, which Railway's inactivity detector counts as
+# outbound traffic, so the service could never be considered idle long
+# enough to sleep. HikariDataSource is already in extra-refreshable (see
+# application.yml), so wiring these through here is enough - no bean
+# changes needed, unlike the OAuth2 registration repository.
+HIKARI_YAML=""
+if [ -n "${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:-}" ]; then
+  HIKARI_YAML="${HIKARI_YAML}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE}"
+fi
+if [ -n "${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:-}" ]; then
+  HIKARI_YAML="${HIKARI_YAML}
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE}"
+fi
+if [ -n "${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:-}" ]; then
+  HIKARI_YAML="${HIKARI_YAML}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT}"
+fi
+if [ -n "$HIKARI_YAML" ]; then
+  HIKARI_YAML="
+    hikari:${HIKARI_YAML}"
+fi
+
 cat > crac-runtime-config.yml <<EOF
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    password: ${SPRING_DATASOURCE_PASSWORD}${HIKARI_YAML}
   security:
     oauth2:
       client:
