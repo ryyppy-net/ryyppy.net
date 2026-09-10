@@ -71,8 +71,6 @@ spring:
       extra-refreshable:
         - javax.sql.DataSource
         - com.zaxxer.hikari.HikariDataSource
-        - org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
-        - org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository
 
 app:
   # Read via Environment.getProperty(...) at request time rather than
