@@ -5,6 +5,7 @@ import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,15 +40,22 @@ public class AuthRelayController {
 
     private final AuthRelayTokenService tokenService;
     private final GoogleIdentityLinkingService identityLinkingService;
+    private final Environment environment;
 
-    public AuthRelayController(AuthRelayTokenService tokenService, GoogleIdentityLinkingService identityLinkingService) {
+    public AuthRelayController(
+            AuthRelayTokenService tokenService,
+            GoogleIdentityLinkingService identityLinkingService,
+            Environment environment) {
         this.tokenService = tokenService;
         this.identityLinkingService = identityLinkingService;
+        this.environment = environment;
     }
 
     @GetMapping("/api/auth/relay/redirect")
     public String redirect(HttpServletRequest request) {
-        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
+        // Read via Environment rather than System.getenv() directly - see
+        // app.google-auth-hub-url in application.yml for why.
+        String hubUrl = environment.getProperty("app.google-auth-hub-url");
         if (!tokenService.isEnabled() || hubUrl == null || hubUrl.isBlank()) {
             log.error("Google sign-in relay was requested but GOOGLE_AUTH_HUB_URL/AUTH_RELAY_SECRET are not configured");
             return "redirect:/ui/login?error=relay_not_configured";

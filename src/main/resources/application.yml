@@ -56,6 +56,13 @@ spring:
   docker:
     compose:
       file: docker/docker-compose.yml
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
+            client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
   cloud:
     refresh:
       # Rebind these beans against the live environment after a CRaC
@@ -64,14 +71,22 @@ spring:
       extra-refreshable:
         - javax.sql.DataSource
         - com.zaxxer.hikari.HikariDataSource
+        - org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
+        - org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
-            client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
+app:
+  # Read via Environment.getProperty(...) at request time rather than
+  # System.getenv() directly (see AuthRelayController, GlobalControllerAdvice,
+  # AuthRelayTokenService) - System.getenv() is a JVM-wide snapshot frozen
+  # into the checkpoint image at build time, so it would never reflect a
+  # restored production container's actual environment, the same issue
+  # spring.config.import solves for spring.datasource.* above. Fresh values
+  # for these are supplied at restore by crac-runtime-config.yml (see
+  # scripts/railway-start.sh); the ${...} defaults here only matter for a
+  # plain boot (local dev, or the fallback path), where System.getenv() is
+  # never stale.
+  auth-relay-secret: ${AUTH_RELAY_SECRET:}
+  google-auth-hub-url: ${GOOGLE_AUTH_HUB_URL:}
 
 server:
   servlet:

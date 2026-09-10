@@ -23,12 +23,38 @@ cd "$(dirname "$0")/.."
 # spring.config.import and CheckpointListener) re-imports this file fresh
 # on every restore, which is what actually makes the swap work - verified
 # via pg_stat_activity, not just log output.
+#
+# spring.security.oauth2.client.registration.google.* and app.* below are
+# the same fix applied to the other config that was silently stuck at
+# whatever it looked like during training (google client-id/secret frozen
+# at REPLACE_THIS, AUTH_RELAY_SECRET/GOOGLE_AUTH_HUB_URL frozen unset) -
+# see application.yml's spring.cloud.refresh.extra-refreshable (for the
+# OAuth2 client registration beans) and app.auth-relay-secret/
+# app.google-auth-hub-url (read fresh per-call via Environment instead of
+# System.getenv() - see AuthRelayTokenService, AuthRelayController,
+# GlobalControllerAdvice).
 cat > crac-runtime-config.yml <<EOF
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            # :-REPLACE_THIS, not :- : an empty client-id fails
+            # ClientRegistration.build()'s validation and would crash
+            # bean construction on refresh, whereas the same placeholder
+            # application.yml already falls back to is a harmless no-op.
+            client-id: ${GOOGLE_CLIENT_ID:-REPLACE_THIS}
+            client-secret: ${GOOGLE_CLIENT_SECRET:-REPLACE_THIS}
+app:
+  # Both optional (see AuthRelayTokenService/AuthRelayController) - guarded with :- so an
+  # unset variable doesn't trip set -u, unlike the required SPRING_DATASOURCE_* above.
+  auth-relay-secret: ${AUTH_RELAY_SECRET:-}
+  google-auth-hub-url: ${GOOGLE_AUTH_HUB_URL:-}
 EOF
 
 CHECKPOINT_DIR=target/crac-checkpoint
