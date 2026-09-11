@@ -1,9 +1,16 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<t:master title="Tietosuojaseloste - Ryyppy.net">
-    <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<!--
+    This document's own <html>/<head>/<body> are never rendered: th:replace
+    above swaps the whole element for the master layout fragment before it's
+    serialized. The markup below only exists so ~{::title}, ~{::#customHead}
+    and ~{::#content} have something to select from - see fragments/master.html.
+-->
+<head>
+    <title>Tietosuojaseloste - Ryyppy.net</title>
+
+    <div id="customHead" th:remove="tag">
+        <link rel="stylesheet" type="text/css" th:href="@{/static/css/login.css}" />
         <style>
             .privacy-policy {
                 background-color: #000000;
@@ -59,12 +66,13 @@
                 margin-top: 30px;
             }
         </style>
-    </jsp:attribute>
-
-    <jsp:body>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
         <div id="logoContainer">
             <a href="/ui/login">
-                <img id="logo" src="<c:url value="/static/images/logo_ryyppy.png"/>" alt="Ryyppy.net" title="Ryyppy.net" style="max-width: 300px;" />
+                <img id="logo" th:src="@{/static/images/logo_ryyppy.png}" alt="Ryyppy.net" title="Ryyppy.net" style="max-width: 300px;" />
             </a>
         </div>
 
@@ -166,5 +174,6 @@
         <div class="back-link">
             <a href="/ui/login">&larr; Takaisin kirjautumissivulle</a>
         </div>
-    </jsp:body>
-</t:master>
+    </div>
+</body>
+</html>
