@@ -4,11 +4,11 @@ Written ahead of the JSP-to-Thymeleaf migration, to answer two questions:
 what UI surface exists, and what regression coverage each page needs before
 its template is rewritten.
 
-**Verification status:** everything below comes from static reference
-analysis of the repo (controllers, JSPs, Angular routes, static JS). The app
-was not booted while writing this — the session had no Docker/Postgres — so
-the "no inbound references" findings are grep-complete but not runtime-
-confirmed. Each one lists how to confirm it against a running instance.
+**Verification status:** every finding below was checked against a running
+instance (local PostgreSQL 16 + `mvn spring-boot:run`), driving the pages
+with curl and with Playwright/Chromium for the JS-dependent ones. The
+existing e2e suite was green (7/7) on the same setup. Findings that are
+still a judgement call rather than an observation say so explicitly.
 
 ---
 
@@ -56,77 +56,133 @@ the JSP resolver), `loginerror.jsp` (see §2).
 
 ## 2. Unreferenced / dead surface
 
-Ordered roughly by confidence.
+All of the following were exercised against a running instance.
 
-### 2.1 `/static/mob/` — orphan mobile prototype
-A jQuery Mobile 1.0b2 + Backbone + Handlebars app. **Zero inbound
-references** anywhere in the repo. It is also unfinished: `js/app.js`'s
-`App.addDrinker` creates a hardcoded `{id: 1, promilles: 1.2}` model rather
-than calling the API, `index.html` has an empty `<title>` and an `<h1>Hello</h1>`
-header. Publicly reachable, since `/static/**` is `permitAll`.
-*Confirm:* open `/static/mob/index.html` on a running instance.
-*Suggested action:* delete the directory. No test.
+### 2.1 `/static/mob/` — orphan mobile prototype — **confirmed**
+A jQuery Mobile 1.0b2 + Backbone + Handlebars app with zero inbound
+references anywhere in the repo. Verified live: `/static/mob/index.html`
+returns 200 (it is public, since `/static/**` is `permitAll`), its page title
+is `"Hello"`, and typing a name into its "Add drinker" form renders
+`MobTester 1.2` — the hardcoded `{id: 1, promilles: 1.2}` model from
+`js/app.js`, with no API call at all. It is an unfinished prototype, not a
+working UI.
+*Action:* delete the directory. No test.
 
-### 2.2 `/ui/viewParty` — unreferenced duplicate of `/ui/party`
-No link anywhere. It renders the same `party.jsp` but puts `users` in the
-model, while `party.jsp` reads `${user.id}` — so the kick dialog would list
-the current user too. Its `kick` query parameter performs a GET-triggered
-unlink with no confirmation.
-*Confirm:* `grep -rn viewParty src/` returns only the controller itself.
-*Suggested action:* delete the handler.
+### 2.2 `/ui/viewParty` — unreferenced duplicate, with a worse bug — **confirmed**
+No link anywhere; returns 200 if you type the URL. It renders the same
+`party.jsp` as `/ui/party`, but puts `users` in the model where the template
+reads `${user.id}`. Verified difference on the same party, same session:
 
-### 2.3 `/ui/addDrink` — unreferenced and broken
-No inbound references, and it ends with `return "redirect:parties"` — there
-is no `parties` mapping under `/ui` (or anywhere), so a successful call would
-redirect into a 404. The drink *is* added first, so the failure is silent
-from the caller's point of view.
-*Confirm:* `GET /ui/addDrink?id=<your id>` while logged in → error page, and
-the drink shows up anyway.
-*Suggested action:* delete the handler (the modern UI and `/ui/user`'s
-drinker button both add drinks through the API instead).
+| | entries in the "remove drinker" dialog |
+|---|---|
+| `/ui/party?id=1` | `GuestBob` |
+| `/ui/viewParty?id=1` | `GuestBob`, **`VerifyUser`** (the current user) |
 
-### 2.4 `/ui/passphrase`, `/ui/passphrase-generate`, `passphrase.jsp` — orphan page, live API
-No page in either UI links to the passphrase view; it is reachable only by
-typing the URL. The page's copy button is ZeroClipboard, i.e. Flash
-(`static/vendor/zeroclipboard/ZeroClipboard.swf`) — non-functional in any
-current browser.
+So `/ui/viewParty` offers the logged-in user a button to kick themselves out
+of their own party. Its `kick` query parameter also performs a
+GET-triggered unlink with no confirmation.
+*Action:* delete the handler.
 
-**But the backing API is not dead by the same evidence:** `/API/passphrase/**`
-is explicitly `permitAll` in `WebSecurityConfiguration` and exposes
-`GET /API/passphrase/{p}`, `.../add-drink/{time}` and `.../undo-drink`. That
-is the shape of an external client (a script, a hardware button), which this
-repo would not reference. Removing the page would leave existing passphrase
-holders with no way to see or rotate their passphrase.
-*Decision needed:* either (a) keep the page, link it from the settings
-menus, and replace ZeroClipboard with `navigator.clipboard`, or (b) drop the
-page and keep the API. Worth checking production logs for
-`/API/passphrase/` traffic before choosing.
+### 2.3 `/ui/addDrink` — unreferenced and broken — **confirmed**
+No inbound references, and it ends with `return "redirect:parties"` — no
+`parties` mapping exists. Verified: `GET /ui/addDrink?id=1` took the profile
+from `totalDrinks = 0` to `totalDrinks = 1`, then returned
+`302 → /ui/parties`, which is a **404**. The drink is written and the user is
+dropped on an error page.
+*Action:* delete the handler. Both UIs add drinks through the API instead.
 
-### 2.5 `/ui/loginerror` + `loginerror.jsp` — unreachable
-Nothing routes to it. Form login failure uses Spring Security's default,
-`/ui/login?error`; OAuth2 failure goes through `UserNotRegisteredFailureHandler`
-to the registration URL. Related gap: `login.jsp` renders no message for
-`?error`, so a rejected login silently redraws the form.
-*Confirm:* the existing e2e test already asserts the failure lands on
-`/ui/login?error`.
-*Suggested action:* either wire the failure handler to `/ui/loginerror`, or
-delete the view and show an inline error on `login.jsp`. Either way the
-"failed login gives no feedback" gap is worth a test.
+### 2.4 Passphrase — the page is orphaned, the API works, and nobody has a passphrase
+Three separate facts, verified:
+
+1. **The page is unlinked.** No page in either UI links to `/ui/passphrase`;
+   it is reachable only by typing the URL. It renders fine and
+   `/ui/passphrase-generate` does rotate the value.
+2. **The API is fully functional and unauthenticated.** With no cookies at
+   all: `GET /API/passphrase/{p}` → `VerifyUser,0.19847844541072845`;
+   `.../add-drink/0` took the user from 1 drink to 2; `.../undo-drink` took
+   them back to 1. This is a real, working external-client interface.
+3. **But almost nobody can have a passphrase.** Registration never generates
+   one — `UserServiceImpl.generatePassphrase()` is called only from
+   `/ui/passphrase-generate`. In the verification database every user had
+   `passphrase = NULL` except the single one where that unlinked URL was hit
+   by hand. So the only route to a working passphrase is the orphan page.
+
+The copy button is still ZeroClipboard: the page injects a Flash object into
+`#d_clip_container` (confirmed in the DOM), which no current browser will run.
+
+*This is the one item that needs a production data point rather than a
+judgement call.* Run:
+
+```sql
+SELECT count(*) FROM users WHERE passphrase IS NOT NULL;
+```
+
+Zero (or only your own test rows) means the whole feature — page, API,
+`findByPassphrase`, the `permitAll` rule — is dead and can go. A non-trivial
+count means real clients exist, and the page should be kept, linked from the
+settings menus, and have ZeroClipboard replaced with `navigator.clipboard`.
+
+### 2.5 `/ui/loginerror` — unreachable, and login failure is silent — **confirmed**
+`/ui/loginerror` returns 200 but nothing routes to it: form-login failure
+uses Spring Security's default `/ui/login?error`, and OAuth2 failure goes
+through `UserNotRegisteredFailureHandler` to the registration URL.
+
+Verified separately: after submitting bad credentials the browser lands on
+`/ui/login?error` and the page contains **no error wording at all** — the
+rendered text was searched for `virhe`, `väär`, `error`, `epäonnistu` and
+`invalid` and matched none. A rejected login silently redraws the form.
+*Action:* either point the failure handler at `/ui/loginerror`, or delete the
+view and render an inline message on `login.jsp` for `?error`. Either way
+test E3 below covers it.
 
 ### 2.6 Smaller orphans
-- `GET /API/parties/{partyId}/get-history` — no frontend reference
-  (`partygraph.js` uses `/API/users/{id}/show-history`).
+- `GET /API/parties/{partyId}/get-history` — returns 200, no frontend
+  reference (`partygraph.js` uses `/API/users/{id}/show-history`).
 - `public/app/index-async.html` — no references.
 - `public/static/js/googlegraph.js` — no references.
 - Inside live code: `user.jsp`'s `configureDrinksDialogOpened()` calls
-  `$("#time").datetimepicker(...)`, but `user.jsp` contains no `#time`
-  element — the picker actually in use is `new DateTimePicker('#historyDrinkTime')`.
+  `$("#time").datetimepicker(...)` but the page has no `#time` element, so
+  that call is a no-op. The picker actually in use is
+  `new DateTimePicker('#historyDrinkTime')`, which renders correctly.
+
+### 2.7 Correction to an earlier assumption: the error page is alive
+`error.jsp` is reachable and used. A 404 requested with `Accept: text/html`
+renders it (`<title>Ryyppy.net - Virhe!</title>`); the same URL with
+`Accept: */*` returns JSON instead. Tests for it must therefore go through a
+browser, not a bare API client. (The JSON also carried a stack trace here,
+but that is `spring-boot-devtools` forcing
+`server.error.include-stacktrace=always` in dev — not a production finding.)
 
 ---
 
+## 2b. Two things that will bite whoever writes the classic-UI tests
+
+**The header icon buttons are 0×0 anchors.** On `/ui/user` and `/ui/party`
+every `<a class="headerButtonA">` wrapper measures 0×0, because the icon
+`<div>` inside it is floated and the inline anchor collapses. The 42×42 icon
+div is what a user sees and clicks. Playwright will refuse to click the
+anchor ("element is not visible") and time out. Click the inner div instead:
+
+| Click this | Not this |
+|---|---|
+| `#addPartyButton`, `#configureButton`, `#configureDrinksButton` | `#addPartyButtonLink`, `#configureDrinkerButtonLink`, `#configureDrinksButtonLink` |
+| `#graphButton`, `#addDrinkerButton`, `#kickDrinkerButton` | `#graphButtonLink`, `#addDrinkerButtonLink`, `#kickDrinkerButtonLink` |
+
+`#uiSwitchButton` is a text link (114×40) and is clickable directly — which
+is why the existing `classic-ui-toggle` test works.
+
+**Reopening the group graph throws.** On `/ui/party`, opening the group
+graph dialog, closing it, and opening it again reliably throws
+`Cannot read properties of undefined (reading 'w')` from
+`jquery.flot.resize.min.js`. Cause: `party.jsp` wires only the dialog's
+`open:` handler and never `graphDialogClosed()`, so `RyyppyNet.graphVisible`
+stays `true` after closing (verified) and the two-minute interval keeps
+redrawing a hidden plot. Test P5 below will hit this — worth fixing before
+or alongside writing it, rather than writing the test around it.
+
 ## 3. Existing E2E coverage
 
-`e2e/tests/`, 4 specs / 7 tests:
+`e2e/tests/`, 4 specs / 7 tests — all green against the verification setup:
 
 | Spec | Covers |
 |---|---|
@@ -140,6 +196,16 @@ only ever asserted to render a heading and a party name. Nothing covers
 `/ui/party`, the classic dialogs, profile settings in either UI, party admin
 in either UI, guest users, drink removal, or terms/privacy/error pages —
 which is most of what the migration will touch.
+
+Everything those missing tests would cover was confirmed to work in a
+browser, so none of them is blocked: `/ui/user` renders the heading, the
+drinker button with its promille reading and the history graph (2 flot
+canvases), its add-party dialog opens and creating a party lands on
+`/ui/party?id=N`; `/ui/party` fills its title in asynchronously from
+`/API/parties/{id}`, renders the participant grid, and opens both the group
+graph (2 canvases) and add-drinker dialogs; the drinks dialog renders its
+`#historyDrinkTime` picker and shows "Ei lisättyjä juomia" when empty. The
+two caveats in §2b apply.
 
 ---
 
@@ -199,6 +265,11 @@ that 500s) before any behavioural test runs.
 |---|---|
 | T1 | Both load **anonymously** (both are `permitAll`), render their heading and body text, and `terms` links to `/ui/privacy` |
 
+Verified: both return 200 with no session — `/ui/terms` is
+`Käyttöehdot - Ryyppy.net` / `<h1>Käyttöehdot</h1>`, `/ui/privacy` is
+`Tietosuojaseloste - Ryyppy.net` / `<h1>Tietosuojaseloste</h1>`. Those
+titles and headings are the assertion targets.
+
 `privacy` already has a render-level unit test (`LegalControllerTest`); that
 pattern — render the template standalone, assert no `${` leaked and the
 layout fragments projected — is worth repeating for every page as it is
@@ -208,7 +279,7 @@ converted, alongside the e2e test.
 | # | Test |
 |---|---|
 | E1 | Requesting a party you are not a participant of renders `error.jsp`, not a whitelabel page or a stack trace |
-| E2 | An unknown `/ui/...` URL renders `error.jsp` |
+| E2 | An unknown `/ui/...` URL renders `error.jsp` (verified: a 404 with an HTML `Accept` header returns `<title>Ryyppy.net - Virhe!</title>`; the same URL as an API client returns JSON, so these must run through the browser) |
 | E3 | A rejected login gives the user visible feedback (currently it does not — see §2.5; write this once the behaviour is decided) |
 
 ### 4.7 Modern UI — unchanged by the migration, but the mode toggle crosses over
@@ -238,9 +309,30 @@ tests need one.
 
 ## 5. Suggested sequencing
 
-1. Decide on §2 removals (`/static/mob/`, `/ui/viewParty`, `/ui/addDrink`) and
-   on the passphrase page — deleting a page is cheaper than testing and then
-   converting it.
+1. Delete the three confirmed-dead handlers (`/static/mob/`,
+   `/ui/viewParty`, `/ui/addDrink`) — deleting a page is cheaper than testing
+   it and then converting it. Run the passphrase `count(*)` query from §2.4
+   against production to decide that one, and pick a direction for
+   `/ui/loginerror` (§2.5).
 2. Land §4.0 smoke tests for every remaining server-rendered page.
 3. Land §4.1–4.6 per page, then convert that page's template.
 4. §4.7–4.8 whenever; they are not on the migration's critical path.
+
+Separately, the group-graph reopen bug (§2b) is a real defect on a live page,
+independent of the migration.
+
+---
+
+## 6. Reproducing the verification environment
+
+No Docker is needed — a local PostgreSQL works:
+
+```bash
+pg_ctlcluster 16 main start          # or pg_ctl -D /var/lib/postgresql/16/main start
+sudo -u postgres psql -c "CREATE ROLE ryyppynet LOGIN PASSWORD 'ryyppynet' SUPERUSER;" \
+                      -c "CREATE DATABASE ryyppynet OWNER ryyppynet;"
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.docker.compose.enabled=false"
+```
+
+Flyway builds the schema on first boot. Then, from `e2e/`:
+`SKIP_WEBSERVER=1 npx playwright test`.
