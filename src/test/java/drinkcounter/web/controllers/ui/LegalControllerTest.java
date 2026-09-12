@@ -62,4 +62,16 @@ class LegalControllerTest {
         assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
         assertFalse(html.contains("customHead") , "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
     }
+
+    @Test
+    void termsTemplateRendersThroughMasterLayoutWithoutUnresolvedExpressions() {
+        String html = render("terms");
+
+        assertTrue(html.contains("<title>Käyttöehdot - Ryyppy.net</title>"), "title from the page wasn't projected into the master layout's <head>");
+        assertTrue(html.contains("Käyttöehdot"), "page body content missing");
+        assertTrue(html.contains("href=\"/static/css/login.css\""), "page-specific stylesheet from customHead missing");
+        assertTrue(html.contains("href=\"/static/css/style.css\""), "shared stylesheet from the master layout missing");
+        assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
+        assertFalse(html.contains("customHead") , "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
+    }
 }
