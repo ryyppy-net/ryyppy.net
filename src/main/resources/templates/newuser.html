@@ -1,25 +1,33 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<t:master title="Uusi juoja">
-    <jsp:attribute name="customHead">
-        <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
-        <script type="text/javascript" src="<c:url value="/static/js/drinkerchecks.js"/>"></script>
-        
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<!--
+    This document's own <html>/<head>/<body> are never rendered: th:replace
+    above swaps the whole element for the master layout fragment before it's
+    serialized. The markup below only exists so ~{::title}, ~{::#customHead}
+    and ~{::#content} have something to select from - see fragments/master.html.
+-->
+<head>
+    <title>Uusi juoja</title>
+
+    <div id="customHead" th:remove="tag">
+        <script type="text/javascript" th:src="@{/static/js/common.js}"></script>
+        <script type="text/javascript" th:src="@{/static/js/drinkerchecks.js}"></script>
+
         <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.css"/>
-        <link rel="stylesheet" href="<c:url value="/app/css/app.css"/>"/>
+        <link rel="stylesheet" th:href="@{/app/css/app.css}"/>
 
         <script type="text/javascript">
             $(document).ready(function() {
                 $("#drinkerName").focus();
-                
+
                 $('.userField').live('keyup', function() { checkDrinkerFields(true); });
                 $('#email').live('keyup', function() { checkEmail($(this).val()); });
             });
         </script>
-    </jsp:attribute>
-    <jsp:body>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
         <div class="navbar">
             <div class="navbar-inner">
                 <span class="brand">Ryyppy.net</span>
@@ -34,9 +42,9 @@
                 <div class="offset1 span10">
                     <h1>Tervetuloa!</h1>
                     <p>Olet näemmä ensimmäistä kertaa tällä sivulla. Ole hyvä ja täytä allaolevat tiedot, niin aletaan ryyppäämään!</p>
-                    
+
                     <p>
-                        Sähköpostiosoitteellasi kaverit voivat kutsua sinut bileisiin. 
+                        Sähköpostiosoitteellasi kaverit voivat kutsua sinut bileisiin.
                         Jos käytät <a href="https://www.gravatar.com">Gravatar</a>-palvelua, Gravatar-profiilikuvasi näytetään kavereillesi ryyppy.netissä.
                         Me emme lähetä sinulle sähköpostia tai anna sähköpostiosoitettasi eteenpäin.
                     </p>
@@ -90,5 +98,6 @@
                 </div>
             </div>
         </div>
-    </jsp:body>
-</t:master>
+    </div>
+</body>
+</html>
