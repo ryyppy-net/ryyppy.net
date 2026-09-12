@@ -1,30 +1,40 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<t:master title="Ryyppy.net - Virhe!">
-    <jsp:attribute name="customHead">
-        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
-        <script type="text/javascript" src="<c:url value="/static/js/login.js"/>"></script>
-    </jsp:attribute>
-    <jsp:body>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<!--
+    This document's own <html>/<head>/<body> are never rendered: th:replace
+    above swaps the whole element for the master layout fragment before it's
+    serialized. The markup below only exists so ~{::title}, ~{::#customHead}
+    and ~{::#content} have something to select from - see fragments/master.html.
+-->
+<head>
+    <title>Ryyppy.net - Virhe!</title>
+
+    <div id="customHead" th:remove="tag">
+        <link rel="stylesheet" type="text/css" th:href="@{/static/css/login.css}" />
+        <script type="text/javascript" th:src="@{/static/js/login.js}"></script>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
         <div id="logoContainer">
-            <img id="logo" src="<c:url value="/static/images/logo_ryyppy.png"/>" alt="Ryyppy.net" title="Ryyppy.net" />
+            <img id="logo" th:src="@{/static/images/logo_ryyppy.png}" alt="Ryyppy.net" title="Ryyppy.net" />
         </div>
-        
+
         <div class="login" style="text-align:left;padding-left:30px;">
-            <h2> <spring:message code="error.title" /></h2>
-            <p><spring:message code="error.reasons" /></p>
+            <h2 th:text="#{error.title}"></h2>
+            <p th:text="#{error.reasons}"></p>
             <ul>
-                <li><spring:message code="error.list.unauthorized" /></li>
-                <li><spring:message code="error.list.page_doesnt_exist" /></li>
-                <li><spring:message code="error.list.bug" /> <a href="mailto:ryyppy.net@gmail.com"><spring:message code="error.list.tell_us" /></a></li>
-                <li><spring:message code="error.list.you_fucked_up" /></li>
+                <li th:text="#{error.list.unauthorized}"></li>
+                <li th:text="#{error.list.page_doesnt_exist}"></li>
+                <li><span th:text="#{error.list.bug}"></span> <a href="mailto:ryyppy.net@gmail.com" th:text="#{error.list.tell_us}"></a></li>
+                <li th:text="#{error.list.you_fucked_up}"></li>
             </ul>
-            <p><spring:message code="error.continue" />
-                <a href="/"><spring:message code="error.to_frontpage" /></a> 
-                <spring:message code="error.try_again" />
+            <p>
+                <span th:text="#{error.continue}"></span>
+                <a href="/" th:text="#{error.to_frontpage}"></a>
+                <span th:text="#{error.try_again}"></span>
             </p>
         </div>
-    </jsp:body>
-</t:master>
+    </div>
+</body>
+</html>
