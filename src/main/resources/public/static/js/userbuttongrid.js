@@ -1,8 +1,18 @@
+function arraysEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
+
 function UserButtonGrid(target) {
     this.target = target;
     this.userButtons = [];
     this.users = undefined;
     this.onUserDrunk = undefined;
+    this.renderedUserIds = null;
+    this.renderedLayout = null;
 }
 
 UserButtonGrid.prototype.empty = function() {
@@ -14,9 +24,25 @@ UserButtonGrid.prototype.updateGrid = function() {
     if (this.users === undefined)
         return;
 
+    var layout = this.pivotLayoutIfNecessary(this.determineLayout(this.users.length));
+    var userIds = this.users.map(function(user) { return user.id; });
+
+    // repaint() (and so updateGrid()) runs on every window resize and every
+    // popup dialog open, not just when the participant list actually
+    // changes. Rebuilding the whole grid from scratch every time destroys
+    // and recreates each drinker's <td> and its .resize() binding (and its
+    // sparkline flot plot), and that churn corrupts the bundled legacy
+    // resize-event plugin bindings enough to crash jquery.flot.resize on a
+    // later dialog open (see #80). Skip the rebuild when nothing changed.
+    if (this.renderedUserIds != null &&
+        arraysEqual(this.renderedUserIds, userIds) &&
+        arraysEqual(this.renderedLayout, layout)) {
+        this.updateButtons();
+        return;
+    }
+
     this.empty();
 
-    var layout = this.pivotLayoutIfNecessary(this.determineLayout(this.users.length));
     RyyppyNet.layout = layout;
     var width = "" + (1 / layout[0] * 100) + "%;";
     var height = "" + (1 / layout[1] * 100) + "%;";
@@ -39,6 +65,9 @@ UserButtonGrid.prototype.updateGrid = function() {
             $('#row' + i).append(newElement);
         }
     }
+
+    this.renderedUserIds = userIds;
+    this.renderedLayout = layout;
 
     this.updateButtons();
 }
