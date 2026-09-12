@@ -45,7 +45,7 @@ spring:
     # an unconverted view name like "party" would be claimed by Thymeleaf
     # and blow up at render time instead of falling through to the JSP
     # resolver. List each view name here as its .jsp is converted.
-    view-names: privacy,terms,newuser,error,passphrase,login
+    view-names: privacy,terms,newuser,error,passphrase,login,app/index
 
   messages:
     basename: messages,drinkcounter.version
