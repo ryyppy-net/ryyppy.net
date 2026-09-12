@@ -2,13 +2,11 @@ import { test, expect, Page } from '@playwright/test';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
 /**
- * Cheapest possible net for the JSP-to-Thymeleaf migration: visit every
- * server-rendered page, assert it actually returns 200 with the expected
- * <title> and a distinctive on-page string, and that no unresolved template
- * expression ("${") leaked into the rendered HTML — the same check
- * LegalControllerTest already makes at the unit level for privacy.html, but
- * here against the real running app. This is what a half-converted
- * Thymeleaf template looks like in the browser (see #74/#75).
+ * Smoke-checks every server-rendered page: each returns 200, has its
+ * expected <title> and a distinctive on-page element, and its rendered HTML
+ * contains no unresolved Thymeleaf expression ("${") — the same check
+ * LegalControllerTest makes at the unit level for privacy.html, here against
+ * the real running app.
  */
 async function assertNoUnresolvedExpressions(page: Page): Promise<void> {
   expect(await page.content()).not.toContain('${');
