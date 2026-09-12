@@ -191,38 +191,6 @@ public class APIController {
         return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
     }
 
-    @RequestMapping("/parties/{partyId}/get-history")
-    public ResponseEntity<byte[]> getPartyHistory(HttpSession session, @PathVariable String partyId) throws IOException {
-        int id = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(id);
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{"UserID", "Time", "Alcohol"});
-
-        Instant now = Instant.now();
-        Instant start = now.minus(Duration.ofMinutes(300));
-        int intervalMs = 2 * 60 * 1000;
-
-        List<User> users = drinkCounterService.listUsersByParty(id);
-
-        for (User user : users) {
-            List<String[]> history = getSlopes(user, true);
-            Instant time = start;
-            for (String[] s : history) {
-                csvWriter.writeRecord(s);
-                time = time.plus(Duration.ofMillis(intervalMs));
-            }
-        }
-        csvWriter.close();
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "text/plain;charset=utf-8");
-        
-        byte[] bytes = baos.toByteArray();
-        return new ResponseEntity<byte[]>(bytes, headers, HttpStatus.OK);
-    }
-    
     @RequestMapping("/parties/{partyId}/add-anonymous-user")
     public @ResponseBody String addAnonymousUser(HttpSession session,
             @PathVariable String partyId,
