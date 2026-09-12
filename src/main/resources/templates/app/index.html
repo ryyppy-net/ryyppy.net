@@ -1,7 +1,5 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="jakarta.tags.core" prefix="c" %>
 <!doctype html>
-<html lang="en" ng-app="ryyppy">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" ng-app="ryyppy">
 <head>
     <meta charset="utf-8">
     <title>Ryyppy.net</title>
@@ -9,7 +7,7 @@
     <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.css"/>
     <link rel="stylesheet" href="/webjars/pnotify/1.2.0/jquery.pnotify.default.css"/>
-    <link rel="stylesheet" href="<c:url value="/app/css/app.css"/>"/>
+    <link rel="stylesheet" th:href="@{/app/css/app.css}"/>
 
     <!-- media="print" + onload swap keeps this from blocking the synchronous
          <script> tags below on a slow/unreachable Google Fonts request. -->
@@ -22,45 +20,49 @@
 <body>
     <div ng-view></div>
 
-    <%--
+    <!--
         Pre-populate $templateCache with every route's template (loaded from
         app/partials/ by DefaultController.appIndex()) so Angular never
-        fetches one over XHR. ${...} is intentionally unescaped: trusted
-        server-side markup, not user input.
-    --%>
-    <c:forEach var="template" items="${templates}">
-        <script type="text/ng-template" id="${template.key}">${template.value}</script>
-    </c:forEach>
+        fetches one over XHR. Written with th:utext (unescaped): trusted
+        server-side markup, not user input - th:text/[[...]] would escape it
+        to visible &lt;div&gt; markup instead of rendering it.
+    -->
+    <script type="text/ng-template" th:each="template : ${templates}" th:id="${template.key}" th:utext="${template.value}"></script>
 
-    <%--
+    <!--
         The current user's profile, parties, own drinks, and drink-history
         graph data (DefaultController.appIndex()), so UserCtrl and the
         promille history graph it renders can skip their first API fetch.
-    --%>
-    <script>
-        window.__INITIAL_PROFILE__ = JSON.parse('${initialProfile}');
-        window.__INITIAL_PARTIES__ = JSON.parse('${initialParties}');
-        window.__INITIAL_DRINKS__ = JSON.parse('${initialDrinks}');
-        window.__INITIAL_DRINK_HISTORY__ = JSON.parse('${initialDrinkHistory}');
+        Written with [(...)] (unescaped inlining), not [[...]]: each value is
+        already JavaScript-escaped by JavaScriptUtils.javaScriptEscape() in
+        the controller and gets substituted into a single-quoted JS string
+        literal below - escaping it again here would corrupt JSON.parse()
+        and break the whole dashboard.
+    -->
+    <script th:inline="javascript">
+        window.__INITIAL_PROFILE__ = JSON.parse('[(${initialProfile})]');
+        window.__INITIAL_PARTIES__ = JSON.parse('[(${initialParties})]');
+        window.__INITIAL_DRINKS__ = JSON.parse('[(${initialDrinks})]');
+        window.__INITIAL_DRINK_HISTORY__ = JSON.parse('[(${initialDrinkHistory})]');
     </script>
 
     <script src="/static/vendor/angular/angular.min.js"></script>
-    <script src="<c:url value="/app/js/app.js"/>"></script>
-    <script src="<c:url value="/app/js/services.js"/>"></script>
+    <script th:src="@{/app/js/app.js}"></script>
+    <script th:src="@{/app/js/services.js}"></script>
 
     <script src="/static/vendor/moment/moment.min.js"></script>
 
-    <script src="<c:url value="/app/js/controllers/UserCtrl.js"/>"></script>
-    <script src="<c:url value="/app/js/controllers/ProfileSettingsCtrl.js"/>"></script>
-    <script src="<c:url value="/app/js/controllers/DrinkerCtrl.js"/>"></script>
-    <script src="<c:url value="/app/js/controllers/PartyCtrl.js"/>"></script>
-    <script src="<c:url value="/app/js/controllers/GeneralPartyAdminCtrl.js"/>"></script>
-    <script src="<c:url value="/app/js/controllers/PartyAdminCtrl.js"/>"></script>
+    <script th:src="@{/app/js/controllers/UserCtrl.js}"></script>
+    <script th:src="@{/app/js/controllers/ProfileSettingsCtrl.js}"></script>
+    <script th:src="@{/app/js/controllers/DrinkerCtrl.js}"></script>
+    <script th:src="@{/app/js/controllers/PartyCtrl.js}"></script>
+    <script th:src="@{/app/js/controllers/GeneralPartyAdminCtrl.js}"></script>
+    <script th:src="@{/app/js/controllers/PartyAdminCtrl.js}"></script>
 
-    <script src="<c:url value="/app/js/userhistorygraph.js"/>"></script>
+    <script th:src="@{/app/js/userhistorygraph.js}"></script>
 
-    <script src="<c:url value="/app/js/filters.js"/>"></script>
-    <script src="<c:url value="/app/js/directives.js"/>"></script>
+    <script th:src="@{/app/js/filters.js}"></script>
+    <script th:src="@{/app/js/directives.js}"></script>
 
     <script src="/webjars/jquery/1.8.3/jquery.min.js"></script>
     <script src="/webjars/pnotify/1.2.0/jquery.pnotify.js"></script>
