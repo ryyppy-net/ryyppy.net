@@ -66,10 +66,10 @@ export async function createParty(page: Page, partyName: string): Promise<void> 
 
 /**
  * Logs an already-registered user in and lands on the classic /ui/user
- * dashboard rather than the Angular one. WebSecurityConfiguration sets
- * .defaultSuccessUrl("/app/index.html", true) — the "true" forces the
- * Angular dashboard on login regardless of any saved request — so getting
- * to /ui/user takes an explicit navigation after login, not a redirect.
+ * dashboard rather than the Angular one. Login always redirects to the
+ * Angular dashboard (WebSecurityConfiguration's defaultSuccessUrl forces
+ * it regardless of any saved request), so this navigates to /ui/user
+ * explicitly afterward.
  */
 export async function loginClassic(page: Page, user: Pick<TestUser, 'name' | 'email' | 'password'>): Promise<void> {
   await loginUser(page, user);
@@ -104,14 +104,13 @@ export async function addGuestToParty(page: Page, guest: ClassicGuest): Promise<
 
   // #addDrinkerAccordion > h2 has two sections: index 0 is "add registered
   // user", index 1 is "add guest". The guest form reuses #drinkerName,
-  // #drinkerWeight and #submitButton from the registration page, so it must
-  // be opened first or a copied selector will target the wrong section.
+  // #drinkerWeight and #submitButton from the registration page, so a
+  // selector alone can't tell which section it targets.
   await page.locator('#addDrinkerAccordion > h2').nth(1).click();
 
   // The submit button starts disabled and is only re-enabled by
-  // checkDrinkerFields(false) on the field's own onkeyup handler. fill()
-  // sets values without firing keyup and leaves it stuck disabled, so type
-  // real keystrokes instead, exactly like registerUser does.
+  // checkDrinkerFields(false) on the field's own onkeyup handler, which
+  // fill() doesn't trigger — pressSequentially() types real keystrokes.
   await page.locator('#drinkerName').pressSequentially(guest.name);
   await page.selectOption('#drinkerSex', guest.sex);
   await page.locator('#drinkerWeight').pressSequentially(guest.weight);
