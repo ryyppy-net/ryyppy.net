@@ -6,22 +6,13 @@
     <jsp:attribute name="customHead">
         <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
         <script type="text/javascript" src="<c:url value="/static/js/login.js"/>"></script>
-        <script type="text/javascript" src="/static/vendor/zeroclipboard/ZeroClipboard.js"></script>
         <script type="text/javascript">
-            ZeroClipboard.setMoviePath("/static/vendor/zeroclipboard/ZeroClipboard.swf");
-            var clip;
             $(document).ready(function() {
-                clip = new ZeroClipboard.Client();
-                clip.glue( 'd_clip_button', 'd_clip_container' );
-                clip.setText('<c:out value="${passphrase}" />');
-                clip.addEventListener('complete', function() {
-                    alert('<spring:message code="passphrase.copied" />');
+                $('#d_clip_button').click(function() {
+                    navigator.clipboard.writeText('<c:out value="${passphrase}" />').then(function() {
+                        alert('<spring:message code="passphrase.copied" />');
+                    });
                 });
-            });
-
-            $(window).resize(function() {
-                if (clip != null)
-                    clip.reposition();
             });
         </script>
     </jsp:attribute>
