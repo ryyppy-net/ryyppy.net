@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<!--
+    This document's own <html>/<head>/<body> are never rendered: th:replace
+    above swaps the whole element for the master layout fragment before it's
+    serialized. The markup below only exists so ~{::title}, ~{::#customHead}
+    and ~{::#content} have something to select from - see fragments/master.html.
+-->
+<head>
+    <title>Ryyppy.net</title>
+
+    <div id="customHead" th:remove="tag">
+        <link rel="stylesheet" type="text/css" th:href="@{/static/css/login.css}" />
+        <script type="text/javascript" th:src="@{/static/js/login.js}"></script>
+        <script type="text/javascript" th:inline="javascript">
+            $(document).ready(function() {
+                $('#d_clip_button').click(function() {
+                    navigator.clipboard.writeText(/*[[${passphrase}]]*/ '').then(function() {
+                        alert(/*[[#{passphrase.copied}]]*/ '');
+                    });
+                });
+            });
+        </script>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
+        <div class="login">
+            <h2 th:text="#{passphrase.header}">Your Ryyppy.net key</h2>
+
+            <p th:text="#{passphrase.info}">
+                With this key, you can use other Ryyppy.net services, like the Android client. The key is personal. If you generate a new key, the old one stops working.
+            </p>
+
+            <form>
+                <input type="text" readonly="readonly" size="35" name="passphrase" th:value="${passphrase}" /> <br />
+                <input type="button" th:value="#{passphrase.generate_new}" onclick="location.href='passphrase-generate'" />
+            </form>
+            <br />
+            <span th:text="#{passphrase.copy_clipboard}">Press here to copy key to clipboard:</span>
+            <div id="d_clip_container" style="position:relative">
+                <button type="button" id="d_clip_button" th:text="#{passphrase.copy_clipboard_button}">Copy to clipboard</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
