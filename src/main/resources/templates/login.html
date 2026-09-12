@@ -1,34 +1,37 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<t:master>
-    <jsp:attribute name="customHead">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<!--
+    This document's own <html>/<head>/<body> are never rendered: th:replace
+    above swaps the whole element for the master layout fragment before it's
+    serialized. The markup below only exists so ~{::title}, ~{::#customHead}
+    and ~{::#content} have something to select from - see fragments/master.html.
+-->
+<head>
+    <title>Ryyppy.net</title>
+
+    <div id="customHead" th:remove="tag">
         <link rel="stylesheet" href="/static/vendor/jquery-tooltip/jquery.tooltip.css" type="text/css" media="screen" />
-        <link rel="stylesheet" type="text/css" href="<c:url value="/static/css/login.css"/>" />
+        <link rel="stylesheet" type="text/css" th:href="@{/static/css/login.css}" />
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
         <noscript><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet"></noscript>
 
-        <script type="text/javascript" src="<c:url value="/static/js/login.js"/>"></script>
-    </jsp:attribute>
-    
-    <jsp:body>
+        <script type="text/javascript" th:src="@{/static/js/login.js}"></script>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
         <div id="logoContainer">
-            <img id="logo" src="<c:url value="/static/images/logo_ryyppy.png"/>" alt="Ryyppy.net" title="Ryyppy.net" />
-            
-            <p class="totalDrinkCount">
-                <spring:message code="login.already_n_drinks" arguments="${totalDrinkCount}" />
-            </p>
-        </div>
-        
-        <div class="login">
-            <h2> <spring:message code="login.login_title" /> </h2>
+            <img id="logo" th:src="@{/static/images/logo_ryyppy.png}" alt="Ryyppy.net" title="Ryyppy.net" />
 
-            <c:if test="${param.error != null}">
-                <p class="loginError" style="color:#c00;"><spring:message code="login.error" /></p>
-            </c:if>
+            <p class="totalDrinkCount" th:text="#{login.already_n_drinks(${totalDrinkCount})}">0 drinks served!</p>
+        </div>
+
+        <div class="login">
+            <h2 th:text="#{login.login_title}">Log in</h2>
+
+            <p class="loginError" style="color:#c00;" th:if="${param.error != null}" th:text="#{login.error}">Login failed. Check your username and password and try again.</p>
 
             <p>
                 <form action="/login" method="post" >
@@ -40,72 +43,70 @@
                 </form>
             </p>
 
-            <c:if test="${googleAuthEnabled}">
-                        <c:choose>
-                            <c:when test="${isHubEnvironment}">
-                                <div id="g_id_onload"
-                                     data-client_id="${googleClientId}"
-                                     data-context="use"
-                                     data-ux_mode="popup"
-                                     data-login_uri="${oneTapLoginUri}"
-                                     data-auto_select="${param.logout == null}"
-                                     data-itp_support="true"
-                                     data-use_fedcm_for_prompt="${useFedCm}">
-                                </div>
+            <th:block th:if="${googleAuthEnabled}">
+                <th:block th:if="${isHubEnvironment}">
+                    <div id="g_id_onload"
+                         th:with="autoSelect=${param.logout == null}"
+                         th:attr="data-client_id=${googleClientId},data-login_uri=${oneTapLoginUri},data-auto_select=${autoSelect},data-use_fedcm_for_prompt=${useFedCm}"
+                         data-context="use"
+                         data-ux_mode="popup"
+                         data-itp_support="true">
+                    </div>
 
-                                <div style="display: flex; justify-content: center; margin: 20px 0;">
-                                    <div class="g_id_signin"
-                                         data-type="standard"
-                                         data-shape="pill"
-                                         data-theme="outline"
-                                         data-text="continue_with"
-                                         data-size="large"
-                                         data-locale="fi"
-                                         data-logo_alignment="left">
-                                    </div>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <%-- Google's One Tap widget checks the page's own origin against
-                                     Google's Authorized JavaScript origins before allowing
-                                     sign-in, which always fails here since this isn't the
-                                     registered hub domain. Use the classical OAuth2 relay
-                                     instead, which only checks the redirect URI. --%>
-                                <div style="display: flex; justify-content: center; margin: 20px 0;">
-                                    <a href="/api/auth/relay/redirect"
-                                       style="display: inline-flex; align-items: center;
-                                              padding: 10px 24px; border-radius: 999px;
-                                              border: 1px solid #dadce0; background: #fff;
-                                              color: #3c4043; font-family: Roboto, sans-serif;
-                                              font-size: 14px; text-decoration: none;">
-                                        Continue with Google
-                                    </a>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:if>
+                    <div style="display: flex; justify-content: center; margin: 20px 0;">
+                        <div class="g_id_signin"
+                             data-type="standard"
+                             data-shape="pill"
+                             data-theme="outline"
+                             data-text="continue_with"
+                             data-size="large"
+                             data-locale="fi"
+                             data-logo_alignment="left">
+                        </div>
+                    </div>
+                </th:block>
+                <th:block th:unless="${isHubEnvironment}">
+                    <!--
+                        Google's One Tap widget checks the page's own origin against
+                        Google's Authorized JavaScript origins before allowing
+                        sign-in, which always fails here since this isn't the
+                        registered hub domain. Use the classical OAuth2 relay
+                        instead, which only checks the redirect URI.
+                    -->
+                    <div style="display: flex; justify-content: center; margin: 20px 0;">
+                        <a href="/api/auth/relay/redirect"
+                           style="display: inline-flex; align-items: center;
+                                  padding: 10px 24px; border-radius: 999px;
+                                  border: 1px solid #dadce0; background: #fff;
+                                  color: #3c4043; font-family: Roboto, sans-serif;
+                                  font-size: 14px; text-decoration: none;">
+                            Continue with Google
+                        </a>
+                    </div>
+                </th:block>
+            </th:block>
 
             <p>Eikö sinulla ole vielä tunnuksia? <a href="newuser">Rekisteröi itsesi saadaksesi tunnukset</a>
         </div>
         <div class="login">
-            <h2><spring:message code="login.info.title" /></h2>
-            
-            <p>
-                <spring:message code="login.info.content" />
+            <h2 th:text="#{login.info.title}">What is this Ryyppy.net?</h2>
+
+            <p th:text="#{login.info.content}">
+                Ryyppy.net is Sports Tracker of partying! Now you can easily keep track how many drinks you've drunk. You can also start parties and invite your friends.
             </p>
-            
+
             <p>
-                <spring:message code="login.info.watch" />
-                <a href="http://www.youtube.com/embed/A6JWd3-yzCM"><spring:message code="login.info.video" /></a>
-                <spring:message code="login.info.youtube" />
+                <span th:text="#{login.info.watch}">Watch</span>
+                <a href="http://www.youtube.com/embed/A6JWd3-yzCM" th:text="#{login.info.video}">presentation video</a>
+                <span th:text="#{login.info.youtube}">on YouTube!</span>
             </p>
         </div>
-                    
+
         <div style="text-align: center; margin-top: 20px; color: #888;">
             <a href="/ui/privacy" style="color: #aaa; text-decoration: none;">Tietosuojaseloste</a>
             <span style="margin: 0 10px;">|</span>
             <a href="/ui/terms" style="color: #aaa; text-decoration: none;">Käyttöehdot</a>
         </div>
-    </jsp:body>
-</t:master>
-
+    </div>
+</body>
+</html>
