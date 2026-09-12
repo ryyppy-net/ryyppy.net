@@ -1,4 +1,13 @@
 spring:
+  config:
+    # Re-imported fresh by Spring Cloud's context refresh on every CRaC
+    # restore (unlike ${ENV_VAR} placeholders, which resolve from
+    # System.getenv() - a JVM-wide cache populated once at startup and
+    # frozen into the checkpoint image, so it never reflects the
+    # restoring process's actual environment). This file is where
+    # restore-time secrets belong; see CheckpointListener and
+    # railway-build-aot-cache.sh for how it gets written.
+    import: "optional:file:./crac-runtime-config.yml"
   application:
     name: ryyppy.net
   datasource:
@@ -6,6 +15,12 @@ spring:
     username: ryyppynet
     password: ryyppynet
     driver-class-name: org.postgresql.Driver
+    hikari:
+      # Required for HikariCheckpointRestoreLifecycle to suspend the pool
+      # (rather than just evicting connections while new ones keep getting
+      # opened) so a CRaC checkpoint can actually be taken - see
+      # CheckpointListener and railway-build-aot-cache.sh.
+      allow-pool-suspension: true
   jpa:
     hibernate:
       ddl-auto: validate
@@ -52,7 +67,6 @@ spring:
   docker:
     compose:
       file: docker/docker-compose.yml
-
   security:
     oauth2:
       client:
@@ -60,6 +74,28 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
+  cloud:
+    refresh:
+      # Rebind these beans against the live environment after a CRaC
+      # restore, instead of reusing whatever connection details were baked
+      # in when the checkpoint was taken - see CheckpointListener.
+      extra-refreshable:
+        - javax.sql.DataSource
+        - com.zaxxer.hikari.HikariDataSource
+
+app:
+  # Read via Environment.getProperty(...) at request time rather than
+  # System.getenv() directly (see AuthRelayController, GlobalControllerAdvice,
+  # AuthRelayTokenService) - System.getenv() is a JVM-wide snapshot frozen
+  # into the checkpoint image at build time, so it would never reflect a
+  # restored production container's actual environment, the same issue
+  # spring.config.import solves for spring.datasource.* above. Fresh values
+  # for these are supplied at restore by crac-runtime-config.yml (see
+  # scripts/railway-start.sh); the ${...} defaults here only matter for a
+  # plain boot (local dev, or the fallback path), where System.getenv() is
+  # never stale.
+  auth-relay-secret: ${AUTH_RELAY_SECRET:}
+  google-auth-hub-url: ${GOOGLE_AUTH_HUB_URL:}
 
 server:
   servlet:

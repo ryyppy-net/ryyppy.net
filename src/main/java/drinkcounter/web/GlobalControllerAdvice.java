@@ -3,6 +3,7 @@ package drinkcounter.web;
 import drinkcounter.authentication.relay.Origins;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,10 +16,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalControllerAdvice {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final Environment environment;
 
     @Autowired
-    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository) {
+    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository, Environment environment) {
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.environment = environment;
     }
 
     /**
@@ -69,11 +72,14 @@ public class GlobalControllerAdvice {
      *
      * GOOGLE_AUTH_HUB_URL (e.g. "https://ryyppy.net") configures the hub; unset falls back to
      * this environment's own origin, preserving today's single-environment behavior.
+     *
+     * Read via Environment rather than System.getenv() directly - see app.google-auth-hub-url
+     * in application.yml for why.
      * Available in JSP as ${oneTapLoginUri}
      */
     @ModelAttribute("oneTapLoginUri")
     public String oneTapLoginUri(HttpServletRequest request) {
-        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
+        String hubUrl = environment.getProperty("app.google-auth-hub-url");
         String base = (hubUrl != null && !hubUrl.isBlank())
                 ? hubUrl.replaceAll("/+$", "")
                 : Origins.of(request);
@@ -96,7 +102,7 @@ public class GlobalControllerAdvice {
      */
     @ModelAttribute("isHubEnvironment")
     public boolean isHubEnvironment(HttpServletRequest request) {
-        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
+        String hubUrl = environment.getProperty("app.google-auth-hub-url");
         if (hubUrl == null || hubUrl.isBlank()) {
             return true;
         }

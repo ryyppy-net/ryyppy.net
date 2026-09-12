@@ -4,9 +4,11 @@ import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.authentication.relay.RelayAwareAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 /**
  * Configuration for OAuth2/OIDC social authentication.
@@ -15,6 +17,15 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
  */
 @Configuration
 public class OAuth2Configuration {
+
+    /**
+     * Replaces Spring Boot's auto-configured InMemoryClientRegistrationRepository - see
+     * RefreshableClientRegistrationRepository for why.
+     */
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository(Environment environment) {
+        return new RefreshableClientRegistrationRepository(environment);
+    }
 
     /**
      * Provides a customizer that configures OAuth2 login for the security filter chain.

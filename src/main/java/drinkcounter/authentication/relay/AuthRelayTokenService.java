@@ -1,5 +1,7 @@
 package drinkcounter.authentication.relay;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -33,15 +35,24 @@ public class AuthRelayTokenService {
 
     private final SecureRandom secureRandom = new SecureRandom();
     private final Map<String, Instant> consumedNonces = new ConcurrentHashMap<>();
-    private final String configuredSecret;
+    private final Environment environment;
+    private final String fixedSecretForTesting;
 
-    public AuthRelayTokenService() {
-        this(System.getenv("AUTH_RELAY_SECRET"));
+    // Read fresh from Environment on every call instead of caching a resolved secret at
+    // construction time. This bean isn't in spring.cloud.refresh.extra-refreshable, so caching
+    // here would otherwise freeze whatever AUTH_RELAY_SECRET (or its absence) looked like during
+    // the CRaC training pass, forever - the same staleness app.auth-relay-secret's
+    // spring.config.import-backed value (see application.yml) is meant to avoid.
+    @Autowired
+    public AuthRelayTokenService(Environment environment) {
+        this.environment = environment;
+        this.fixedSecretForTesting = null;
     }
 
     /** Visible for testing - lets tests fix a secret instead of depending on the environment. */
     AuthRelayTokenService(String secret) {
-        this.configuredSecret = (secret == null || secret.isBlank()) ? null : secret;
+        this.environment = null;
+        this.fixedSecretForTesting = (secret == null || secret.isBlank()) ? null : secret;
     }
 
     /** Plain data holder for the token's claims. */
@@ -200,7 +211,8 @@ public class AuthRelayTokenService {
     }
 
     private String getSecret() {
-        return configuredSecret;
+        String secret = environment != null ? environment.getProperty("app.auth-relay-secret") : fixedSecretForTesting;
+        return (secret == null || secret.isBlank()) ? null : secret;
     }
 
     private String requireSecret() {

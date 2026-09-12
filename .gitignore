@@ -2,6 +2,11 @@
 *.iml
 target
 
+# Written at container start with restore-time secrets for CRaC checkpoint
+# restore - see application.yml's spring.config.import and
+# CheckpointListener. Never commit: this is where real credentials live.
+crac-runtime-config.yml
+
 src/main/resources/drinkcounter/general-configuration-default.properties
 src/main/resources/drinkcounter/jdbc-default.properties
 
