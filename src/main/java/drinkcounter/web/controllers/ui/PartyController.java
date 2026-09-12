@@ -29,22 +29,6 @@ public class PartyController {
 
     @Autowired private AuthenticationChecks authenticationChecks;
 
-    @RequestMapping("/viewParty")
-    public ModelAndView viewParty(HttpSession session, @RequestParam("id") String partyId, @RequestParam(value="kick", required=false) String toKick){
-
-        int pid = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(pid);
-        
-        if (toKick != null)
-            drinkCounterService.unlinkUserFromParty(Integer.parseInt(toKick), pid);
-        
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("party");
-        mav.addObject("party", drinkCounterService.getParty(pid));
-        mav.addObject("users", drinkCounterService.listUsersByParty(pid));
-        return mav;
-    }
-
     @RequestMapping("/party")
     public ModelAndView party(HttpSession session, @RequestParam("id") String partyId){
         int pid = Integer.parseInt(partyId);
