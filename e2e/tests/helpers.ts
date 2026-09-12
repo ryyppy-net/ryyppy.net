@@ -63,3 +63,61 @@ export async function createParty(page: Page, partyName: string): Promise<void> 
 
   await expect(page).toHaveURL(/#\/party\/\d+/);
 }
+
+/**
+ * Logs an already-registered user in and lands on the classic /ui/user
+ * dashboard rather than the Angular one. Login always redirects to the
+ * Angular dashboard (WebSecurityConfiguration's defaultSuccessUrl forces
+ * it regardless of any saved request), so this navigates to /ui/user
+ * explicitly afterward.
+ */
+export async function loginClassic(page: Page, user: Pick<TestUser, 'name' | 'email' | 'password'>): Promise<void> {
+  await loginUser(page, user);
+  await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1.topic', { hasText: user.name })).toBeVisible();
+}
+
+/** Creates a party from the classic /ui/user dashboard and waits for /ui/party?id=N. */
+export async function createPartyClassic(page: Page, partyName: string): Promise<void> {
+  // On /ui/user and /ui/party, every <a class="headerButtonA"> header wrapper
+  // measures 0x0 because the icon <div> inside it is floated, collapsing the
+  // inline anchor. The 42x42 icon div is what a user actually sees and clicks,
+  // and clicking it still works because the jQuery handlers are bound to the
+  // anchor and the click bubbles. Click #addPartyButton, not #addPartyButtonLink.
+  await page.click('#addPartyButton');
+  await page.fill('#nameInput', partyName);
+  await page.click('#addPartyDialog input[type="submit"]');
+
+  await expect(page).toHaveURL(/\/ui\/party\?id=\d+/);
+}
+
+export interface ClassicGuest {
+  name: string;
+  sex: 'MALE' | 'FEMALE';
+  weight: string;
+}
+
+/** Adds a guest drinker to a party from the classic /ui/party page's add-drinker dialog. */
+export async function addGuestToParty(page: Page, guest: ClassicGuest): Promise<void> {
+  // Same 0x0-anchor quirk as createPartyClassic: click the icon div, not the link.
+  await page.click('#addDrinkerButton');
+
+  // #addDrinkerAccordion > h2 has two sections: index 0 is "add registered
+  // user", index 1 is "add guest". The guest form reuses #drinkerName,
+  // #drinkerWeight and #submitButton from the registration page, so a
+  // selector alone can't tell which section it targets.
+  await page.locator('#addDrinkerAccordion > h2').nth(1).click();
+
+  // The submit button starts disabled and is only re-enabled by
+  // checkDrinkerFields(false) on the field's own onkeyup handler, which
+  // fill() doesn't trigger — pressSequentially() types real keystrokes.
+  await page.locator('#drinkerName').pressSequentially(guest.name);
+  await page.selectOption('#drinkerSex', guest.sex);
+  await page.locator('#drinkerWeight').pressSequentially(guest.weight);
+  await page.click('#submitButton');
+
+  // The dialog submits via addAnonymousUser() and refreshes the grid through
+  // partyHost.update() rather than a page load, so wait on #drinkers directly
+  // instead of expecting a navigation.
+  await expect(page.locator('#drinkers')).toContainText(guest.name);
+}
