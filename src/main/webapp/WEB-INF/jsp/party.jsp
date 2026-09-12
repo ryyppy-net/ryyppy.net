@@ -43,6 +43,9 @@
                     resizable: false,
                     open: function() {
                         graphDialogOpened();
+                    },
+                    close: function() {
+                        graphDialogClosed();
                     }
                 });
             });
