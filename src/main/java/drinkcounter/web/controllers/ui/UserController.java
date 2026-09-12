@@ -129,15 +129,6 @@ public class UserController {
         return "redirect:user";
     }
 
-    @RequestMapping("/addDrink")
-    public String addDrink(HttpSession session, @RequestParam("id") String userId){
-        int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(id);
-        
-        drinkCounterService.addDrink(id);
-        return "redirect:parties";
-    }
-    
     @RequestMapping("/addDrinkToDate")
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") String userId, @RequestParam("date") String date){
         int id = Integer.parseInt(userId);
