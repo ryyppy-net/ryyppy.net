@@ -42,6 +42,7 @@ test('/ui/terms renders the terms of service for an anonymous visitor', async ({
 
   await expect(page).toHaveTitle('Käyttöehdot - Ryyppy.net');
   await expect(page.locator('h1', { hasText: 'Käyttöehdot' })).toBeVisible();
+  await expect(page.locator('a[href="/ui/privacy"]')).toBeVisible();
   await assertNoUnresolvedExpressions(page);
 });
 
