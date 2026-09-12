@@ -288,10 +288,14 @@
                         <th>&nbsp;</th>
                         <td colspan="2"><input id="submitButton" type="submit" value="<spring:message code="form.save"/>" /></td>
                     </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <td colspan="2"><a id="passphraseLink" href="<c:url value="/ui/passphrase"/>"><spring:message code="user.passphrase_link"/></a></td>
+                    </tr>
                 </table>
             </form>
         </div>
-                    
+
         <t:jQueryTemplates></t:jQueryTemplates>
     </jsp:body>
 </t:master>
