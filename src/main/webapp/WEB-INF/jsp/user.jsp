@@ -112,12 +112,13 @@
                 
                 
                 $('#submitTime').click(function() {
+                    var pad = function(n) { return n < 10 ? '0' + n : '' + n; };
                     var formattedTime = '{0}.{1}.{2} {3}:{4}'.format(
-                        picker.selectedTime.getDate(),
-                        picker.selectedTime.getMonth() + 1,
+                        pad(picker.selectedTime.getDate()),
+                        pad(picker.selectedTime.getMonth() + 1),
                         picker.selectedTime.getFullYear(),
-                        picker.selectedTime.getHours(),
-                        picker.selectedTime.getMinutes()
+                        pad(picker.selectedTime.getHours()),
+                        pad(picker.selectedTime.getMinutes())
                     );
                     $('#date').val(formattedTime);
                 });
