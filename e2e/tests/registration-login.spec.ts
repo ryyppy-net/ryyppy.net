@@ -27,4 +27,5 @@ test('an unknown email/password combination is rejected', async ({ page }) => {
   await page.click('input[type="submit"]');
 
   await expect(page).toHaveURL(/\/ui\/login\?error/);
+  await expect(page.locator('.loginError')).toBeVisible();
 });

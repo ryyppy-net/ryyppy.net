@@ -25,7 +25,11 @@
         
         <div class="login">
             <h2> <spring:message code="login.login_title" /> </h2>
-            
+
+            <c:if test="${param.error != null}">
+                <p class="loginError" style="color:#c00;"><spring:message code="login.error" /></p>
+            </c:if>
+
             <p>
                 <form action="/login" method="post" >
                     <label for="username">Käyttäjätunnus</label>

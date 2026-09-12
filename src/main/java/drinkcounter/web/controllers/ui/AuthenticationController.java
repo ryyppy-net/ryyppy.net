@@ -49,9 +49,4 @@ public class AuthenticationController {
         mav.addObject("totalDrinkCount", drinkCounterService.getTotalDrinkCount());
         return mav;
     }
-    
-    @RequestMapping("/loginerror")
-    public String loginerror() {
-        return "loginerror";
-    }
 }
