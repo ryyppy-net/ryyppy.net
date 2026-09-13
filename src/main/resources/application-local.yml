@@ -1,6 +1,0 @@
-# Activated for `mvn spring-boot:run` only (see the spring-boot-maven-plugin
-# configuration in pom.xml). There is no Railway pre-deploy step outside
-# Railway, so a fresh local database still needs Flyway to run on boot.
-spring:
-  flyway:
-    enabled: true

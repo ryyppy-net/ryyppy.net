@@ -29,20 +29,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <!--
-                    Activates the `local` profile (application-local.yml, which
-                    re-enables Flyway) for direct goal invocations such as `mvn
-                    spring-boot:run`. The process-aot execution below opts out
-                    with an empty override, since it must build with the base
-                    application.yml's spring.flyway.enabled=false - process-aot
-                    freezes @Conditional evaluation, so a flywayInitializer bean
-                    generated here would exist at runtime regardless of profile.
-                -->
-                <configuration>
-                    <profiles>
-                        <profile>local</profile>
-                    </profiles>
-                </configuration>
                 <executions>
                     <!--
                         Generates META-INF/build-info.properties (default phase:
@@ -59,10 +45,19 @@
                             <goal>build-info</goal>
                         </goals>
                     </execution>
+                    <!--
+                        Builds under the `production` profile (spring.flyway.enabled=false
+                        there) so the deployed jar never gets a flywayInitializer bean:
+                        process-aot freezes @Conditional evaluation at build time, so
+                        whatever profile is active here decides that bean's existence for
+                        every future run of this jar, whatever profile it boots with later.
+                    -->
                     <execution>
                         <id>process-aot</id>
                         <configuration>
-                            <profiles combine.self="override"/>
+                            <profiles>
+                                <profile>production</profile>
+                            </profiles>
                         </configuration>
                         <goals>
                             <goal>process-aot</goal>

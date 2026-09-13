@@ -90,24 +90,31 @@ covers the pgjdbc driver and the actual SQL dialect. Two properties of it:
 
 * **Read-only.** Migrations run as a
   [Railway pre-deploy step](https://docs.railway.com/deployments/pre-deploy-command)
-  instead of at app boot (see below), so `process-aot` (in `pom.xml`) never
-  generates a `flywayInitializer` bean for this jar in the first place - there
-  is no migration bean left for the training run, or the running app, to
-  invoke. This is also why the training run can use
+  instead of at app boot (see below). `process-aot` (in `pom.xml`) builds under
+  the `production` profile, whose `application-production.yml` disables
+  Flyway, so this jar never gets a `flywayInitializer` bean generated for it in
+  the first place - there is no migration bean left for the training run, or
+  the running app, to invoke. This is also why the training run can use
   `-Dspring.aot.enabled=true`, unlike before this bean was removed: Spring AOT
   freezes `@Conditional` evaluation at build time, so an AOT-processed context
-  used to create `flywayInitializer` regardless of profile.
+  used to create `flywayInitializer` regardless of the profile active at boot.
 * **Best-effort.** An unreachable database fails the run and leaves the build
   green; the image then boots without the cache.
 
 ### Database migrations
 
-Flyway migrations (`src/main/resources/db/migration/`) run as a Railway
-pre-deploy command, not as part of app boot - the app image carries no
-`flywayInitializer` bean at runtime. The command is set in
+Flyway is enabled by default (`spring.flyway.enabled` in the base
+`application.yml`) - `mvn spring-boot:run` migrates a fresh local database
+with no extra profile or setup needed. `application-production.yml` disables
+it for the profile Railway runs, since production migrates via a Railway
+pre-deploy command instead of at app boot - the app image carries no
+`flywayInitializer` bean at runtime regardless of profile, because
+`process-aot` (see `pom.xml`) also builds under the `production` profile. The
+pre-deploy command is set in
 [`railway.json`](https://docs.railway.com/config-as-code) via
 `deploy.preDeployCommand`, so it's version-controlled and applied on every
-deploy without touching the dashboard:
+deploy without touching the dashboard, and overrides the production
+profile's `spring.flyway.enabled=false` for that one-off run:
 
 ```bash
 java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
@@ -125,12 +132,6 @@ files stop being read on 2026-12-01, so this will need migrating before then.
 Also set a **Pre-deploy Timeout** in the service settings - without one, a
 Flyway run blocked on a lock hangs the deploy instead of failing it. Neither
 Config as Code nor Infrastructure as Code exposes this field; it's dashboard-only.
-
-Locally, `mvn spring-boot:run` has no pre-deploy step. The
-`spring-boot-maven-plugin` activates the `local` profile
-(`application-local.yml`) for direct goal invocations like this one, which
-re-enables `spring.flyway.enabled` so a fresh local database still gets
-migrated on boot.
 
 Build args are recorded in image history, so `docker history` reveals the
 database password. Railway keeps images private to the project.
