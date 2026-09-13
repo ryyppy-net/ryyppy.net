@@ -31,18 +31,19 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <!--
-                        Generates META-INF/build-info.properties, which Spring Boot's
-                        ProjectInfoAutoConfiguration picks up as a BuildProperties bean
-                        (see GlobalControllerAdvice). Bound to generate-resources rather
-                        than the goal's default prepare-package phase so it also runs
-                        under mvn spring-boot:run, which never reaches prepare-package.
+                        Generates META-INF/build-info.properties (default phase:
+                        generate-resources, so this also runs under mvn
+                        spring-boot:run), which Spring Boot's ProjectInfoAutoConfiguration
+                        picks up as a BuildProperties bean (see GlobalControllerAdvice).
+                        Running the app straight from an IDE without going through this
+                        Maven build skips it, so that bean - and ${applicationVersion} -
+                        stays absent there.
                     -->
                     <execution>
                         <id>build-info</id>
                         <goals>
                             <goal>build-info</goal>
                         </goals>
-                        <phase>generate-resources</phase>
                     </execution>
                     <execution>
                         <id>process-aot</id>
