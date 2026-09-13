@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty } from './helpers';
 
 test('party header fills in asynchronously and the grid shows the owner with a promille reading', async ({ page }) => {
@@ -15,6 +15,61 @@ test('party header fills in asynchronously and the grid shows the owner with a p
   await expect(page.locator('#drinkers')).toContainText(user.name);
   await expect(page.locator('#drinkers')).toContainText('0.00‰');
   await expect(page.locator('#drinkers')).toContainText('Paina tästä juodaksesi');
+});
+
+test('a drinker tile shows 0.00‰, not NaN‰, while its reading is still loading', async ({ page }) => {
+  // UserButton.initializeButton paints a placeholder before /API/users/{id}
+  // answers, and a non-numeric value in setTexts' promille slot renders as
+  // "NaN‰". That window is a blink on a fast load and seconds on a busy
+  // server, so hold the reading back to make the placeholder observable on
+  // every run rather than only under load.
+  const user = makeTestUser('party-loading');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+  await createPartyClassic(page, `E2E Loading Party ${Date.now()}`);
+
+  let release: () => void = () => {};
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  await page.route('**/API/users/*', async (route) => {
+    await held;
+    await route.continue();
+  });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  // The tile is up and painted, but its reading is still in flight.
+  await expect(page.locator('#drinkers .details').first()).toBeVisible();
+  await expect(page.locator('#drinkers')).toContainText('0.00‰');
+  await expect(page.locator('#drinkers')).not.toContainText('NaN');
+
+  release();
+  await expect(page.locator('#drinkers')).toContainText(user.name);
+  await expect(page.locator('#drinkers')).not.toContainText('NaN');
+});
+
+test('a drinker tile shows its reading even when the reading beats its own template', async ({ page }) => {
+  // UserButtonGrid fires update() the moment it constructs a UserButton, so
+  // /API/users/{id} races the button's own template GET. In the order where
+  // the reading wins, dataLoaded() has no #info element to paint into and the
+  // tile depends on initializeButton() repainting what it kept. Hold the
+  // template back so that order happens on every run, not just under load.
+  const user = makeTestUser('party-template');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+  await createPartyClassic(page, `E2E Template Party ${Date.now()}`);
+
+  await page.route('**/static/templates/userButton.html', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await route.continue();
+  });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('#drinkers')).toContainText(user.name);
+  await expect(page.locator('#drinkers')).toContainText('0.00‰');
+  await expect(page.locator('#drinkers')).not.toContainText('NaN');
 });
 
 test('add-registered-user form enables its submit button for a known email and adds them to the grid', async ({ page }) => {

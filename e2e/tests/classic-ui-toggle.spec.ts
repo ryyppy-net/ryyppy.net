@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
 test('a user can switch from the modern dashboard to the classic UI and back', async ({ page }) => {

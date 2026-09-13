@@ -21,7 +21,9 @@
                 $("#drinkerName").focus();
 
                 $('.userField').live('keyup', function() { checkDrinkerFields(true); });
-                $('#email').live('keyup', function() { checkEmail($(this).val()); });
+                // No #email binding here: its own onkeyup/onblur below call
+                // checkEmail(), and a second binding would double the lookups
+                // every keystroke fires.
             });
         </script>
     </div>

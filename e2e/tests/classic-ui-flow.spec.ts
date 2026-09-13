@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty } from './helpers';
 
 test('a user can log in to the classic UI, create a party and add a guest drinker', async ({ page }) => {

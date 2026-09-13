@@ -10,7 +10,9 @@ export default defineConfig({
   // server/DB.
   fullyParallel: true,
   workers: 4,
-  retries: process.env.CI ? 1 : 0,
+  // No retries, on CI either: the suite is expected to be correct at the
+  // parallelism above, and a retry turns a genuine race into a green build.
+  retries: 0,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
   timeout: 30_000,
   expect: { timeout: 5_000 },

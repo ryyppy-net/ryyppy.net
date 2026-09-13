@@ -58,6 +58,9 @@ function UserButton(userId, element, color) {
     this.clicked = false;
     this.onDrunk = null;
     this.alcohol = 0;
+    this.drinks = 0;
+    this.idletime = 0;
+    this.dataReceived = false;
     this.onDataLoaded = null;
     this.series = null;
     
@@ -139,7 +142,24 @@ UserButton.prototype.buildHtml = function() {
 UserButton.prototype.initializeButton = function() {
     this.buttonElement.css('background-color', this.color);
     this.buttonElement.click($.proxy(this.buttonClick, this));
-    this.setTexts(getMessage('loading'), 0, 0, 0);
+
+    // The grid calls update() as soon as it constructs a button, so
+    // /API/users/{id} can answer before this button's template GET. In that
+    // order dataLoaded() has no #info element to paint into, and nothing
+    // refreshes the tile afterwards, so its values are repainted here rather
+    // than overwritten with the placeholder. renderGraph() guards the same
+    // ordering.
+    if (this.dataReceived) {
+        this.setTexts(this.alcohol, this.drinks, this.idletime);
+        return;
+    }
+
+    // setTexts renders its first argument as Number(alcohol).toFixed(2), so a
+    // non-numeric value there shows as NaN in the promille reading. The
+    // loading text belongs in the name slot, which setTexts takes from
+    // this.name.
+    this.name = getMessage('loading');
+    this.setTexts(0, 0, 0);
 }
 
 UserButton.prototype.setMaxY = function(max) {
@@ -163,12 +183,13 @@ UserButton.prototype.dataLoaded = function(data) {
     var idletime = xml.find('idle').text();
 
     this.alcohol = alcohol;
+    this.drinks = drinks;
+    this.idletime = idletime;
+    this.dataReceived = true;
 
     this.setTexts(alcohol, drinks, idletime);
     if (this.onDataLoaded != null)
         this.onDataLoaded(data);
-
-    $('#info' + this.userId).css('top', ($('#infoContainer' + this.userId).height() / 2) - ($('#info' + this.userId).height() / 2));
 }
 
 UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
@@ -195,6 +216,9 @@ UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
         div.append($('<br />'));
         div.append($('<span class="details"></span>').text(idle_msg + formatTime(idletime)));
     }
+
+    // Re-centre: the text above determines the div's height.
+    div.css('top', ($('#infoContainer' + this.userId).height() / 2) - (div.height() / 2));
 }
 
 UserButton.prototype.historyLoaded = function(data) {

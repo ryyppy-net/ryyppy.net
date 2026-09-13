@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, loginUser } from './helpers';
 
 test('L1: /ui/login renders logo, credential fields, drink counter, registration link and footer links', async ({ page }) => {
