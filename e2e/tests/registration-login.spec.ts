@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, loginUser } from './helpers';
 
 test('a new user can register and lands on their dashboard', async ({ page }) => {

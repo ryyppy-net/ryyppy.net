@@ -58,6 +58,9 @@ function UserButton(userId, element, color) {
     this.clicked = false;
     this.onDrunk = null;
     this.alcohol = 0;
+    this.drinks = 0;
+    this.idletime = 0;
+    this.dataReceived = false;
     this.onDataLoaded = null;
     this.series = null;
     
@@ -139,7 +142,26 @@ UserButton.prototype.buildHtml = function() {
 UserButton.prototype.initializeButton = function() {
     this.buttonElement.css('background-color', this.color);
     this.buttonElement.click($.proxy(this.buttonClick, this));
-    this.setTexts(getMessage('loading'), 0, 0, 0);
+
+    // The grid calls update() as soon as it constructs a button, so
+    // /API/users/{id} races this button's own template GET. When the reading
+    // wins, dataLoaded() already painted it into an #info element that did
+    // not exist yet - repaint it here instead of stamping the placeholder
+    // over it, which left the tile reading "loading" for good (see #127).
+    // renderGraph() has guarded the same race since forever; the text did not.
+    if (this.dataReceived) {
+        this.setTexts(this.alcohol, this.drinks, this.idletime);
+        return;
+    }
+
+    // setTexts' first argument is the promille reading, which it renders as
+    // Number(alcohol).toFixed(2). The placeholder used to pass
+    // getMessage('loading') there, so a tile rendered a literal
+    // "NaN" followed by the per-mille sign for as long as it was waiting on
+    // its reading. The loading text belongs
+    // in the name slot, which is what setTexts reads from this.name.
+    this.name = getMessage('loading');
+    this.setTexts(0, 0, 0);
 }
 
 UserButton.prototype.setMaxY = function(max) {
@@ -163,12 +185,13 @@ UserButton.prototype.dataLoaded = function(data) {
     var idletime = xml.find('idle').text();
 
     this.alcohol = alcohol;
+    this.drinks = drinks;
+    this.idletime = idletime;
+    this.dataReceived = true;
 
     this.setTexts(alcohol, drinks, idletime);
     if (this.onDataLoaded != null)
         this.onDataLoaded(data);
-
-    $('#info' + this.userId).css('top', ($('#infoContainer' + this.userId).height() / 2) - ($('#info' + this.userId).height() / 2));
 }
 
 UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
@@ -195,6 +218,11 @@ UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
         div.append($('<br />'));
         div.append($('<span class="details"></span>').text(idle_msg + formatTime(idletime)));
     }
+
+    // Re-centre after the text changes height. This used to live at the end of
+    // dataLoaded(), where it was a no-op whenever the reading arrived before
+    // the button's template did.
+    div.css('top', ($('#infoContainer' + this.userId).height() / 2) - (div.height() / 2));
 }
 
 UserButton.prototype.historyLoaded = function(data) {

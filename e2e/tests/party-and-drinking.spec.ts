@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
 test('a newly created party shows its actual start date, not a misparsed one', async ({ page }) => {

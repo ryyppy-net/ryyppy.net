@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser } from './helpers';
 
 test('the dashboard does not fetch the profile, parties, own drinks, or drink-history graph data over the API on first load', async ({ page }) => {

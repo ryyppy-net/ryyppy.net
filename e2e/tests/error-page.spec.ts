@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, createParty } from './helpers';
 
 test('requesting a party you are not a participant of renders the error page', async ({ page, browser }) => {

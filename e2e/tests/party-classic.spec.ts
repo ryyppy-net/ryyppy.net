@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty } from './helpers';
 
 test('party header fills in asynchronously and the grid shows the owner with a promille reading', async ({ page }) => {
@@ -15,6 +15,67 @@ test('party header fills in asynchronously and the grid shows the owner with a p
   await expect(page.locator('#drinkers')).toContainText(user.name);
   await expect(page.locator('#drinkers')).toContainText('0.00‰');
   await expect(page.locator('#drinkers')).toContainText('Paina tästä juodaksesi');
+});
+
+test('a drinker tile shows 0.00‰, not NaN‰, while its reading is still loading', async ({ page }) => {
+  // Regression guard for #127. UserButton.initializeButton paints a
+  // placeholder as soon as the grid is built, before /API/users/{id} has
+  // answered, and it used to pass the "loading" string into setTexts'
+  // promille slot - so Number(...).toFixed(2) rendered a literal "NaN‰".
+  // On a fast page load that window is a blink; on a busy server it is
+  // seconds, which is how the test above kept catching it. Hold the reading
+  // back deliberately so the placeholder is observable every run instead of
+  // only under load.
+  const user = makeTestUser('party-loading');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+  await createPartyClassic(page, `E2E Loading Party ${Date.now()}`);
+
+  let release: () => void = () => {};
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  await page.route('**/API/users/*', async (route) => {
+    await held;
+    await route.continue();
+  });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  // The tile is up and painted, but its reading is still in flight.
+  await expect(page.locator('#drinkers .details').first()).toBeVisible();
+  await expect(page.locator('#drinkers')).toContainText('0.00‰');
+  await expect(page.locator('#drinkers')).not.toContainText('NaN');
+
+  release();
+  await expect(page.locator('#drinkers')).toContainText(user.name);
+  await expect(page.locator('#drinkers')).not.toContainText('NaN');
+});
+
+test('a drinker tile shows its reading even when the reading beats its own template', async ({ page }) => {
+  // Regression guard for #127. UserButtonGrid fires update() the moment it
+  // constructs a UserButton, so /API/users/{id} races the button's own
+  // template GET. When the reading won, dataLoaded() painted into an #info
+  // element that did not exist yet and initializeButton() then stamped the
+  // placeholder over it - the tile sat on "loading" (or, before the fix
+  // above, on NaN‰) forever, with nothing left to refresh it. Hold the
+  // template back so the losing order happens on every run, not just under
+  // parallel load.
+  const user = makeTestUser('party-template');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+  await createPartyClassic(page, `E2E Template Party ${Date.now()}`);
+
+  await page.route('**/static/templates/userButton.html', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await route.continue();
+  });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('#drinkers')).toContainText(user.name);
+  await expect(page.locator('#drinkers')).toContainText('0.00‰');
+  await expect(page.locator('#drinkers')).not.toContainText('NaN');
 });
 
 test('add-registered-user form enables its submit button for a known email and adds them to the grid', async ({ page }) => {
