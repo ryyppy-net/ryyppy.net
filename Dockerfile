@@ -1,28 +1,21 @@
-# Standard Spring Boot container image, following
+# Spring Boot container image, following
 # https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html
 #
-# The reference Dockerfile starts from an already-built jar (its JAR_FILE
-# arg). Railway builds straight from the git repo, where target/ does not
-# exist, so stage 1 here runs the Maven build that used to be Railpack's
-# build command; stages 2 and 3 are the reference's own two stages.
+# Three stages: stage 1 builds the jar with Maven, stage 2 unpacks it into
+# Spring Boot's layered layout, stage 3 is the runtime image and copies those
+# layers in one COPY each, so a rebuild that only changes application code
+# re-pushes the small application layer instead of the ~70MB dependency layer.
 #
-# Stage 2 unpacks the repackaged (uber) jar into Spring Boot's layered
-# layout; stage 3 copies those layers in one COPY each, so a rebuild that
-# only changes application code re-pushes the small application layer
-# instead of the ~70MB dependency layer.
-#
-# Java 25 lets us add the JDK AOT cache (JEP 483/514) on top: a training
-# run inside the image records the classes the app loads while its Spring
-# context refreshes, and the runtime start command replays that cache
-# instead of loading and linking those classes from scratch.
+# Java 25 adds the JDK AOT cache (JEP 483/514) on top: a training run inside
+# the image records the classes the app loads while its Spring context
+# refreshes, and the runtime start command replays that cache instead of
+# loading and linking those classes from scratch.
 
-# Build the jar - the same `mvn package` that used to be Railpack's build
-# command. Tests are skipped here; CI runs them on every push.
+# Build the jar. Tests are skipped here; CI runs them on every push.
 #
-# Deliberately no `dependency:go-offline` warm-up layer: it resolves every
-# plugin's dependencies across all lifecycle phases, and on this project it
-# ran past 20 minutes on Railway's builder without finishing, which is worse
-# than the dependency downloads it was meant to save.
+# No `dependency:go-offline` warm-up layer: it resolves every plugin's
+# dependencies across all lifecycle phases, which costs more than the
+# dependency downloads it would save.
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .

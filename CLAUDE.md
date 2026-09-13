@@ -40,30 +40,29 @@ mvn install
 ```
 
 ### Container image
-The root `Dockerfile` follows Spring Boot's reference Dockerfile (layered
-`jarmode=tools extract` plus a JDK AOT cache training run), with a Maven stage
-prepended because Railway builds from the git repo and the reference assumes
-an already-built jar. It needs no `mvn package` beforehand:
+The root `Dockerfile` follows Spring Boot's reference Dockerfile: a Maven
+stage that builds the jar, a layered `jarmode=tools extract`, and a runtime
+stage with a JDK AOT cache training run. It needs no `mvn package` first:
 ```bash
 docker build -t ryyppynet .
 ```
-The image's AOT cache training run boots against the **real database**, via
-`SPRING_DATASOURCE_*` build args (Railway injects service variables into the
-build for any `ARG` declared in the stage using them). Locally, pass them with
-`--build-arg` or the training run is skipped and the image just starts slower.
+The training run boots against the real database via `SPRING_DATASOURCE_*`
+build args (Railway injects service variables into the build for any `ARG`
+declared in the stage using them). Locally, pass them with `--build-arg`, or
+omit them and the training run is skipped and the image just starts slower.
 
-Two invariants to preserve when touching it: the training run must stay
-read-only (the `aot-train` profile disables Flyway, and the run deliberately
-omits `-Dspring.aot.enabled=true`, since Spring AOT would re-enable Flyway and
-migrate the real database at build time), and it must stay best-effort (the
-`|| echo` keeps an unreachable database from blocking a deploy).
+Two invariants to preserve when touching it: the training run stays read-only
+(the `aot-train` profile disables Flyway, and the run omits
+`-Dspring.aot.enabled=true`, since Spring AOT freezes `@Conditional`
+evaluation at build time and would re-enable Flyway against the real
+database), and it stays best-effort (the `|| echo` keeps an unreachable
+database from blocking a deploy).
 
-Railway deploys it via `railway.json`'s `DOCKERFILE` builder. There is no
-`startCommand` anywhere - the Dockerfile's `ENTRYPOINT` is the single
-definition of how the app starts, so keep it correct there. There is no
-Railpack config or custom build script any more - changes to how the image
-is built belong in the `Dockerfile`, and changes to the AOT training boot in
-`src/main/resources/application-aot-train.yml`. See README.md for the full
+Railway detects the root `Dockerfile` and builds with it. The service sets no
+start command, so the Dockerfile's `ENTRYPOINT` defines how the app starts -
+keep it correct there. Changes to how the image is built belong in the
+`Dockerfile`; changes to the AOT training boot in
+`src/main/resources/application-aot-train.yml`. See README.md for the
 rationale and the startup-time table.
 
 ### Database Configuration
