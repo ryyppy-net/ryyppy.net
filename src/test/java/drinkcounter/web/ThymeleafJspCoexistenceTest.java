@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * Regression test for the incident where ThymeleafViewResolver, once added
  * alongside the JSP InternalResourceViewResolver, claimed EVERY view name
  * (not just converted ones) and only failed at render time when the
- * template didn't exist - breaking every unconverted page (e.g. "party")
+ * template didn't exist - breaking every unconverted page (e.g. "user")
  * with a 500 instead of falling through to JSP. Fixed by constraining it to
  * the spring.thymeleaf.view-names allow-list in application.yml.
  */
@@ -31,7 +31,7 @@ class ThymeleafJspCoexistenceTest {
 
             assertNotNull(resolver.resolveViewName("privacy", Locale.of("fi", "FI")),
                     "the converted view name must still resolve to a Thymeleaf view");
-            assertNull(resolver.resolveViewName("party", Locale.of("fi", "FI")),
+            assertNull(resolver.resolveViewName("user", Locale.of("fi", "FI")),
                     "an unconverted view name must be left for the JSP resolver, not claimed and failed on by Thymeleaf");
         });
     }
