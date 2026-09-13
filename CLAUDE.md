@@ -58,10 +58,9 @@ omits `-Dspring.aot.enabled=true`, since Spring AOT would re-enable Flyway and
 migrate the real database at build time), and it must stay best-effort (the
 `|| echo` keeps an unreachable database from blocking a deploy).
 
-Railway deploys it via `railway.json`'s `DOCKERFILE` builder, whose
-`startCommand` must be kept in sync with the Dockerfile's `ENTRYPOINT` - it
-exists only to override a leftover war-era start command still set on the
-Railway service itself (see README). There is no
+Railway deploys it via `railway.json`'s `DOCKERFILE` builder. There is no
+`startCommand` anywhere - the Dockerfile's `ENTRYPOINT` is the single
+definition of how the app starts, so keep it correct there. There is no
 Railpack config or custom build script any more - changes to how the image
 is built belong in the `Dockerfile`, and changes to the AOT training boot in
 `src/main/resources/application-aot-train.yml`. See README.md for the full

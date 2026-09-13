@@ -3,8 +3,5 @@
   "build": {
     "builder": "DOCKERFILE",
     "dockerfilePath": "Dockerfile"
-  },
-  "deploy": {
-    "startCommand": "java -XX:AOTCache=app.aot -Dspring.aot.enabled=true -jar application.jar"
   }
 }

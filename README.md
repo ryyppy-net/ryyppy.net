@@ -144,30 +144,15 @@ image hides it.
 Railway builds the repo with the `DOCKERFILE` builder (`railway.json`) - no
 Railpack config, no custom build script.
 
-`railway.json` also sets a `startCommand` that duplicates the Dockerfile's
-`ENTRYPOINT`. That duplication is deliberate and, for now, load-bearing: the
-`web` service still carries a start command from the war days
-(`java -jar target/ryyppynet.war`) in its Railway service settings, in both
-production and PR environments. A service-level start command overrides the
-image's entry point, so without this override the container crashloops on
-`Unable to access jarfile target/ryyppynet.war`. The old `railway.json` set a
-`startCommand` of its own, which is what had been masking it.
-
-**Keep the two in sync**, or delete the service-level start command in the
-Railway dashboard (Settings -> Deploy -> Start Command) and then drop
-`deploy` from `railway.json` entirely - which is the tidier end state, since
-the Dockerfile's `ENTRYPOINT` is then the single definition of how the app
-starts. Railway injects `$PORT`, which
-`application.yml` reads via `server.port: ${PORT:8080}`; Postgres and OAuth2
-config come from the environment variables listed above, and the
-`SPRING_DATASOURCE_*` ones reach the build as well via the `ARG`s described
-above.
-
-Note that Railway's private network is
-[runtime-only](https://docs.railway.com/networking/private-networking/how-it-works#build-vs-runtime).
-A database reachable only at `*.railway.internal` could not be trained
-against; this works because the production database is reached over the
-public internet.
+The `web` service used to carry a start command from the war days
+(`java -jar target/ryyppynet.war`) in its Railway service settings. A
+service-level start command overrides the image's entry point, so it
+crashlooped the first Dockerfile deploy on
+`Unable to access jarfile target/ryyppynet.war`; the old `railway.json` set a
+`startCommand` of its own, which had been masking it. That setting has since
+been cleared on the service, so the Dockerfile's `ENTRYPOINT` is now the
+single definition of how the app starts and `railway.json` carries no
+`deploy` block.
 
 ### Startup time
 
