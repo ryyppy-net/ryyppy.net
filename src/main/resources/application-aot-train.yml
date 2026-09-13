@@ -1,30 +1,24 @@
 # Used only by the JDK AOT cache training run in the Dockerfile.
 #
-# A `docker build` has no service containers, so there is no real Postgres
-# for the training boot to reach. It boots against an in-memory HSQLDB
-# instead, which is enough for the context to refresh for real: Hikari opens
-# a pool, Hibernate resolves a dialect and builds a SessionFactory, and every
-# bean in the application is instantiated - so the cache still covers the
-# bulk of the boot path.
+# The datasource is NOT configured here: the training boot connects to the
+# real database via the SPRING_DATASOURCE_* environment variables, which the
+# Dockerfile takes as build args (Railway injects its service variables into
+# the build for any ARG declared in the stage that uses them). Training
+# against the real database is the point - it puts the pgjdbc driver, the
+# actual SQL dialect and the connection pool's code paths into the cache.
 #
-# What it does not cover is the Postgres-specific half: the pgjdbc driver
-# and the PostgreSQL dialect. Those classes get loaded and linked normally
-# on the first production boot instead of coming from the cache.
+# Flyway is disabled so this boot cannot write to that database. The training
+# run happens during `docker build`, before the deploy is accepted, so a
+# migration applied here would land whether or not the deploy that carries it
+# ever goes live. Disabling it keeps the training boot read-only: Hikari
+# connects, Hibernate resolves the dialect and validates the schema, every
+# bean is instantiated, and nothing is mutated.
 #
-# Flyway is off and ddl-auto creates the schema because db/migration's
-# baseline is a Postgres DDL dump (bytea columns and friends) that HSQLDB
-# cannot execute.
+# Note that this only works because the training run does not set
+# spring.aot.enabled - see the Dockerfile for why.
 spring:
   docker:
     compose:
       enabled: false
-  datasource:
-    url: jdbc:hsqldb:mem:aottrain
-    username: sa
-    password: ""
-    driver-class-name: org.hsqldb.jdbc.JDBCDriver
-  jpa:
-    hibernate:
-      ddl-auto: create
   flyway:
     enabled: false

@@ -8,7 +8,7 @@ Ryyppy.net is a web application for tracking alcohol consumption. Users can crea
 
 **Tech Stack:**
 - Backend: Spring Boot 4.1.1 (Java 25)
-- Database: PostgreSQL (HSQLDB for testing)
+- Database: PostgreSQL (no in-memory database; unit tests use no datasource)
 - Frontend: AngularJS (legacy)
 - View Layer: JSP with JSTL
 - Build Tool: Maven 3
@@ -47,11 +47,22 @@ The root `Dockerfile` follows Spring Boot's reference Dockerfile (layered
 mvn -DskipTests package
 docker build -t ryyppynet .
 ```
+The image's AOT cache training run boots against the **real database**, via
+`SPRING_DATASOURCE_*` build args (Railway injects service variables into the
+build for any `ARG` declared in the stage using them). Locally, pass them with
+`--build-arg` or the training run is skipped and the image just starts slower.
+
+Two invariants to preserve when touching it: the training run must stay
+read-only (the `aot-train` profile disables Flyway, and the run deliberately
+omits `-Dspring.aot.enabled=true`, since Spring AOT would re-enable Flyway and
+migrate the real database at build time), and it must stay best-effort (the
+`|| echo` keeps an unreachable database from blocking a deploy).
+
 Railway deploys it via `railway.json`'s `DOCKERFILE` builder. There is no
 Railpack config or custom build script any more - changes to how the image
 is built belong in the `Dockerfile`, and changes to the AOT training boot in
-`src/main/resources/application-aot-train.yml`. See README.md for what the
-training run can and cannot cover inside a `docker build`.
+`src/main/resources/application-aot-train.yml`. See README.md for the full
+rationale and the startup-time table.
 
 ### Database Configuration
 - Development uses local PostgreSQL via Docker (localhost:5432)

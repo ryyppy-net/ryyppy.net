@@ -36,25 +36,46 @@ COPY --from=builder /builder/extracted/spring-boot-loader/ ./
 COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
 COPY --from=builder /builder/extracted/application/ ./
 
+# Datasource settings for the AOT cache training run below. Railway injects
+# its service variables into the build for any ARG declared in the stage that
+# uses them, so on Railway these arrive with no --build-arg needed; locally
+# you pass them yourself (see README). Leave them unset and the training run
+# simply fails and is skipped.
+#
+# Caveat: build args consumed by a RUN step are recorded in the built image's
+# history, so the database password is readable by anyone who can pull the
+# image. Railway keeps images private to the project; treat that as the
+# boundary, and rotate the credential rather than assuming the image hides it.
+ARG SPRING_DATASOURCE_URL
+ARG SPRING_DATASOURCE_USERNAME
+ARG SPRING_DATASOURCE_PASSWORD
+
 # Execute the AOT cache training run.
 #
-# The `aot-train` profile points this boot at an in-memory HSQLDB rather
-# than Postgres: a `docker build` has no service containers, so no real
-# Postgres is reachable here. See application-aot-train.yml.
+# This boots against the real database (the ARGs above) under the `aot-train`
+# profile, which disables Flyway so the run cannot write to it - see
+# application-aot-train.yml. Training against the real thing is what puts the
+# pgjdbc driver, the actual SQL dialect and the pool's code paths into the
+# cache.
 #
 # Note the absence of -Dspring.aot.enabled=true, which the runtime start
-# command below does set. Spring AOT resolves @Conditional evaluation at
-# build time, so an AOT-processed context instantiates flywayInitializer
-# regardless of the profile's spring.flyway.enabled=false - and Flyway 13
-# rejects HSQLDB outright ("Unsupported Database"), failing the run. Doing
-# the training boot without Spring AOT keeps the JDK cache trainable with
-# no database server in the build; the cache still covers the bulk of the
-# classes the AOT-processed boot loads. Measured cost vs. training the two
-# together: roughly +0.4s of startup (see README).
+# command below does set. Spring AOT freezes @Conditional evaluation at build
+# time, so an AOT-processed context creates flywayInitializer regardless of
+# the profile's spring.flyway.enabled=false - and this run would then apply
+# any pending migration to the real database during the build, before the
+# deploy carrying it is accepted. Training without Spring AOT keeps the run
+# read-only. Measured cost of that choice: ~0.2s of startup (see README).
+#
+# Best-effort: if the database is unreachable from the build (a network
+# policy, an IP allowlist, an outage), the training run fails, no cache is
+# written, and the image still starts - the JVM logs an AOT error for the
+# missing cache and boots normally, just without the speed-up. A deploy
+# should not be blocked by this.
 RUN java -XX:AOTCacheOutput=app.aot \
     -Dspring.profiles.active=aot-train \
     -Dspring.context.exit=onRefresh \
-    -jar application.jar
+    -jar application.jar \
+    || echo "WARNING: AOT cache training failed; starting without a cache"
 
 # Start the application jar with AOT cache enabled - this is not the uber jar
 # used by the builder. This jar only contains application code and references
