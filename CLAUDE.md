@@ -8,7 +8,7 @@ Ryyppy.net is a web application for tracking alcohol consumption. Users can crea
 
 **Tech Stack:**
 - Backend: Spring Boot 4.1.1 (Java 25)
-- Database: PostgreSQL (HSQLDB for testing)
+- Database: PostgreSQL (no in-memory database; unit tests use no datasource)
 - Frontend: AngularJS (legacy)
 - View Layer: JSP with JSTL
 - Build Tool: Maven 3
@@ -38,6 +38,24 @@ mvn install
 mvn versions:set -DnewVersion=3.1.6
 mvn install
 ```
+
+### Container image
+The root `Dockerfile` follows Spring Boot's reference Dockerfile: Maven stage,
+layered `jarmode=tools extract`, runtime stage with a JDK AOT cache training
+run. Railway detects it and builds with it; there is no Railway config file.
+```bash
+docker build -t ryyppynet .
+```
+The training run boots against the real database via `SPRING_DATASOURCE_*`
+build args; omit them locally and it is skipped.
+
+Two invariants: it stays read-only (the `aot-train` profile disables Flyway,
+and the run omits `-Dspring.aot.enabled=true`, which would re-create
+`flywayInitializer` via build-time `@Conditional` evaluation), and it stays
+best-effort (`|| echo`, so an unreachable database cannot block a deploy).
+
+The service sets no start command, so the `ENTRYPOINT` defines how the app
+starts. See README.md for the startup-time table.
 
 ### Database Configuration
 - Development uses local PostgreSQL via Docker (localhost:5432)

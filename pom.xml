@@ -168,15 +168,10 @@
             <version>0.7</version>
         </dependency>
 
-        <!-- Database drivers. Currently supports hsqldb and postgresql -->
+        <!-- Database driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
         </dependency>
 
         <!-- Test libraries -->
