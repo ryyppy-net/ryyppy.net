@@ -25,42 +25,26 @@
     </properties>
     <build>
         <finalName>${project.artifactId}</finalName>
-        <!--
-            spring-boot-starter-parent only filters resources matching
-            **/application*.{yml,yaml,properties}, so drinkcounter/version.properties
-            (application.version=@project.version@, looked up via the
-            drinkcounter.version message bundle - see spring.messages.basename in
-            application.yml) was never actually filtered: it rendered the literal
-            "@project.version@" in every packaged build, not just under
-            mvn spring-boot:run. Redeclaring the parent's split here, with this file
-            added to the filtered side, fixes that.
-        -->
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/application*.yml</include>
-                    <include>**/application*.yaml</include>
-                    <include>**/application*.properties</include>
-                    <include>drinkcounter/version.properties</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>**/application*.yml</exclude>
-                    <exclude>**/application*.yaml</exclude>
-                    <exclude>**/application*.properties</exclude>
-                    <exclude>drinkcounter/version.properties</exclude>
-                </excludes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
+                    <!--
+                        Generates META-INF/build-info.properties (default phase:
+                        generate-resources, so this also runs under mvn
+                        spring-boot:run), which Spring Boot's ProjectInfoAutoConfiguration
+                        picks up as a BuildProperties bean (see GlobalControllerAdvice).
+                        Running the app straight from an IDE without going through this
+                        Maven build skips it, so that bean - and ${applicationVersion} -
+                        stays absent there.
+                    -->
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
                     <execution>
                         <id>process-aot</id>
                         <goals>

@@ -3,6 +3,7 @@ package drinkcounter.web;
 import drinkcounter.authentication.relay.Origins;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,10 +16,25 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalControllerAdvice {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final BuildProperties buildProperties;
 
     @Autowired
-    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository) {
+    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository, @Autowired(required = false) BuildProperties buildProperties) {
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.buildProperties = buildProperties;
+    }
+
+    /**
+     * The app version, sourced from the BuildProperties bean that Spring Boot's
+     * ProjectInfoAutoConfiguration derives from META-INF/build-info.properties
+     * (see the spring-boot-maven-plugin build-info execution in pom.xml). Not
+     * generated when the app is run straight from an IDE without going
+     * through that Maven build, so this is null in that case.
+     * Available in templates as ${applicationVersion}
+     */
+    @ModelAttribute("applicationVersion")
+    public String applicationVersion() {
+        return buildProperties == null ? null : buildProperties.getVersion();
     }
 
     /**
