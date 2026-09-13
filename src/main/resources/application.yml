@@ -46,6 +46,10 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
 
 server:
+  # Railway assigns the container's public port via $PORT. The old Railpack
+  # start command passed it as -Dserver.port=$PORT; with a Dockerfile the
+  # entry point is exec-form (no shell to expand it), so read it here instead.
+  port: ${PORT:8080}
   servlet:
     session:
       cookie:

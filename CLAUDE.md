@@ -39,6 +39,20 @@ mvn versions:set -DnewVersion=3.1.6
 mvn install
 ```
 
+### Container image
+The root `Dockerfile` follows Spring Boot's reference Dockerfile (layered
+`jarmode=tools extract` plus a JDK AOT cache training run). It consumes
+`target/*.jar`, so package first:
+```bash
+mvn -DskipTests package
+docker build -t ryyppynet .
+```
+Railway deploys it via `railway.json`'s `DOCKERFILE` builder. There is no
+Railpack config or custom build script any more - changes to how the image
+is built belong in the `Dockerfile`, and changes to the AOT training boot in
+`src/main/resources/application-aot-train.yml`. See README.md for what the
+training run can and cannot cover inside a `docker build`.
+
 ### Database Configuration
 - Development uses local PostgreSQL via Docker (localhost:5432)
 - Default credentials: ryyppynet/ryyppynet/ryyppynet

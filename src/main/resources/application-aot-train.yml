@@ -1,23 +1,30 @@
-# Used only to produce the JDK 25 AOT cache during the build (see
-# scripts/railway-build-aot-cache.sh, which also unsets SPRING_DATASOURCE_*
-# for this profile's boot - Railway injects those as env vars for the real
-# Postgres, and an env var outranks this file's spring.datasource.url,
-# which broke the training run against the driver-class-name below).
+# Used only by the JDK AOT cache training run in the Dockerfile.
 #
-# Boots against a real, ephemeral PostgreSQL instance that the build script
-# starts locally on 127.0.0.1 (Docker isn't available during a Railway
-# build, so the script runs actual Postgres server binaries directly - see
-# the script for how). Everything else - dialect, ddl-auto, session-jdbc
-# schema init - is left as the base application.yml configures it, since
-# the entire point of training against real Postgres instead of an
-# in-memory substitute is to exercise the same JDBC driver, SQL dialect,
-# and connection pool code paths production actually boots with.
+# A `docker build` has no service containers, so there is no real Postgres
+# for the training boot to reach. It boots against an in-memory HSQLDB
+# instead, which is enough for the context to refresh for real: Hikari opens
+# a pool, Hibernate resolves a dialect and builds a SessionFactory, and every
+# bean in the application is instantiated - so the cache still covers the
+# bulk of the boot path.
+#
+# What it does not cover is the Postgres-specific half: the pgjdbc driver
+# and the PostgreSQL dialect. Those classes get loaded and linked normally
+# on the first production boot instead of coming from the cache.
+#
+# Flyway is off and ddl-auto creates the schema because db/migration's
+# baseline is a Postgres DDL dump (bytea columns and friends) that HSQLDB
+# cannot execute.
 spring:
   docker:
     compose:
       enabled: false
   datasource:
-    url: jdbc:postgresql://127.0.0.1:${AOT_TRAIN_PG_PORT:5432}/ryyppynet
-    username: ryyppynet
-    password: ryyppynet
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:hsqldb:mem:aottrain
+    username: sa
+    password: ""
+    driver-class-name: org.hsqldb.jdbc.JDBCDriver
+  jpa:
+    hibernate:
+      ddl-auto: create
+  flyway:
+    enabled: false

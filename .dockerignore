@@ -1,5 +1,9 @@
-target/
+# The Docker build only consumes target/*.jar (see the Dockerfile's
+# JAR_FILE build arg), so keep the rest of the build output and all
+# source/tooling out of the build context.
+target/*
+!target/*.jar
 .git/
-e2e/node_modules/
-e2e/test-results/
-e2e/playwright-report/
+e2e/
+docker/
+src/
