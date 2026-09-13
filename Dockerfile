@@ -16,17 +16,16 @@
 # context refreshes, and the runtime start command replays that cache
 # instead of loading and linking those classes from scratch.
 
-# Build the jar. Dependencies resolve in a layer keyed on pom.xml alone, so a
-# source-only change reuses it and skips straight to the compile step. Tests
-# are skipped here - CI runs them on every push.
+# Build the jar - the same `mvn package` that used to be Railpack's build
+# command. Tests are skipped here; CI runs them on every push.
 #
-# go-offline is a cache warmer, not a gate: it is known to miss or choke on
-# some plugin dependencies, and `package` below fetches whatever it did not.
-# Letting it fail the build would turn an optimization into an outage.
+# Deliberately no `dependency:go-offline` warm-up layer: it resolves every
+# plugin's dependencies across all lifecycle phases, and on this project it
+# ran past 20 minutes on Railway's builder without finishing, which is worse
+# than the dependency downloads it was meant to save.
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
-RUN mvn -B -q dependency:go-offline || echo "go-offline incomplete; package will fetch the rest"
 COPY src src
 RUN mvn -B -DskipTests package
 
