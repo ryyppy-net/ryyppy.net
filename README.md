@@ -47,7 +47,7 @@ The Google login button will automatically appear on the login page when valid c
 ## Release
 1. Update version number in pom.xml
 2. Make a git TAG with the version number
-3. Run `mvn install` to build the application .war file
+3. Run `mvn install` to build the application .jar file
 
 ## Configure and run on server
 Set configuration using environment variables:
@@ -57,8 +57,8 @@ Set configuration using environment variables:
 * GOOGLE_CLIENT_ID - (Optional) Google OAuth2 client ID to enable Google login
 * GOOGLE_CLIENT_SECRET - (Optional) Google OAuth2 client secret to enable Google login
 
-1. Copy `ryyppynet-<version>.war` to server
-3. Run application `java -jar ryyppynet-<version>.war`
+1. Copy `target/ryyppynet.jar` to server
+3. Run application `java -jar ryyppynet.jar`
 
 ### Railway
 
@@ -69,14 +69,26 @@ pins the JDK to 25 and sets
 `mvn package` — which also runs Spring Boot's own AOT processing
 (`process-aot`, wired into `pom.xml`; generates ahead-of-time bean
 definitions so the context doesn't have to reflect over annotations at
-boot) — then trains a JDK AOT cache (`target/app.aot`, JEP 483/514) against
-an in-memory HSQLDB, regenerated every build, best-effort (a failed
-training run just skips the cache, build still succeeds). Its start command
-fixes Railpack's default jar glob, which doesn't match this project's
-`.war` artifact.
+boot) — then trains a JDK AOT cache (`target/app.aot`, JEP 483/514),
+regenerated every build, best-effort (a failed training run just skips the
+cache, build still succeeds).
 
-Measured locally (extracted WAR, HSQLDB training profile, 5 runs averaged,
-time to the "Started RyyppyApplication" log line):
+The training run boots against a real, throwaway PostgreSQL server that the
+build script starts itself: Railway allows no Docker daemon during a build,
+so the script runs the Postgres server binaries directly on 127.0.0.1 and
+points the `aot-train` profile at them. Training against real Postgres
+rather than an in-memory substitute means the cache covers the same JDBC
+driver, SQL dialect and connection-pool code paths production boots with.
+
+The deploy's start command launches `target/extracted/ryyppynet.jar` — the
+thin jar the build script extracts — rather than letting Railpack pick the
+repackaged `target/ryyppynet.jar` by its default glob. The JDK AOT cache is
+layout-specific, so the artifact that runs has to be the same one the cache
+was trained against.
+
+Measured locally (extracted artifact, HSQLDB training profile — this
+predates the switch to a real Postgres training run above — 5 runs
+averaged, time to the "Started RyyppyApplication" log line):
 
 | Configuration | Startup time | vs. plain boot |
 | --- | --- | --- |
@@ -90,4 +102,5 @@ reflection-based bean discovery, the JDK cache skips class loading/linking —
 so they stack rather than overlap.
 
 Postgres/OAuth2 config is read from env vars exactly as above; the
-training run only ever touches its own throwaway in-memory database.
+training run only ever touches its own throwaway Postgres instance, which
+is deleted when the build step ends.

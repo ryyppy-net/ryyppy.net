@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Railway build command: package the WAR, then do a short training run to
+# Railway build command: package the jar, then do a short training run to
 # produce a JDK AOT cache (JEP 483/514) so the production start command
 # can boot faster. The training run boots against a real, ephemeral
 # PostgreSQL instance that this script starts itself (see the "AOT
@@ -36,28 +36,28 @@ cd "$(dirname "$0")/.."
 echo "==> mvn package"
 mvn -B -DskipTests package
 
-WAR=target/ryyppynet.war
+JAR=target/ryyppynet.jar
 EXTRACTED_DIR=target/extracted
-EXTRACTED_WAR="$EXTRACTED_DIR/ryyppynet.war"
+EXTRACTED_JAR="$EXTRACTED_DIR/ryyppynet.jar"
 AOT_CACHE=target/app.aot
 TRAIN_LOG=target/aot-train.log
 TRAIN_PORT=8080
 
-if [ ! -f "$WAR" ]; then
-  echo "!! $WAR not found after mvn package, aborting" >&2
+if [ ! -f "$JAR" ]; then
+  echo "!! $JAR not found after mvn package, aborting" >&2
   exit 1
 fi
 
-# Extract the WAR into a thin executable WAR plus a flat lib/ directory
+# Extract the jar into a thin executable jar plus a flat lib/ directory
 # (see issue #15). The JDK AOT cache is layout-specific, so it has to be
-# trained against this extracted layout rather than the nested-jar WAR -
-# that's also what the production start command now launches.
-echo "==> extracting WAR"
+# trained against this extracted layout rather than the nested-jar
+# archive - that's also what the production start command now launches.
+echo "==> extracting jar"
 rm -rf "$EXTRACTED_DIR"
-java -Djarmode=tools -jar "$WAR" extract --destination "$EXTRACTED_DIR"
+java -Djarmode=tools -jar "$JAR" extract --destination "$EXTRACTED_DIR"
 
-if [ ! -f "$EXTRACTED_WAR" ]; then
-  echo "!! $EXTRACTED_WAR not found after extraction, aborting" >&2
+if [ ! -f "$EXTRACTED_JAR" ]; then
+  echo "!! $EXTRACTED_JAR not found after extraction, aborting" >&2
   exit 1
 fi
 
@@ -181,7 +181,7 @@ set +e
 env -u SPRING_DATASOURCE_URL -u SPRING_DATASOURCE_USERNAME -u SPRING_DATASOURCE_PASSWORD \
   AOT_TRAIN_PG_PORT="$PG_PORT" \
   java -Dspring.aot.enabled=true -XX:AOTCacheOutput="$AOT_CACHE" \
-  -jar "$EXTRACTED_WAR" \
+  -jar "$EXTRACTED_JAR" \
   --spring.profiles.active=aot-train \
   --server.port="$TRAIN_PORT" \
   > "$TRAIN_LOG" 2>&1 &
