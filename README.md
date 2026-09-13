@@ -62,11 +62,14 @@ Set configuration using environment variables:
 
 ### Docker
 
-The app ships as a container image built from the root `Dockerfile`, which
-follows Spring Boot's
+The root `Dockerfile` follows Spring Boot's
 [Dockerfiles reference](https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html)
-(the AOT cache variant). The image builds the jar itself, so no `mvn package`
-is needed first:
+(the AOT cache variant): a Maven stage builds the jar, a second stage runs
+`jarmode=tools extract --layers`, and the runtime stage copies the four layers
+separately and trains a JDK AOT cache (JEP 483/514) that the entry point
+replays. `-Dspring.aot.enabled=true` on the entry point activates the
+build-time bean definitions from the spring-boot-maven-plugin's `process-aot`
+goal. No `mvn package` is needed first.
 
 ```bash
 docker build -t ryyppynet \
@@ -81,75 +84,38 @@ docker run -p 8080:8080 \
   ryyppynet
 ```
 
-Three stages: a Maven stage that builds the jar, a stage that unpacks it, and
-the runtime stage.
+The training run boots under the `aot-train` profile against the real
+database, reached through the `SPRING_DATASOURCE_*` build args, so the cache
+covers the pgjdbc driver and the actual SQL dialect. Three properties of it:
 
-* **Layered extraction.** The second stage runs
-  `java -Djarmode=tools -jar application.jar extract --layers`, and the
-  runtime stage copies `dependencies`, `spring-boot-loader`,
-  `snapshot-dependencies` and `application` as four separate layers, so a
-  code-only change re-pushes the small application layer instead of the ~70MB
-  dependency layer. The extracted layout (thin jar plus a flat `lib/`) is also
-  what makes the JDK AOT cache usable.
-* **JDK AOT cache** (JEP 483/514). A training run inside the image
-  (`-XX:AOTCacheOutput=app.aot -Dspring.context.exit=onRefresh`) records the
-  classes loaded while the Spring context refreshes; the entry point replays
-  that cache via `-XX:AOTCache=app.aot`. The entry point also passes
-  `-Dspring.aot.enabled=true`, which activates the ahead-of-time bean
-  definitions generated at build time by the spring-boot-maven-plugin's
-  `process-aot` goal (see `pom.xml`).
+* **Read-only.** The profile disables Flyway, so the build step cannot migrate
+  the database it trains against.
+* **No `-Dspring.aot.enabled=true`,** unlike the entry point. Spring AOT
+  freezes `@Conditional` evaluation at build time, so an AOT-processed context
+  would create `flywayInitializer` regardless of the profile. Costs ~0.2s of
+  startup.
+* **Best-effort.** An unreachable database fails the run and leaves the build
+  green; the image then boots without the cache.
 
-#### The AOT training run
-
-The training run boots against the real database, under the `aot-train`
-profile (`application-aot-train.yml`). That is what puts the pgjdbc driver,
-the actual SQL dialect and the connection pool's code paths into the cache.
-The datasource comes from the `SPRING_DATASOURCE_*` build args declared as
-`ARG` in the runtime stage; Railway
-[injects its service variables into the build](https://docs.railway.com/builds/dockerfiles#using-variables-at-build-time)
-for any `ARG` declared in the stage that uses them. Locally, pass them with
-`--build-arg`, or omit them and the training run is skipped.
-
-Three properties of that run are deliberate:
-
-* **It is read-only.** The profile disables Flyway. The training run happens
-  during `docker build`, before the deploy is accepted, so a migration applied
-  there would land on the real database whether or not the deploy carrying it
-  ever goes live. With Flyway off, the run connects, resolves the dialect,
-  validates the schema against the entities, instantiates every bean, and
-  writes nothing.
-* **It does not set `-Dspring.aot.enabled=true`,** though the entry point
-  does. Spring AOT freezes `@Conditional` evaluation at build time, so an
-  AOT-processed context creates `flywayInitializer` regardless of
-  `spring.flyway.enabled=false` - turning Spring AOT on for the training run
-  is what would make it start writing. That costs ~0.2s of startup (see the
-  table below) and buys a build step that cannot mutate the database.
-* **It is best-effort.** If the database is unreachable from the build - an
-  IP allowlist, a network policy, an outage - the run fails, no cache is
-  written, and the build still succeeds. The image then starts without the
-  cache: the JVM logs an AOT error and boots normally, just slower.
-
-Build args consumed by a `RUN` step are recorded in the built image's history,
-so `docker history` on the image reveals the database password. Railway keeps
-images private to the project; treat that as the security boundary, and rotate
-the credential rather than assuming the image hides it.
+Build args are recorded in image history, so `docker history` reveals the
+database password. Railway keeps images private to the project.
 
 ### Railway
 
 Railway [detects the root `Dockerfile`](https://docs.railway.com/builds/dockerfiles)
-and builds with it. `$PORT` is read by `application.yml` via
-`server.port: ${PORT:8080}`; database and OAuth2 config come from the
-environment variables listed above, and the `SPRING_DATASOURCE_*` ones reach
-the build as well through the `ARG`s described above.
+and builds with it; there is no Railway config file in the repo. `$PORT` is
+read by `application.yml` via `server.port: ${PORT:8080}`. Database and OAuth2
+config come from the environment variables listed above, and Railway
+[injects them into the build](https://docs.railway.com/builds/dockerfiles#using-variables-at-build-time)
+for the `ARG`s the Dockerfile declares.
 
 The service sets no start command, so the Dockerfile's `ENTRYPOINT` defines
-how the app starts. A start command set on the Railway service would override
-it.
+how the app starts; a start command set on the service would override it.
 
 Railway's private network is
 [runtime-only](https://docs.railway.com/networking/private-networking/how-it-works#build-vs-runtime),
-so the AOT training run can only reach a database that is available over the
-public internet.
+so the training run only reaches a database available over the public
+internet.
 
 ### Startup time
 

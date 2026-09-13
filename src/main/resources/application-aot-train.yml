@@ -1,21 +1,6 @@
-# Used only by the JDK AOT cache training run in the Dockerfile.
-#
-# The datasource is NOT configured here: the training boot connects to the
-# real database via the SPRING_DATASOURCE_* environment variables, which the
-# Dockerfile takes as build args (Railway injects its service variables into
-# the build for any ARG declared in the stage that uses them). Training
-# against the real database is the point - it puts the pgjdbc driver, the
-# actual SQL dialect and the connection pool's code paths into the cache.
-#
-# Flyway is disabled so this boot cannot write to that database. The training
-# run happens during `docker build`, before the deploy is accepted, so a
-# migration applied here would land whether or not the deploy that carries it
-# ever goes live. Disabling it keeps the training boot read-only: Hikari
-# connects, Hibernate resolves the dialect and validates the schema, every
-# bean is instantiated, and nothing is mutated.
-#
-# Note that this only works because the training run does not set
-# spring.aot.enabled - see the Dockerfile for why.
+# Used only by the Dockerfile's AOT cache training run, which boots against the
+# real database via SPRING_DATASOURCE_* build args. Flyway is off so that build
+# step cannot migrate it.
 spring:
   docker:
     compose:
