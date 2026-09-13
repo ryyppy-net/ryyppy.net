@@ -1,9 +1,8 @@
 # Used only by the Dockerfile's AOT cache training run, which boots against the
-# real database via SPRING_DATASOURCE_* build args. Flyway is off so that build
-# step cannot migrate it.
+# real database via SPRING_DATASOURCE_* build args. Flyway is disabled by the
+# base application.yml (migrations now run as a Railway pre-deploy step), so
+# this training run is read-only without needing to override it here too.
 spring:
   docker:
     compose:
       enabled: false
-  flyway:
-    enabled: false

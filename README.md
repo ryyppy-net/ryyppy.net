@@ -86,16 +86,39 @@ docker run -p 8080:8080 \
 
 The training run boots under the `aot-train` profile against the real
 database, reached through the `SPRING_DATASOURCE_*` build args, so the cache
-covers the pgjdbc driver and the actual SQL dialect. Three properties of it:
+covers the pgjdbc driver and the actual SQL dialect. Two properties of it:
 
-* **Read-only.** The profile disables Flyway, so the build step cannot migrate
-  the database it trains against.
-* **No `-Dspring.aot.enabled=true`,** unlike the entry point. Spring AOT
+* **Read-only.** Migrations run as a
+  [Railway pre-deploy step](https://docs.railway.com/deployments/pre-deploy-command)
+  instead of at app boot (see below), so `process-aot` (in `pom.xml`) never
+  generates a `flywayInitializer` bean for this jar in the first place - there
+  is no migration bean left for the training run, or the running app, to
+  invoke. This is also why the training run can use
+  `-Dspring.aot.enabled=true`, unlike before this bean was removed: Spring AOT
   freezes `@Conditional` evaluation at build time, so an AOT-processed context
-  would create `flywayInitializer` regardless of the profile. Costs ~0.2s of
-  startup.
+  used to create `flywayInitializer` regardless of profile.
 * **Best-effort.** An unreachable database fails the run and leaves the build
   green; the image then boots without the cache.
+
+### Database migrations
+
+Flyway migrations (`src/main/resources/db/migration/`) run as a Railway
+pre-deploy command, not as part of app boot - the app image carries no
+`flywayInitializer` bean at runtime. The pre-deploy command, set in Railway's
+service settings (the repo has no Railway config file):
+
+```bash
+java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
+```
+
+Set a **Pre-deploy Timeout** in service settings too - without one, a Flyway
+run blocked on a lock hangs the deploy instead of failing it.
+
+Locally, `mvn spring-boot:run` has no pre-deploy step. The
+`spring-boot-maven-plugin` activates the `local` profile
+(`application-local.yml`) for direct goal invocations like this one, which
+re-enables `spring.flyway.enabled` so a fresh local database still gets
+migrated on boot.
 
 Build args are recorded in image history, so `docker history` reveals the
 database password. Railway keeps images private to the project.
@@ -128,8 +151,14 @@ against the same PostgreSQL 14 container, time from process launch to the
 | Plain boot (no AOT of either kind) | 6.42s | baseline |
 | `spring.aot.enabled=true` only | 5.53s | 14% faster |
 | JDK AOT cache alone | 2.95s | 54% faster |
-| **Both, cache trained read-only against the real database** | **2.37s** | **63% faster** |
-| Both, with Spring AOT on during training (writes - see above) | 2.15s | 67% faster |
+| Both, cache trained read-only against the real database (pre-Flyway-move) | 2.37s | 63% faster |
+| **Both, with Spring AOT on during training** | **2.15s** | **67% faster** |
 
 End to end in a container, Spring reports ~1.93-2.11s once the page cache is
 warm.
+
+Now that migrations run as a Railway pre-deploy step instead of at app boot,
+the training run always has `-Dspring.aot.enabled=true` on (there is no
+`flywayInitializer` bean left to make that unsafe), so production should land
+on the last row rather than the 2.37s one above. Not yet re-measured on
+Railway with an actual pre-deploy command configured.

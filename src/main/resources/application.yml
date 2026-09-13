@@ -29,6 +29,11 @@ spring:
       initialize-schema: never
       cleanup-cron: "0 */15 * * * *"
   flyway:
+    # Migrations run as a Railway pre-deploy step (java -jar application.jar
+    # -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh), not as
+    # part of the running app - see the `local` profile for local dev, which
+    # re-enables this since there is no pre-deploy step outside Railway.
+    enabled: false
     baseline-on-migrate: true
     baseline-version: 1
   messages:

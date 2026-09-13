@@ -29,6 +29,20 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <!--
+                    Activates the `local` profile (application-local.yml, which
+                    re-enables Flyway) for direct goal invocations such as `mvn
+                    spring-boot:run`. The process-aot execution below opts out
+                    with an empty override, since it must build with the base
+                    application.yml's spring.flyway.enabled=false - process-aot
+                    freezes @Conditional evaluation, so a flywayInitializer bean
+                    generated here would exist at runtime regardless of profile.
+                -->
+                <configuration>
+                    <profiles>
+                        <profile>local</profile>
+                    </profiles>
+                </configuration>
                 <executions>
                     <!--
                         Generates META-INF/build-info.properties (default phase:
@@ -47,6 +61,9 @@
                     </execution>
                     <execution>
                         <id>process-aot</id>
+                        <configuration>
+                            <profiles combine.self="override"/>
+                        </configuration>
                         <goals>
                             <goal>process-aot</goal>
                         </goals>
