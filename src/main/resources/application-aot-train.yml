@@ -1,9 +1,0 @@
-# Used only by the Dockerfile's AOT cache training run, which boots against the
-# real database via SPRING_DATASOURCE_* build args. Flyway is off so that build
-# step cannot migrate it.
-spring:
-  docker:
-    compose:
-      enabled: false
-  flyway:
-    enabled: false

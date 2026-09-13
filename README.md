@@ -84,18 +84,30 @@ docker run -p 8080:8080 \
   ryyppynet
 ```
 
-The training run boots under the `aot-train` profile against the real
-database, reached through the `SPRING_DATASOURCE_*` build args, so the cache
-covers the pgjdbc driver and the actual SQL dialect. Three properties of it:
+The training run boots against the real database, reached through the
+`SPRING_DATASOURCE_*` build args, so the cache covers the pgjdbc driver and
+the actual SQL dialect. Two properties of it:
 
-* **Read-only.** The profile disables Flyway, so the build step cannot migrate
-  the database it trains against.
-* **No `-Dspring.aot.enabled=true`,** unlike the entry point. Spring AOT
-  freezes `@Conditional` evaluation at build time, so an AOT-processed context
-  would create `flywayInitializer` regardless of the profile. Costs ~0.2s of
-  startup.
+* **Read-only.** This jar has no `flywayInitializer` bean (see Database
+  migrations below), so the training run can safely use
+  `-Dspring.aot.enabled=true`, which freezes `@Conditional` evaluation at
+  build time.
 * **Best-effort.** An unreachable database fails the run and leaves the build
   green; the image then boots without the cache.
+
+### Database migrations
+
+Flyway is enabled by default, so `mvn spring-boot:run` migrates a fresh local
+database. `application-production.yml` - the profile Railway runs - disables
+it; production migrates instead via `railway.json`'s pre-deploy command:
+
+```bash
+java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
+```
+
+`railway.json` uses Railway's deprecated Config as Code (see #129). Also set
+a **Pre-deploy Timeout** in the service settings - dashboard-only, no
+config-file field for it.
 
 Build args are recorded in image history, so `docker history` reveals the
 database password. Railway keeps images private to the project.
@@ -103,7 +115,8 @@ database password. Railway keeps images private to the project.
 ### Railway
 
 Railway [detects the root `Dockerfile`](https://docs.railway.com/builds/dockerfiles)
-and builds with it; there is no Railway config file in the repo. `$PORT` is
+and builds with it; `railway.json` only sets the pre-deploy command (see
+above) and leaves the builder to that auto-detection. `$PORT` is
 read by `application.yml` via `server.port: ${PORT:8080}`. Database and OAuth2
 config come from the environment variables listed above, and Railway
 [injects them into the build](https://docs.railway.com/builds/dockerfiles#using-variables-at-build-time)
@@ -128,8 +141,8 @@ against the same PostgreSQL 14 container, time from process launch to the
 | Plain boot (no AOT of either kind) | 6.42s | baseline |
 | `spring.aot.enabled=true` only | 5.53s | 14% faster |
 | JDK AOT cache alone | 2.95s | 54% faster |
-| **Both, cache trained read-only against the real database** | **2.37s** | **63% faster** |
-| Both, with Spring AOT on during training (writes - see above) | 2.15s | 67% faster |
+| Both, cache trained read-only against the real database | 2.37s | 63% faster |
+| **Both, with Spring AOT on during training** | **2.15s** | **67% faster** |
 
 End to end in a container, Spring reports ~1.93-2.11s once the page cache is
 warm.

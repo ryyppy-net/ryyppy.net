@@ -5,3 +5,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  flyway:
+    # Migrations run via railway.json's pre-deploy command instead.
+    enabled: false

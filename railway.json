@@ -1,0 +1,8 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "deploy": {
+    "preDeployCommand": [
+      "java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar"
+    ]
+  }
+}

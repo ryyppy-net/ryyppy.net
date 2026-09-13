@@ -45,8 +45,18 @@
                             <goal>build-info</goal>
                         </goals>
                     </execution>
+                    <!--
+                        Builds under `production`, whose Flyway is disabled, so no
+                        flywayInitializer bean is baked in - process-aot freezes
+                        @Conditional evaluation at build time.
+                    -->
                     <execution>
                         <id>process-aot</id>
+                        <configuration>
+                            <profiles>
+                                <profile>production</profile>
+                            </profiles>
+                        </configuration>
                         <goals>
                             <goal>process-aot</goal>
                         </goals>

@@ -23,13 +23,11 @@ ARG SPRING_DATASOURCE_URL
 ARG SPRING_DATASOURCE_USERNAME
 ARG SPRING_DATASOURCE_PASSWORD
 
-# AOT cache training run against the real database. No -Dspring.aot.enabled=true:
-# Spring AOT freezes @Conditional at build time, so flywayInitializer would be
-# created despite the profile's spring.flyway.enabled=false and would migrate
-# that database from this build step. Best-effort: a failed run leaves no cache
-# and the image boots without it.
+# AOT cache training run against the real database. Safe with Spring AOT
+# enabled since the jar has no flywayInitializer bean (see pom.xml).
+# Best-effort: a failed run leaves no cache and the image boots without it.
 RUN java -XX:AOTCacheOutput=app.aot \
-    -Dspring.profiles.active=aot-train \
+    -Dspring.aot.enabled=true \
     -Dspring.context.exit=onRefresh \
     -jar application.jar \
     || echo "WARNING: AOT cache training failed; starting without a cache"
