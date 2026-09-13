@@ -104,15 +104,27 @@ covers the pgjdbc driver and the actual SQL dialect. Two properties of it:
 
 Flyway migrations (`src/main/resources/db/migration/`) run as a Railway
 pre-deploy command, not as part of app boot - the app image carries no
-`flywayInitializer` bean at runtime. The pre-deploy command, set in Railway's
-service settings (the repo has no Railway config file):
+`flywayInitializer` bean at runtime. The command is set in
+[`railway.json`](https://docs.railway.com/config-as-code) via
+`deploy.preDeployCommand`, so it's version-controlled and applied on every
+deploy without touching the dashboard:
 
 ```bash
 java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
 ```
 
-Set a **Pre-deploy Timeout** in service settings too - without one, a Flyway
-run blocked on a lock hangs the deploy instead of failing it.
+`railway.json`'s
+[Config as Code](https://docs.railway.com/infrastructure-as-code#iac-vs-config-as-code)
+is deprecated in favor of Railway's newer `.railway/railway.ts`
+[Infrastructure as Code](https://docs.railway.com/infrastructure-as-code), but
+still auto-applies on every deploy with no extra tooling, unlike IaC (which
+needs `railway config apply` run by a human or CI job, and takes over full
+service management rather than just this one field). Existing Config as Code
+files stop being read on 2026-12-01, so this will need migrating before then.
+
+Also set a **Pre-deploy Timeout** in the service settings - without one, a
+Flyway run blocked on a lock hangs the deploy instead of failing it. Neither
+Config as Code nor Infrastructure as Code exposes this field; it's dashboard-only.
 
 Locally, `mvn spring-boot:run` has no pre-deploy step. The
 `spring-boot-maven-plugin` activates the `local` profile
@@ -126,7 +138,8 @@ database password. Railway keeps images private to the project.
 ### Railway
 
 Railway [detects the root `Dockerfile`](https://docs.railway.com/builds/dockerfiles)
-and builds with it; there is no Railway config file in the repo. `$PORT` is
+and builds with it; `railway.json` only sets the pre-deploy command (see
+above) and leaves the builder to that auto-detection. `$PORT` is
 read by `application.yml` via `server.port: ${PORT:8080}`. Database and OAuth2
 config come from the environment variables listed above, and Railway
 [injects them into the build](https://docs.railway.com/builds/dockerfiles#using-variables-at-build-time)
