@@ -31,7 +31,7 @@ mvn spring-boot:run
 # Run tests
 mvn test
 
-# Build WAR file
+# Build jar file
 mvn install
 
 # Package specific version (updates pom.xml version)
