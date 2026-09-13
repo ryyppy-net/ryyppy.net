@@ -16,14 +16,10 @@ function checkDrinkerFields(checkEmail) {
     button.prop("disabled", success ? "" : "disabled");
 }
 
-// Both lookups below fire one request per keystroke, and jQuery gives no
-// ordering guarantee on the replies: under load the answer for a half-typed
-// address routinely lands *after* the answer for the fully-typed one and
-// overwrites it. Since a half-typed address is neither a valid nor a known
-// one, the late reply marks the field wrong and disables the submit button,
-// and nothing is left to re-check it - the form is stuck until the user
-// types again (see #127). Stamp every request and let only the newest reply
-// touch the UI.
+// Both lookups below fire one request per keystroke and the replies can
+// arrive in any order. A reply for a half-typed address reports it as invalid
+// or unknown, so applying a stale one disables the submit button with nothing
+// left to re-enable it. Only the newest reply may touch the UI.
 var latestEmailCheck = 0;
 var latestUserLookup = 0;
 

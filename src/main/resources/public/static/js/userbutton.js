@@ -144,22 +144,20 @@ UserButton.prototype.initializeButton = function() {
     this.buttonElement.click($.proxy(this.buttonClick, this));
 
     // The grid calls update() as soon as it constructs a button, so
-    // /API/users/{id} races this button's own template GET. When the reading
-    // wins, dataLoaded() already painted it into an #info element that did
-    // not exist yet - repaint it here instead of stamping the placeholder
-    // over it, which left the tile reading "loading" for good (see #127).
-    // renderGraph() has guarded the same race since forever; the text did not.
+    // /API/users/{id} can answer before this button's template GET. In that
+    // order dataLoaded() has no #info element to paint into, and nothing
+    // refreshes the tile afterwards, so its values are repainted here rather
+    // than overwritten with the placeholder. renderGraph() guards the same
+    // ordering.
     if (this.dataReceived) {
         this.setTexts(this.alcohol, this.drinks, this.idletime);
         return;
     }
 
-    // setTexts' first argument is the promille reading, which it renders as
-    // Number(alcohol).toFixed(2). The placeholder used to pass
-    // getMessage('loading') there, so a tile rendered a literal
-    // "NaN" followed by the per-mille sign for as long as it was waiting on
-    // its reading. The loading text belongs
-    // in the name slot, which is what setTexts reads from this.name.
+    // setTexts renders its first argument as Number(alcohol).toFixed(2), so a
+    // non-numeric value there shows as NaN in the promille reading. The
+    // loading text belongs in the name slot, which setTexts takes from
+    // this.name.
     this.name = getMessage('loading');
     this.setTexts(0, 0, 0);
 }
@@ -219,9 +217,7 @@ UserButton.prototype.setTexts = function(alcohol, drinks, idletime) {
         div.append($('<span class="details"></span>').text(idle_msg + formatTime(idletime)));
     }
 
-    // Re-centre after the text changes height. This used to live at the end of
-    // dataLoaded(), where it was a no-op whenever the reading arrived before
-    // the button's template did.
+    // Re-centre: the text above determines the div's height.
     div.css('top', ($('#infoContainer' + this.userId).height() / 2) - (div.height() / 2));
 }
 

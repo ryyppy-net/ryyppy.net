@@ -18,14 +18,11 @@ test('party header fills in asynchronously and the grid shows the owner with a p
 });
 
 test('a drinker tile shows 0.00‰, not NaN‰, while its reading is still loading', async ({ page }) => {
-  // Regression guard for #127. UserButton.initializeButton paints a
-  // placeholder as soon as the grid is built, before /API/users/{id} has
-  // answered, and it used to pass the "loading" string into setTexts'
-  // promille slot - so Number(...).toFixed(2) rendered a literal "NaN‰".
-  // On a fast page load that window is a blink; on a busy server it is
-  // seconds, which is how the test above kept catching it. Hold the reading
-  // back deliberately so the placeholder is observable every run instead of
-  // only under load.
+  // UserButton.initializeButton paints a placeholder before /API/users/{id}
+  // answers, and a non-numeric value in setTexts' promille slot renders as
+  // "NaN‰". That window is a blink on a fast load and seconds on a busy
+  // server, so hold the reading back to make the placeholder observable on
+  // every run rather than only under load.
   const user = makeTestUser('party-loading');
   await registerUser(page, user);
   await page.goto('/logout');
@@ -52,14 +49,11 @@ test('a drinker tile shows 0.00‰, not NaN‰, while its reading is still loadi
 });
 
 test('a drinker tile shows its reading even when the reading beats its own template', async ({ page }) => {
-  // Regression guard for #127. UserButtonGrid fires update() the moment it
-  // constructs a UserButton, so /API/users/{id} races the button's own
-  // template GET. When the reading won, dataLoaded() painted into an #info
-  // element that did not exist yet and initializeButton() then stamped the
-  // placeholder over it - the tile sat on "loading" (or, before the fix
-  // above, on NaN‰) forever, with nothing left to refresh it. Hold the
-  // template back so the losing order happens on every run, not just under
-  // parallel load.
+  // UserButtonGrid fires update() the moment it constructs a UserButton, so
+  // /API/users/{id} races the button's own template GET. In the order where
+  // the reading wins, dataLoaded() has no #info element to paint into and the
+  // tile depends on initializeButton() repainting what it kept. Hold the
+  // template back so that order happens on every run, not just under load.
   const user = makeTestUser('party-template');
   await registerUser(page, user);
   await page.goto('/logout');

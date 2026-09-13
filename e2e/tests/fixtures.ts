@@ -1,18 +1,13 @@
 import { test as base, expect } from '@playwright/test';
 
 /**
- * The app's pages pull in third-party resources that have nothing to do with
- * what these tests assert: Google Fonts stylesheets, the Google Sign-In
- * client, and Gravatar avatars. They are cosmetic, but the browser still
- * blocks on them, and wherever those hosts are slow or unreachable - a
- * sandboxed CI container, an offline dev box - every single navigation pays
- * for it. Measured here, an unreachable Google Fonts/GSI cost ~12.5s per page
- * load against ~0.4s with them cut off, which on its own overruns the 30s test
- * timeout in any spec that navigates more than a couple of times, and did so
- * unevenly enough to look like random flakiness (see #127).
+ * Fails every request to an origin other than the app's own.
  *
- * So: fail them fast instead of waiting. The suite is here to test the app,
- * not Google's CDN reachability.
+ * The pages pull in Google Fonts, the Google Sign-In client and Gravatar.
+ * Nothing here asserts on any of them, but the browser blocks on them anyway,
+ * and where those hosts are slow or unreachable that costs ~12.5s per
+ * navigation against ~0.4s without them - enough on its own to overrun the 30s
+ * test timeout. The suite tests the app, not Google's CDN reachability.
  */
 export const test = base.extend({
   page: async ({ page, baseURL }, use) => {

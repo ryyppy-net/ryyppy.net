@@ -10,9 +10,8 @@ export default defineConfig({
   // server/DB.
   fullyParallel: true,
   workers: 4,
-  // No retries, on CI either. The suite is expected to be correct at the
-  // parallelism above, and a retry here only converted genuine races into
-  // green builds - it hid #127 for as long as it existed.
+  // No retries, on CI either: the suite is expected to be correct at the
+  // parallelism above, and a retry turns a genuine race into a green build.
   retries: 0,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
   timeout: 30_000,

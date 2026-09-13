@@ -50,7 +50,7 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome SKIP_WEBSERVER=1 npm test
 - Every test runs with requests to origins other than the app's own blocked
   (`tests/fixtures.ts`). The pages pull in Google Fonts, the Google Sign-In
   client and Gravatar avatars, none of which anything here asserts on, and
-  waiting on them cost ~12.5s per navigation on a box that can't reach them -
+  waiting on them costs ~12.5s per navigation on a box that can't reach them -
   enough on its own to blow the 30s test timeout. Import `test`/`expect` from
   `./fixtures`, not from `@playwright/test`, so a new spec gets this too.
 - There are no retries, on CI either: the suite is meant to be correct at

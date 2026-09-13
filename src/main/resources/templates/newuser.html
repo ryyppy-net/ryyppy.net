@@ -21,11 +21,9 @@
                 $("#drinkerName").focus();
 
                 $('.userField').live('keyup', function() { checkDrinkerFields(true); });
-                // #email already calls checkEmail() from its own onkeyup (and
-                // onblur) below. Binding it here as well fired two identical
-                // lookups per keystroke - roughly 90 round-trips to register
-                // with a typical address - which is pure load, and doubled the
-                // window in which replies could come back out of order.
+                // No #email binding here: its own onkeyup/onblur below call
+                // checkEmail(), and a second binding would double the lookups
+                // every keystroke fires.
             });
         </script>
     </div>
