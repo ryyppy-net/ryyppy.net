@@ -32,7 +32,7 @@ class ErrorTemplateTest {
         resolver.setCharacterEncoding("UTF-8");
 
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasenames("messages", "drinkcounter.version");
+        messageSource.setBasenames("messages");
         messageSource.setDefaultEncoding("UTF-8");
 
         SpringTemplateEngine engine = new SpringTemplateEngine();

@@ -32,7 +32,7 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
   messages:
-    basename: messages,drinkcounter.version
+    basename: messages
   docker:
     compose:
       file: docker/docker-compose.yml
@@ -55,5 +55,3 @@ server:
         # (spring.session.timeout). Match it here so the cookie actually
         # outlives a restart.
         max-age: 365d
-application:
-  version: "@project.version@"
