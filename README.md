@@ -60,47 +60,76 @@ Set configuration using environment variables:
 1. Copy `target/ryyppynet.jar` to server
 3. Run application `java -jar ryyppynet.jar`
 
+### Docker
+
+The root `Dockerfile` follows Spring Boot's
+[Dockerfiles reference](https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html)
+(the AOT cache variant): a Maven stage builds the jar, a second stage runs
+`jarmode=tools extract --layers`, and the runtime stage copies the four layers
+separately and trains a JDK AOT cache (JEP 483/514) that the entry point
+replays. `-Dspring.aot.enabled=true` on the entry point activates the
+build-time bean definitions from the spring-boot-maven-plugin's `process-aot`
+goal. No `mvn package` is needed first.
+
+```bash
+docker build -t ryyppynet \
+  --build-arg SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/ryyppynet \
+  --build-arg SPRING_DATASOURCE_USERNAME=ryyppynet \
+  --build-arg SPRING_DATASOURCE_PASSWORD=ryyppynet \
+  .
+docker run -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/ryyppynet \
+  -e SPRING_DATASOURCE_USERNAME=ryyppynet \
+  -e SPRING_DATASOURCE_PASSWORD=ryyppynet \
+  ryyppynet
+```
+
+The training run boots under the `aot-train` profile against the real
+database, reached through the `SPRING_DATASOURCE_*` build args, so the cache
+covers the pgjdbc driver and the actual SQL dialect. Three properties of it:
+
+* **Read-only.** The profile disables Flyway, so the build step cannot migrate
+  the database it trains against.
+* **No `-Dspring.aot.enabled=true`,** unlike the entry point. Spring AOT
+  freezes `@Conditional` evaluation at build time, so an AOT-processed context
+  would create `flywayInitializer` regardless of the profile. Costs ~0.2s of
+  startup.
+* **Best-effort.** An unreachable database fails the run and leaves the build
+  green; the image then boots without the cache.
+
+Build args are recorded in image history, so `docker history` reveals the
+database password. Railway keeps images private to the project.
+
 ### Railway
 
-Railway builds this app with [Railpack](https://railpack.com). `railpack.json`
-pins the JDK to 25 and sets
-`JAVA_OPTS=-Dspring.aot.enabled=true -XX:AOTCache=target/app.aot`.
-`railway.json`'s build command (`scripts/railway-build-aot-cache.sh`) runs
-`mvn package` — which also runs Spring Boot's own AOT processing
-(`process-aot`, wired into `pom.xml`; generates ahead-of-time bean
-definitions so the context doesn't have to reflect over annotations at
-boot) — then trains a JDK AOT cache (`target/app.aot`, JEP 483/514),
-regenerated every build, best-effort (a failed training run just skips the
-cache, build still succeeds).
+Railway [detects the root `Dockerfile`](https://docs.railway.com/builds/dockerfiles)
+and builds with it; there is no Railway config file in the repo. `$PORT` is
+read by `application.yml` via `server.port: ${PORT:8080}`. Database and OAuth2
+config come from the environment variables listed above, and Railway
+[injects them into the build](https://docs.railway.com/builds/dockerfiles#using-variables-at-build-time)
+for the `ARG`s the Dockerfile declares.
 
-The training run boots against a real, throwaway PostgreSQL server that the
-build script starts itself: Railway allows no Docker daemon during a build,
-so the script runs the Postgres server binaries directly on 127.0.0.1 and
-points the `aot-train` profile at them. Training against real Postgres
-rather than an in-memory substitute means the cache covers the same JDBC
-driver, SQL dialect and connection-pool code paths production boots with.
+The service sets no start command, so the Dockerfile's `ENTRYPOINT` defines
+how the app starts; a start command set on the service would override it.
 
-The deploy's start command launches `target/extracted/ryyppynet.jar` — the
-thin jar the build script extracts — rather than letting Railpack pick the
-repackaged `target/ryyppynet.jar` by its default glob. The JDK AOT cache is
-layout-specific, so the artifact that runs has to be the same one the cache
-was trained against.
+Railway's private network is
+[runtime-only](https://docs.railway.com/networking/private-networking/how-it-works#build-vs-runtime),
+so the training run only reaches a database available over the public
+internet.
 
-Measured locally (extracted artifact, HSQLDB training profile — this
-predates the switch to a real Postgres training run above — 5 runs
-averaged, time to the "Started RyyppyApplication" log line):
+### Startup time
 
-| Configuration | Startup time | vs. plain boot |
+Measured on one machine (16 vCPU, JDK 25.0.4.1), booting the extracted layout
+against the same PostgreSQL 14 container, time from process launch to the
+`Started RyyppyApplication` log line, median of 5 runs:
+
+| Configuration | Startup | vs. plain boot |
 | --- | --- | --- |
-| Plain boot (neither enabled) | ~7.4s | baseline |
-| `spring.aot.enabled=true` only | ~6.5s | ~12% faster |
-| JDK `AOTCache` only | ~3.4s | ~54% faster |
-| Both combined (what production runs) | ~2.2s | ~70% faster |
+| Plain boot (no AOT of either kind) | 6.42s | baseline |
+| `spring.aot.enabled=true` only | 5.53s | 14% faster |
+| JDK AOT cache alone | 2.95s | 54% faster |
+| **Both, cache trained read-only against the real database** | **2.37s** | **63% faster** |
+| Both, with Spring AOT on during training (writes - see above) | 2.15s | 67% faster |
 
-Spring AOT and the JDK AOT cache address different costs — Spring AOT skips
-reflection-based bean discovery, the JDK cache skips class loading/linking —
-so they stack rather than overlap.
-
-Postgres/OAuth2 config is read from env vars exactly as above; the
-training run only ever touches its own throwaway Postgres instance, which
-is deleted when the build step ends.
+End to end in a container, Spring reports ~1.93-2.11s once the page cache is
+warm.
