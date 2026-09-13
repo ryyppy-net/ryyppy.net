@@ -12,13 +12,15 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+        <!-- Build version marker, formerly a JSP comment in master.tag -->
+        <meta name="ryyppy-net-version" th:content="#{application.version}" />
 
         <title th:replace="${title}">Ryyppy.net</title>
 
         <script type="text/javascript" src="/webjars/jquery/1.8.3/jquery.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tooltip/jquery.tooltip.min.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
-        <!-- Loaded non-render-blocking: see master.tag for why. -->
+        <!-- Loaded non-render-blocking: see below for why. -->
         <link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
         <noscript><link href="https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext" rel="stylesheet" type="text/css" /></noscript>
 
