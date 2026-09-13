@@ -46,11 +46,9 @@
                         </goals>
                     </execution>
                     <!--
-                        Builds under the `production` profile (spring.flyway.enabled=false
-                        there) so the deployed jar never gets a flywayInitializer bean:
-                        process-aot freezes @Conditional evaluation at build time, so
-                        whatever profile is active here decides that bean's existence for
-                        every future run of this jar, whatever profile it boots with later.
+                        Builds under `production`, whose Flyway is disabled, so no
+                        flywayInitializer bean is baked in - process-aot freezes
+                        @Conditional evaluation at build time.
                     -->
                     <execution>
                         <id>process-aot</id>

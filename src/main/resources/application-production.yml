@@ -6,10 +6,5 @@ spring:
     hibernate:
       ddl-auto: none
   flyway:
-    # Railway runs this profile and migrates via a pre-deploy step instead
-    # (see railway.json's deploy.preDeployCommand), which passes
-    # -Dspring.flyway.enabled=true to override this for that one-off run -
-    # the running app itself carries no flywayInitializer bean. process-aot
-    # (see pom.xml) also builds under this profile, so that bean never gets
-    # generated for the jar in the first place.
+    # Migrations run via railway.json's pre-deploy command instead.
     enabled: false

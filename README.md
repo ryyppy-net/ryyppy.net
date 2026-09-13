@@ -88,50 +88,26 @@ The training run boots under the `aot-train` profile against the real
 database, reached through the `SPRING_DATASOURCE_*` build args, so the cache
 covers the pgjdbc driver and the actual SQL dialect. Two properties of it:
 
-* **Read-only.** Migrations run as a
-  [Railway pre-deploy step](https://docs.railway.com/deployments/pre-deploy-command)
-  instead of at app boot (see below). `process-aot` (in `pom.xml`) builds under
-  the `production` profile, whose `application-production.yml` disables
-  Flyway, so this jar never gets a `flywayInitializer` bean generated for it in
-  the first place - there is no migration bean left for the training run, or
-  the running app, to invoke. This is also why the training run can use
-  `-Dspring.aot.enabled=true`, unlike before this bean was removed: Spring AOT
-  freezes `@Conditional` evaluation at build time, so an AOT-processed context
-  used to create `flywayInitializer` regardless of the profile active at boot.
+* **Read-only.** This jar has no `flywayInitializer` bean (see Database
+  migrations below), so the training run can safely use
+  `-Dspring.aot.enabled=true`, which freezes `@Conditional` evaluation at
+  build time.
 * **Best-effort.** An unreachable database fails the run and leaves the build
   green; the image then boots without the cache.
 
 ### Database migrations
 
-Flyway is enabled by default (`spring.flyway.enabled` in the base
-`application.yml`) - `mvn spring-boot:run` migrates a fresh local database
-with no extra profile or setup needed. `application-production.yml` disables
-it for the profile Railway runs, since production migrates via a Railway
-pre-deploy command instead of at app boot - the app image carries no
-`flywayInitializer` bean at runtime regardless of profile, because
-`process-aot` (see `pom.xml`) also builds under the `production` profile. The
-pre-deploy command is set in
-[`railway.json`](https://docs.railway.com/config-as-code) via
-`deploy.preDeployCommand`, so it's version-controlled and applied on every
-deploy without touching the dashboard, and overrides the production
-profile's `spring.flyway.enabled=false` for that one-off run:
+Flyway is enabled by default, so `mvn spring-boot:run` migrates a fresh local
+database. `application-production.yml` - the profile Railway runs - disables
+it; production migrates instead via `railway.json`'s pre-deploy command:
 
 ```bash
 java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
 ```
 
-`railway.json`'s
-[Config as Code](https://docs.railway.com/infrastructure-as-code#iac-vs-config-as-code)
-is deprecated in favor of Railway's newer `.railway/railway.ts`
-[Infrastructure as Code](https://docs.railway.com/infrastructure-as-code), but
-still auto-applies on every deploy with no extra tooling, unlike IaC (which
-needs `railway config apply` run by a human or CI job, and takes over full
-service management rather than just this one field). Existing Config as Code
-files stop being read on 2026-12-01, so this will need migrating before then.
-
-Also set a **Pre-deploy Timeout** in the service settings - without one, a
-Flyway run blocked on a lock hangs the deploy instead of failing it. Neither
-Config as Code nor Infrastructure as Code exposes this field; it's dashboard-only.
+`railway.json` uses Railway's deprecated Config as Code (see #129). Also set
+a **Pre-deploy Timeout** in the service settings - dashboard-only, no
+config-file field for it.
 
 Build args are recorded in image history, so `docker history` reveals the
 database password. Railway keeps images private to the project.
@@ -165,18 +141,8 @@ against the same PostgreSQL 14 container, time from process launch to the
 | Plain boot (no AOT of either kind) | 6.42s | baseline |
 | `spring.aot.enabled=true` only | 5.53s | 14% faster |
 | JDK AOT cache alone | 2.95s | 54% faster |
-| Both, cache trained read-only against the real database (pre-Flyway-move) | 2.37s | 63% faster |
+| Both, cache trained read-only against the real database | 2.37s | 63% faster |
 | **Both, with Spring AOT on during training** | **2.15s** | **67% faster** |
 
 End to end in a container, Spring reports ~1.93-2.11s once the page cache is
 warm.
-
-Now that migrations run as a Railway pre-deploy step instead of at app boot,
-the training run always has `-Dspring.aot.enabled=true` on (there is no
-`flywayInitializer` bean left to make that unsafe). One deploy of PR #130's
-`ryyppy.net-pr-130` preview environment (single run, not the 5-run median
-methodology above, against CockroachDB over Railway's private network rather
-than the local PostgreSQL container) logged
-`Started RyyppyApplication in 1.549 seconds` for the app boot, with the
-pre-deploy step's own boot-and-migrate-and-exit run taking a separate ~6s
-before it. Consistent with landing at or below the 2.15s row.

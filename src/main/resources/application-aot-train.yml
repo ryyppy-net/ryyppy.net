@@ -1,9 +1,5 @@
-# Used only by the Dockerfile's AOT cache training run, which boots against the
-# real database via SPRING_DATASOURCE_* build args. This run uses
-# -Dspring.aot.enabled=true, so whether a flywayInitializer bean exists was
-# already decided at build time by process-aot (see pom.xml, built under the
-# `production` profile) - no active profile here can add one back, so this
-# training run is read-only regardless of what's set in this file.
+# Used only by the Dockerfile's AOT cache training run, against the real
+# database via SPRING_DATASOURCE_* build args.
 spring:
   docker:
     compose:

@@ -23,10 +23,8 @@ ARG SPRING_DATASOURCE_URL
 ARG SPRING_DATASOURCE_USERNAME
 ARG SPRING_DATASOURCE_PASSWORD
 
-# AOT cache training run against the real database. Migrations now run as a
-# Railway pre-deploy step instead of at app boot, so process-aot (see pom.xml)
-# never generated a flywayInitializer bean for this jar - -Dspring.aot.enabled=true
-# is safe here, unlike before, since there is no migration bean left to run.
+# AOT cache training run against the real database. Safe with Spring AOT
+# enabled since the jar has no flywayInitializer bean (see pom.xml).
 # Best-effort: a failed run leaves no cache and the image boots without it.
 RUN java -XX:AOTCacheOutput=app.aot \
     -Dspring.profiles.active=aot-train \
