@@ -1,9 +1,9 @@
-# The Docker build only consumes target/*.jar (see the Dockerfile's
-# JAR_FILE build arg), so keep the rest of the build output and all
-# source/tooling out of the build context.
-target/*
-!target/*.jar
+# The image builds the jar itself (see the Dockerfile's Maven stage), so the
+# build context needs pom.xml and src/ - but never a local target/, whose
+# stale output would otherwise invalidate the build cache on every rebuild.
+target/
 .git/
 e2e/
 docker/
-src/
+scripts/
+*.md

@@ -68,7 +68,6 @@ follows Spring Boot's own
 (the AOT cache variant):
 
 ```bash
-mvn -DskipTests package
 docker build -t ryyppynet \
   --build-arg SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/ryyppynet \
   --build-arg SPRING_DATASOURCE_USERNAME=ryyppynet \
@@ -81,9 +80,14 @@ docker run -p 8080:8080 \
   ryyppynet
 ```
 
+The image builds the jar itself - no `mvn package` beforehand. Spring's
+reference Dockerfile starts from an already-built jar, but Railway builds
+straight from the git repo, so a Maven stage runs first (that build used to be
+Railpack's build command).
+
 Two optimizations from that reference are in play:
 
-* **Layered extraction.** A builder stage runs
+* **Layered extraction.** The second stage runs
   `java -Djarmode=tools -jar application.jar extract --layers`, and the
   runtime stage copies `dependencies`, `spring-boot-loader`,
   `snapshot-dependencies` and `application` as four separate layers. A code-only

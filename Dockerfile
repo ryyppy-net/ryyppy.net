@@ -1,8 +1,13 @@
 # Standard Spring Boot container image, following
 # https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html
 #
-# Stage 1 unpacks the repackaged (uber) jar into Spring Boot's layered
-# layout; stage 2 copies those layers in one COPY each, so a rebuild that
+# The reference Dockerfile starts from an already-built jar (its JAR_FILE
+# arg). Railway builds straight from the git repo, where target/ does not
+# exist, so stage 1 here runs the Maven build that used to be Railpack's
+# build command; stages 2 and 3 are the reference's own two stages.
+#
+# Stage 2 unpacks the repackaged (uber) jar into Spring Boot's layered
+# layout; stage 3 copies those layers in one COPY each, so a rebuild that
 # only changes application code re-pushes the small application layer
 # instead of the ~70MB dependency layer.
 #
@@ -11,15 +16,26 @@
 # context refreshes, and the runtime start command replays that cache
 # instead of loading and linking those classes from scratch.
 
+# Build the jar. Dependencies resolve in a layer keyed on pom.xml alone, so a
+# source-only change reuses it and skips straight to the compile step. Tests
+# are skipped here - CI runs them on every push.
+#
+# go-offline is a cache warmer, not a gate: it is known to miss or choke on
+# some plugin dependencies, and `package` below fetches whatever it did not.
+# Letting it fail the build would turn an optimization into an outage.
+FROM maven:3.9-eclipse-temurin-25 AS build
+WORKDIR /build
+COPY pom.xml .
+RUN mvn -B -q dependency:go-offline || echo "go-offline incomplete; package will fetch the rest"
+COPY src src
+RUN mvn -B -DskipTests package
+
 # Perform the extraction in a separate builder container
 FROM bellsoft/liberica-openjre-debian:25-cds AS builder
 WORKDIR /builder
 
-# This points to the built jar file in the target folder
-ARG JAR_FILE=target/*.jar
-
-# Copy the jar file to the working directory and rename it to application.jar
-COPY ${JAR_FILE} application.jar
+# Copy the jar built in the previous stage and rename it to application.jar
+COPY --from=build /build/target/ryyppynet.jar application.jar
 
 # Extract the jar file using an efficient layout
 RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted

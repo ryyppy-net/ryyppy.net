@@ -41,10 +41,10 @@ mvn install
 
 ### Container image
 The root `Dockerfile` follows Spring Boot's reference Dockerfile (layered
-`jarmode=tools extract` plus a JDK AOT cache training run). It consumes
-`target/*.jar`, so package first:
+`jarmode=tools extract` plus a JDK AOT cache training run), with a Maven stage
+prepended because Railway builds from the git repo and the reference assumes
+an already-built jar. It needs no `mvn package` beforehand:
 ```bash
-mvn -DskipTests package
 docker build -t ryyppynet .
 ```
 The image's AOT cache training run boots against the **real database**, via
