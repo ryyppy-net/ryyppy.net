@@ -172,6 +172,10 @@ warm.
 
 Now that migrations run as a Railway pre-deploy step instead of at app boot,
 the training run always has `-Dspring.aot.enabled=true` on (there is no
-`flywayInitializer` bean left to make that unsafe), so production should land
-on the last row rather than the 2.37s one above. Not yet re-measured on
-Railway with an actual pre-deploy command configured.
+`flywayInitializer` bean left to make that unsafe). One deploy of PR #130's
+`ryyppy.net-pr-130` preview environment (single run, not the 5-run median
+methodology above, against CockroachDB over Railway's private network rather
+than the local PostgreSQL container) logged
+`Started RyyppyApplication in 1.549 seconds` for the app boot, with the
+pre-deploy step's own boot-and-migrate-and-exit run taking a separate ~6s
+before it. Consistent with landing at or below the 2.15s row.
