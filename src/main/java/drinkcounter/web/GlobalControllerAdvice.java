@@ -19,7 +19,7 @@ public class GlobalControllerAdvice {
     private final BuildProperties buildProperties;
 
     @Autowired
-    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository, BuildProperties buildProperties) {
+    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository, @Autowired(required = false) BuildProperties buildProperties) {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.buildProperties = buildProperties;
     }
@@ -27,12 +27,14 @@ public class GlobalControllerAdvice {
     /**
      * The app version, sourced from the BuildProperties bean that Spring Boot's
      * ProjectInfoAutoConfiguration derives from META-INF/build-info.properties
-     * (see the spring-boot-maven-plugin build-info execution in pom.xml).
+     * (see the spring-boot-maven-plugin build-info execution in pom.xml). Not
+     * generated when the app is run straight from an IDE without going
+     * through that Maven build, so this is null in that case.
      * Available in templates as ${applicationVersion}
      */
     @ModelAttribute("applicationVersion")
     public String applicationVersion() {
-        return buildProperties.getVersion();
+        return buildProperties == null ? null : buildProperties.getVersion();
     }
 
     /**
