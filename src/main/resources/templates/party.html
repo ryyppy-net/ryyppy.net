@@ -1,12 +1,17 @@
-<%@page contentType="text/html" pageEncoding="UTF-8" isELIgnored="false"%>
-<%@taglib uri="jakarta.tags.core" prefix="c" %>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<t:master title="${party.name}">
-    <jsp:attribute name="customHead">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<!--
+    This document's own <html>/<head>/<body> are never rendered: th:replace
+    above swaps the whole element for the master layout fragment before it's
+    serialized. The markup below only exists so ~{::title}, ~{::#customHead}
+    and ~{::#content} have something to select from - see fragments/master.html.
+-->
+<head>
+    <title th:text="${party.name}">Ryyppy.net</title>
+
+    <div id="customHead" th:remove="tag">
         <link rel="stylesheet" href="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.custom.css" type="text/css" media="screen" />
-        
+
         <!-- hack -->
         <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="/static/vendor/excanvas/excanvas.min.js"></script><![endif]-->
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
@@ -14,17 +19,17 @@
         <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-ui/1.8.24/jquery-ui-1.8.24.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tmpl/jquery.tmpl.js"></script>
-        
-        <script type="text/javascript" src="<c:url value="/static/js/common.js"/>"></script>
-        <script type="text/javascript" src="<c:url value="/static/js/userbutton.js"/>"></script>
-        <script type="text/javascript" src="<c:url value="/static/js/userbuttongrid.js"/>"></script>
-        <script type="text/javascript" src="<c:url value="/static/js/drinkerchecks.js"/>"></script>
-        <script type="text/javascript" src="<c:url value="/static/js/partygraph.js"/>"></script>
-        <script type="text/javascript" src="<c:url value="/static/js/party.js"/>"></script>
 
-        <script type="text/javascript">
-            var partyId = ${party.id};
-            
+        <script type="text/javascript" th:src="@{/static/js/common.js}"></script>
+        <script type="text/javascript" th:src="@{/static/js/userbutton.js}"></script>
+        <script type="text/javascript" th:src="@{/static/js/userbuttongrid.js}"></script>
+        <script type="text/javascript" th:src="@{/static/js/drinkerchecks.js}"></script>
+        <script type="text/javascript" th:src="@{/static/js/partygraph.js}"></script>
+        <script type="text/javascript" th:src="@{/static/js/party.js}"></script>
+
+        <script type="text/javascript" th:inline="javascript">
+            var partyId = [[${party.id}]];
+
             var partyHost = new PartyHost(partyId);
             partyHost.onUpdate = pageUpdate;
             var grid = new UserButtonGrid($('#drinkers'));
@@ -34,7 +39,7 @@
                 $('#addDrinkerAccordion').accordion({
                     fillSpace: true
                 });
-                
+
                 $('#addDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
                 $('#kickDrinkerDialog').dialog({ width: 600, autoOpen: false, draggable: false, resizable: false });
                 $('#groupGraphDialog').dialog({
@@ -49,7 +54,7 @@
                     }
                 });
             });
-            
+
             function addAnonymousUser() {
                 RyyppyAPI.addAnonymousUserToParty(partyId, $('#drinkerName').val(), $('#drinkerSex').val(), $('#drinkerWeight').val(),
                     function() {
@@ -60,7 +65,7 @@
                 );
                 return false;
             }
-            
+
             function linkUserToParty() {
                 RyyppyAPI.linkUserToParty(partyId, $('#userId').val(),
                     function() {
@@ -72,17 +77,19 @@
                 return false;
             }
         </script>
-    </jsp:attribute>
-    <jsp:body>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
         <div class="header">
             <table style="width: 100%;" class="noBorders">
                 <tr>
-                    <td class="headerButton"><a class="headerButtonA" title="<spring:message code="party.tooltip.back"/>" href="/ui/user"><div id="goBack" class="headerButton headerButtonLeft"></div></a></td>
-                    <td class="headerButton"><a id="graphButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.show_graph"/>" href="#"><div id="graphButton" class="headerButton headerButtonLeft"></div></a></td>
-                    <td class="topic"><h1 class="topic" id="topic">&nbsp;</h1></td>                    
-                    <td class="headerButton"><a id="addDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.add_drinker"/>" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
-                    <td class="headerButton"><a id="kickDrinkerButtonLink" class="headerButtonA" title="<spring:message code="party.tooltip.remove_drinker"/>" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
-                    <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" title="<spring:message code="ui.switch_to_modern"/>" href="/app/index.html#/"><spring:message code="ui.modern_ui_label"/></a></td>
+                    <td class="headerButton"><a class="headerButtonA" th:title="#{party.tooltip.back}" href="/ui/user"><div id="goBack" class="headerButton headerButtonLeft"></div></a></td>
+                    <td class="headerButton"><a id="graphButtonLink" class="headerButtonA" th:title="#{party.tooltip.show_graph}" href="#"><div id="graphButton" class="headerButton headerButtonLeft"></div></a></td>
+                    <td class="topic"><h1 class="topic" id="topic">&nbsp;</h1></td>
+                    <td class="headerButton"><a id="addDrinkerButtonLink" class="headerButtonA" th:title="#{party.tooltip.add_drinker}" href="#"><div id="addDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
+                    <td class="headerButton"><a id="kickDrinkerButtonLink" class="headerButtonA" th:title="#{party.tooltip.remove_drinker}" href="#"><div id="kickDrinkerButton" class="headerButton headerButtonRight"></div></a></td>
+                    <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" th:title="#{ui.switch_to_modern}" href="/app/index.html#/" th:text="#{ui.modern_ui_label}">New UI</a></td>
                 </tr>
             </table>
         </div>
@@ -90,89 +97,88 @@
         <div id="body">
             <table id="drinkers"></table>
         </div>
-            
-        <div id="groupGraphDialog" class="popupDialog" title="<spring:message code="party.group_graph"/>">
+
+        <div id="groupGraphDialog" class="popupDialog" th:title="#{party.group_graph}">
             <div id="groupGraph"></div>
         </div>
 
-        <div id="addDrinkerDialog" class="popupDialog" title="<spring:message code="party.tooltip.add_drinker"/>">
+        <div id="addDrinkerDialog" class="popupDialog" th:title="#{party.tooltip.add_drinker}">
             <div id="addDrinkerAccordion">
-                <h2><a href="#"><spring:message code="party.add_drinker.registered"/></a></h2>
+                <h2><a href="#" th:text="#{party.add_drinker.registered}">Add registered user</a></h2>
                 <div>
                     <form method="post" action="#">
-                        <input type="hidden" name="partyId" value="${party.id}" />
+                        <input type="hidden" name="partyId" th:value="${party.id}" />
                         <input type="hidden" id="userId" name="userId" />
 
                         <table>
                             <tr>
-                                <th><spring:message code="form.email"/></th>
+                                <th th:text="#{form.email}">Email</th>
                                 <td>
-                                    <input id="emailInput" type="email" name="email" onkeyup="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');" onblur="getIdByEmail($(this).val(), '<c:out value="${party.id}" />');"/>
+                                    <input id="emailInput" type="email" name="email"
+                                           th:onkeyup="|getIdByEmail($(this).val(), '${party.id}');|"
+                                           th:onblur="|getIdByEmail($(this).val(), '${party.id}');|"/>
                                 </td>
                                 <td id="emailCorrect"></td>
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>
-                                <td colspan="2"><input id="linkUserButton" type="submit" value="<spring:message code="form.add_drinker"/>" disabled="disabled" onClick="return linkUserToParty();" /></td>
+                                <td colspan="2"><input id="linkUserButton" type="submit" th:value="#{form.add_drinker}" disabled="disabled" onClick="return linkUserToParty();" /></td>
                             </tr>
                         </table>
                     </form>
                 </div>
 
-                <h2><a href="#"><spring:message code="party.add_drinker.guest"/></a></h2>
+                <h2><a href="#" th:text="#{party.add_drinker.guest}">Add a guest</a></h2>
                 <div>
                     <form method="post" action="#">
-                        <input type="hidden" name="partyId" value="${party.id}" />
+                        <input type="hidden" name="partyId" th:value="${party.id}" />
                         <table>
                             <tr>
-                                <th><spring:message code="form.name"/></th>
+                                <th th:text="#{form.name}">Name</th>
                                 <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(false);" /></td>
                             </tr>
                             <tr>
-                                <th><spring:message code="form.sex"/></th>
+                                <th th:text="#{form.sex}">Gender</th>
                                 <td>
                                     <select id="drinkerSex" name="sex">
-                                        <option value="MALE"><spring:message code="form.male"/></option>
-                                        <option value="FEMALE"><spring:message code="form.female"/></option>
+                                        <option value="MALE" th:text="#{form.male}">Male</option>
+                                        <option value="FEMALE" th:text="#{form.female}">Female</option>
                                     </select>
                                 </td>
                             </tr>
                             <tr>
-                                <th><spring:message code="form.weight"/></th>
+                                <th th:text="#{form.weight}">Weight</th>
                                 <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" autocomplete="off" /></td>
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>
-                                <td><input id="submitButton" type="submit" value="<spring:message code="form.add_drinker"/>" onClick="return addAnonymousUser();" disabled="disabled" /></td>
+                                <td><input id="submitButton" type="submit" th:value="#{form.add_drinker}" onClick="return addAnonymousUser();" disabled="disabled" /></td>
                             </tr>
                         </table>
                     </form>
                 </div>
             </div>
         </div>
-                
-        <div id="kickDrinkerDialog" class="popupDialog" title="<spring:message code="party.remove_drinker"/>">
-            <c:choose>
-                <c:when test="${fn:length(party.participants) < 2}">
-                    <p><spring:message code="party.no_users"/>
-                </c:when>
-                <c:otherwise>
-                    <ul>
-                        <c:forEach var="participant" items="${party.participants}">
-                            <c:url var="leavePartyUrl" value="removeUserFromParty?partyId=${party.id}&userId=${participant.id}" />
-                            <c:if test="${participant.id != user.id}">
-                                <li>
-                                    <a href="#" onClick="if (confirm('<spring:message code="party.confirm.remove_user"/> ${participant.name} <spring:message code="party.confirm.from_party"/>'))
-                                        $.get('${leavePartyUrl}', function() {location.reload(true);});">
-                                        <c:out value="${participant.name}" /> 
-                                    </a>
-                                </li>
-                            </c:if>
-                        </c:forEach>
-                    </ul>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </jsp:body>
-</t:master>
 
+        <!--
+            party.confirm.remove_user/from_party used to be concatenated with
+            the participant name straight into an onClick="confirm('...')"
+            string, inside this th:each, inside an HTML attribute - the most
+            fiddly expression in the page (see #111). Moved the confirm text
+            to a data-confirm attribute instead and bound the click handler
+            in party.js (initializeButtons -> .kickParticipant), which keeps
+            the message/EL/message concatenation out of an attribute value.
+        -->
+        <div id="kickDrinkerDialog" class="popupDialog" th:title="#{party.remove_drinker}">
+            <p th:if="${#lists.size(party.participants) < 2}" th:text="#{party.no_users}">No partiers</p>
+            <ul th:unless="${#lists.size(party.participants) < 2}">
+                <li th:each="participant : ${party.participants}" th:if="${participant.id != user.id}">
+                    <a href="#" class="kickParticipant" th:text="${participant.name}"
+                       th:data-user-id="${participant.id}"
+                       th:data-confirm="|#{party.confirm.remove_user} ${participant.name} #{party.confirm.from_party}|">Participant name</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

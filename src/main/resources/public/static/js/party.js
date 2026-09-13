@@ -27,6 +27,22 @@ function initializeButtons() {
     $('#kickDrinkerButtonLink').click(function() {
         toggleJQUIDialog($('#kickDrinkerDialog'));
     });
+
+    // party.html renders each kickable participant's confirm text into a
+    // data-confirm attribute (built server-side from party.confirm.remove_user
+    // / party.confirm.from_party plus the participant name) instead of an
+    // inline onClick, since concatenating two messages and an EL value inside
+    // a JS string inside an HTML attribute inside a loop doesn't translate
+    // cleanly to Thymeleaf. See #111.
+    $('.kickParticipant').click(function(e) {
+        e.preventDefault();
+        var link = $(this);
+        if (confirm(link.data('confirm'))) {
+            $.get('/ui/removeUserFromParty?partyId=' + partyId + '&userId=' + link.data('userId'), function() {
+                location.reload(true);
+            });
+        }
+    });
 }
 
 function updateGroupGraph() {

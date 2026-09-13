@@ -42,10 +42,10 @@ spring:
     # without an explicit view-names allow-list it claims EVERY view name
     # (it only returns null from resolveViewName() for names that don't
     # match this list) rather than checking template existence upfront, so
-    # an unconverted view name like "party" would be claimed by Thymeleaf
+    # an unconverted view name like "user" would be claimed by Thymeleaf
     # and blow up at render time instead of falling through to the JSP
     # resolver. List each view name here as its .jsp is converted.
-    view-names: privacy,terms,newuser,error,passphrase,login,app/index
+    view-names: privacy,terms,newuser,error,passphrase,login,app/index,party
 
   messages:
     basename: messages,drinkcounter.version
