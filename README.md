@@ -84,9 +84,9 @@ docker run -p 8080:8080 \
   ryyppynet
 ```
 
-The training run boots under the `aot-train` profile against the real
-database, reached through the `SPRING_DATASOURCE_*` build args, so the cache
-covers the pgjdbc driver and the actual SQL dialect. Two properties of it:
+The training run boots against the real database, reached through the
+`SPRING_DATASOURCE_*` build args, so the cache covers the pgjdbc driver and
+the actual SQL dialect. Two properties of it:
 
 * **Read-only.** This jar has no `flywayInitializer` bean (see Database
   migrations below), so the training run can safely use

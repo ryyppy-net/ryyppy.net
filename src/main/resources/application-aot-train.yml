@@ -1,6 +1,0 @@
-# Used only by the Dockerfile's AOT cache training run, against the real
-# database via SPRING_DATASOURCE_* build args.
-spring:
-  docker:
-    compose:
-      enabled: false

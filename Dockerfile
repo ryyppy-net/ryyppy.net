@@ -27,7 +27,6 @@ ARG SPRING_DATASOURCE_PASSWORD
 # enabled since the jar has no flywayInitializer bean (see pom.xml).
 # Best-effort: a failed run leaves no cache and the image boots without it.
 RUN java -XX:AOTCacheOutput=app.aot \
-    -Dspring.profiles.active=aot-train \
     -Dspring.aot.enabled=true \
     -Dspring.context.exit=onRefresh \
     -jar application.jar \
