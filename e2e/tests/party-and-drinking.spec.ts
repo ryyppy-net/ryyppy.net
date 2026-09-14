@@ -31,6 +31,19 @@ test.describe('party start date', () => {
 });
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
+  // Counts started AudioBufferSourceNodes, so the drink below also covers the
+  // real sound path: DrinkerCtrl -> Sound service -> sound.js. Folded in here
+  // rather than given its own test, which would repeat this whole flow
+  // (registration, party, 5s countdown) just to hear one clip.
+  await page.addInitScript(() => {
+    (window as any).__playedSounds__ = 0;
+    const start = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args: any[]) {
+      (window as any).__playedSounds__++;
+      return start.apply(this, args as []);
+    };
+  });
+
   const user = makeTestUser('party');
   await registerUser(page, user);
 
@@ -61,4 +74,11 @@ test('a user can create a party, appear as a participant, and logging a drink up
   expect(drinkResponse.ok()).toBeTruthy();
 
   await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '', { timeout: 10_000 });
+
+  // The drink sound is fired from the same success callback as the promille
+  // update (DrinkerCtrl.drinkSuccessfullyAdded), and a failed play() is
+  // silent, so assert a buffer actually started rather than that play() ran.
+  await expect
+    .poll(() => page.evaluate(() => (window as any).__playedSounds__ as number), { timeout: 5_000 })
+    .toBeGreaterThan(0);
 });
