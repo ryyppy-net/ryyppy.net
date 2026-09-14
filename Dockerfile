@@ -1,9 +1,11 @@
+# syntax=docker/dockerfile:1
 # https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src src
-RUN mvn -B -DskipTests package
+# Railway scopes cache mounts by service: https://docs.railway.com/builds/dockerfiles#cache-mounts
+RUN --mount=type=cache,id=s/051f3916-5603-418f-a470-2c39ca314729-/root/.m2,target=/root/.m2 mvn -B -DskipTests package
 
 FROM bellsoft/liberica-openjre-debian:25-cds AS builder
 WORKDIR /builder
