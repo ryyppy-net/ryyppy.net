@@ -25,9 +25,24 @@ export default defineConfig({
 
   use: {
     baseURL: BASE_URL,
-    trace: 'retain-on-failure',
+    // Trace and video are off, not 'retain-on-failure'. That setting records
+    // every test unconditionally - Playwright can't know a test will fail
+    // until it already has - and throws the recording away on pass, so a
+    // green suite pays the full cost for nothing. Tracing snapshots every
+    // step; video runs a screencast into an ffmpeg encoder per context,
+    // competing for the same cores as the browsers and the app server.
+    // Measured at 4 workers: ~105s with both, 83.5s without video, 55.6s
+    // without either.
+    //
+    // A failure here therefore leaves a stack trace and the screenshot
+    // below; reproduce and debug it locally, turning these back on for the
+    // run you're investigating:
+    //   npx playwright test --trace=on <test>
+    trace: 'off',
+    // Unlike the two above, this one is genuinely lazy - the screenshot is
+    // taken at the moment of failure, so a passing run pays nothing.
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: 'off',
   },
 
   projects: [
