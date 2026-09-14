@@ -4,15 +4,11 @@
     <meta charset="utf-8">
     <title>Ryyppy.net</title>
 
+    <link rel="stylesheet" th:href="@{/static/css/fonts.css}"/>
     <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.css"/>
     <link rel="stylesheet" href="/webjars/pnotify/1.2.0/jquery.pnotify.default.css"/>
     <link rel="stylesheet" th:href="@{/app/css/app.css}"/>
-
-    <!-- media="print" + onload swap keeps this from blocking the synchronous
-         <script> tags below on a slow/unreachable Google Fonts request. -->
-    <link href='https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext' rel='stylesheet' type='text/css' media="print" onload="this.media='all'">
-    <noscript><link href='https://fonts.googleapis.com/css?family=Rum+Raisin&subset=latin,latin-ext' rel='stylesheet' type='text/css'></noscript>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>

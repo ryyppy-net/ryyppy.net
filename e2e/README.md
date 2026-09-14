@@ -58,11 +58,11 @@ npx playwright show-trace test-results/<dir>/trace.zip
 - Each test registers a fresh, uniquely-emailed user (see `tests/helpers.ts`)
   so runs never collide with each other or leave shared fixtures to clean up.
 - Every test runs with requests to origins other than the app's own blocked
-  (`tests/fixtures.ts`). The pages pull in Google Fonts, the Google Sign-In
-  client and Gravatar avatars, none of which anything here asserts on, and
-  waiting on them costs ~12.5s per navigation on a box that can't reach them -
-  enough on its own to blow the 30s test timeout. Import `test`/`expect` from
-  `./fixtures`, not from `@playwright/test`, so a new spec gets this too.
+  (`tests/fixtures.ts`). The pages pull in the Google Sign-In client and
+  Gravatar avatars, neither of which anything here asserts on, and waiting on
+  them costs seconds per navigation on a box that can't reach them - enough to
+  blow the 30s test timeout. Import `test`/`expect` from `./fixtures`, not from
+  `@playwright/test`, so a new spec gets this too.
 - There are no retries, on CI either: the suite is meant to be correct at
   `workers: 4`, and a retry only turns a real race into a green build.
 - Adding a drink through the UI has a built-in ~5s "undo" countdown
