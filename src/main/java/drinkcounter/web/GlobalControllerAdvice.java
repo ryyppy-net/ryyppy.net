@@ -39,12 +39,7 @@ public class GlobalControllerAdvice {
     }
 
     /**
-     * The drink sound clips, as content-hashed URLs. Rendered by
-     * fragments/sounds.html into the pages that can add a drink, so sound.js
-     * can preload them without a separate request for the list itself. Model
-     * attributes are cheap and unused ones are never rendered, so this is on
-     * the global advice rather than wired into each of those controllers.
-     * See SoundManifest.
+     * The drink sound clips, as content-hashed URLs.
      * Available in templates as ${soundUrls}
      */
     @ModelAttribute("soundUrls")

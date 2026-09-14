@@ -41,14 +41,9 @@ public class WebConfiguration implements WebMvcConfigurer {
      * JSP (appIndex.jsp) rather than a static file - only JSP's <c:url>
      * triggers the rewrite.
      *
-     * Sound effects under /static/sounds/** are content-hashed the same way,
-     * but reach the browser differently: nothing references them from markup,
-     * so there is no <c:url>/@{...} for ResourceUrlEncodingFilter to rewrite.
-     * Instead SoundManifest resolves them through this same resource chain
-     * server-side and fragments/sounds.html renders the finished URLs into the
-     * page, where sound.js preloads them. Because the URL carries the hash,
-     * these can be .immutable() - never revalidated, and a replaced clip is
-     * picked up on its own.
+     * Sound effects under /static/sounds/** are content-hashed the same way.
+     * Nothing references them from markup, so SoundManifest resolves them
+     * through this chain server-side instead.
      *
      * The favicon and Apple touch icons are requested by browsers/OS via
      * fixed, well-known root paths (not referenced through any <c:url> or

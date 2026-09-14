@@ -31,12 +31,8 @@ test.describe('party start date', () => {
 });
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
-  // Counts started AudioBufferSourceNodes, so the drink below also covers the
-  // real sound path: DrinkerCtrl -> Sound service -> sound.js. A blocked
-  // play() is silent, so counting started buffers is the only way to tell a
-  // played sound from a swallowed one. Folded in here rather than given its
-  // own test, which would repeat this whole flow (registration, party,
-  // countdown) just to hear one clip.
+  // A blocked play() is silent, so counting started buffers is the only way
+  // to tell a played sound from a swallowed one.
   await page.addInitScript(() => {
     (window as any).__playedSounds__ = 0;
     const start = AudioBufferSourceNode.prototype.start;
@@ -62,11 +58,8 @@ test('a user can create a party, appear as a participant, and logging a drink up
   // actually posted (see DrinkerCtrl.addDrink), so give it plenty of room.
   await drinkerTile.locator('.container-fluid').first().click();
 
-  // The sound is feedback for the click, so it has to be audible now, during
-  // the countdown - not when the POST lands. Asserting it before waiting for
-  // that response is what makes this a regression test for the timing: a
-  // sound moved back to the success callback would still play, just late,
-  // and would fail here.
+  // The sound is feedback for the click, so it has to be audible during the
+  // countdown, before the POST below.
   await expect
     .poll(() => page.evaluate(() => (window as any).__playedSounds__ as number), { timeout: 2_000 })
     .toBeGreaterThan(0);

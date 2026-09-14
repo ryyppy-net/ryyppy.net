@@ -9,13 +9,9 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.addDefaultDrink = function (participant) {
-        // The sound is feedback for the tap, so it plays on the tap - not when
-        // the POST lands after the 5s undo countdown. Only this entry point
-        // plays it: addEditedDrink() is reachable only from the overlay this
-        // click opens, so editing a drink does not sound twice.
-        //
-        // Playing here also runs play() inside the user gesture itself, which
-        // is the case autoplay policies are least restrictive about.
+        // Feedback for the tap, so it sounds here rather than when the drink
+        // posts 5s later. addEditedDrink() is reachable only from the overlay
+        // this opens, so a drink never sounds twice.
         Sound.playSound();
 
         var defaultDrink = {volume: '0.33', alcohol: '0.047', timestamp: null};

@@ -4,10 +4,9 @@ import { getClassicUserId, loginClassic, makeTestUser, registerUser } from './he
 import { Page } from '@playwright/test';
 
 /**
- * Counts every AudioBufferSourceNode that actually gets started, so a test can
- * tell "a sound played" from "play() was called and silently did nothing" -
- * the latter being exactly how autoplay policies break this. Must be installed
- * before any page script runs.
+ * Counts started AudioBufferSourceNodes: a blocked play() is silent, so this
+ * is the only way to tell a played sound from a swallowed one. Must be
+ * installed before any page script runs.
  */
 async function instrumentWebAudio(page: Page): Promise<void> {
   await page.addInitScript(() => {
@@ -30,11 +29,9 @@ test.describe('drink sounds', () => {
 
     const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[]);
 
-    // Every .mp3 in public/static/sounds/ - including 8.mp3, which the old
-    // hardcoded "1..7" loop never played.
+    // Every .mp3 in public/static/sounds/.
     expect(urls).toHaveLength(8);
-    // SoundManifest resolves each through the resource chain, so the content
-    // hash is in the URL; that is what makes the immutable cache header safe.
+    // The content hash in the URL is what makes the immutable header safe.
     for (const url of urls) {
       expect(url).toMatch(/^\/static\/sounds\/\d+-[0-9a-f]{32}\.mp3$/);
     }
@@ -53,20 +50,16 @@ test.describe('drink sounds', () => {
     await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 
-    // sound.js fetches the clips after load rather than waiting for a click,
-    // which is what keeps playback lag-free. Wait for every one of them: the
-    // preload is sequential, so a snapshot taken mid-flight would still be
-    // growing and the "no request at play() time" check below would race it.
+    // Wait for every clip: the preload is sequential, so a snapshot taken
+    // mid-flight would race the "no request at play() time" check below.
     const expectedUrls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[]);
     await expect.poll(() => soundRequests.length, { timeout: 30_000 }).toBe(expectedUrls.length);
 
-    // A real gesture first: the autoplay policy leaves the AudioContext
-    // suspended until one happens.
+    // A real gesture first: the AudioContext stays suspended until one.
     await page.locator('body').click();
 
-    // Polls because decoding finishes asynchronously. The assertion is that a
-    // decoded buffer does get started, and with no further network request at
-    // play() time - the clip comes from memory.
+    // Polls because decoding finishes asynchronously. No further request at
+    // play() time means the clip came from memory.
     const requestsBeforePlay = soundRequests.length;
     await expect
       .poll(async () => {
@@ -89,8 +82,8 @@ test.describe('drink sounds', () => {
 
 });
 
-// Its own user rather than the shared one: the click below actually logs a
-// drink, and the shared user must not gain any (see shared-user.setup.ts).
+// Its own user: the click below logs a real drink, and the shared user must
+// not gain any (see shared-user.setup.ts).
 test('the classic UI plays a drink sound on the click, not when the drink posts', async ({ page }) => {
   await instrumentWebAudio(page);
 
@@ -102,10 +95,8 @@ test('the classic UI plays a drink sound on the click, not when the drink posts'
   const userId = await getClassicUserId(page);
   await page.click(`#user${userId}`);
 
-  // UserButton.buttonClick plays it straight away; the POST is 5s later,
-  // behind the undo countdown, so a sound that only arrived with the response
-  // would miss this window. Covers the classic path end to end: common.js's
-  // global playSound() through to the shared sound.js player.
+  // The POST is 5s later, behind the undo countdown, so a sound tied to the
+  // response would miss this window.
   await expect
     .poll(() => playedSounds(page), { timeout: 2_000 })
     .toBeGreaterThan(0);

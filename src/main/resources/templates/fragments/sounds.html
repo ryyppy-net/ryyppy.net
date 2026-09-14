@@ -1,27 +1,13 @@
 <!--
-    Drink sound player, included by every page that can add a drink:
+    Drink sound player, for the pages that can add a drink:
 
         <th:block th:replace="~{fragments/sounds :: player}" />
-
-    Renders the clip list (SoundManifest, via GlobalControllerAdvice) straight
-    into the page so sound.js has it without a round trip of its own, then
-    loads the player. The URLs are already content-hashed by the resource
-    chain - see WebConfiguration.
-
-    Included per page rather than from fragments/master.html: the clips are
-    ~490 KB, and pages with no drinker button on them (login, newuser, the
-    legal pages) would download all of it to play nothing.
 -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
     <th:block th:fragment="player">
-        <!--
-            [[...]] (escaped inlining) is correct here: Thymeleaf serializes
-            the List<String> to a JS array literal and escapes it for a
-            <script> context. These are server-generated resource paths, not
-            user input.
-        -->
+        <!-- Server-generated resource paths, so escaped inlining is enough. -->
         <script th:inline="javascript">
             window.__SOUND_URLS__ = [[${soundUrls}]];
         </script>
