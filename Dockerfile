@@ -1,9 +1,10 @@
+# syntax=docker/dockerfile:1
 # https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src src
-RUN mvn -B -DskipTests package
+RUN --mount=type=cache,target=/root/.m2 mvn -B -DskipTests package
 
 FROM bellsoft/liberica-openjre-debian:25-cds AS builder
 WORKDIR /builder
