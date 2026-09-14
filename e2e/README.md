@@ -43,6 +43,16 @@ binary instead of downloading:
 PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome SKIP_WEBSERVER=1 npm test
 ```
 
+## Debugging a failure
+
+Traces and videos are not recorded; a failure leaves a stack trace and a
+screenshot. Re-run the failing test with recording on:
+
+```bash
+npx playwright test --trace=on -g "<test name>"
+npx playwright show-trace test-results/<dir>/trace.zip
+```
+
 ## Notes
 
 - Each test registers a fresh, uniquely-emailed user (see `tests/helpers.ts`)
