@@ -144,6 +144,20 @@ alcoholGrams = volume * alcoholPercentage * 789
 - Default locale is Finnish (`fi_FI`) with English support
 - All timestamps use Joda-Time `DateTime` for parsing, converted to `java.util.Date`
 
+## Comments
+
+A comment earns its place by explaining what the code cannot: why this approach,
+what breaks without it, what a reader would otherwise "fix".
+
+- Don't narrate the incident that produced the change. That belongs in the commit
+  message and the PR body, which is where someone goes looking for it.
+- Don't restate what the line does.
+- Default to 1-4 lines. Longer needs a reason you could defend in review.
+
+Existing long comments in this repo are not precedent - match the rule, not the
+neighbours. A Stop hook in `.claude/settings.json` sends Claude back for one pass
+over its own comments before it finishes a turn.
+
 ## Testing
 
 Test files are in `src/test/java/drinkcounter/`:
