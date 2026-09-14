@@ -108,7 +108,7 @@ public class AuthRelayTokenServiceTest {
         assertFalse(tokenService.verifyOriginSignature(ORIGIN, "anything"));
     }
 
-    /** Uses the package-private test constructor to fix a secret instead of relying on the environment. */
+    /** Passes the secret directly instead of relying on Spring to inject it from the environment. */
     private static AuthRelayTokenService withSecret(String secret) {
         return new AuthRelayTokenService(secret);
     }
