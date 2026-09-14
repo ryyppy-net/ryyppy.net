@@ -3,6 +3,7 @@ package drinkcounter.web;
 import drinkcounter.authentication.relay.Origins;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -17,11 +18,19 @@ public class GlobalControllerAdvice {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final BuildProperties buildProperties;
+    private final boolean fedcmEnabled;
+    private final String hubUrl;
 
     @Autowired
-    public GlobalControllerAdvice(ClientRegistrationRepository clientRegistrationRepository, @Autowired(required = false) BuildProperties buildProperties) {
+    public GlobalControllerAdvice(
+            ClientRegistrationRepository clientRegistrationRepository,
+            @Autowired(required = false) BuildProperties buildProperties,
+            @Value("${google.fedcm-enabled:false}") boolean fedcmEnabled,
+            @Value("${google.auth.hub-url:}") String hubUrl) {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.buildProperties = buildProperties;
+        this.fedcmEnabled = fedcmEnabled;
+        this.hubUrl = hubUrl;
     }
 
     /**
@@ -48,13 +57,12 @@ public class GlobalControllerAdvice {
 
     /**
      * Returns whether to use FedCM for Google One Tap.
-     * Disabled by default, enable with GOOGLE_FEDCM_ENABLED=true environment variable.
+     * Disabled by default, enable with the google.fedcm-enabled property (GOOGLE_FEDCM_ENABLED environment variable).
      * Available in JSP as ${useFedCm}
      */
     @ModelAttribute("useFedCm")
     public boolean useFedCm() {
-        String value = System.getenv("GOOGLE_FEDCM_ENABLED");
-        return "true".equalsIgnoreCase(value);
+        return fedcmEnabled;
     }
 
     /**
@@ -89,7 +97,6 @@ public class GlobalControllerAdvice {
      */
     @ModelAttribute("oneTapLoginUri")
     public String oneTapLoginUri(HttpServletRequest request) {
-        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
         String base = (hubUrl != null && !hubUrl.isBlank())
                 ? hubUrl.replaceAll("/+$", "")
                 : Origins.of(request);
@@ -112,7 +119,6 @@ public class GlobalControllerAdvice {
      */
     @ModelAttribute("isHubEnvironment")
     public boolean isHubEnvironment(HttpServletRequest request) {
-        String hubUrl = System.getenv("GOOGLE_AUTH_HUB_URL");
         if (hubUrl == null || hubUrl.isBlank()) {
             return true;
         }

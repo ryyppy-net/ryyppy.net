@@ -45,6 +45,15 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
 
+google:
+  fedcm-enabled: ${GOOGLE_FEDCM_ENABLED:false}
+  auth:
+    hub-url: ${GOOGLE_AUTH_HUB_URL:}
+
+auth:
+  relay:
+    secret: ${AUTH_RELAY_SECRET:}
+
 server:
   # Railway assigns the container's public port via $PORT. The old Railpack
   # start command passed it as -Dserver.port=$PORT; with a Dockerfile the

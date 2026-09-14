@@ -1,5 +1,6 @@
 package drinkcounter.authentication.relay;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -35,12 +36,7 @@ public class AuthRelayTokenService {
     private final Map<String, Instant> consumedNonces = new ConcurrentHashMap<>();
     private final String configuredSecret;
 
-    public AuthRelayTokenService() {
-        this(System.getenv("AUTH_RELAY_SECRET"));
-    }
-
-    /** Visible for testing - lets tests fix a secret instead of depending on the environment. */
-    AuthRelayTokenService(String secret) {
+    public AuthRelayTokenService(@Value("${auth.relay.secret:}") String secret) {
         this.configuredSecret = (secret == null || secret.isBlank()) ? null : secret;
     }
 
