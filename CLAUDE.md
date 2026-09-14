@@ -144,6 +144,26 @@ alcoholGrams = volume * alcoholPercentage * 789
 - Default locale is Finnish (`fi_FI`) with English support
 - All timestamps use Joda-Time `DateTime` for parsing, converted to `java.util.Date`
 
+## Comments
+
+Write for someone opening the file for the first time, not for a reviewer of your
+change. The test: would this comment be word-for-word the same if the code had
+always been here? If not, it is narrating a change - cut it.
+
+- State the standing fact that forces the code - our deployment, our domain, our
+  data. Not the framework mechanism behind it: Spring internals are documented
+  elsewhere, "Railway terminates TLS at its edge" is not.
+- No symptoms, no incident, no ticket archaeology. That belongs in the commit
+  message and the PR body, which is where someone goes looking for it.
+- Don't defend where the code lives or why the alternative was rejected.
+- Don't restate what the line does.
+- One or two lines in config, up to four in code. Longer needs a reason you could
+  defend in review.
+
+The `forward-headers-strategy` comment in `application-production.yml` is the
+model. Existing long comments are not precedent - match the rule, not the
+neighbours.
+
 ## Testing
 
 Test files are in `src/test/java/drinkcounter/`:

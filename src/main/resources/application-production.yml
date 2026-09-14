@@ -9,20 +9,7 @@ spring:
     # Migrations run via railway.json's pre-deploy command instead.
     enabled: false
 
-# Railway terminates TLS at its edge and forwards plain HTTP to the container,
-# so without this every request looks like http://ryyppy.net to the app - which
-# is what Spring Security puts in the OAuth2 redirect_uri (redirect_uri_mismatch
-# from Google) and what Origins.of() reports (isHubEnvironment false, so the One
-# Tap widget is replaced by the relay link). See #126.
-#
-# This has to be set here rather than only as a Railway service variable: the
-# bean behind this strategy is @ConditionalOnProperty(server.forward-headers-strategy=framework),
-# and process-aot freezes @Conditional evaluation at build time (same mechanism
-# the production profile uses to keep flywayInitializer out of the jar). The
-# Docker build doesn't see Railway's service variables, so the filter was
-# conditioned away at build time and setting the variable at runtime no longer
-# had any effect. Under the production profile - which is what process-aot
-# builds with, and what runs in production - the property is now present in
-# both places.
+# Railway terminates TLS at its edge, so trust X-Forwarded-* to see the
+# original https scheme and host.
 server:
   forward-headers-strategy: framework
