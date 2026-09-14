@@ -155,8 +155,7 @@ what breaks without it, what a reader would otherwise "fix".
 - Default to 1-4 lines. Longer needs a reason you could defend in review.
 
 Existing long comments in this repo are not precedent - match the rule, not the
-neighbours. A Stop hook in `.claude/settings.json` sends Claude back for one pass
-over its own comments before it finishes a turn.
+neighbours.
 
 ## Testing
 
