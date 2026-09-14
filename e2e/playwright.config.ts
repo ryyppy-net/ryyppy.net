@@ -9,7 +9,13 @@ export default defineConfig({
   // tests are independent and safe to run concurrently against the same
   // server/DB.
   fullyParallel: true,
-  workers: 4,
+  // Measured on a 4-core box (app + Postgres sharing CPU with the browsers):
+  // 1 worker 147s, 2 workers 100-111s, 4 workers 98-111s - i.e. past 2 the
+  // shared single app server is the ceiling and extra workers buy nothing
+  // measurable. At 6 workers 4 tests time out, at 8 workers 14 do, so the
+  // next step up costs correctness rather than just speed. 2 leaves headroom
+  // for that without giving up throughput.
+  workers: 2,
   // No retries, on CI either: the suite is expected to be correct at the
   // parallelism above, and a retry turns a genuine race into a green build.
   retries: 0,
