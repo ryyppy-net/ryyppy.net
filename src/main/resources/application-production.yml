@@ -9,9 +9,7 @@ spring:
     # Migrations run via railway.json's pre-deploy command instead.
     enabled: false
 
-# Must live here, not only in Railway's SERVER_FORWARD_HEADERS_STRATEGY: the
-# filter behind this is @ConditionalOnProperty(...havingValue="framework") and
-# process-aot freezes @Conditional evaluation at build time, where the Docker
-# build can't see Railway's service variables.
+# Railway terminates TLS at its edge, so trust X-Forwarded-* to see the
+# original https scheme and host.
 server:
   forward-headers-strategy: framework
