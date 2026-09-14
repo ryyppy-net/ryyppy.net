@@ -1,6 +1,8 @@
 import { test, expect } from './fixtures';
+import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
 import {
   makeTestUser,
+  gotoClassicDashboard,
   registerUser,
   loginClassic,
   createPartyClassic,
@@ -8,15 +10,18 @@ import {
   addDrinkImmediatelyClassic,
 } from './helpers';
 
-test('U1: heading is the user name and #drinkers shows their button with a promille reading', async ({ page }) => {
-  const user = makeTestUser('dash-u1');
-  await registerUser(page, user);
-  await page.goto('/logout');
-  await loginClassic(page, user);
+// Read-only, and the shared user never drinks, so its reading stays 0.00.
+test.describe('classic dashboard, shared user', () => {
+  test.use({ storageState: SHARED_STORAGE_STATE });
+
+  test('U1: heading is the user name and #drinkers shows their button with a promille reading', async ({ page }) => {
+  const user = sharedUser();
+  await gotoClassicDashboard(page, user.name);
 
   await expect(page.locator('h1.topic')).toHaveText(user.name);
   await expect(page.locator('#drinkers')).toContainText('0.00‰', { timeout: 10_000 });
   await expect(page.locator('#drinkers')).toContainText('Paina tästä juodaksesi');
+  });
 });
 
 test('U2: party list shows each party name and formatted start time, newest first', async ({ page }) => {

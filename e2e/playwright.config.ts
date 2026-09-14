@@ -5,44 +5,35 @@ const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './tests',
-  // Each test registers its own uniquely-emailed user (see helpers.ts), so
-  // tests are independent and safe to run concurrently against the same
-  // server/DB.
   fullyParallel: true,
-  workers: 4,
-  // No retries, on CI either: the suite is expected to be correct at the
-  // parallelism above, and a retry turns a genuine race into a green build.
-  retries: 0,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
-  timeout: 30_000,
-  expect: { timeout: 5_000 },
 
   use: {
     baseURL: BASE_URL,
-    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    // PLAYWRIGHT_CHROMIUM_EXECUTABLE runs against an already-installed Chromium
+    // instead of the revision `npx playwright install` fetches.
+    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+      : undefined,
   },
 
   projects: [
+    // Writes tests/.auth/ for the storageState tests; see shared-user.setup.ts.
+    {
+      name: 'setup',
+      testMatch: /shared-user\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // Sandboxed dev containers pre-install a pinned Chromium build that may
-        // not match the exact revision @playwright/test expects; point at it
-        // explicitly so `npx playwright install` isn't required there. Safe to
-        // remove once running with a standard Playwright browser install.
-        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
-          ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
-          : undefined,
-      },
+      dependencies: ['setup'],
+      testIgnore: /shared-user\.setup\.ts/,
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 
-  // Assumes the app (and its Postgres via docker compose) is already running,
-  // e.g. via `mvn spring-boot:run` in the repo root. Set REUSE_SERVER=0 to
-  // require Playwright to fail fast instead of hanging on a missing server.
+  // SKIP_WEBSERVER=1 runs against an app that is already started.
   webServer: process.env.SKIP_WEBSERVER
     ? undefined
     : {

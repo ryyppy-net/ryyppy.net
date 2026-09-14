@@ -1,13 +1,18 @@
 import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, createParty } from './helpers';
+import { SHARED_STORAGE_STATE } from './shared-user';
 
-test('a newly created party shows its actual start date, not a misparsed one', async ({ page }) => {
+// Creates a party and asserts only on that party's own tile, so the shared
+// user's other parties are irrelevant.
+test.describe('party start date', () => {
+  test.use({ storageState: SHARED_STORAGE_STATE });
+
+  test('a newly created party shows its actual start date, not a misparsed one', async ({ page }) => {
   // Regression test: the party list used to parse the ISO-8601 startTime the
   // API returns with a moment format string meant for a completely different
   // date shape ('MMM DD, YYYY h:mm:ss A'), which silently misparsed today's
   // date into a garbage one (see filters.js formatDateTime / partySort).
-  const user = makeTestUser('party-date');
-  await registerUser(page, user);
+  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
   const partyName = `E2E Date Party ${Date.now()}`;
   await createParty(page, partyName);
@@ -21,6 +26,8 @@ test('a newly created party shows its actual start date, not a misparsed one', a
 
   const partyTile = page.locator('.party', { has: page.getByText(partyName) });
   await expect(partyTile.getByText('Alkamisaika:').locator('..')).toContainText(expectedDate);
+});
+
 });
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {

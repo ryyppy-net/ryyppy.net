@@ -1,6 +1,7 @@
 import { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, createParty } from './helpers';
+import { createParty } from './helpers';
+import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
 
 /**
  * Smoke-checks every server-rendered page: each returns 200, has its
@@ -56,9 +57,13 @@ test('/ui/privacy renders the privacy policy for an anonymous visitor', async ({
   await assertNoUnresolvedExpressions(page);
 });
 
-test('/ui/user renders the classic dashboard for a logged-in user', async ({ page }) => {
-  const user = makeTestUser('smoke-user');
-  await registerUser(page, user);
+// These three only need *a* logged-in user - they assert rendering, not any
+// per-user state - so they reuse the shared session instead of registering.
+test.describe('logged-in page loads', () => {
+  test.use({ storageState: SHARED_STORAGE_STATE });
+
+  test('/ui/user renders the classic dashboard for a logged-in user', async ({ page }) => {
+  const user = sharedUser();
 
   const response = await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
   expect(response?.status()).toBe(200);
@@ -67,9 +72,8 @@ test('/ui/user renders the classic dashboard for a logged-in user', async ({ pag
   await assertNoUnresolvedExpressions(page);
 });
 
-test('/ui/party renders the participant grid for a logged-in participant', async ({ page }) => {
-  const user = makeTestUser('smoke-party');
-  await registerUser(page, user);
+  test('/ui/party renders the participant grid for a logged-in participant', async ({ page }) => {
+  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
   const partyName = `E2E Smoke Party ${Date.now()}`;
   await createParty(page, partyName);
@@ -84,11 +88,11 @@ test('/ui/party renders the participant grid for a logged-in participant', async
   await assertNoUnresolvedExpressions(page);
 });
 
-test('/app/index.html renders the modern dashboard for a logged-in user', async ({ page }) => {
-  const user = makeTestUser('smoke-app');
-  await registerUser(page, user);
+  test('/app/index.html renders the modern dashboard for a logged-in user', async ({ page }) => {
+  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
   await expect(page).toHaveTitle('Ryyppy.net');
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   await assertNoUnresolvedExpressions(page);
+  });
 });

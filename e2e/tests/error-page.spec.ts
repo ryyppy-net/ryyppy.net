@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, createParty } from './helpers';
+import { SHARED_STORAGE_STATE } from './shared-user';
 
 test('requesting a party you are not a participant of renders the error page', async ({ page, browser }) => {
   const owner = makeTestUser('error-owner');
@@ -23,13 +24,15 @@ test('requesting a party you are not a participant of renders the error page', a
   await outsiderContext.close();
 });
 
-test('an unknown /ui/... URL renders the error page', async ({ page }) => {
-  const user = makeTestUser('error-unknown-url');
-  await registerUser(page, user);
+// Only needs to be authenticated; the 404 has nothing to do with which user.
+test.describe('authenticated error page', () => {
+  test.use({ storageState: SHARED_STORAGE_STATE });
 
+  test('an unknown /ui/... URL renders the error page', async ({ page }) => {
   const response = await page.goto('/ui/does-not-exist', { waitUntil: 'domcontentloaded' });
   expect(response?.status()).toBe(404);
 
   await expect(page).toHaveTitle('Ryyppy.net - Virhe!');
   await expect(page.locator('h2')).toContainText('Tapahtui virhe!');
+});
 });
