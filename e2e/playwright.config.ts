@@ -46,8 +46,22 @@ export default defineConfig({
   },
 
   projects: [
+    // Registers the one shared read-only user and saves its session, before
+    // anything else runs. See shared-user.setup.ts for what may use it.
+    {
+      name: 'setup',
+      testMatch: /shared-user\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+          ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+          : undefined,
+      },
+    },
     {
       name: 'chromium',
+      dependencies: ['setup'],
+      testIgnore: /shared-user\.setup\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         // Sandboxed dev containers pre-install a pinned Chromium build that may

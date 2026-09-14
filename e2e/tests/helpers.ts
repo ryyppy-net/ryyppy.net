@@ -77,6 +77,15 @@ export async function loginClassic(page: Page, user: Pick<TestUser, 'name' | 'em
   await expect(page.locator('h1.topic', { hasText: user.name })).toBeVisible();
 }
 
+/**
+ * Lands on the classic /ui/user dashboard for a session that is already
+ * authenticated (via storageState), skipping loginClassic's login form.
+ */
+export async function gotoClassicDashboard(page: Page, name: string): Promise<void> {
+  await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1.topic', { hasText: name })).toBeVisible();
+}
+
 /** Creates a party from the classic /ui/user dashboard and waits for /ui/party?id=N. */
 export async function createPartyClassic(page: Page, partyName: string): Promise<void> {
   // On /ui/user and /ui/party, every <a class="headerButtonA"> header wrapper

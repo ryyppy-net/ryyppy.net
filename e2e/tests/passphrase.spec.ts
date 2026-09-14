@@ -1,11 +1,13 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser } from './helpers';
+import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
+
+// Read-only apart from the passphrase itself, which nothing else asserts on.
+test.use({ storageState: SHARED_STORAGE_STATE });
 
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
 test('a user can reach the passphrase page from the classic UI settings dialog and copy the key', async ({ page }) => {
-  const user = makeTestUser('passphrase');
-  await registerUser(page, user);
+  const user = sharedUser();
 
   await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h1.topic', { hasText: user.name })).toBeVisible();

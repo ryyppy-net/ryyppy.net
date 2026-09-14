@@ -1,5 +1,8 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser } from './helpers';
+import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
+
+// Read-only: asserts which requests the dashboard does *not* make.
+test.use({ storageState: SHARED_STORAGE_STATE });
 
 test('the dashboard does not fetch the profile, parties, own drinks, or drink-history graph data over the API on first load', async ({ page }) => {
   // DefaultController.appIndex() embeds the current user's profile, parties,
@@ -24,11 +27,12 @@ test('the dashboard does not fetch the profile, parties, own drinks, or drink-hi
     }
   });
 
-  const user = makeTestUser('ssr-profile');
-  await registerUser(page, user);
+  const user = sharedUser();
+  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
-  // registerUser already waits for the dashboard heading, i.e. for UserCtrl's
-  // first refreshProfile()/refreshParties()/refreshOwnDrinks() tick to have run.
+  // Wait for the dashboard heading, i.e. for UserCtrl's first
+  // refreshProfile()/refreshParties()/refreshOwnDrinks() tick to have run.
+  await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   const ownTile = page.locator('.drinker', { has: page.getByText(user.name) });
   await expect(ownTile).toBeVisible();
   await expect(ownTile.locator('p', { hasText: 'Promilleja' })).toBeVisible();

@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, loginUser } from './helpers';
+import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
 
 test('L1: /ui/login renders logo, credential fields, drink counter, registration link and footer links', async ({ page }) => {
   await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
@@ -17,19 +17,23 @@ test('L1: /ui/login renders logo, credential fields, drink counter, registration
   await expect(page.locator('a[href="/ui/terms"]')).toBeVisible();
 });
 
-test('L3: an already-logged-in user visiting /ui/login is redirected to the dashboard', async ({ page }) => {
-  const user = makeTestUser('login-redirect');
-  await registerUser(page, user);
+// Only needs *some* authenticated session to bounce off /ui/login.
+test.describe('already-logged-in redirect', () => {
+  test.use({ storageState: SHARED_STORAGE_STATE });
 
+  test('L3: an already-logged-in user visiting /ui/login is redirected to the dashboard', async ({ page }) => {
   await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
 
   await expect(page).toHaveURL(/\/app\/index\.html/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 });
 
+});
+
+// Needs an address that is already taken, but must stay anonymous to reach
+// /ui/newuser - so it borrows the shared user's email without its session.
 test('N2: entering an already-registered email marks #emailCorrect as an error and disables #submitButton', async ({ page }) => {
-  const existingUser = makeTestUser('newuser-dup');
-  await registerUser(page, existingUser);
+  const existingUser = sharedUser();
 
   await page.goto('/ui/newuser', { waitUntil: 'domcontentloaded' });
   await page.locator('#drinkerName').pressSequentially('Duplicate Email Tester');

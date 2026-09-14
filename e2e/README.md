@@ -58,3 +58,22 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome SKIP_WEBSERVER=1 npm test
 - Adding a drink through the UI has a built-in ~5s "undo" countdown
   (`DrinkerCtrl.addDrink`) before the API call actually fires — the drink
   test accounts for this with a generous `waitForResponse` timeout.
+
+## Shared vs. dedicated users
+
+A `setup` project registers one user per run and saves its session
+(`tests/.auth/`), and every test that only needs *a* logged-in user starts
+from that session instead of registering its own — no registration, no
+login form, no logout/login round trip.
+
+A test may use the shared session only if it does none of the following:
+
+- change the profile (U4 renames it)
+- add or remove its own drinks (U5, U6, U8 — U1 and the party-page tests
+  assert `0.00‰`, which only holds while the shared user stays dry)
+- assert an exact party count (U2 expects 2, U7 expects 0)
+- need a second distinct account or a guest (the kick, invite, outsider and
+  classic-flow tests)
+
+Creating parties is fine: no sharing test asserts how many there are.
+Anything else keeps calling `registerUser` with its own `makeTestUser`.

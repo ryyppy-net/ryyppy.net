@@ -1,9 +1,12 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, createParty } from './helpers';
+import { createParty } from './helpers';
+import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
+
+// Only needs a logged-in user with at least one party; asserts no counts.
+test.use({ storageState: SHARED_STORAGE_STATE });
 
 test('a user can switch from the modern dashboard to the classic UI and back', async ({ page }) => {
-  const user = makeTestUser('uitoggle');
-  await registerUser(page, user);
+  const user = sharedUser();
 
   // A party in the list is what previously crashed the classic dashboard
   // (party.startTime.time isn't valid EL on a java.time.Instant), so make
