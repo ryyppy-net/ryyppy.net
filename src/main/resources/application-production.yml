@@ -8,8 +8,26 @@ spring:
   flyway:
     # Migrations run via railway.json's pre-deploy command instead.
     enabled: false
+  datasource:
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 3
+      idle-timeout: 10000
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 6115241938-fkfn0jc12l66aelicc3v19so1e9gl58o.apps.googleusercontent.com
 
 # Railway terminates TLS at its edge, so trust X-Forwarded-* to see the
 # original https scheme and host.
 server:
   forward-headers-strategy: framework
+
+# ryyppy.net is the domain actually registered in Google Cloud Console for
+# Google sign-in; every environment's login page points there (see
+# GlobalControllerAdvice#oneTapLoginUri).
+google:
+  auth:
+    hub-url: https://ryyppy.net
