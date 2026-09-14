@@ -32,9 +32,11 @@ test.describe('party start date', () => {
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
   // Counts started AudioBufferSourceNodes, so the drink below also covers the
-  // real sound path: DrinkerCtrl -> Sound service -> sound.js. Folded in here
-  // rather than given its own test, which would repeat this whole flow
-  // (registration, party, 5s countdown) just to hear one clip.
+  // real sound path: DrinkerCtrl -> Sound service -> sound.js. A blocked
+  // play() is silent, so counting started buffers is the only way to tell a
+  // played sound from a swallowed one. Folded in here rather than given its
+  // own test, which would repeat this whole flow (registration, party,
+  // countdown) just to hear one clip.
   await page.addInitScript(() => {
     (window as any).__playedSounds__ = 0;
     const start = AudioBufferSourceNode.prototype.start;
@@ -59,6 +61,15 @@ test('a user can create a party, appear as a participant, and logging a drink up
   // Clicking the tile starts a 5s "undo" countdown before the drink is
   // actually posted (see DrinkerCtrl.addDrink), so give it plenty of room.
   await drinkerTile.locator('.container-fluid').first().click();
+
+  // The sound is feedback for the click, so it has to be audible now, during
+  // the countdown - not when the POST lands. Asserting it before waiting for
+  // that response is what makes this a regression test for the timing: a
+  // sound moved back to the success callback would still play, just late,
+  // and would fail here.
+  await expect
+    .poll(() => page.evaluate(() => (window as any).__playedSounds__ as number), { timeout: 2_000 })
+    .toBeGreaterThan(0);
   // Both the "adding" and "editing" overlays exist in the DOM at once
   // (toggled via ng-show), so scope to the one shown right after a click.
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
@@ -74,11 +85,4 @@ test('a user can create a party, appear as a participant, and logging a drink up
   expect(drinkResponse.ok()).toBeTruthy();
 
   await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '', { timeout: 10_000 });
-
-  // The drink sound is fired from the same success callback as the promille
-  // update (DrinkerCtrl.drinkSuccessfullyAdded), and a failed play() is
-  // silent, so assert a buffer actually started rather than that play() ran.
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__playedSounds__ as number), { timeout: 5_000 })
-    .toBeGreaterThan(0);
 });

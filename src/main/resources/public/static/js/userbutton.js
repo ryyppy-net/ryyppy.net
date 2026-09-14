@@ -281,6 +281,11 @@ UserButton.prototype.buttonClick = function() {
         return;
 
     this.clicked = true;
+    // Feedback for the click itself, so it plays here rather than when the
+    // POST lands after the 5s undo countdown. Only this entry point plays it:
+    // the accept button in the edit overlay is reachable only from the click
+    // this handles, so editing a drink does not sound twice.
+    playSound();
     this.showAdding();
 }
 
@@ -291,7 +296,6 @@ UserButton.prototype.addDrink = function() {
         this.selectedPortionAlcoholPercentage,
         $.proxy(function(data) {
             this.update();
-            playSound();
         }, this),
         function() {
             alert(getMessage('drink_add_failed'));

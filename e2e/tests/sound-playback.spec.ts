@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
 import { SHARED_STORAGE_STATE } from './shared-user';
+import { getClassicUserId, loginClassic, makeTestUser, registerUser } from './helpers';
 import { Page } from '@playwright/test';
 
 /**
@@ -86,18 +87,26 @@ test.describe('drink sounds', () => {
     expect(response.headers()['cache-control']).toMatch(/max-age=\d{7,}/);
   });
 
-  test('the classic UI plays a drink sound through the same player', async ({ page }) => {
-    await instrumentWebAudio(page);
+});
 
-    await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
-    await page.locator('body').click();
+// Its own user rather than the shared one: the click below actually logs a
+// drink, and the shared user must not gain any (see shared-user.setup.ts).
+test('the classic UI plays a drink sound on the click, not when the drink posts', async ({ page }) => {
+  await instrumentWebAudio(page);
 
-    // common.js's global playSound() delegates to the shared sound.js player.
-    await expect
-      .poll(async () => {
-        await page.evaluate(() => (window as any).playSound());
-        return playedSounds(page);
-      }, { timeout: 15_000 })
-      .toBeGreaterThan(0);
-  });
+  const user = makeTestUser('sound-classic');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+
+  const userId = await getClassicUserId(page);
+  await page.click(`#user${userId}`);
+
+  // UserButton.buttonClick plays it straight away; the POST is 5s later,
+  // behind the undo countdown, so a sound that only arrived with the response
+  // would miss this window. Covers the classic path end to end: common.js's
+  // global playSound() through to the shared sound.js player.
+  await expect
+    .poll(() => playedSounds(page), { timeout: 2_000 })
+    .toBeGreaterThan(0);
 });
