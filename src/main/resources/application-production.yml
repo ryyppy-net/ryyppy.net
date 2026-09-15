@@ -9,9 +9,11 @@ spring:
     # Migrations run via railway.json's pre-deploy command instead.
     enabled: false
   datasource:
+    # minimum-idle: 0 lets the pool drop to no open connections, so Railway's
+    # serverless sleep can detect the service as idle.
     hikari:
       maximum-pool-size: 3
-      minimum-idle: 3
+      minimum-idle: 0
       idle-timeout: 10000
   security:
     oauth2:
