@@ -4,10 +4,14 @@
  * Every response carries an X-App-Version header (AppVersionFilter). This
  * worker doesn't cache anything - it passes every fetch through untouched
  * and only observes that header as a side effect, comparing it against the
- * first version it saw. A plain variable wouldn't survive the worker being
- * terminated and restarted while idle, so the baseline lives in Cache
- * Storage instead. On a mismatch it can't reload the page itself (no DOM
- * access), so it messages every controlled tab and lets sw-client.js do it.
+ * first version it saw. That baseline is read from Cache Storage once per
+ * worker lifetime and kept in memory from then on - re-opening the cache on
+ * every single intercepted fetch would add real overhead site-wide, since
+ * this handler runs for every resource on every page. Cache Storage is only
+ * there because a plain variable wouldn't survive the worker being
+ * terminated and restarted while idle. On a mismatch it can't reload the
+ * page itself (no DOM access), so it messages every controlled tab and lets
+ * sw-client.js do it.
  *
  * Static and stays that way: detection rides on the header, not on the
  * browser's own byte-diff update check for this file.
@@ -17,6 +21,9 @@
 var VERSION_CACHE = 'ryyppy-sw-version';
 var VERSION_KEY = new Request('/__sw_version_marker__');
 
+var knownVersion = null;
+var knownVersionLoaded = null;
+
 self.addEventListener('install', function (event) {
     self.skipWaiting();
 });
@@ -25,15 +32,20 @@ self.addEventListener('activate', function (event) {
     event.waitUntil(self.clients.claim());
 });
 
-function getStoredVersion() {
-    return caches.open(VERSION_CACHE).then(function (cache) {
-        return cache.match(VERSION_KEY);
-    }).then(function (match) {
-        return match ? match.text() : null;
-    });
+function loadKnownVersion() {
+    if (!knownVersionLoaded) {
+        knownVersionLoaded = caches.open(VERSION_CACHE).then(function (cache) {
+            return cache.match(VERSION_KEY);
+        }).then(function (match) {
+            return match ? match.text() : null;
+        }).then(function (version) {
+            knownVersion = version;
+        });
+    }
+    return knownVersionLoaded;
 }
 
-function setStoredVersion(version) {
+function persistVersion(version) {
     return caches.open(VERSION_CACHE).then(function (cache) {
         return cache.put(VERSION_KEY, new Response(version));
     });
@@ -53,11 +65,12 @@ function checkVersion(response) {
         return Promise.resolve();
     }
 
-    return getStoredVersion().then(function (stored) {
-        if (stored === null) {
-            return setStoredVersion(version);
+    return loadKnownVersion().then(function () {
+        if (knownVersion === null) {
+            knownVersion = version;
+            return persistVersion(version);
         }
-        if (stored !== version) {
+        if (knownVersion !== version) {
             return notifyClients();
         }
     });
