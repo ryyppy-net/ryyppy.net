@@ -1,7 +1,8 @@
 "use strict";
 
-function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
+function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
     var self = this;
+    var stopPolling = null;
 
 
     this.refreshParty = function () {
@@ -34,14 +35,14 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     };
 
     this.startPolling = function () {
-        (function tick() {
-            self.refreshParticipants();
-            self.timeoutPromise = $timeout(tick, 60000);
-        })();
+        stopPolling = Poller.start(self.refreshParticipants, 60000);
     };
 
     this.endPolling = function () {
-        $timeout.cancel(self.timeoutPromise);
+        if (stopPolling) {
+            stopPolling();
+            stopPolling = null;
+        }
     };
 
 
@@ -60,4 +61,4 @@ function PartyCtrl($scope, $routeParams, $timeout, RyyppyAPI) {
     });
 }
 
-PartyCtrl.$inject = ['$scope', '$routeParams', '$timeout', 'RyyppyAPI'];
+PartyCtrl.$inject = ['$scope', '$routeParams', 'Poller', 'RyyppyAPI'];

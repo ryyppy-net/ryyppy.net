@@ -186,6 +186,48 @@
     }
 
 
+    /**
+     * Poller repeats a tick function on an interval, but skips ticks (and
+     * stops scheduling further ones) while the tab is in the background, per
+     * the Page Visibility API. When the tab becomes visible again it ticks
+     * immediately and resumes the interval, so background tabs don't keep
+     * polling the backend.
+     */
+    function Poller($timeout, $document) {
+        this.start = function (tick, intervalMs) {
+            var doc = $document[0];
+            var timeoutPromise = null;
+
+            function scheduleNext() {
+                timeoutPromise = null;
+                if (doc.hidden) {
+                    return;
+                }
+                timeoutPromise = $timeout(function () {
+                    tick();
+                    scheduleNext();
+                }, intervalMs);
+            }
+
+            function onVisibilityChange() {
+                if (!doc.hidden && !timeoutPromise) {
+                    tick();
+                    scheduleNext();
+                }
+            }
+
+            doc.addEventListener('visibilitychange', onVisibilityChange);
+            tick();
+            scheduleNext();
+
+            return function stop() {
+                $timeout.cancel(timeoutPromise);
+                doc.removeEventListener('visibilitychange', onVisibilityChange);
+            };
+        };
+    }
+
+
     function NotificationService() {
         $.pnotify.defaults.pnotify_history = false;
 
@@ -210,6 +252,10 @@
 
         $provide.factory('Sound', ['$window', function ($window) {
             return new SoundService($window);
+        }]);
+
+        $provide.factory('Poller', ['$timeout', '$document', function ($timeout, $document) {
+            return new Poller($timeout, $document);
         }]);
 
         $provide.factory('Notify', function () {
