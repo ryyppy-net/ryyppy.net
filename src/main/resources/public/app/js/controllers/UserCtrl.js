@@ -1,7 +1,8 @@
 "use strict";
 
-function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
+function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
     var self = this;
+    var stopPolling = null;
     $scope.active = 'user';
 
     function applyProfile(data) {
@@ -58,15 +59,17 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     };
 
     this.startPolling = function () {
-        (function tick() {
+        stopPolling = Poller.start(function () {
             self.refreshProfile();
             self.refreshOwnDrinks();
-            self.timeoutPromise = $timeout(tick, 60000);
-        })();
+        }, 60000);
     };
 
     this.endPolling = function () {
-        $timeout.cancel(self.timeoutPromise);
+        if (stopPolling) {
+            stopPolling();
+            stopPolling = null;
+        }
     };
 
     $scope.partySort = function (party) {
@@ -98,4 +101,4 @@ function UserCtrl($scope, $timeout, RyyppyAPI, Notify) {
     };
 }
 
-UserCtrl.$inject = ['$scope', '$timeout', 'RyyppyAPI', 'Notify'];
+UserCtrl.$inject = ['$scope', 'Poller', 'RyyppyAPI', 'Notify'];
