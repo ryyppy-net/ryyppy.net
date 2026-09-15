@@ -96,91 +96,14 @@
     }
 
 
+    /**
+     * Thin wrapper over the shared player in /static/js/sound.js, which
+     * preloads and decodes the drink sounds so playback is instant.
+     */
     function SoundService(win) {
-        var doc = win.document;
-        var pool = [];
-        var unlocked = false;
-
-        function resolveFormat(probe) {
-            if (win.navigator.userAgent.indexOf("Opera M") !== -1) { // stupid buggy opera mobile
-                return { type: 'audio/wav', files: ['/static/sounds/7.wav'] };
-            }
-
-            var ogg = probe.canPlayType('audio/ogg; codecs="vorbis"');
-            var mp3 = probe.canPlayType('audio/mpeg; codecs="mp3"');
-            var files = [];
-            for (var i = 1; i <= 7; i++) {
-                files.push("/static/sounds/" + i);
-            }
-
-            if (ogg === "probably" || ogg === "maybe") {
-                return { type: 'audio/ogg', files: files.map(function (f) { return f + '.ogg'; }) };
-            } else if (mp3 === "probably" || mp3 === "maybe") {
-                return { type: 'audio/mpeg', files: files.map(function (f) { return f + '.mp3'; }) };
-            }
-            return null;
-        }
-
-        function build() {
-            var probe = doc.createElement("audio");
-            if (!probe.canPlayType) {
-                // no html5 audio support
-                return;
-            }
-
-            var format = resolveFormat(probe);
-            if (!format) {
-                return;
-            }
-
-            pool = format.files.map(function (src) {
-                var audio = doc.createElement("audio");
-                var source = doc.createElement('source');
-                source.type = format.type;
-                source.src = src;
-                audio.appendChild(source);
-                return audio;
-            });
-        }
-
-        // iOS Safari only allows audio.play() unprompted when it runs synchronously
-        // inside a user gesture handler. playSound() is normally triggered later,
-        // from an async API response, so it gets silently blocked on iPhone.
-        // Unlocking each pooled <audio> element once during the first real tap
-        // lets later script-triggered play() calls on those same elements succeed.
-        function unlock() {
-            if (unlocked) return;
-            unlocked = true;
-            pool.forEach(function (audio) {
-                var playPromise = audio.play();
-                audio.pause();
-                audio.currentTime = 0;
-                if (playPromise && playPromise.catch) {
-                    playPromise.catch(function () {});
-                }
-            });
-        }
-
-        function addUnlockListener(evt) {
-            doc.addEventListener(evt, function onUnlock() {
-                doc.removeEventListener(evt, onUnlock);
-                unlock();
-            }, true);
-        }
-
-        build();
-        addUnlockListener('touchend');
-        addUnlockListener('click');
-
         this.playSound = function () {
-            if (!pool.length) {
-                return;
-            }
-            var audio = pool[Math.floor(Math.random() * pool.length)];
-            audio.currentTime = 0;
-            var playPromise = audio.play();
-            if (playPromise && playPromise.catch) {
-                playPromise.catch(function () {});
+            if (win.RyyppySound) {
+                win.RyyppySound.play();
             }
         };
     }

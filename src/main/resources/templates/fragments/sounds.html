@@ -1,0 +1,17 @@
+<!--
+    Drink sound player, for the pages that can add a drink:
+
+        <th:block th:replace="~{fragments/sounds :: player}" />
+-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <th:block th:fragment="player">
+        <!-- Server-generated resource paths, so escaped inlining is enough. -->
+        <script th:inline="javascript">
+            window.__SOUND_URLS__ = [[${soundUrls}]];
+        </script>
+        <script type="text/javascript" defer th:src="@{/static/js/sound.js}"></script>
+    </th:block>
+</body>
+</html>

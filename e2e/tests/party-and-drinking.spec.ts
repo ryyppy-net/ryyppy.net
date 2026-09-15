@@ -31,6 +31,17 @@ test.describe('party start date', () => {
 });
 
 test('a user can create a party, appear as a participant, and logging a drink updates their promille level', async ({ page }) => {
+  // A blocked play() is silent, so counting started buffers is the only way
+  // to tell a played sound from a swallowed one.
+  await page.addInitScript(() => {
+    (window as any).__playedSounds__ = 0;
+    const start = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args: any[]) {
+      (window as any).__playedSounds__++;
+      return start.apply(this, args as []);
+    };
+  });
+
   const user = makeTestUser('party');
   await registerUser(page, user);
 
@@ -46,6 +57,12 @@ test('a user can create a party, appear as a participant, and logging a drink up
   // Clicking the tile starts a 5s "undo" countdown before the drink is
   // actually posted (see DrinkerCtrl.addDrink), so give it plenty of room.
   await drinkerTile.locator('.container-fluid').first().click();
+
+  // The sound is feedback for the click, so it has to be audible during the
+  // countdown, before the POST below.
+  await expect
+    .poll(() => page.evaluate(() => (window as any).__playedSounds__ as number), { timeout: 2_000 })
+    .toBeGreaterThan(0);
   // Both the "adding" and "editing" overlays exist in the DOM at once
   // (toggled via ng-show), so scope to the one shown right after a click.
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();

@@ -281,6 +281,10 @@ UserButton.prototype.buttonClick = function() {
         return;
 
     this.clicked = true;
+    // Feedback for the click, so it sounds here rather than when the drink
+    // posts 5s later. The edit overlay's accept button is reachable only from
+    // this click, so a drink never sounds twice.
+    playSound();
     this.showAdding();
 }
 
@@ -291,7 +295,6 @@ UserButton.prototype.addDrink = function() {
         this.selectedPortionAlcoholPercentage,
         $.proxy(function(data) {
             this.update();
-            playSound();
         }, this),
         function() {
             alert(getMessage('drink_add_failed'));

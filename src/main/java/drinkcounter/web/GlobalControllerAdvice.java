@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.util.List;
+
 /**
  * Global controller advice that makes configuration properties available to all views.
  */
@@ -20,17 +22,29 @@ public class GlobalControllerAdvice {
     private final BuildProperties buildProperties;
     private final boolean fedcmEnabled;
     private final String hubUrl;
+    private final SoundManifest soundManifest;
 
     @Autowired
     public GlobalControllerAdvice(
             ClientRegistrationRepository clientRegistrationRepository,
             @Autowired(required = false) BuildProperties buildProperties,
             @Value("${google.fedcm-enabled:false}") boolean fedcmEnabled,
-            @Value("${google.auth.hub-url:}") String hubUrl) {
+            @Value("${google.auth.hub-url:}") String hubUrl,
+            SoundManifest soundManifest) {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.buildProperties = buildProperties;
         this.fedcmEnabled = fedcmEnabled;
         this.hubUrl = hubUrl;
+        this.soundManifest = soundManifest;
+    }
+
+    /**
+     * The drink sound clips, as content-hashed URLs.
+     * Available in templates as ${soundUrls}
+     */
+    @ModelAttribute("soundUrls")
+    public List<String> soundUrls() {
+        return soundManifest.getSoundUrls();
     }
 
     /**
