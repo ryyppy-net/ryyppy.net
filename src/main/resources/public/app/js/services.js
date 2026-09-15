@@ -199,26 +199,33 @@
             var timeoutPromise = null;
 
             function scheduleNext() {
-                timeoutPromise = null;
-                if (doc.hidden) {
-                    return;
-                }
                 timeoutPromise = $timeout(function () {
+                    timeoutPromise = null;
                     tick();
                     scheduleNext();
                 }, intervalMs);
             }
 
+            function resume() {
+                tick();
+                scheduleNext();
+            }
+
             function onVisibilityChange() {
-                if (!doc.hidden && !timeoutPromise) {
-                    tick();
-                    scheduleNext();
+                if (doc.hidden) {
+                    // Cancel the in-flight timer outright so a tick already
+                    // scheduled before backgrounding doesn't still fire.
+                    $timeout.cancel(timeoutPromise);
+                    timeoutPromise = null;
+                } else if (!timeoutPromise) {
+                    resume();
                 }
             }
 
             doc.addEventListener('visibilitychange', onVisibilityChange);
-            tick();
-            scheduleNext();
+            if (!doc.hidden) {
+                resume();
+            }
 
             return function stop() {
                 $timeout.cancel(timeoutPromise);
