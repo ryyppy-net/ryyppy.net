@@ -4,8 +4,12 @@ FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src src
+# This stage never has .git in its build context (see .dockerignore), so the
+# commit hash AppVersionFilter needs (see pom.xml) comes from Railway's own
+# build-time variable instead of a git-log lookup.
+ARG RAILWAY_GIT_COMMIT_SHA
 # Railway scopes cache mounts by service: https://docs.railway.com/builds/dockerfiles#cache-mounts
-RUN --mount=type=cache,id=s/051f3916-5603-418f-a470-2c39ca314729-/root/.m2,target=/root/.m2 mvn -B -DskipTests package
+RUN --mount=type=cache,id=s/051f3916-5603-418f-a470-2c39ca314729-/root/.m2,target=/root/.m2 mvn -B -DskipTests -Dgit.revision=$RAILWAY_GIT_COMMIT_SHA package
 
 FROM bellsoft/liberica-openjre-debian:25-cds AS builder
 WORKDIR /builder
