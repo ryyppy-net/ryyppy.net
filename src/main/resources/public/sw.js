@@ -1,20 +1,8 @@
 /*
- * Detects a new deploy landing under an already-open tab and reloads it.
- *
- * Every response carries an X-App-Version header (AppVersionFilter). This
- * worker doesn't cache anything - it passes every fetch through untouched
- * and only observes that header as a side effect, comparing it against the
- * first version it saw. That baseline is read from Cache Storage once per
- * worker lifetime and kept in memory from then on - re-opening the cache on
- * every single intercepted fetch would add real overhead site-wide, since
- * this handler runs for every resource on every page. Cache Storage is only
- * there because a plain variable wouldn't survive the worker being
- * terminated and restarted while idle. On a mismatch it can't reload the
- * page itself (no DOM access), so it messages every controlled tab and lets
- * sw-client.js do it.
- *
- * Static and stays that way: detection rides on the header, not on the
- * browser's own byte-diff update check for this file.
+ * Watches every fetch's X-App-Version header (AppVersionFilter) for drift,
+ * then messages open tabs to reload - the worker has no DOM access to do
+ * it itself. The baseline version lives in Cache Storage, not a plain
+ * variable, since the worker can be terminated and restarted while idle.
  */
 'use strict';
 

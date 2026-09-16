@@ -1,6 +1,6 @@
 /*
- * Registers sw.js and reloads the tab the moment it reports a new deploy.
- * No prompt, no confirmation - see issue #151 for why that's deferred.
+ * Registers sw.js and reloads the tab as soon as it reports a new deploy,
+ * with no prompt or confirmation.
  */
 (function (window, navigator) {
     'use strict';
