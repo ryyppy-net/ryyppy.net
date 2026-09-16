@@ -64,6 +64,32 @@
                 </executions>
             </plugin>
             <!--
+                Generates target/classes/git.properties, which Spring Boot's
+                ProjectInfoAutoConfiguration picks up as a GitProperties bean
+                (see AppVersionFilter). The Maven version in pom.xml only moves on
+                a deliberate release, so it can't tell two deploys of the same
+                version apart - the commit hash always does.
+            -->
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>9.0.1</version>
+                <executions>
+                    <execution>
+                        <id>git-commit-id</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.commit.id.*$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                </configuration>
+            </plugin>
+            <!--
                 Build-time Hibernate bytecode enhancement. Without this, Hibernate
                 generates lazy-loading/dirty-checking bytecode for each @Entity at
                 startup via ByteBuddy; this plugin bakes that enhancement into the
