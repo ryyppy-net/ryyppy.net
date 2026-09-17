@@ -1,8 +1,7 @@
 /*
- * Watches every fetch's X-App-Version header (AppVersionFilter) for drift,
- * then messages open tabs to reload - the worker has no DOM access to do
- * it itself. The baseline version lives in Cache Storage, not a plain
- * variable, since the worker can be terminated and restarted while idle.
+ * Watches fetches for X-App-Version drift (AppVersionFilter) and messages
+ * open tabs to reload, since a worker can't reload them itself. The
+ * baseline lives in Cache Storage, since a worker can be killed while idle.
  */
 'use strict';
 

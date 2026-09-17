@@ -9,11 +9,15 @@
         return;
     }
 
-    navigator.serviceWorker.register('/sw.js');
-
     navigator.serviceWorker.addEventListener('message', function (event) {
         if (event.data && event.data.type === 'RYYPPY_NEW_VERSION') {
             window.location.reload();
         }
+    });
+
+    // Deferred so registering the worker never competes with this page's
+    // own resource fetches - see sound.js's preload for the same pattern.
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js');
     });
 })(window, navigator);

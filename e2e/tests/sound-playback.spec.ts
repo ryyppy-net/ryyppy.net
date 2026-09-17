@@ -96,8 +96,8 @@ test('the classic UI plays a drink sound on the click, not when the drink posts'
   await page.click(`#user${userId}`);
 
   // The POST is 5s later, behind the undo countdown, so a sound tied to the
-  // response would miss this comfortably-shorter window.
+  // response would miss this window.
   await expect
-    .poll(() => playedSounds(page), { timeout: 4_000 })
+    .poll(() => playedSounds(page), { timeout: 2_000 })
     .toBeGreaterThan(0);
 });

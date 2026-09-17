@@ -11,12 +11,9 @@ import java.io.IOException;
 
 /**
  * Stamps every response with the running commit hash, so sw.js can tell when
- * a deploy has moved the backend out from under an already-open tab. The
- * Maven version in pom.xml only moves on a deliberate release, so it can't
- * tell two deploys apart - the commit hash always does. It comes through as
- * BuildProperties' git.revision (see pom.xml); blank or the pom's "unset"
- * default means that build never set -Dgit.revision, so no header goes out,
- * same as a null BuildProperties.
+ * a deploy has moved the backend out from under an open tab - the Maven
+ * version in pom.xml only moves on a deliberate release, so it can't tell
+ * deploys apart. Blank or "unset" (see pom.xml) skips the header.
  */
 public class AppVersionFilter extends HttpFilter {
 
