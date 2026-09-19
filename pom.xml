@@ -22,6 +22,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>25</java.version>
+        <!--
+            The Docker build stage (see Dockerfile) never has .git in its context,
+            so a git.revision Maven property - overridable with -Dgit.revision, as
+            the Dockerfile does from Railway's RAILWAY_GIT_COMMIT_SHA - stands in
+            for a git-log lookup. The sentinel default means no build set it.
+        -->
+        <git.revision>unset</git.revision>
     </properties>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -41,6 +48,11 @@
                     -->
                     <execution>
                         <id>build-info</id>
+                        <configuration>
+                            <additionalProperties>
+                                <git.revision>${git.revision}</git.revision>
+                            </additionalProperties>
+                        </configuration>
                         <goals>
                             <goal>build-info</goal>
                         </goals>

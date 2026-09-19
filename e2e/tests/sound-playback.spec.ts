@@ -87,10 +87,21 @@ test.describe('drink sounds', () => {
 test('the classic UI plays a drink sound on the click, not when the drink posts', async ({ page }) => {
   await instrumentWebAudio(page);
 
+  const soundRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/static/sounds/')) {
+      soundRequests.push(request.url());
+    }
+  });
+
   const user = makeTestUser('sound-classic');
   await registerUser(page, user);
   await page.goto('/logout');
   await loginClassic(page, user);
+
+  // The preload is sequential and starts on page load; wait for the first
+  // clip's fetch so the click below races only a decode, not a fetch too.
+  await expect.poll(() => soundRequests.length, { timeout: 10_000 }).toBeGreaterThan(0);
 
   const userId = await getClassicUserId(page);
   await page.click(`#user${userId}`);
