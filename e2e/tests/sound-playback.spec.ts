@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 import { SHARED_STORAGE_STATE } from './shared-user';
-import { getClassicUserId, loginClassic, makeTestUser, registerUser } from './helpers';
+import { getClassicUserId, loginClassic, makeTestUser, registerUser, waitForSoundsReady } from './helpers';
 import { Page } from '@playwright/test';
 
 /**
@@ -52,21 +52,19 @@ test.describe('drink sounds', () => {
 
     // Wait for every clip: the preload is sequential, so a snapshot taken
     // mid-flight would race the "no request at play() time" check below.
-    const expectedUrls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[]);
-    await expect.poll(() => soundRequests.length, { timeout: 30_000 }).toBe(expectedUrls.length);
+    await expect
+      .poll(() => page.evaluate(() => (window as any).RyyppySound.decodedCount() as number), {
+        timeout: 30_000,
+      })
+      .toBe(await page.evaluate(() => (window as any).RyyppySound.clipCount() as number));
 
     // A real gesture first: the AudioContext stays suspended until one.
     await page.locator('body').click();
 
-    // Polls because decoding finishes asynchronously. No further request at
-    // play() time means the clip came from memory.
+    // No further request at play() time means the clip came from memory.
     const requestsBeforePlay = soundRequests.length;
-    await expect
-      .poll(async () => {
-        await page.evaluate(() => (window as any).RyyppySound.play());
-        return playedSounds(page);
-      }, { timeout: 15_000 })
-      .toBeGreaterThan(0);
+    await page.evaluate(() => (window as any).RyyppySound.play());
+    expect(await playedSounds(page)).toBeGreaterThan(0);
     expect(soundRequests.length).toBe(requestsBeforePlay);
   });
 
@@ -87,28 +85,18 @@ test.describe('drink sounds', () => {
 test('the classic UI plays a drink sound on the click, not when the drink posts', async ({ page }) => {
   await instrumentWebAudio(page);
 
-  const soundRequests: string[] = [];
-  page.on('request', (request) => {
-    if (request.url().includes('/static/sounds/')) {
-      soundRequests.push(request.url());
-    }
-  });
-
   const user = makeTestUser('sound-classic');
   await registerUser(page, user);
   await page.goto('/logout');
   await loginClassic(page, user);
 
-  // The preload is sequential and starts on page load; wait for the first
-  // clip's fetch so the click below races only a decode, not a fetch too.
-  await expect.poll(() => soundRequests.length, { timeout: 10_000 }).toBeGreaterThan(0);
+  await waitForSoundsReady(page);
 
   const userId = await getClassicUserId(page);
   await page.click(`#user${userId}`);
 
-  // The POST is 5s later, behind the undo countdown, so a sound tied to the
-  // response would miss this window.
-  await expect
-    .poll(() => playedSounds(page), { timeout: 2_000 })
-    .toBeGreaterThan(0);
+  // play() starts the buffer synchronously inside the click handler, and the
+  // POST is 5s later behind the undo countdown, so a sound tied to the
+  // response would not have started by now.
+  expect(await playedSounds(page)).toBeGreaterThan(0);
 });
