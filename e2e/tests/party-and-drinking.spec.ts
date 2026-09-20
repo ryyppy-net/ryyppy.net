@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, createParty } from './helpers';
+import { makeTestUser, registerUser, createParty, waitForSoundsReady } from './helpers';
 import { SHARED_STORAGE_STATE } from './shared-user';
 
 // Creates a party and asserts only on that party's own tile, so the shared
@@ -54,15 +54,15 @@ test('a user can create a party, appear as a participant, and logging a drink up
   const promilleLocator = drinkerTile.locator('p', { hasText: 'Promilleja' });
   const initialPromilleText = await promilleLocator.textContent();
 
+  await waitForSoundsReady(page);
+
   // Clicking the tile starts a 5s "undo" countdown before the drink is
   // actually posted (see DrinkerCtrl.addDrink), so give it plenty of room.
   await drinkerTile.locator('.container-fluid').first().click();
 
   // The sound is feedback for the click, so it has to be audible during the
   // countdown, before the POST below.
-  await expect
-    .poll(() => page.evaluate(() => (window as any).__playedSounds__ as number), { timeout: 2_000 })
-    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => (window as any).__playedSounds__ as number)).toBeGreaterThan(0);
   // Both the "adding" and "editing" overlays exist in the DOM at once
   // (toggled via ng-show), so scope to the one shown right after a click.
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
