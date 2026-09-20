@@ -66,11 +66,8 @@
             <!--
                 Generates target/classes/git.properties from the local .git, which
                 Spring Boot's ProjectInfoAutoConfiguration picks up as a
-                GitProperties bean (see AppVersionFilter). The Docker build stage
-                (see Dockerfile) never has .git in its context, so it skips this
-                plugin (-Dmaven.gitcommitid.skip=true) and writes that same file
-                itself from Railway's own build-time commit variable instead.
-                failOnNoGitDirectory covers a checkout without .git either way.
+                GitProperties bean (see AppVersionFilter). failOnNoGitDirectory
+                keeps a checkout without .git from failing the build.
             -->
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>

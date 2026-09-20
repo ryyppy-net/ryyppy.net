@@ -11,10 +11,8 @@ import java.io.IOException;
 
 /**
  * Stamps every response with the running commit hash, so sw.js can tell when
- * a deploy has moved the backend out from under an open tab - the Maven
- * version in pom.xml only moves on a deliberate release, so it can't tell
- * deploys apart. Null or commit-id-less GitProperties (see pom.xml) skips
- * the header.
+ * a deploy has moved the backend out from under an open tab. Null or
+ * commit-id-less GitProperties skips the header.
  */
 public class AppVersionFilter extends HttpFilter {
 
