@@ -22,13 +22,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>25</java.version>
-        <!--
-            Fallback for the Docker build stage, which never has .git in its
-            context (see git-commit-id-maven-plugin below) - overridable with
-            -Dgit.revision, as the Dockerfile does from Railway's
-            RAILWAY_GIT_COMMIT_SHA. The sentinel default means no build set it.
-        -->
-        <git.revision>unset</git.revision>
     </properties>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -48,11 +41,6 @@
                     -->
                     <execution>
                         <id>build-info</id>
-                        <configuration>
-                            <additionalProperties>
-                                <git.revision>${git.revision}</git.revision>
-                            </additionalProperties>
-                        </configuration>
                         <goals>
                             <goal>build-info</goal>
                         </goals>
@@ -78,10 +66,11 @@
             <!--
                 Generates target/classes/git.properties from the local .git, which
                 Spring Boot's ProjectInfoAutoConfiguration picks up as a
-                GitProperties bean (see AppVersionFilter) - the standard route to a
-                commit hash. failOnNoGitDirectory keeps the Docker build stage
-                (see Dockerfile) working even without .git in its context: it just
-                skips this plugin, and AppVersionFilter falls back to git.revision.
+                GitProperties bean (see AppVersionFilter). The Docker build stage
+                (see Dockerfile) never has .git in its context, so it skips this
+                plugin (-Dmaven.gitcommitid.skip=true) and writes that same file
+                itself from Railway's own build-time commit variable instead.
+                failOnNoGitDirectory covers a checkout without .git either way.
             -->
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
