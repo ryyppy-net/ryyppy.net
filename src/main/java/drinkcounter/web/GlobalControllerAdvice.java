@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.info.GitProperties;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,6 +21,7 @@ public class GlobalControllerAdvice {
 
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final BuildProperties buildProperties;
+    private final GitProperties gitProperties;
     private final boolean fedcmEnabled;
     private final String hubUrl;
     private final SoundManifest soundManifest;
@@ -28,11 +30,13 @@ public class GlobalControllerAdvice {
     public GlobalControllerAdvice(
             ClientRegistrationRepository clientRegistrationRepository,
             @Autowired(required = false) BuildProperties buildProperties,
+            @Autowired(required = false) GitProperties gitProperties,
             @Value("${google.fedcm-enabled:false}") boolean fedcmEnabled,
             @Value("${google.auth.hub-url:}") String hubUrl,
             SoundManifest soundManifest) {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.buildProperties = buildProperties;
+        this.gitProperties = gitProperties;
         this.fedcmEnabled = fedcmEnabled;
         this.hubUrl = hubUrl;
         this.soundManifest = soundManifest;
@@ -58,6 +62,16 @@ public class GlobalControllerAdvice {
     @ModelAttribute("applicationVersion")
     public String applicationVersion() {
         return buildProperties == null ? null : buildProperties.getVersion();
+    }
+
+    /**
+     * The running commit hash, same source AppVersionFilter uses for the
+     * X-App-Version header. Null when GitProperties has no commit id.
+     * Available in templates as ${gitCommit}
+     */
+    @ModelAttribute("gitCommit")
+    public String gitCommit() {
+        return gitProperties == null ? null : gitProperties.getCommitId();
     }
 
     /**
