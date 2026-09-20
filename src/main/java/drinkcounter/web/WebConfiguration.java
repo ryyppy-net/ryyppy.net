@@ -1,5 +1,7 @@
 package drinkcounter.web;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.GitProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -92,6 +94,15 @@ public class WebConfiguration implements WebMvcConfigurer {
         FilterRegistrationBean<ResourceUrlEncodingFilter> registration =
                 new FilterRegistrationBean<>(new ResourceUrlEncodingFilter());
         registration.setDispatcherTypes(jakarta.servlet.DispatcherType.REQUEST);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<AppVersionFilter> appVersionFilter(
+            @Autowired(required = false) GitProperties gitProperties) {
+        FilterRegistrationBean<AppVersionFilter> registration =
+                new FilterRegistrationBean<>(new AppVersionFilter(gitProperties));
+        registration.addUrlPatterns("/*");
         return registration;
     }
 

@@ -4,8 +4,14 @@ FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src src
+# This stage never has .git in its build context (see .dockerignore), so
+# git-commit-id-maven-plugin (pom.xml) has nothing to read here - write the
+# git.properties it would otherwise generate ourselves, from Railway's own
+# build-time commit variable, and skip the plugin so it doesn't overwrite it.
+ARG RAILWAY_GIT_COMMIT_SHA
+RUN echo "git.commit.id=$RAILWAY_GIT_COMMIT_SHA" > src/main/resources/git.properties
 # Railway scopes cache mounts by service: https://docs.railway.com/builds/dockerfiles#cache-mounts
-RUN --mount=type=cache,id=s/051f3916-5603-418f-a470-2c39ca314729-/root/.m2,target=/root/.m2 mvn -B -DskipTests package
+RUN --mount=type=cache,id=s/051f3916-5603-418f-a470-2c39ca314729-/root/.m2,target=/root/.m2 mvn -B -DskipTests -Dmaven.gitcommitid.skip=true package
 
 FROM bellsoft/liberica-openjre-debian:25-cds AS builder
 WORKDIR /builder
