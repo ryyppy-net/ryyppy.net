@@ -102,7 +102,7 @@ the actual SQL dialect. Two properties of it:
 `checkpoint.sh` runs in the same stage. It starts the application, waits for
 `Started RyyppyApplication`, and triggers a
 [CRaC](https://docs.spring.io/spring-boot/reference/packaging/checkpoint-restore.html)
-checkpoint with `jcmd`; `entrypoint.sh` restores that image instead of booting.
+checkpoint with `jcmd`; the entry point restores that image instead of booting.
 Restoring takes ~90ms against ~2s for a boot, which is what Railway's
 serverless sleep costs on every wake (see Railway below).
 
@@ -129,10 +129,10 @@ serverless sleep costs on every wake (see Railway below).
 * **Best-effort.** Warp SIGKILLs the JVM once the image is written, so exit
   status says nothing; `checkpoint.sh` checks for `crac/core.img`, removes a
   partial directory, and prints either `CRaC checkpoint written` or a warning -
-  the JVM's own output goes to a file, so the build log shows nothing else.
-  `entrypoint.sh` boots normally when the image carries no checkpoint, and falls
-  back to a normal boot if a restore fails outright - a single-replica service
-  must not crash-loop on a checkpoint some host refuses.
+  the JVM's own output goes to a file, so the build log shows nothing else. The
+  entry point boots normally when the image carries no checkpoint; a checkpoint
+  that fails to restore crashes the container rather than degrading quietly to
+  a boot that looks like success.
 * **Secrets.** A checkpoint is a memory image, so it contains every value the
   JVM saw, the datasource password included. It ships inside the image, which
   Railway keeps private to the project.

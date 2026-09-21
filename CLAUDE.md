@@ -56,8 +56,8 @@ Two invariants: they stay read-only (the jar has no `flywayInitializer` bean -
 and they stay best-effort, so an unreachable database cannot block a deploy.
 
 The service sets no start command, so the `ENTRYPOINT` defines how the app
-starts: `entrypoint.sh` restores the checkpoint, or boots normally when there
-is none and when a restore fails. Railway's serverless sleep starts a fresh
+starts: it restores the checkpoint, or boots normally when there is none.
+Railway's serverless sleep starts a fresh
 container on every wake, so that restore is the hot path - see README.md for
 why the checkpoint is taken through `jcmd` rather than
 `spring.context.checkpoint=onRefresh`, and for the startup-time figures.

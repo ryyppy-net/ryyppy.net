@@ -26,7 +26,7 @@ COPY --from=builder /builder/extracted/dependencies/ ./
 COPY --from=builder /builder/extracted/spring-boot-loader/ ./
 COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
 COPY --from=builder /builder/extracted/application/ ./
-COPY --chmod=0755 entrypoint.sh checkpoint.sh ./
+COPY --chmod=0755 checkpoint.sh ./
 
 # Railway injects service variables for any ARG declared in the stage using
 # them. These land in the image history: `docker history` reveals the password.
@@ -49,4 +49,7 @@ RUN java -XX:AOTCacheOutput=app.aot \
 
 RUN ./checkpoint.sh
 
-ENTRYPOINT ["./entrypoint.sh"]
+# Railway starts a fresh container on every wake from serverless sleep, so this
+# restores on each wake. A build whose checkpoint step found no database wrote
+# none, and boots instead; a checkpoint that fails to restore is a crash.
+ENTRYPOINT ["/bin/sh", "-c", "if [ -s crac/core.img ]; then exec java -XX:CRaCRestoreFrom=crac; fi; exec java -XX:AOTCache=app.aot -Dspring.aot.enabled=true -jar application.jar"]
