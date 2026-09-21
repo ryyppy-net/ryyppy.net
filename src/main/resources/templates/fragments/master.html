@@ -21,6 +21,8 @@
         <script type="text/javascript" src="/webjars/jquery/1.8.3/jquery.min.js"></script>
         <script type="text/javascript" src="/static/vendor/jquery-tooltip/jquery.tooltip.min.js"></script>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <link rel="preload" as="font" type="font/woff2" th:href="@{/static/fonts/rum-raisin-latin.woff2}" crossorigin />
+        <link rel="preload" as="font" type="font/woff2" th:href="@{/static/fonts/roboto-500-latin.woff2}" crossorigin />
         <link rel="stylesheet" th:href="@{/static/css/fonts.css}" type="text/css" />
         <link rel="stylesheet" th:href="@{/static/css/style.css}" type="text/css" media="screen" />
         <th:block th:replace="${customHead}" />
