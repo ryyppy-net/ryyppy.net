@@ -47,6 +47,11 @@ public class WebConfiguration implements WebMvcConfigurer {
      * Nothing references them from markup, so SoundManifest resolves them
      * through this chain server-side instead.
      *
+     * Font files under /static/fonts/** are referenced by plain url() in
+     * fonts.css rather than through a template, so they can't go through the
+     * <c:url>-driven rewrite either - they get the vendor treatment instead:
+     * a fixed path with a long cache lifetime.
+     *
      * The favicon and Apple touch icons are requested by browsers/OS via
      * fixed, well-known root paths (not referenced through any <c:url> or
      * <link> tag), so they can't be versioned either. They change rarely, so
@@ -83,6 +88,10 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .setCacheControl(oneYearImmutable)
                 .resourceChain(true)
                 .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+
+        registry.addResourceHandler("/static/fonts/**")
+                .addResourceLocations("classpath:/public/static/fonts/")
+                .setCacheControl(oneYearImmutable);
 
         registry.addResourceHandler("/favicon.ico", "/apple-touch-icon.png", "/apple-touch-icon-precomposed.png")
                 .addResourceLocations("classpath:/public/")
