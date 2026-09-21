@@ -43,11 +43,11 @@ public class GlobalControllerAdvice {
     }
 
     /**
-     * The drink sound clips, as content-hashed URLs.
+     * The drink sound clips, each as a content-hashed [oggUrl, mp3Url] pair.
      * Available in templates as ${soundUrls}
      */
     @ModelAttribute("soundUrls")
-    public List<String> soundUrls() {
+    public List<List<String>> soundUrls() {
         return soundManifest.getSoundUrls();
     }
 

@@ -130,7 +130,7 @@ String.prototype.format = function() {
 };
 
 function playSound() {
-    // Implemented in sound.js (Web Audio, preloaded and decoded up front).
+    // Implemented in sound.js (Howler, preloaded up front).
     if (window.RyyppySound) {
         window.RyyppySound.play();
     }
