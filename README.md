@@ -118,12 +118,21 @@ serverless sleep costs on every wake (see Railway below).
 * **`-Dspring.profiles.active=production`.** A checkpoint freezes resolved
   property values, so a checkpoint taken without the profile would restore with
   `ddl-auto: validate`, Flyway enabled and the wrong Google client id.
+* **`-XX:CPUFeatures=generic`.** Railway builds and runs on separate hosts, and
+  a restore needs every CPU feature the checkpointed JVM was using; without the
+  baseline the restore fails outright with `incompatible or missing CPU
+  features`. This is also why the checkpoint run does not replay `app.aot`:
+  adapter stubs from an AOT cache do not survive a restore under that baseline,
+  and the JVM dies with a SIGSEGV in `AdapterHandlerLibrary::lookup` on the
+  first request rather than at restore. The cache serves the fallback boot,
+  where nothing constrains the CPU.
 * **Best-effort.** Warp SIGKILLs the JVM once the image is written, so exit
-  status says nothing; `checkpoint.sh` checks for `crac/core.img` and removes a
-  partial directory. `entrypoint.sh` boots normally when the image carries no
-  checkpoint, and falls back to a normal boot if a restore fails outright -
-  a single-replica service must not crash-loop on a checkpoint some host
-  refuses.
+  status says nothing; `checkpoint.sh` checks for `crac/core.img`, removes a
+  partial directory, and prints either `CRaC checkpoint written` or a warning -
+  the JVM's own output goes to a file, so the build log shows nothing else.
+  `entrypoint.sh` boots normally when the image carries no checkpoint, and falls
+  back to a normal boot if a restore fails outright - a single-replica service
+  must not crash-loop on a checkpoint some host refuses.
 * **Secrets.** A checkpoint is a memory image, so it contains every value the
   JVM saw, the datasource password included. It ships inside the image, which
   Railway keeps private to the project.

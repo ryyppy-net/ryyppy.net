@@ -47,11 +47,6 @@ RUN java -XX:AOTCacheOutput=app.aot \
     -jar application.jar \
     || echo "WARNING: AOT cache training failed; starting without a cache"
 
-# The checkpoint bakes these values into the JVM image, so the layer has to be
-# keyed on them: the JVM reads them from the environment, where BuildKit cannot
-# see the dependency, and a reused layer would restore a rotated database
-# password with the old one.
-RUN : "$SPRING_DATASOURCE_URL $SPRING_DATASOURCE_USERNAME $SPRING_DATASOURCE_PASSWORD $GOOGLE_CLIENT_SECRET $AUTH_RELAY_SECRET"; \
-    ./checkpoint.sh
+RUN ./checkpoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]

@@ -11,11 +11,21 @@ LOG=/tmp/checkpoint-boot.log
 
 rm -rf "$CHECKPOINT"
 
+# Railway builds and runs on separate hosts, and a checkpoint can only be
+# restored on a CPU carrying every feature the checkpointed JVM was using, so
+# the JVM is held to the x86-64 baseline that every host has.
+#
+# app.aot is deliberately not replayed here: adapter stubs from an AOT cache do
+# not survive a restore under that baseline, and the JVM dies with a SIGSEGV in
+# AdapterHandlerLibrary::lookup on the first request rather than at restore. The
+# cache serves entrypoint.sh's fallback boot instead, where nothing constrains
+# the CPU. Booting without it costs this step a couple of seconds.
+#
 # A checkpoint freezes resolved property values, and production configuration
 # lives in application-production.yml, so the profile has to be active here
 # rather than only where the container runs.
-java -XX:AOTCache=app.aot \
-    -XX:CRaCEngine=warp \
+java -XX:CRaCEngine=warp \
+    -XX:CPUFeatures=generic \
     -XX:CRaCCheckpointTo="$CHECKPOINT" \
     -Dspring.aot.enabled=true \
     -Dspring.profiles.active=production \
@@ -38,8 +48,12 @@ done
 wait "$APP" 2>/dev/null || true
 
 # warp SIGKILLs the JVM once the image is written, so a successful checkpoint
-# and a failed boot both exit non-zero. The image on disk is the only result.
-if [ ! -s "$CHECKPOINT/core.img" ]; then
+# and a failed boot both exit non-zero. The image on disk is the only result,
+# and the JVM's own output went to $LOG, so say which happened - the build log
+# is the only place this step is visible from.
+if [ -s "$CHECKPOINT/core.img" ]; then
+    echo "CRaC checkpoint written ($(du -sh "$CHECKPOINT" | cut -f1))"
+else
     rm -rf "$CHECKPOINT"
     echo "WARNING: no CRaC checkpoint written; the image will boot normally" >&2
     tail -20 "$LOG" >&2 || true
