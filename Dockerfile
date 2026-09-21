@@ -49,7 +49,6 @@ RUN java -XX:AOTCacheOutput=app.aot \
 
 RUN ./checkpoint.sh
 
-# Railway starts a fresh container on every wake from serverless sleep, so this
-# restores on each wake. A build whose checkpoint step found no database wrote
-# none, and boots instead; a checkpoint that fails to restore is a crash.
+# Railway starts a fresh container on every wake from serverless sleep, so the
+# restore runs on each wake and not only on deploy.
 ENTRYPOINT ["/bin/sh", "-c", "if [ -s crac/core.img ]; then exec java -XX:CRaCRestoreFrom=crac; fi; exec java -XX:AOTCache=app.aot -Dspring.aot.enabled=true -jar application.jar"]

@@ -183,9 +183,9 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <!--
-            On the classpath this activates Spring's checkpoint/restore
-            support, which drains the connection pool around the image's CRaC
-            checkpoint (see checkpoint.sh) and resumes it on restore.
+            No code imports this. Its presence is what makes Spring drain the
+            connection pool around the image's CRaC checkpoint (checkpoint.sh)
+            and resume it on restore.
         -->
         <dependency>
             <groupId>org.crac</groupId>

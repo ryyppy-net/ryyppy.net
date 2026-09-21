@@ -1,9 +1,8 @@
 #!/bin/sh
-# Writes the CRaC checkpoint that entrypoint.sh restores.
+# Writes the CRaC checkpoint the entry point restores.
 #
-# The warp engine needs no Linux capabilities; CRaC's default CRIU engine needs
-# CHECKPOINT_RESTORE and SYS_PTRACE, which Railway grants neither builds nor
-# containers.
+# Railway grants no Linux capabilities to builds or containers, so the
+# checkpoint is taken by warp rather than CRaC's default CRIU engine.
 set -eu
 
 CHECKPOINT=/application/crac
@@ -11,19 +10,10 @@ LOG=/tmp/checkpoint-boot.log
 
 rm -rf "$CHECKPOINT"
 
-# Railway builds and runs on separate hosts, and a checkpoint can only be
-# restored on a CPU carrying every feature the checkpointed JVM was using, so
-# the JVM is held to the x86-64 baseline that every host has.
-#
-# app.aot is deliberately not replayed here: adapter stubs from an AOT cache do
-# not survive a restore under that baseline, and the JVM dies with a SIGSEGV in
-# AdapterHandlerLibrary::lookup on the first request rather than at restore. The
-# cache serves entrypoint.sh's fallback boot instead, where nothing constrains
-# the CPU. Booting without it costs this step a couple of seconds.
-#
-# A checkpoint freezes resolved property values, and production configuration
-# lives in application-production.yml, so the profile has to be active here
-# rather than only where the container runs.
+# Railway builds and runs on separate hosts, so the JVM is held to the x86-64
+# baseline every host has; an AOT cache's adapter stubs do not survive a restore
+# under it. A checkpoint freezes resolved property values, and production
+# configuration lives in application-production.yml.
 java -XX:CRaCEngine=warp \
     -XX:CPUFeatures=generic \
     -XX:CRaCCheckpointTo="$CHECKPOINT" \
@@ -32,8 +22,8 @@ java -XX:CRaCEngine=warp \
     -jar application.jar > "$LOG" 2>&1 &
 APP=$!
 
-# Checkpointing a half-started context captures a JVM with no Tomcat and a
-# connection pool mid-open, so wait for Spring to report the context up.
+# A half-started context checkpoints a JVM with no Tomcat and a connection pool
+# mid-open.
 i=0
 while [ "$i" -lt 180 ]; do
     if grep -q "Started RyyppyApplication" "$LOG" 2>/dev/null; then
@@ -48,9 +38,7 @@ done
 wait "$APP" 2>/dev/null || true
 
 # warp SIGKILLs the JVM once the image is written, so a successful checkpoint
-# and a failed boot both exit non-zero. The image on disk is the only result,
-# and the JVM's own output went to $LOG, so say which happened - the build log
-# is the only place this step is visible from.
+# and a failed boot both exit non-zero; the image on disk is the only result.
 if [ -s "$CHECKPOINT/core.img" ]; then
     echo "CRaC checkpoint written ($(du -sh "$CHECKPOINT" | cut -f1))"
 else
