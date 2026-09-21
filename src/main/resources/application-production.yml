@@ -11,10 +11,14 @@ spring:
   datasource:
     # minimum-idle: 0 lets the pool drop to no open connections, so Railway's
     # serverless sleep can detect the service as idle.
+    #
+    # allow-pool-suspension lets the pool be drained before the image's CRaC
+    # checkpoint (see checkpoint.sh); CRaC will not checkpoint open sockets.
     hikari:
       maximum-pool-size: 3
       minimum-idle: 0
       idle-timeout: 10000
+      allow-pool-suspension: true
   security:
     oauth2:
       client:

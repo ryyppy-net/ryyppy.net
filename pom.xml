@@ -182,6 +182,15 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!--
+            On the classpath this activates Spring's checkpoint/restore
+            support, which drains the connection pool around the image's CRaC
+            checkpoint (see checkpoint.sh) and resumes it on restore.
+        -->
+        <dependency>
+            <groupId>org.crac</groupId>
+            <artifactId>crac</artifactId>
+        </dependency>
 
         <!-- Frontend third-party libraries served via Spring Boot's /webjars/** mapping -->
         <dependency>

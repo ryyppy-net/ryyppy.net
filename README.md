@@ -66,10 +66,12 @@ The root `Dockerfile` follows Spring Boot's
 [Dockerfiles reference](https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html)
 (the AOT cache variant): a Maven stage builds the jar, a second stage runs
 `jarmode=tools extract --layers`, and the runtime stage copies the four layers
-separately and trains a JDK AOT cache (JEP 483/514) that the entry point
-replays. `-Dspring.aot.enabled=true` on the entry point activates the
-build-time bean definitions from the spring-boot-maven-plugin's `process-aot`
-goal. No `mvn package` is needed first.
+separately, trains a JDK AOT cache (JEP 483/514) and writes a CRaC checkpoint
+(see below). `-Dspring.aot.enabled=true` activates the build-time bean
+definitions from the spring-boot-maven-plugin's `process-aot` goal. No
+`mvn package` is needed first.
+
+The base image is Azul Zulu, the only JDK shipping CRaC's warp engine.
 
 ```bash
 docker build -t ryyppynet \
@@ -94,6 +96,37 @@ the actual SQL dialect. Two properties of it:
   build time.
 * **Best-effort.** An unreachable database fails the run and leaves the build
   green; the image then boots without the cache.
+
+### Checkpoint and restore
+
+`checkpoint.sh` runs in the same stage. It starts the application, waits for
+`Started RyyppyApplication`, and triggers a
+[CRaC](https://docs.spring.io/spring-boot/reference/packaging/checkpoint-restore.html)
+checkpoint with `jcmd`; `entrypoint.sh` restores that image instead of booting.
+Restoring takes ~90ms against ~2s for a boot, which is what Railway's
+serverless sleep costs on every wake (see Railway below).
+
+* **`-XX:CRaCEngine=warp`.** CRaC's default CRIU engine needs the
+  `CHECKPOINT_RESTORE` and `SYS_PTRACE` capabilities at both ends, and Railway
+  grants neither to builds nor to containers. Warp needs no privileges.
+* **On demand, not `spring.context.checkpoint=onRefresh`.** The automatic mode
+  checkpoints inside `LifecycleProcessor.onRefresh`, before Spring's lifecycle
+  is running, so `stopForRestart()` is a no-op and the connection pool is never
+  drained - and CRaC refuses to checkpoint a JVM holding an open socket. With
+  `jcmd` against a started context, `HikariCheckpointRestoreLifecycle` suspends
+  the pool first and resumes it after restore.
+* **`-Dspring.profiles.active=production`.** A checkpoint freezes resolved
+  property values, so a checkpoint taken without the profile would restore with
+  `ddl-auto: validate`, Flyway enabled and the wrong Google client id.
+* **Best-effort.** Warp SIGKILLs the JVM once the image is written, so exit
+  status says nothing; `checkpoint.sh` checks for `crac/core.img` and removes a
+  partial directory. `entrypoint.sh` boots normally when the image carries no
+  checkpoint, and falls back to a normal boot if a restore fails outright -
+  a single-replica service must not crash-loop on a checkpoint some host
+  refuses.
+* **Secrets.** A checkpoint is a memory image, so it contains every value the
+  JVM saw, the datasource password included. It ships inside the image, which
+  Railway keeps private to the project.
 
 ### Database migrations
 
@@ -130,11 +163,27 @@ Railway's private network is
 so the training run only reaches a database available over the public
 internet.
 
+[Serverless](https://docs.railway.com/deployments/serverless) is enabled, so
+the service sleeps after 5-10 minutes without outbound traffic and the next
+request starts a fresh container - which is the checkpoint restore, not a boot.
+
+Because the checkpoint freezes the secrets it was built with, changes to them
+must go through a **redeploy**, which rebuilds, and never a **restart**, which
+[reuses the existing image](https://docs.railway.com/cli/restart). Editing a
+variable in the dashboard stages a change whose *Deploy* redeploys; `Alt`-click
+commits it without one, and a restart afterwards would run the container with
+the new value while the restored JVM still holds the old one.
+
 ### Startup time
 
-Measured on one machine (16 vCPU, JDK 25.0.4.1), booting the extracted layout
-against the same PostgreSQL 14 container, time from process launch to the
-`Started RyyppyApplication` log line, median of 5 runs:
+Restoring the checkpoint is the path a Railway wake takes; the boot below is
+what the image falls back to. Spring reports ~90ms for `restored JVM running
+for`, with the first HTTP request answered ~160ms after process launch.
+
+The boot figures are measured on a different machine (16 vCPU, JDK 25.0.4.1),
+booting the extracted layout against the same PostgreSQL 14 container, time
+from process launch to the `Started RyyppyApplication` log line, median of 5
+runs:
 
 | Configuration | Startup | vs. plain boot |
 | --- | --- | --- |
