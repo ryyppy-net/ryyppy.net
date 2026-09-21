@@ -27,17 +27,18 @@ test.describe('drink sounds', () => {
   test('the server renders a content-hashed clip manifest into the page', async ({ page }) => {
     await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
-    const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[]);
+    const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[][]);
 
-    // Every .mp3 in public/static/sounds/.
+    // Every clip stem in public/static/sounds/, as an [oggUrl, mp3Url] pair.
     expect(urls).toHaveLength(8);
-    // The content hash in the URL is what makes the immutable header safe.
-    for (const url of urls) {
-      expect(url).toMatch(/^\/static\/sounds\/\d+-[0-9a-f]{32}\.mp3$/);
+    for (const [oggUrl, mp3Url] of urls) {
+      // The content hash in the URL is what makes the immutable header safe.
+      expect(oggUrl).toMatch(/^\/static\/sounds\/\d+-[0-9a-f]{32}\.ogg$/);
+      expect(mp3Url).toMatch(/^\/static\/sounds\/\d+-[0-9a-f]{32}\.mp3$/);
     }
   });
 
-  test('clips are preloaded, decoded and played through the Web Audio API', async ({ page }) => {
+  test('clips are preloaded and played through the Web Audio API', async ({ page }) => {
     await instrumentWebAudio(page);
 
     const soundRequests: string[] = [];
@@ -50,13 +51,7 @@ test.describe('drink sounds', () => {
     await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 
-    // Wait for every clip: the preload is sequential, so a snapshot taken
-    // mid-flight would race the "no request at play() time" check below.
-    await expect
-      .poll(() => page.evaluate(() => (window as any).RyyppySound.decodedCount() as number), {
-        timeout: 30_000,
-      })
-      .toBe(await page.evaluate(() => (window as any).RyyppySound.clipCount() as number));
+    await waitForSoundsReady(page);
 
     // A real gesture first: the AudioContext stays suspended until one.
     await page.locator('body').click();
@@ -70,9 +65,9 @@ test.describe('drink sounds', () => {
 
   test('clips are served immutable so a repeat visit never refetches them', async ({ page }) => {
     await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
-    const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[]);
+    const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[][]);
 
-    const response = await page.request.get(urls[0]);
+    const response = await page.request.get(urls[0][0]);
     expect(response.ok()).toBeTruthy();
     expect(response.headers()['cache-control']).toContain('immutable');
     expect(response.headers()['cache-control']).toMatch(/max-age=\d{7,}/);

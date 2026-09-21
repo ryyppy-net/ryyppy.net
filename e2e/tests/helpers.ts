@@ -152,11 +152,10 @@ export async function addDrinkImmediatelyClassic(page: Page, userId: number): Pr
 }
 
 /**
- * Waits until at least one drink clip is decoded and playable. sound.js only
- * plays from memory, so a click before this point is silently dropped.
+ * Waits until every drink clip has been loaded by Howler, so a subsequent
+ * play() starts immediately instead of racing the load.
  */
 export async function waitForSoundsReady(page: Page): Promise<void> {
   await page.waitForFunction(() => (window as any).RyyppySound !== undefined);
-  const state = await page.evaluate(() => (window as any).RyyppySound.ready as Promise<string>);
-  expect(state).toBe('ready');
+  await page.evaluate(() => (window as any).RyyppySound.ready as Promise<void>);
 }

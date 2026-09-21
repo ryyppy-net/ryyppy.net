@@ -98,7 +98,7 @@
 
     /**
      * Thin wrapper over the shared player in /static/js/sound.js, which
-     * preloads and decodes the drink sounds so playback is instant.
+     * preloads the drink sounds via Howler so playback is instant.
      */
     function SoundService(win) {
         this.playSound = function () {
