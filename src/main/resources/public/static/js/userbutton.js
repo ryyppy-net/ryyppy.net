@@ -347,48 +347,48 @@ UserButton.prototype.showAdding = function() {
         that.progressBar = new DrinkProgressBar($("#progressbar" + that.userId));
         that.progressBar.start();
 
-        that.undoDiv.fadeIn(500, function() {
-            that.scheduleAddingDrink();
+        var editButton = $('#editButton' + that.userId);
+        editButton.click(function() {
+            that.cancelAddingDrink();
+            editButton.css('background-color', 'green');
 
-            var editButton = $('#editButton' + that.userId);
-            editButton.click(function() {
-                that.cancelAddingDrink();
-                editButton.css('background-color', 'green');
+            $.get('/static/templates/editDrink.html', function(template) {
+                var editDiv = $.tmpl(template, undoData);
+                editDiv.appendTo('#body');
+                that.fitElementOnAnotherOrFullScreen(editDiv, $('#user' + that.userId));
 
-                $.get('/static/templates/editDrink.html', function(template) {
-                    var editDiv = $.tmpl(template, undoData);
-                    editDiv.appendTo('#body');
-                    that.fitElementOnAnotherOrFullScreen(editDiv, $('#user' + that.userId));
+                that.undoDiv.hide();
+                editDiv.show();
 
-                    that.undoDiv.hide();
-                    editDiv.show();
-
-                    $('#acceptButton' + that.userId).click(function() {
-                        that.selectedPortionSize = $('#portionSize' + that.userId).val();
-                        that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
-                        that.addDrink();
-                        that.undoDiv.remove();
-                        that.fadeAndRemove(editDiv);
-                        that.enableButton();
-                    });
+                $('#acceptButton' + that.userId).click(function() {
+                    that.selectedPortionSize = $('#portionSize' + that.userId).val();
+                    that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
+                    that.addDrink();
+                    that.undoDiv.remove();
+                    that.fadeAndRemove(editDiv);
+                    that.enableButton();
                 });
             });
+        });
 
-            var undoButton = $('#undoButton' + that.userId);
-            undoButton.click(function() {
-                that.cancelAddingDrink();
-                editButton.unbind('click');
-                that.progressBar.stop();
+        var undoButton = $('#undoButton' + that.userId);
+        undoButton.click(function() {
+            that.cancelAddingDrink();
+            editButton.unbind('click');
+            that.progressBar.stop();
 
-                undoButton.text(getMessage('drink_was_canceled'))
-                          .css('background-color', 'red');
+            undoButton.text(getMessage('drink_was_canceled'))
+                      .css('background-color', 'red');
 
-                setTimeout(function() {
-                    that.fadeAndRemove(that.undoDiv);
-                    that.progressBar.remove();
-                    that.enableButton();
-                }, 2000);
-            });
+            setTimeout(function() {
+                that.fadeAndRemove(that.undoDiv);
+                that.progressBar.remove();
+                that.enableButton();
+            }, 2000);
+        });
+
+        that.undoDiv.fadeIn(500, function() {
+            that.scheduleAddingDrink();
         });
     });
 }
