@@ -20,8 +20,8 @@
             $(document).ready(function() {
                 $("#drinkerName").focus();
 
-                $('.userField').live('keyup', function() { checkDrinkerFields(true); });
-                // No #email binding here: its own onkeyup/onblur below call
+                $('.userField').live('input', function() { checkDrinkerFields(true); });
+                // No #email binding here: its own oninput/onblur below call
                 // checkEmail(), and a second binding would double the lookups
                 // every keystroke fires.
             });
@@ -62,7 +62,7 @@
                         <div class="control-group">
                             <label class="control-label" for="email">Sähköposti</label>
                             <div class="controls">
-                                <input id="email" type="email" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" onkeyup="checkEmail($(this).val()); checkDrinkerFields(true);" />
+                                <input id="email" type="email" name="email" onblur="checkEmail($(this).val()); checkDrinkerFields(true);" oninput="checkEmail($(this).val()); checkDrinkerFields(true);" />
                                 <span id="emailCorrect">&nbsp;</span><br />
                             </div>
                         </div>

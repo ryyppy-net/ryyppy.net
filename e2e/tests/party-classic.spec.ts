@@ -132,9 +132,7 @@ test('add-registered-user form enables its submit button for a known email and a
   const linkUserButton = page.locator('#linkUserButton');
   await expect(linkUserButton).toBeDisabled();
 
-  // #emailInput's getIdByEmail() runs on keyup/blur, which fill() doesn't
-  // dispatch — pressSequentially() types real keystrokes like a real user.
-  await page.locator('#emailInput').pressSequentially(invitee.email);
+  await page.fill('#emailInput', invitee.email);
   await expect(linkUserButton).toBeEnabled();
 
   await linkUserButton.click();

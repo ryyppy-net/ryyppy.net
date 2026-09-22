@@ -21,16 +21,10 @@ export function makeTestUser(label: string): TestUser {
 /** Registers a new user via /ui/newuser and waits until the dashboard has loaded. */
 export async function registerUser(page: Page, user: TestUser): Promise<void> {
   await page.goto('/ui/newuser', { waitUntil: 'domcontentloaded' });
-  // The submit button starts disabled and is only re-enabled by the page's own
-  // keyup-driven validation (checkDrinkerFields/checkEmail in drinkerchecks.js).
-  // fill() sets values without firing keyup, so the async checkEmail response
-  // can race a not-yet-filled weight field and leave the button stuck disabled
-  // with nothing left to re-check it. pressSequentially() types real keystrokes,
-  // like a real user, so the page's own revalidation can't be raced.
-  await page.locator('#drinkerName').pressSequentially(user.name);
-  await page.locator('#email').pressSequentially(user.email);
+  await page.fill('#drinkerName', user.name);
+  await page.fill('#email', user.email);
   await page.selectOption('#sex', 'MALE');
-  await page.locator('#drinkerWeight').pressSequentially(user.weight);
+  await page.fill('#drinkerWeight', user.weight);
   await page.fill('#password', user.password);
   await page.click('#submitButton');
 
@@ -117,12 +111,9 @@ export async function addGuestToParty(page: Page, guest: ClassicGuest): Promise<
   // selector alone can't tell which section it targets.
   await page.locator('#addDrinkerAccordion > h2').nth(1).click();
 
-  // The submit button starts disabled and is only re-enabled by
-  // checkDrinkerFields(false) on the field's own onkeyup handler, which
-  // fill() doesn't trigger — pressSequentially() types real keystrokes.
-  await page.locator('#drinkerName').pressSequentially(guest.name);
+  await page.fill('#drinkerName', guest.name);
   await page.selectOption('#drinkerSex', guest.sex);
-  await page.locator('#drinkerWeight').pressSequentially(guest.weight);
+  await page.fill('#drinkerWeight', guest.weight);
   await page.click('#submitButton');
 
   // The dialog submits via addAnonymousUser() and refreshes the grid through
