@@ -9,7 +9,7 @@ export default defineRailway(() => {
     replicas: { "europe-west4-drams3a": 1 },
     deploy: { limitOverride: { containers: { cpu: 2, memoryBytes: 4000000000 } }, sleepApplication: true },
     domains: ["ryyppy.net"],
-    env: { AUTH_RELAY_SECRET: preserve(), GOOGLE_CLIENT_SECRET: preserve(), SPRING_DATASOURCE_PASSWORD: preserve(), SPRING_DATASOURCE_URL: preserve(), SPRING_DATASOURCE_USERNAME: preserve(), SPRING_PROFILES_ACTIVE: preserve() },
+    env: { AUTH_RELAY_SECRET: preserve(), GOOGLE_CLIENT_SECRET: preserve(), SPRING_DATASOURCE_PASSWORD: preserve(), SPRING_DATASOURCE_URL: preserve(), SPRING_DATASOURCE_USERNAME: preserve() },
   });
 
   return project("ryyppy.net", {
