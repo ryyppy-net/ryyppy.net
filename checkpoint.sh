@@ -11,9 +11,8 @@ LOG=/tmp/checkpoint-boot.log
 rm -rf "$CHECKPOINT"
 
 # Railway builds and runs on separate hosts, so the JVM is held to the x86-64
-# baseline every host has; an AOT cache's adapter stubs do not survive a restore
-# under it. A checkpoint freezes resolved property values, and production
-# configuration lives in application-production.yml.
+# baseline every host has. A checkpoint freezes resolved property values, and
+# production configuration lives in application-production.yml.
 java -XX:CRaCEngine=warp \
     -XX:CPUFeatures=generic \
     -XX:CRaCCheckpointTo="$CHECKPOINT" \

@@ -41,19 +41,18 @@ mvn install
 
 ### Container image
 The root `Dockerfile` follows Spring Boot's reference Dockerfile: Maven stage,
-layered `jarmode=tools extract`, runtime stage with a JDK AOT cache training
-run and a CRaC checkpoint (`checkpoint.sh`). Railway detects it and builds with
-it; `railway.json` only sets the pre-deploy command that runs migrations (see
-README.md).
+layered `jarmode=tools extract`, runtime stage with a CRaC checkpoint
+(`checkpoint.sh`). Railway detects it and builds with it; `railway.json` only
+sets the pre-deploy command that runs migrations (see README.md).
 ```bash
 docker build -t ryyppynet .
 ```
-Both build steps boot against the real database via `SPRING_DATASOURCE_*`
-build args; omit them locally and both are skipped.
+The checkpoint step boots against the real database via `SPRING_DATASOURCE_*`
+build args; omit them locally and it is skipped.
 
-Two invariants: they stay read-only (the jar has no `flywayInitializer` bean -
+Two invariants: it stays read-only (the jar has no `flywayInitializer` bean -
 `process-aot` builds under the `production` profile, which disables Flyway),
-and they stay best-effort, so an unreachable database cannot block a deploy.
+and it stays best-effort, so an unreachable database cannot block a deploy.
 
 The service sets no start command, so the `ENTRYPOINT` defines how the app
 starts: it restores the checkpoint, or boots normally when there is none.

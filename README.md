@@ -63,13 +63,12 @@ Set configuration using environment variables:
 ### Docker
 
 The root `Dockerfile` follows Spring Boot's
-[Dockerfiles reference](https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html)
-(the AOT cache variant): a Maven stage builds the jar, a second stage runs
-`jarmode=tools extract --layers`, and the runtime stage copies the four layers
-separately, trains a JDK AOT cache (JEP 483/514) and writes a CRaC checkpoint
-(see below). `-Dspring.aot.enabled=true` activates the build-time bean
-definitions from the spring-boot-maven-plugin's `process-aot` goal. No
-`mvn package` is needed first.
+[Dockerfiles reference](https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html):
+a Maven stage builds the jar, a second stage runs `jarmode=tools extract
+--layers`, and the runtime stage copies the four layers separately and writes a
+CRaC checkpoint (see below). `-Dspring.aot.enabled=true` activates the
+build-time bean definitions from the spring-boot-maven-plugin's `process-aot`
+goal. No `mvn package` is needed first.
 
 The base image is Azul Zulu, the only JDK shipping CRaC's warp engine.
 
@@ -86,32 +85,23 @@ docker run -p 8080:8080 \
   ryyppynet
 ```
 
-The training run boots against the real database, reached through the
-`SPRING_DATASOURCE_*` build args, so the cache covers the pgjdbc driver and
-the actual SQL dialect. Two properties of it:
-
-* **Read-only.** This jar has no `flywayInitializer` bean (see Database
-  migrations below), so the training run can safely use
-  `-Dspring.aot.enabled=true`, which freezes `@Conditional` evaluation at
-  build time.
-* **Best-effort.** An unreachable database fails the run and leaves the build
-  green; the image then boots without the cache.
-
 ### Checkpoint and restore
 
 `checkpoint.sh` runs in the same stage. It starts the application, waits for
 `Started RyyppyApplication`, and triggers a
 [CRaC](https://docs.spring.io/spring-boot/reference/packaging/checkpoint-restore.html)
-checkpoint with `jcmd`; the entry point restores that image instead of booting.
-Restoring takes ~90ms against ~2s for a boot, which is what Railway's
-serverless sleep costs on every wake (see Railway below).
+checkpoint with `jcmd`; the entry point restores that image instead of booting,
+which is what Railway's serverless sleep costs on every wake (see Railway
+below). It boots against the real database through the `SPRING_DATASOURCE_*`
+build args, read-only - this jar has no `flywayInitializer` bean (see Database
+migrations below) - and best-effort: an unreachable database leaves the build
+green and the image boots instead.
 
 * **`-XX:CRaCEngine=warp`.** CRaC's default CRIU engine needs the
   `CHECKPOINT_RESTORE` and `SYS_PTRACE` capabilities at both ends, and Railway
   grants neither to builds nor to containers. Warp needs no privileges.
 * **`-XX:CPUFeatures=generic`.** Railway builds and runs on separate hosts, so
-  the JVM is held to the baseline every host has. `app.aot` is not replayed
-  under it: an AOT cache's adapter stubs do not survive a restore.
+  the JVM is held to the baseline every host has.
 
 ### Database migrations
 
@@ -145,7 +135,7 @@ how the app starts; a start command set on the service would override it.
 
 Railway's private network is
 [runtime-only](https://docs.railway.com/networking/private-networking/how-it-works#build-vs-runtime),
-so the training run only reaches a database available over the public
+so the checkpoint step only reaches a database available over the public
 internet.
 
 [Serverless](https://docs.railway.com/deployments/serverless) is enabled, so
@@ -154,19 +144,7 @@ request starts a fresh container - which is the checkpoint restore, not a boot.
 
 ### Startup time
 
-Restoring the checkpoint is the path a Railway wake takes; the boot below is
-what the image falls back to, measured on a different machine (16 vCPU, JDK
-25.0.4.1), booting the extracted layout against the same PostgreSQL 14
-container, time from process launch to the `Started RyyppyApplication` log
-line, median of 5 runs:
-
-| Configuration | Startup | vs. plain boot |
-| --- | --- | --- |
-| Plain boot (no AOT of either kind) | 6.42s | baseline |
-| `spring.aot.enabled=true` only | 5.53s | 14% faster |
-| JDK AOT cache alone | 2.95s | 54% faster |
-| Both, cache trained read-only against the real database | 2.37s | 63% faster |
-| **Both, with Spring AOT on during training** | **2.15s** | **67% faster** |
-
-End to end in a container, Spring reports ~1.93-2.11s once the page cache is
-warm.
+Restoring the checkpoint takes ~90ms. The boot the image falls back to when a
+build wrote no checkpoint takes ~5.5s, measured on one machine (16 vCPU, JDK
+25.0.4.1) against a PostgreSQL 14 container, to the `Started RyyppyApplication`
+log line.

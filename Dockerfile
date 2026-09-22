@@ -38,17 +38,8 @@ ARG SPRING_DATASOURCE_PASSWORD
 ARG GOOGLE_CLIENT_SECRET
 ARG AUTH_RELAY_SECRET
 
-# AOT cache training run against the real database. Safe with Spring AOT
-# enabled since the jar has no flywayInitializer bean (see pom.xml).
-# Best-effort: a failed run leaves no cache and the image boots without it.
-RUN java -XX:AOTCacheOutput=app.aot \
-    -Dspring.aot.enabled=true \
-    -Dspring.context.exit=onRefresh \
-    -jar application.jar \
-    || echo "WARNING: AOT cache training failed; starting without a cache"
-
 RUN ./checkpoint.sh
 
 # Railway starts a fresh container on every wake from serverless sleep, so the
 # restore runs on each wake and not only on deploy.
-ENTRYPOINT ["/bin/sh", "-c", "if [ -s crac/core.img ]; then exec java -XX:CRaCRestoreFrom=crac; fi; exec java -XX:AOTCache=app.aot -Dspring.aot.enabled=true -jar application.jar"]
+ENTRYPOINT ["/bin/sh", "-c", "if [ -s crac/core.img ]; then exec java -XX:CRaCRestoreFrom=crac; fi; exec java -Dspring.aot.enabled=true -jar application.jar"]
