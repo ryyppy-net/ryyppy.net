@@ -36,26 +36,18 @@ test('N2: entering an already-registered email marks #emailCorrect as an error a
   const existingUser = sharedUser();
 
   await page.goto('/ui/newuser', { waitUntil: 'domcontentloaded' });
-  await page.locator('#drinkerName').pressSequentially('Duplicate Email Tester');
+  await page.fill('#drinkerName', 'Duplicate Email Tester');
   await page.selectOption('#sex', 'MALE');
-  await page.locator('#drinkerWeight').pressSequentially('80');
+  await page.fill('#drinkerWeight', '80');
   await page.fill('#password', 'whatever-password');
-
-  // checkEmail() fires one request per keystroke with no request sequencing,
-  // so typing the address key-by-key can let a stale in-flight response for
-  // an earlier, not-yet-registered prefix land after the real one and
-  // overwrite the error state. Filling the whole address at once and blurring
-  // (by moving focus to #drinkerWeight) fires the check exactly once, via the
-  // field's onblur handler.
-  await page.locator('#email').fill(existingUser.email);
-  await page.locator('#drinkerWeight').focus();
+  await page.fill('#email', existingUser.email);
   await expect(page.locator('#emailCorrect')).toHaveClass(/error/);
 
-  // checkEmail()'s own ajax callback re-runs checkDrinkerFields() without its
-  // "also check the email" argument, so it never disables the button itself -
-  // only a keyup on a .userField (name/weight) does that, and only once the
-  // email check above has actually landed. Nudge #drinkerWeight to fire one.
-  await page.locator('#drinkerWeight').press('End');
+  // checkEmail()'s ajax callback re-runs checkDrinkerFields() without its
+  // "also check the email" argument, so landing the error class alone never
+  // disables the button - only a later call with that argument does, once
+  // the error class is already set. Re-filling a .userField triggers one.
+  await page.locator('#drinkerWeight').fill('80');
   await expect(page.locator('#submitButton')).toBeDisabled();
 });
 

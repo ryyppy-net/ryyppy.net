@@ -116,7 +116,7 @@
                                 <th th:text="#{form.email}">Email</th>
                                 <td>
                                     <input id="emailInput" type="email" name="email"
-                                           th:onkeyup="|getIdByEmail($(this).val(), '${party.id}');|"
+                                           th:oninput="|getIdByEmail($(this).val(), '${party.id}');|"
                                            th:onblur="|getIdByEmail($(this).val(), '${party.id}');|"/>
                                 </td>
                                 <td id="emailCorrect"></td>
@@ -136,7 +136,7 @@
                         <table>
                             <tr>
                                 <th th:text="#{form.name}">Name</th>
-                                <td><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(false);" /></td>
+                                <td><input id="drinkerName" type="text" name="name" oninput="checkDrinkerFields(false);" /></td>
                             </tr>
                             <tr>
                                 <th th:text="#{form.sex}">Gender</th>
@@ -149,7 +149,7 @@
                             </tr>
                             <tr>
                                 <th th:text="#{form.weight}">Weight</th>
-                                <td><input id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(false);" autocomplete="off" /></td>
+                                <td><input id="drinkerWeight" type="password" name="weight" oninput="checkDrinkerFields(false);" autocomplete="off" /></td>
                             </tr>
                             <tr>
                                 <th>&nbsp;</th>

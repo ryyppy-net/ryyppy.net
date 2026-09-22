@@ -274,11 +274,11 @@
                 <table>
                     <tr>
                         <th th:text="#{form.name}">Name</th>
-                        <td colspan="2"><input id="drinkerName" type="text" name="name" onkeyup="checkDrinkerFields(true);" th:value="${user.name}" /></td>
+                        <td colspan="2"><input id="drinkerName" type="text" name="name" oninput="checkDrinkerFields(true);" th:value="${user.name}" /></td>
                     </tr>
                     <tr>
                         <th th:text="#{form.email}">Email</th>
-                        <td><input id="email" type="email" name="email" th:value="${user.email}" th:attr="data-original-email=${user.email}" onkeyup="checkEmail($(this).val(), $(this).data('originalEmail')); checkDrinkerFields(true);" /></td>
+                        <td><input id="email" type="email" name="email" th:value="${user.email}" th:attr="data-original-email=${user.email}" oninput="checkEmail($(this).val(), $(this).data('originalEmail')); checkDrinkerFields(true);" /></td>
                         <td style="width:24px;height:24px;" id="emailCorrect">&nbsp;</td>
                     </tr>
                     <tr>
@@ -292,7 +292,7 @@
                     </tr>
                     <tr>
                         <th th:text="#{form.weight}">Weight</th>
-                        <td colspan="2"><input th:value="${user.weight}" id="drinkerWeight" type="password" name="weight" onkeyup="checkDrinkerFields(true);" autocomplete="off" /></td>
+                        <td colspan="2"><input th:value="${user.weight}" id="drinkerWeight" type="password" name="weight" oninput="checkDrinkerFields(true);" autocomplete="off" /></td>
                     </tr>
                     <tr>
                         <th>&nbsp;</th>
