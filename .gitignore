@@ -18,3 +18,6 @@ e2e/node_modules
 e2e/test-results
 e2e/playwright-report
 e2e/.cache
+
+# Railway IaC SDK
+node_modules

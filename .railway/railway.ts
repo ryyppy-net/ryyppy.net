@@ -4,6 +4,7 @@ export default defineRailway(() => {
   const web = service("web", {
     source: github("ryyppy-net/ryyppy.net", { checkSuites: false }),
     start: "",
+    preDeploy: "java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar",
     healthcheck: "/actuator/health",
     replicas: { "europe-west4-drams3a": 1 },
     deploy: { limitOverride: { containers: { cpu: 2, memoryBytes: 4000000000 } }, sleepApplication: true },
