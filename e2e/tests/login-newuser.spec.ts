@@ -41,13 +41,8 @@ test('N2: entering an already-registered email marks #emailCorrect as an error a
   await page.fill('#drinkerWeight', '80');
   await page.fill('#password', 'whatever-password');
   await page.fill('#email', existingUser.email);
-  await expect(page.locator('#emailCorrect')).toHaveClass(/error/);
 
-  // checkEmail()'s ajax callback re-runs checkDrinkerFields() without its
-  // "also check the email" argument, so landing the error class alone never
-  // disables the button - only a later call with that argument does, once
-  // the error class is already set. Re-filling a .userField triggers one.
-  await page.locator('#drinkerWeight').fill('80');
+  await expect(page.locator('#emailCorrect')).toHaveClass(/error/);
   await expect(page.locator('#submitButton')).toBeDisabled();
 });
 

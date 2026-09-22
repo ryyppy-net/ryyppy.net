@@ -38,7 +38,7 @@ function checkEmail(email, exclude) {
             $("#emailCorrect").html("<img style='width:20px; height:20px;' src='/static/images/yes.png' alt='email is ok' />").removeClass("error");
         else
             $("#emailCorrect").html("<img style='width:20px; height:20px;' src='/static/images/no.png' alt='email is used' />").addClass("error");
-        checkDrinkerFields();
+        checkDrinkerFields(true);
     });
 }
 
