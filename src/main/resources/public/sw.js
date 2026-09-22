@@ -58,7 +58,8 @@ function checkVersion(response) {
             return persistVersion(version);
         }
         if (knownVersion !== version) {
-            return notifyClients();
+            knownVersion = version;
+            return persistVersion(version).then(notifyClients);
         }
     });
 }
