@@ -143,11 +143,7 @@ export async function getClassicUserId(page: Page): Promise<number> {
  */
 export async function addDrinkImmediatelyClassic(page: Page, userId: number): Promise<void> {
   await page.click(`#user${userId}`);
-  // The undo overlay's edit-button click handler is only bound once its
-  // 500ms fade-in animation completes, so a click before that lands on an
-  // unbound element and does nothing.
-  await page.waitForTimeout(700);
-  await page.click(`#editButton${userId}`);
+  await page.locator(`#editButton${userId}`).click();
   await page.click(`#acceptButton${userId}`);
 }
 
