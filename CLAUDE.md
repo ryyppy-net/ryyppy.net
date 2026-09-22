@@ -59,8 +59,7 @@ The service sets no start command, so the `ENTRYPOINT` defines how the app
 starts: it restores the checkpoint, or boots normally when there is none.
 Railway's serverless sleep starts a fresh
 container on every wake, so that restore is the hot path - see README.md for
-why the checkpoint is taken through `jcmd` rather than
-`spring.context.checkpoint=onRefresh`, and for the startup-time figures.
+the startup-time figures.
 
 ### Database Configuration
 - Development uses local PostgreSQL via Docker (localhost:5432)

@@ -109,33 +109,9 @@ serverless sleep costs on every wake (see Railway below).
 * **`-XX:CRaCEngine=warp`.** CRaC's default CRIU engine needs the
   `CHECKPOINT_RESTORE` and `SYS_PTRACE` capabilities at both ends, and Railway
   grants neither to builds nor to containers. Warp needs no privileges.
-* **On demand, not `spring.context.checkpoint=onRefresh`.** The automatic mode
-  checkpoints inside `LifecycleProcessor.onRefresh`, before Spring's lifecycle
-  is running, so `stopForRestart()` is a no-op and the connection pool is never
-  drained - and CRaC refuses to checkpoint a JVM holding an open socket. With
-  `jcmd` against a started context, `HikariCheckpointRestoreLifecycle` suspends
-  the pool first and resumes it after restore.
-* **`-Dspring.profiles.active=production`.** A checkpoint freezes resolved
-  property values, so a checkpoint taken without the profile would restore with
-  `ddl-auto: validate`, Flyway enabled and the wrong Google client id.
-* **`-XX:CPUFeatures=generic`.** Railway builds and runs on separate hosts, and
-  a restore needs every CPU feature the checkpointed JVM was using; without the
-  baseline the restore fails outright with `incompatible or missing CPU
-  features`. This is also why the checkpoint run does not replay `app.aot`:
-  adapter stubs from an AOT cache do not survive a restore under that baseline,
-  and the JVM dies with a SIGSEGV in `AdapterHandlerLibrary::lookup` on the
-  first request rather than at restore. The cache serves the fallback boot,
-  where nothing constrains the CPU.
-* **Best-effort.** Warp SIGKILLs the JVM once the image is written, so exit
-  status says nothing; `checkpoint.sh` checks for `crac/core.img`, removes a
-  partial directory, and prints either `CRaC checkpoint written` or a warning -
-  the JVM's own output goes to a file, so the build log shows nothing else. The
-  entry point boots normally when the image carries no checkpoint; a checkpoint
-  that fails to restore crashes the container rather than degrading quietly to
-  a boot that looks like success.
-* **Secrets.** A checkpoint is a memory image, so it contains every value the
-  JVM saw, the datasource password included. It ships inside the image, which
-  Railway keeps private to the project.
+* **`-XX:CPUFeatures=generic`.** Railway builds and runs on separate hosts, so
+  the JVM is held to the baseline every host has. `app.aot` is not replayed
+  under it: an AOT cache's adapter stubs do not survive a restore.
 
 ### Database migrations
 
@@ -176,23 +152,13 @@ internet.
 the service sleeps after 5-10 minutes without outbound traffic and the next
 request starts a fresh container - which is the checkpoint restore, not a boot.
 
-Because the checkpoint freezes the secrets it was built with, changes to them
-must go through a **redeploy**, which rebuilds, and never a **restart**, which
-[reuses the existing image](https://docs.railway.com/cli/restart). Editing a
-variable in the dashboard stages a change whose *Deploy* redeploys; `Alt`-click
-commits it without one, and a restart afterwards would run the container with
-the new value while the restored JVM still holds the old one.
-
 ### Startup time
 
 Restoring the checkpoint is the path a Railway wake takes; the boot below is
-what the image falls back to. Spring reports ~90ms for `restored JVM running
-for`, with the first HTTP request answered ~160ms after process launch.
-
-The boot figures are measured on a different machine (16 vCPU, JDK 25.0.4.1),
-booting the extracted layout against the same PostgreSQL 14 container, time
-from process launch to the `Started RyyppyApplication` log line, median of 5
-runs:
+what the image falls back to, measured on a different machine (16 vCPU, JDK
+25.0.4.1), booting the extracted layout against the same PostgreSQL 14
+container, time from process launch to the `Started RyyppyApplication` log
+line, median of 5 runs:
 
 | Configuration | Startup | vs. plain boot |
 | --- | --- | --- |
