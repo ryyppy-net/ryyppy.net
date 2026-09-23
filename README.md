@@ -45,9 +45,10 @@ mvn spring-boot:run
 The Google login button will automatically appear on the login page when valid credentials are configured. To disable Google login, simply unset these environment variables or set them to placeholder values.
 
 ## Release
-1. Update version number in pom.xml
-2. Make a git TAG with the version number
-3. Run `mvn install` to build the application .jar file
+`main` is the only long-lived branch. A release is a git tag on `main` that marks a
+milestone; it does not trigger a deploy.
+1. Update version number in pom.xml and merge it to `main`
+2. Tag that commit with the version number and push the tag (`git push origin <version>`)
 
 ## Configure and run on server
 Set configuration using environment variables:
