@@ -39,6 +39,10 @@ mvn versions:set -DnewVersion=3.1.6
 mvn install
 ```
 
+### Branches and releases
+`main` is the default and only long-lived branch; base every PR on it. Releases are
+git tags on `main` marking a milestone - see README.md.
+
 ### Container image
 The root `Dockerfile` follows Spring Boot's reference Dockerfile: Maven stage,
 layered `jarmode=tools extract`, runtime stage with a CRaC checkpoint
