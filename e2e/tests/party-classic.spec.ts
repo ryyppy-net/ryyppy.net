@@ -126,7 +126,7 @@ test('add-registered-user form enables its submit button for a known email and a
   await loginClassic(page, owner);
   await createPartyClassic(page, `E2E Registered Party ${Date.now()}`);
 
-  await page.click('#addDrinkerButton');
+  await page.click('#addDrinkerButtonLink');
   await page.locator('#addDrinkerAccordion > h2').nth(0).click();
 
   const linkUserButton = page.locator('#linkUserButton');

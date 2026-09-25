@@ -82,12 +82,7 @@ export async function gotoClassicDashboard(page: Page, name: string): Promise<vo
 
 /** Creates a party from the classic /ui/user dashboard and waits for /ui/party?id=N. */
 export async function createPartyClassic(page: Page, partyName: string): Promise<void> {
-  // On /ui/user and /ui/party, every <a class="headerButtonA"> header wrapper
-  // measures 0x0 because the icon <div> inside it is floated, collapsing the
-  // inline anchor. The 42x42 icon div is what a user actually sees and clicks,
-  // and clicking it still works because the jQuery handlers are bound to the
-  // anchor and the click bubbles. Click #addPartyButton, not #addPartyButtonLink.
-  await page.click('#addPartyButton');
+  await page.click('#addPartyButtonLink');
   await page.fill('#nameInput', partyName);
   await page.click('#addPartyDialog input[type="submit"]');
 
@@ -102,8 +97,7 @@ export interface ClassicGuest {
 
 /** Adds a guest drinker to a party from the classic /ui/party page's add-drinker dialog. */
 export async function addGuestToParty(page: Page, guest: ClassicGuest): Promise<void> {
-  // Same 0x0-anchor quirk as createPartyClassic: click the icon div, not the link.
-  await page.click('#addDrinkerButton');
+  await page.click('#addDrinkerButtonLink');
 
   // #addDrinkerAccordion > h2 has two sections: index 0 is "add registered
   // user", index 1 is "add guest". The guest form reuses #drinkerName,
