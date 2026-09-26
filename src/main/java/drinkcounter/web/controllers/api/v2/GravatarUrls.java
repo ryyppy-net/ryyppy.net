@@ -1,30 +1,32 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package drinkcounter.web.controllers.api.v2;
 
-import com.timgroup.jgravatar.Gravatar;
-import com.timgroup.jgravatar.GravatarDefaultImage;
 import drinkcounter.model.User;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import java.util.Locale;
 
-/**
- *
- * @author thardas
- */
 public class GravatarUrls {
     public static String forUser(User user) {
         if(user.getEmail() != null) {
-            return getUrl(user.getEmail());
+            return forValue(user.getEmail());
         }
         else {
-            return getUrl(user.getName() + user.getWeight());
+            return forValue(user.getName() + user.getWeight());
         }
     }
 
-    private static String getUrl(String value) {
-        // jgravatar hardcodes http://, which browsers flag as mixed content on our https pages
-        return new Gravatar().setDefaultImage(GravatarDefaultImage.WAVATAR).getUrl(value)
-                .replaceFirst("^http://", "https://");
+    private static String forValue(String value) {
+        return "https://www.gravatar.com/avatar/" + md5Hex(value.trim().toLowerCase(Locale.ROOT)) + ".jpg?d=wavatar";
+    }
+
+    private static String md5Hex(String value) {
+        try {
+            byte[] digest = MessageDigest.getInstance("MD5").digest(value.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
