@@ -136,7 +136,10 @@ test('U7: leaving a party drops it from the party list', async ({ page }) => {
   page.on('dialog', (dialog) => dialog.accept());
   await page.locator('.party', { has: page.getByText(partyName) }).locator('img[alt="sulje"]').click();
 
-  await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
+  // Asserts on the click's own navigation, not a fresh page.goto - the link used to
+  // return an empty response with no Content-Type, which browsers offered as a
+  // file download instead of landing back on the dashboard.
+  await expect(page).toHaveURL(/\/ui\/user/);
   await expect(page.locator('.party')).toHaveCount(0);
 });
 
