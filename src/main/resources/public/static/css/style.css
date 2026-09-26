@@ -125,6 +125,18 @@ div.party a {
     color: #000000;
 }
 
+div.party .marginBox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+div.party .partyName {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 div#graphDialog a {
     color: #ffffff;
     z-index: 666;

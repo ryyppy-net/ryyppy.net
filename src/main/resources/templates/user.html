@@ -181,9 +181,9 @@
         <div class="header">
             <table style="width: 100%;" class="noBorders">
                 <tr>
-                    <td class="headerButton"><a id="logoutLink" class="headerButtonA" th:title="#{user.logout_dialog.title}" href="logout" th:attr="data-confirm-message=#{user.logout_dialog.msg}"><div class="headerButton headerButtonLeft" id="goBack"></div></a></td>
+                    <td class="headerButton"><a id="logoutLink" class="headerButtonA headerButtonLeft" th:title="#{user.logout_dialog.title}" href="logout" th:attr="data-confirm-message=#{user.logout_dialog.msg}"><div class="headerButton" id="goBack"></div></a></td>
                     <td class="topic"><h1 class="topic" th:text="${user.name}">User name</h1></td>
-                    <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA" th:title="#{user.settings}" href="#"><div class="headerButton headerButtonRight" id="configureButton"></div></a></td>
+                    <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA headerButtonRight" th:title="#{user.settings}" href="#"><div class="headerButton" id="configureButton"></div></a></td>
                     <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" th:title="#{ui.switch_to_modern}" href="/app/index.html#/" th:text="#{ui.modern_ui_label}">New UI</a></td>
                 </tr>
             </table>
@@ -195,8 +195,8 @@
         </div>
 
         <div class="header headerMargin">
-            <a id="addPartyButtonLink" class="headerButtonA" th:title="#{user.add_party}" href="#">
-                <div id="addPartyButton" class="headerButton headerButtonRight"></div>
+            <a id="addPartyButtonLink" class="headerButtonA headerButtonRight" th:title="#{user.add_party}" href="#">
+                <div id="addPartyButton" class="headerButton"></div>
             </a>
             <div class="headerTextDiv">
                 <h1 th:text="#{user.your_parties}">Your parties</h1>
@@ -206,22 +206,22 @@
         <div class="body">
             <div class="party roundedCornersBordered" th:each="party : ${parties}">
                 <div class="marginBox">
-                    <a th:href="@{party(id=${party.id})}">
+                    <a class="partyName" th:href="@{party(id=${party.id})}">
                         <span th:text="${party.name}">Party name</span>
                         <span id="partyStartTime">
                             <span th:text="#{user.start_time}">Starting time</span> <script type="text/javascript" th:inline="javascript">document.write(formatDate(new Date(/*[[${party.startTime.toEpochMilli()}]]*/ 0)));</script>
                         </span>
                     </a>
                         <a class="headerButtonA leavePartyLink" th:title="#{user.exit_dialog.title}" th:attr="data-confirm-message=#{user.exit_dialog.msg}" th:href="@{removeUserFromParty(partyId=${party.id},userId=${user.id})}">
-                        <img th:src="@{/static/images/x.png}" alt="sulje" style="float:right; margin-right: 5px;" />
+                        <img th:src="@{/static/images/x.png}" alt="sulje" style="margin-right: 5px;" />
                     </a>
                 </div>
             </div>
         </div>
 
         <div class="header headerMargin">
-            <a id="configureDrinksButtonLink" class="headerButtonA" th:title="#{user.add_or_remove_drinks}" href="#">
-                <div class="headerButton headerButtonRight" id="configureDrinksButton"></div>
+            <a id="configureDrinksButtonLink" class="headerButtonA headerButtonRight" th:title="#{user.add_or_remove_drinks}" href="#">
+                <div class="headerButton" id="configureDrinksButton"></div>
             </a>
             <div class="headerTextDiv">
                 <h1 th:text="#{user.history}">History</h1>

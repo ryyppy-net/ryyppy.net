@@ -51,7 +51,7 @@ test('U3: add-party dialog creates a party and lands on its page', async ({ page
   await page.goto('/logout');
   await loginClassic(page, user);
 
-  await page.click('#addPartyButton');
+  await page.click('#addPartyButtonLink');
   await expect(page.locator('#addPartyDialog')).toBeVisible();
 
   const partyName = `E2E U3 Party ${Date.now()}`;
