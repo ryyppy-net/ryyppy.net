@@ -23,6 +23,8 @@ public class GravatarService {
     }
 
     private static String getUrl(String value) {
-        return new Gravatar().setDefaultImage(GravatarDefaultImage.WAVATAR).getUrl(value);
+        // jgravatar hardcodes http://, which browsers flag as mixed content on our https pages
+        return new Gravatar().setDefaultImage(GravatarDefaultImage.WAVATAR).getUrl(value)
+                .replaceFirst("^http://", "https://");
     }
 }
