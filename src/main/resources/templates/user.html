@@ -206,13 +206,13 @@
         <div class="body">
             <div class="party roundedCornersBordered" th:each="party : ${parties}">
                 <div class="marginBox">
-                    <a th:href="@{party(id=${party.id})}">
+                    <a class="partyName" th:href="@{party(id=${party.id})}">
                         <span th:text="${party.name}">Party name</span>
                         <span id="partyStartTime">
                             <span th:text="#{user.start_time}">Starting time</span> <script type="text/javascript" th:inline="javascript">document.write(formatDate(new Date(/*[[${party.startTime.toEpochMilli()}]]*/ 0)));</script>
                         </span>
                     </a>
-                        <a class="headerButtonA headerButtonRight leavePartyLink" th:title="#{user.exit_dialog.title}" th:attr="data-confirm-message=#{user.exit_dialog.msg}" th:href="@{removeUserFromParty(partyId=${party.id},userId=${user.id})}">
+                        <a class="headerButtonA leavePartyLink" th:title="#{user.exit_dialog.title}" th:attr="data-confirm-message=#{user.exit_dialog.msg}" th:href="@{removeUserFromParty(partyId=${party.id},userId=${user.id})}">
                         <img th:src="@{/static/images/x.png}" alt="sulje" style="margin-right: 5px;" />
                     </a>
                 </div>
