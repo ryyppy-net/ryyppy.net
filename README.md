@@ -57,9 +57,12 @@ Set configuration using environment variables:
 * SPRING_DATASOURCE_PASSWORD - Database password
 * GOOGLE_CLIENT_ID - (Optional) Google OAuth2 client ID to enable Google login
 * GOOGLE_CLIENT_SECRET - (Optional) Google OAuth2 client secret to enable Google login
+* AUTH_RELAY_SECRET - (Optional) Shared secret signing the Google sign-in handoff between environments
+* GOOGLE_AUTH_HUB_URL - (Optional) Environment that hosts Google sign-in (set to `https://ryyppy.net` by the `production` profile)
+* GOOGLE_FEDCM_ENABLED - (Optional) Enables FedCM for Google One Tap (default `false`)
 
 1. Copy `target/ryyppynet.jar` to server
-3. Run application `java -jar ryyppynet.jar`
+2. Run application `java -jar ryyppynet.jar`
 
 ### Docker
 
@@ -108,15 +111,15 @@ green and the image boots instead.
 
 Flyway is enabled by default, so `mvn spring-boot:run` migrates a fresh local
 database. `application-production.yml` - the profile Railway runs - disables
-it; production migrates instead via `railway.json`'s pre-deploy command:
+it; production migrates instead via the pre-deploy command in
+`.railway/railway.ts`:
 
 ```bash
-java -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
+java -Dspring.profiles.active=production -Dspring.flyway.enabled=true -Dspring.context.exit=onRefresh -jar application.jar
 ```
 
-`railway.json` uses Railway's deprecated Config as Code (see #129). Also set
-a **Pre-deploy Timeout** in the service settings - dashboard-only, no
-config-file field for it.
+Also set a **Pre-deploy Timeout** in the service settings dashboard;
+`.railway/railway.ts` does not set it.
 
 Build args are recorded in image history, so `docker history` reveals the
 database password. Railway keeps images private to the project.
@@ -124,8 +127,10 @@ database password. Railway keeps images private to the project.
 ### Railway
 
 Railway [detects the root `Dockerfile`](https://docs.railway.com/builds/dockerfiles)
-and builds with it; `railway.json` only sets the pre-deploy command (see
-above) and leaves the builder to that auto-detection. `$PORT` is
+and builds with it. The service itself (source, pre-deploy command, health
+check, domain, serverless sleep) is defined as code in `.railway/railway.ts`;
+the `Railway config` workflow posts a plan on PRs that touch `.railway/` and
+applies it when they merge. `$PORT` is
 read by `application.yml` via `server.port: ${PORT:8080}`. Database and OAuth2
 config come from the environment variables listed above, and Railway
 [injects them into the build](https://docs.railway.com/builds/dockerfiles#using-variables-at-build-time)

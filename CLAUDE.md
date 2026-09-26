@@ -10,20 +10,19 @@ Ryyppy.net is a web application for tracking alcohol consumption. Users can crea
 - Backend: Spring Boot 4.1.1 (Java 25)
 - Database: PostgreSQL (no in-memory database; unit tests use no datasource)
 - Frontend: AngularJS (legacy)
-- View Layer: JSP with JSTL
+- View Layer: Thymeleaf
+- Schema migrations: Flyway
 - Build Tool: Maven 3
 
 ## Development Commands
 
 ### Start Development Environment
 ```bash
-# 1. Start PostgreSQL database
-docker compose -f docker/docker-compose.yml up
-
-# 2. Start application (with hot reload via spring-boot-devtools)
+# Starts PostgreSQL from docker/docker-compose.yml automatically
+# (spring-boot-docker-compose), with hot reload via spring-boot-devtools
 mvn spring-boot:run
 
-# 3. Access application at http://localhost:8080
+# Access application at http://localhost:8080
 ```
 
 ### Build and Test
@@ -46,8 +45,9 @@ git tags on `main` marking a milestone - see README.md.
 ### Container image
 The root `Dockerfile` follows Spring Boot's reference Dockerfile: Maven stage,
 layered `jarmode=tools extract`, runtime stage with a CRaC checkpoint
-(`checkpoint.sh`). Railway detects it and builds with it; `railway.json` only
-sets the pre-deploy command that runs migrations (see README.md).
+(`checkpoint.sh`). Railway detects it and builds with it; the Railway service
+itself, including the pre-deploy command that runs migrations, is defined in
+`.railway/railway.ts` (see README.md).
 ```bash
 docker build -t ryyppynet .
 ```
@@ -67,7 +67,9 @@ the startup-time figures.
 ### Database Configuration
 - Development uses local PostgreSQL via Docker (localhost:5432)
 - Default credentials: ryyppynet/ryyppynet/ryyppynet
-- Hibernate auto-updates schema (`ddl-auto: update`)
+- Flyway owns the schema (`src/main/resources/db/migration/`); Hibernate only
+  validates it (`ddl-auto: validate`). The `production` profile disables Flyway
+  and sets `ddl-auto: none`; production migrates in Railway's pre-deploy command.
 - Production requires environment variables:
   - `SPRING_DATASOURCE_URL`
   - `SPRING_DATASOURCE_USERNAME`
@@ -117,16 +119,19 @@ Configured in `WebSecurityConfiguration`:
 - Spring Security with form-based login
 - CSRF disabled (legacy frontend compatibility)
 - BCrypt password encoding
-- Multiple auth methods supported: OpenID, Facebook, Password (see `User.AuthMethod`)
+- Auth methods: `OPENID` (Google OAuth2 / One Tap) and `PASSWORD` (see `User.AuthMethod`)
+- Google sign-in on non-hub environments goes through a relay (`authentication/relay/`, `AUTH_RELAY_SECRET`)
 - `CurrentUser` interface provides access to authenticated user context
 - Custom `UserDetailsService` implementation (`UserDetailsServiceImpl`)
 - Authorization interceptors control party access (`PartyAuthorizationInterceptor`)
 
 ### Frontend Architecture
 
-AngularJS app in `src/main/resources/public/app/`.
+AngularJS app in `src/main/resources/public/app/`, served through the `app/index` template.
+The classic UI (`party.html`, `user.html`) uses jQuery scripts in `public/static/js/`.
 
-Server-side views use JSP templates in `src/main/webapp/WEB-INF/jsp/` with a master tag template system.
+Server-side views are Thymeleaf templates in `src/main/resources/templates/`; the
+shared layout is `fragments/master.html`.
 
 ### Key Algorithms
 
@@ -136,7 +141,7 @@ Server-side views use JSP templates in `src/main/webapp/WEB-INF/jsp/` with a mas
 - Sex-specific blood volume factors: Male 0.75, Female 0.66
 - Standard drink = 12g alcohol (configurable via volume and percentage)
 
-**Drink Sounds**: `SoundManifest` scans `public/static/sounds/*.mp3` and resolves each clip through the resource chain into a content-hashed URL. `GlobalControllerAdvice` exposes the list as `${soundUrls}`, and `fragments/sounds.html` renders it as `window.__SOUND_URLS__` alongside `static/js/sound.js` into the pages that can add a drink (not the master layout — the clips are ~490 KB, wasted on login/newuser/legal pages). That player fetches and decodes every clip once after page load and plays it via the Web Audio API (`AudioBufferSourceNode`), so a click starts a sound with no fetch, decode or seek. Both front ends go through it: `common.js`'s global `playSound()` and the AngularJS `Sound` service are thin delegates. The sound fires on the click that starts a drink (`UserButton.buttonClick`, `DrinkerCtrl.addDefaultDrink`), not when the POST lands after the 5s undo countdown — so it is feedback for the tap, and `play()` runs inside the user gesture. Adding a clip means dropping an `.mp3` into that directory — nothing lists them in code. Requires an unprefixed `AudioContext` (Safari 14.1 / iOS 14.5); older browsers get a silent no-op.
+**Drink Sounds**: `SoundManifest` scans `public/static/sounds/` for `.ogg`/`.mp3` pairs sharing a stem and resolves each through the resource chain into content-hashed URLs. `GlobalControllerAdvice` exposes the list as `${soundUrls}` (`[oggUrl, mp3Url]` per clip), and `fragments/sounds.html` renders it as `window.__SOUND_URLS__` together with Howler (webjar) and `static/js/sound.js` into the pages that can add a drink (`app/index`, `party`, `user`), not the master layout. `sound.js` creates one `Howl` per clip and plays a random one; Howler picks the format the browser supports. Both front ends go through it: `common.js`'s global `playSound()` and the AngularJS `Sound` service delegate to `window.RyyppySound`. The sound fires on the click that starts a drink (`UserButton.buttonClick`, `DrinkerCtrl.addDefaultDrink`), not when the POST lands after the 5s undo countdown. Adding a clip means dropping an `.ogg` + `.mp3` pair into that directory — nothing lists them in code. If Howler fails to load, `play()` is a no-op.
 
 **Drink Standardization**: Converts volume + alcohol percentage to grams using alcohol density (789 g/L):
 ```
@@ -145,12 +150,12 @@ alcoholGrams = volume * alcoholPercentage * 789
 
 ## Key Patterns & Conventions
 
-- Services are injected via constructor injection (modern Spring pattern)
+- Most beans use constructor injection; the UI controllers (`PartyController`, `UserController`) and `PartyMarshaller` still use field `@Autowired`
 - Entity relationships use JPA bidirectional mappings (e.g., `@ManyToMany` with `mappedBy`)
 - Transient fields (like `getPromilles()`) compute values on-demand via service calls
 - Guest users (`user.isGuest() = true`) are temporary participants without accounts
 - Default locale is Finnish (`fi_FI`) with English support
-- All timestamps use Joda-Time `DateTime` for parsing, converted to `java.util.Date`
+- Timestamps use `java.time` (`Drink` stores an `Instant`); some service APIs still take `java.util.Date`
 
 ## Comments
 
@@ -175,8 +180,8 @@ neighbours.
 ## Testing
 
 Test files are in `src/test/java/drinkcounter/`:
-- Unit tests use JUnit 4 and Mockito
-- Limited test coverage (4 test files currently)
+- Unit tests use JUnit 5 (Jupiter) and Mockito
+- 15 test classes currently
 - Run individual test: `mvn test -Dtest=ClassName`
 
 ### End-to-end tests (Playwright)
