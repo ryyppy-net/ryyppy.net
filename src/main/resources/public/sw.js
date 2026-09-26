@@ -38,15 +38,30 @@ function persistVersion(version) {
     });
 }
 
-function notifyClients() {
+function notifyClients(detail) {
     return self.clients.matchAll({ type: 'window' }).then(function (clients) {
         clients.forEach(function (client) {
-            client.postMessage({ type: 'RYYPPY_NEW_VERSION' });
+            client.postMessage({ type: 'RYYPPY_NEW_VERSION', detail: detail });
         });
     });
 }
 
-function checkVersion(response) {
+// The Date header is when the server produced the response, so an old date
+// on a mismatch means it came from the browser's HTTP cache.
+function describe(request, response, version) {
+    return {
+        previousVersion: knownVersion,
+        version: version,
+        url: request.url,
+        destination: request.destination,
+        mode: request.mode,
+        status: response.status,
+        responseDate: response.headers.get('Date'),
+        cacheControl: response.headers.get('Cache-Control')
+    };
+}
+
+function checkVersion(request, response) {
     var version = response.headers.get('X-App-Version');
     if (!version) {
         return Promise.resolve();
@@ -54,12 +69,17 @@ function checkVersion(response) {
 
     return loadKnownVersion().then(function () {
         if (knownVersion === null) {
+            console.log('[sw] Version baseline set', describe(request, response, version));
             knownVersion = version;
             return persistVersion(version);
         }
         if (knownVersion !== version) {
+            var detail = describe(request, response, version);
+            console.log('[sw] Version changed', detail);
             knownVersion = version;
-            return persistVersion(version).then(notifyClients);
+            return persistVersion(version).then(function () {
+                return notifyClients(detail);
+            });
         }
     });
 }
@@ -67,7 +87,7 @@ function checkVersion(response) {
 self.addEventListener('fetch', function (event) {
     event.respondWith(
         fetch(event.request).then(function (response) {
-            event.waitUntil(checkVersion(response));
+            event.waitUntil(checkVersion(event.request, response));
             return response;
         })
     );

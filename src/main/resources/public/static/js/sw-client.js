@@ -11,7 +11,7 @@
 
     navigator.serviceWorker.addEventListener('message', function (event) {
         if (event.data && event.data.type === 'RYYPPY_NEW_VERSION') {
-            console.log('New version detected, reloading.');
+            console.log('New version detected, reloading.', event.data.detail);
             window.location.reload();
         }
     });
