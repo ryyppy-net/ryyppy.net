@@ -136,7 +136,7 @@ test('U7: leaving a party drops it from the party list', async ({ page }) => {
   page.on('dialog', (dialog) => dialog.accept());
   await page.locator('.party', { has: page.getByText(partyName) }).locator('img[alt="sulje"]').click();
 
-  await page.goto('/ui/user', { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveURL(/\/ui\/user/);
   await expect(page.locator('.party')).toHaveCount(0);
 });
 

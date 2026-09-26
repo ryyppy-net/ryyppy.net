@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 
@@ -53,7 +52,7 @@ public class PartyController {
     }
    
     @RequestMapping("/removeUserFromParty")
-    public @ResponseBody String removeUserFromParty(HttpSession session, @RequestParam("partyId") String partyId,
+    public String removeUserFromParty(HttpSession session, @RequestParam("partyId") String partyId,
             @RequestParam("userId") String userId){
         int pid = Integer.parseInt(partyId);
         int uid = Integer.parseInt(userId);
@@ -61,6 +60,6 @@ public class PartyController {
         authenticationChecks.checkHighLevelRightsToUser(uid);
         drinkCounterService.unlinkUserFromParty(uid, pid);
 
-        return null;
+        return "redirect:user";
     }
 }
