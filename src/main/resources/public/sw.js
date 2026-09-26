@@ -38,23 +38,35 @@ function persistVersion(version) {
     });
 }
 
-function notifyClients(detail) {
+function notifyClients(detail, exceptClientId) {
     return self.clients.matchAll({ type: 'window' }).then(function (clients) {
         clients.forEach(function (client) {
-            client.postMessage({ type: 'RYYPPY_NEW_VERSION', detail: detail });
+            if (client.id !== exceptClientId) {
+                client.postMessage({ type: 'RYYPPY_NEW_VERSION', detail: detail });
+            }
         });
     });
 }
 
-function describe(request, response, version) {
-    return {
-        previousVersion: knownVersion,
-        version: version,
-        url: request.url,
-        destination: request.destination,
-        mode: request.mode,
-        status: response.status
-    };
+// sourceClientId is a tab that already runs this version, so it is not told
+// to reload.
+function recordVersion(version, detail, sourceClientId) {
+    return loadKnownVersion().then(function () {
+        detail.previousVersion = knownVersion;
+        detail.version = version;
+        if (knownVersion === null) {
+            console.log('[sw] Version baseline set', detail);
+            knownVersion = version;
+            return persistVersion(version);
+        }
+        if (knownVersion !== version) {
+            console.log('[sw] Version changed', detail);
+            knownVersion = version;
+            return persistVersion(version).then(function () {
+                return notifyClients(detail, sourceClientId);
+            });
+        }
+    });
 }
 
 // Matches the paths AppVersionFilter stamps. Other responses can come from
@@ -66,28 +78,32 @@ function isApiRequest(request) {
 
 function checkVersion(request, response) {
     var version = response.headers.get('X-App-Version');
-    if (!version || !isApiRequest(request)) {
+    if (!version) {
         return Promise.resolve();
     }
 
-    return loadKnownVersion().then(function () {
-        if (knownVersion === null) {
-            console.log('[sw] Version baseline set', describe(request, response, version));
-            knownVersion = version;
-            return persistVersion(version);
-        }
-        if (knownVersion !== version) {
-            var detail = describe(request, response, version);
-            console.log('[sw] Version changed', detail);
-            knownVersion = version;
-            return persistVersion(version).then(function () {
-                return notifyClients(detail);
-            });
-        }
+    return recordVersion(version, {
+        url: request.url,
+        destination: request.destination,
+        mode: request.mode,
+        status: response.status
     });
 }
 
+// Sent by sw-client.js on page load with the commit rendered into the page.
+self.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'RYYPPY_PAGE_VERSION' && event.data.version) {
+        var source = event.source || {};
+        event.waitUntil(recordVersion(event.data.version, { url: source.url }, source.id));
+    }
+});
+
+// Everything else is left to the browser, so the worker adds nothing to
+// requests that can't carry a version.
 self.addEventListener('fetch', function (event) {
+    if (!isApiRequest(event.request)) {
+        return;
+    }
     event.respondWith(
         fetch(event.request).then(function (response) {
             event.waitUntil(checkVersion(event.request, response));
