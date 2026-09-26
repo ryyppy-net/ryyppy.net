@@ -86,7 +86,7 @@ export async function createPartyClassic(page: Page, partyName: string): Promise
   await page.fill('#nameInput', partyName);
   await page.click('#addPartyDialog input[type="submit"]');
 
-  await expect(page).toHaveURL(/\/ui\/party\?id=\d+/);
+  await page.waitForURL(/\/ui\/party\?id=\d+/);
 }
 
 export interface ClassicGuest {
