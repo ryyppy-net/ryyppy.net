@@ -46,8 +46,6 @@ function notifyClients(detail) {
     });
 }
 
-// The Date header is when the server produced the response, so an old date
-// on a mismatch means it came from the browser's HTTP cache.
 function describe(request, response, version) {
     return {
         previousVersion: knownVersion,
@@ -55,14 +53,12 @@ function describe(request, response, version) {
         url: request.url,
         destination: request.destination,
         mode: request.mode,
-        status: response.status,
-        responseDate: response.headers.get('Date'),
-        cacheControl: response.headers.get('Cache-Control')
+        status: response.status
     };
 }
 
-// Only API responses are compared: static resources are cached for a year
-// in front of the app, so their X-App-Version can predate the running deploy.
+// Matches the paths AppVersionFilter stamps. Other responses can come from
+// the CDN in front of production and carry an older deploy's version.
 function isApiRequest(request) {
     var url = new URL(request.url);
     return url.origin === self.location.origin && /^\/api\//i.test(url.pathname);
