@@ -4,153 +4,66 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Ryyppy.net is a web application for tracking alcohol consumption. Users can create parties and track their blood alcohol content (BAC) in real-time. The application calculates promille levels based on user weight, sex, and drink timestamps.
+Ryyppy.net tracks alcohol consumption: users join parties, log drinks, and see their
+blood alcohol content (promilles) computed from weight, sex and drink timestamps.
 
-**Tech Stack:**
-- Backend: Spring Boot 4.1.1 (Java 25)
-- Database: PostgreSQL (no in-memory database; unit tests use no datasource)
-- Frontend: AngularJS (legacy)
-- View Layer: JSP with JSTL
-- Build Tool: Maven 3
+Spring Boot 4 on Java 25, PostgreSQL, Thymeleaf views, Maven. Two front ends share
+the backend: an AngularJS app (`public/app/`) and a classic jQuery UI (`party.html`,
+`user.html` with scripts in `public/static/js/`). A change to shared behaviour must
+work in both.
 
-## Development Commands
+## Commands
 
-### Start Development Environment
 ```bash
-# 1. Start PostgreSQL database
-docker compose -f docker/docker-compose.yml up
-
-# 2. Start application (with hot reload via spring-boot-devtools)
-mvn spring-boot:run
-
-# 3. Access application at http://localhost:8080
+mvn spring-boot:run          # starts PostgreSQL via docker/docker-compose.yml, then the app on :8080
+mvn test                     # unit tests
+mvn test -Dtest=ClassName    # single test class
+docker build -t ryyppynet .  # container image (see Container image)
 ```
 
-### Build and Test
-```bash
-# Run tests
-mvn test
-
-# Build jar file
-mvn install
-
-# Package specific version (updates pom.xml version)
-mvn versions:set -DnewVersion=3.1.6
-mvn install
-```
-
-### Branches and releases
 `main` is the default and only long-lived branch; base every PR on it. Releases are
 git tags on `main` marking a milestone - see README.md.
 
-### Container image
-The root `Dockerfile` follows Spring Boot's reference Dockerfile: Maven stage,
-layered `jarmode=tools extract`, runtime stage with a CRaC checkpoint
-(`checkpoint.sh`). Railway detects it and builds with it; `railway.json` only
-sets the pre-deploy command that runs migrations (see README.md).
-```bash
-docker build -t ryyppynet .
-```
-The checkpoint step boots against the real database via `SPRING_DATASOURCE_*`
-build args; omit them locally and it is skipped.
+## Database
 
-Two invariants: it stays read-only (the jar has no `flywayInitializer` bean -
-`process-aot` builds under the `production` profile, which disables Flyway),
-and it stays best-effort, so an unreachable database cannot block a deploy.
+Flyway owns the schema. A schema change is a new migration in
+`src/main/resources/db/migration/`; Hibernate only validates (`ddl-auto: validate`),
+so an entity that disagrees with the migrations fails startup.
 
-The service sets no start command, so the `ENTRYPOINT` defines how the app
-starts: it restores the checkpoint, or boots normally when there is none.
-Railway's serverless sleep starts a fresh
-container on every wake, so that restore is the hot path - see README.md for
-the startup-time figures.
+The `production` profile disables Flyway; production migrates in Railway's
+pre-deploy command (`.railway/railway.ts`), before the new version starts.
 
-### Database Configuration
-- Development uses local PostgreSQL via Docker (localhost:5432)
-- Default credentials: ryyppynet/ryyppynet/ryyppynet
-- Hibernate auto-updates schema (`ddl-auto: update`)
-- Production requires environment variables:
-  - `SPRING_DATASOURCE_URL`
-  - `SPRING_DATASOURCE_USERNAME`
-  - `SPRING_DATASOURCE_PASSWORD`
+## Container image and Railway
 
-## Architecture
+The root `Dockerfile` builds the jar, extracts layers, and writes a CRaC checkpoint
+(`checkpoint.sh`) that the `ENTRYPOINT` restores; with no checkpoint it boots
+normally. Railway builds this Dockerfile and sleeps the service when idle, so every
+wake is a restore - startup cost matters. The Railway service itself (pre-deploy
+command, health check, domain) is code in `.railway/railway.ts`.
 
-### Core Domain Model
+The checkpoint step boots against the real database via `SPRING_DATASOURCE_*` build
+args; omit them locally and it is skipped. Two invariants:
+- It stays read-only: the jar has no `flywayInitializer` bean, because `process-aot`
+  builds under the `production` profile, which disables Flyway.
+- It stays best-effort: an unreachable database cannot block a deploy.
 
-The application revolves around three main entities with bidirectional relationships:
+## Things that are easy to get wrong
 
-- **User**: Represents a person (registered user or guest). Contains physical attributes (weight, sex) for BAC calculations. Each user can participate in multiple parties and has a history of drinks.
-- **Party**: A drinking session with multiple participants. Many-to-many relationship with Users via join table `participants`.
-- **Drink**: Single drink event with timestamp and alcohol content (in grams). Linked to one User.
-
-### Service Layer Architecture
-
-The application uses a service-oriented architecture with clear separation of concerns:
-
-**AlcoholService / AlcoholServiceImpl**: Core calculation engine using the `AlcoholCalculator` class. Implements blood alcohol level calculations based on physiological factors. The calculator uses a burn rate algorithm (1g alcohol per 10kg body weight per hour) and maintains a list of `ShotFunction` objects to track alcohol metabolism over time. Singleton pattern via `getInstance()`.
-
-**DrinkCounterService / DrinkCounterServiceImpl**: Business logic for party management and drink tracking. Coordinates between the data access layer (DAOs) and the alcohol calculation service.
-
-**UserService / UserServiceImpl**: User management including registration, authentication, and profile updates.
-
-### Data Access Layer
-
-Spring Data JPA repositories (interfaces extending JpaRepository):
-- `UserDAO`
-- `PartyDAO`
-- `DrinkDAO`
-
-Entity classes use JPA annotations and extend `AbstractEntity` for common ID/persistence behavior.
-
-### REST API Structure
-
-**API v2** (primary): RESTful controllers under `drinkcounter.web.controllers.api.v2`
-- `PartyApiController`: Manages parties and participants at `/API/v2/parties`
-- `ProfileApiController`: User profile management
-- Uses DTO pattern (`PartyDTO`, `ParticipantDTO`, `DrinkDTO`, etc.) to decouple API from domain model
-
-**Legacy API**: `APIController` provides backward compatibility
-
-### Authentication & Security
-
-Configured in `WebSecurityConfiguration`:
-- Spring Security with form-based login
-- CSRF disabled (legacy frontend compatibility)
-- BCrypt password encoding
-- Multiple auth methods supported: OpenID, Facebook, Password (see `User.AuthMethod`)
-- `CurrentUser` interface provides access to authenticated user context
-- Custom `UserDetailsService` implementation (`UserDetailsServiceImpl`)
-- Authorization interceptors control party access (`PartyAuthorizationInterceptor`)
-
-### Frontend Architecture
-
-AngularJS app in `src/main/resources/public/app/`.
-
-Server-side views use JSP templates in `src/main/webapp/WEB-INF/jsp/` with a master tag template system.
-
-### Key Algorithms
-
-**Blood Alcohol Calculation**: The `AlcoholCalculator` uses a piecewise linear function approach:
-- Each drink creates a new `ShotFunction` with a "cutter" to handle overlapping metabolism
-- Burn rate is weight-dependent: `weight / 10 grams per hour`
-- Sex-specific blood volume factors: Male 0.75, Female 0.66
-- Standard drink = 12g alcohol (configurable via volume and percentage)
-
-**Drink Sounds**: `SoundManifest` scans `public/static/sounds/*.mp3` and resolves each clip through the resource chain into a content-hashed URL. `GlobalControllerAdvice` exposes the list as `${soundUrls}`, and `fragments/sounds.html` renders it as `window.__SOUND_URLS__` alongside `static/js/sound.js` into the pages that can add a drink (not the master layout — the clips are ~490 KB, wasted on login/newuser/legal pages). That player fetches and decodes every clip once after page load and plays it via the Web Audio API (`AudioBufferSourceNode`), so a click starts a sound with no fetch, decode or seek. Both front ends go through it: `common.js`'s global `playSound()` and the AngularJS `Sound` service are thin delegates. The sound fires on the click that starts a drink (`UserButton.buttonClick`, `DrinkerCtrl.addDefaultDrink`), not when the POST lands after the 5s undo countdown — so it is feedback for the tap, and `play()` runs inside the user gesture. Adding a clip means dropping an `.mp3` into that directory — nothing lists them in code. Requires an unprefixed `AudioContext` (Safari 14.1 / iOS 14.5); older browsers get a silent no-op.
-
-**Drink Standardization**: Converts volume + alcohol percentage to grams using alcohol density (789 g/L):
-```
-alcoholGrams = volume * alcoholPercentage * 789
-```
-
-## Key Patterns & Conventions
-
-- Services are injected via constructor injection (modern Spring pattern)
-- Entity relationships use JPA bidirectional mappings (e.g., `@ManyToMany` with `mappedBy`)
-- Transient fields (like `getPromilles()`) compute values on-demand via service calls
-- Guest users (`user.isGuest() = true`) are temporary participants without accounts
-- Default locale is Finnish (`fi_FI`) with English support
-- All timestamps use Joda-Time `DateTime` for parsing, converted to `java.util.Date`
+- `AlcoholServiceImpl.getInstance()` is a static singleton outside Spring that keeps
+  an in-memory `AlcoholCalculator` per user id. Change drinks through `User.drink()` /
+  `User.removeDrink()` so it stays in sync.
+- Google sign-in only works on the hub domain registered with Google
+  (`GOOGLE_AUTH_HUB_URL`, `https://ryyppy.net` in production). Other environments,
+  such as PR previews, reach it through `authentication/relay/`, signed with
+  `AUTH_RELAY_SECRET`.
+- CSRF is disabled for the legacy front ends.
+- UI text goes in both `messages_fi.properties` and `messages_en.properties`;
+  Finnish is the default locale.
+- Drink sounds: adding a clip means dropping an `.ogg` + `.mp3` pair with the same
+  stem into `public/static/sounds/`; `SoundManifest` finds them. The sound plays on
+  the click that starts a drink, not when the drink is saved after the 5s undo
+  countdown.
+- Use constructor injection in new code.
 
 ## Comments
 
@@ -174,14 +87,13 @@ neighbours.
 
 ## Testing
 
-Test files are in `src/test/java/drinkcounter/`:
-- Unit tests use JUnit 4 and Mockito
-- Limited test coverage (4 test files currently)
-- Run individual test: `mvn test -Dtest=ClassName`
+Unit tests use JUnit 5 and Mockito and run without a datasource.
 
 ### End-to-end tests (Playwright)
 
-A Playwright suite in `e2e/` drives the real app through a browser — registration, login/logout, invalid-credentials rejection, party creation/drink logging with promille updates, and drink-sound playback. Use this to verify a change actually works end-to-end (auth flows, the AngularJS UI, REST API together), not just that units pass in isolation.
+A Playwright suite in `e2e/` drives the real app through a browser, covering both
+front ends. Use it to verify a change actually works end-to-end (auth flows, the UIs,
+REST API together), not just that units pass in isolation.
 
 ```bash
 cd e2e
