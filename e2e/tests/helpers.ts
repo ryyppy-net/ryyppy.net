@@ -86,8 +86,6 @@ export async function createPartyClassic(page: Page, partyName: string): Promise
   await page.fill('#nameInput', partyName);
   await page.click('#addPartyDialog input[type="submit"]');
 
-  // The party page binds its header buttons in $(document).ready, so callers
-  // need the page loaded, not just the URL changed.
   await page.waitForURL(/\/ui\/party\?id=\d+/);
 }
 
