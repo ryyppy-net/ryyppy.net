@@ -7,7 +7,7 @@ import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
-import drinkcounter.web.controllers.api.v2.GravatarService;
+import drinkcounter.web.controllers.api.v2.GravatarUrls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,7 +159,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         List<Friend> friends = new ArrayList<Friend>();
         for (Object[] tuple : results) {
             User user = userDAO.findById((Integer)tuple[0]).orElseThrow(EntityNotFoundException::new);
-            friends.add(new Friend(user.getId(), user.getName(), GravatarService.getGravatarUrl(user)));
+            friends.add(new Friend(user.getId(), user.getName(), GravatarUrls.forUser(user)));
         }
         return friends;
     }

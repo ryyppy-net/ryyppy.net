@@ -12,8 +12,8 @@ import drinkcounter.model.User;
  *
  * @author thardas
  */
-public class GravatarService {
-    public static String getGravatarUrl(User user) {
+public class GravatarUrls {
+    public static String forUser(User user) {
         if(user.getEmail() != null) {
             return getUrl(user.getEmail());
         }

@@ -84,7 +84,7 @@ public class ParticipantDTO {
         participant.setPromilles(user.getPromilles());
         participant.setSex(user.getSex());
         participant.setTotalDrinks(user.getTotalDrinks());
-        participant.setProfilePictureUrl(GravatarService.getGravatarUrl(user));
+        participant.setProfilePictureUrl(GravatarUrls.forUser(user));
         return participant;
     }
 }
