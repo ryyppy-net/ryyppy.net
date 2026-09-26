@@ -111,7 +111,7 @@ public class WebConfiguration implements WebMvcConfigurer {
             @Autowired(required = false) GitProperties gitProperties) {
         FilterRegistrationBean<AppVersionFilter> registration =
                 new FilterRegistrationBean<>(new AppVersionFilter(gitProperties));
-        registration.addUrlPatterns("/*");
+        registration.addUrlPatterns("/API/*", "/api/*");
         return registration;
     }
 

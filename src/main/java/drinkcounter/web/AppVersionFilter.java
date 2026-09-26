@@ -10,7 +10,7 @@ import org.springframework.boot.info.GitProperties;
 import java.io.IOException;
 
 /**
- * Stamps every response with the running commit hash, so sw.js can tell when
+ * Stamps API responses with the running commit hash, so sw.js can tell when
  * a deploy has moved the backend out from under an open tab. Null or
  * commit-id-less GitProperties skips the header.
  */
