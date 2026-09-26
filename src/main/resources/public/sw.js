@@ -61,9 +61,16 @@ function describe(request, response, version) {
     };
 }
 
+// Only API responses are compared: static resources are cached for a year
+// in front of the app, so their X-App-Version can predate the running deploy.
+function isApiRequest(request) {
+    var url = new URL(request.url);
+    return url.origin === self.location.origin && /^\/api\//i.test(url.pathname);
+}
+
 function checkVersion(request, response) {
     var version = response.headers.get('X-App-Version');
-    if (!version) {
+    if (!version || !isApiRequest(request)) {
         return Promise.resolve();
     }
 
