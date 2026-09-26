@@ -15,6 +15,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="text/javascript" th:src="@{/static/js/sw-client.js}"></script>
+    <script defer src="/static/vendor/angular/angular.min.js"></script>
+    <script defer th:src="@{/app/js/app.js}"></script>
+    <script defer th:src="@{/app/js/services.js}"></script>
+    <script defer src="/static/vendor/moment/moment.min.js"></script>
+    <script defer th:src="@{/app/js/controllers/UserCtrl.js}"></script>
+    <script defer th:src="@{/app/js/controllers/ProfileSettingsCtrl.js}"></script>
+    <script defer th:src="@{/app/js/controllers/DrinkerCtrl.js}"></script>
+    <script defer th:src="@{/app/js/controllers/PartyCtrl.js}"></script>
+    <script defer th:src="@{/app/js/controllers/GeneralPartyAdminCtrl.js}"></script>
+    <script defer th:src="@{/app/js/controllers/PartyAdminCtrl.js}"></script>
+    <script defer th:src="@{/app/js/userhistorygraph.js}"></script>
+    <script defer th:src="@{/app/js/filters.js}"></script>
+    <script defer th:src="@{/app/js/directives.js}"></script>
+    <script defer src="/webjars/jquery/1.8.3/jquery.min.js"></script>
+    <script defer src="/webjars/pnotify/1.2.0/jquery.pnotify.js"></script>
+    <script defer src="/webjars/flot/0.7/jquery.flot.min.js"></script>
+    <script defer src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
+    <script defer src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
 </head>
 <body>
     <div ng-view></div>
@@ -45,30 +63,6 @@
         window.__INITIAL_DRINK_HISTORY__ = JSON.parse('[(${initialDrinkHistory})]');
     </script>
 
-    <script src="/static/vendor/angular/angular.min.js"></script>
-    <script th:src="@{/app/js/app.js}"></script>
-    <script th:src="@{/app/js/services.js}"></script>
     <th:block th:replace="~{fragments/sounds :: player}" />
-
-    <script src="/static/vendor/moment/moment.min.js"></script>
-
-    <script th:src="@{/app/js/controllers/UserCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/ProfileSettingsCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/DrinkerCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/PartyCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/GeneralPartyAdminCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/PartyAdminCtrl.js}"></script>
-
-    <script th:src="@{/app/js/userhistorygraph.js}"></script>
-
-    <script th:src="@{/app/js/filters.js}"></script>
-    <script th:src="@{/app/js/directives.js}"></script>
-
-    <script src="/webjars/jquery/1.8.3/jquery.min.js"></script>
-    <script src="/webjars/pnotify/1.2.0/jquery.pnotify.js"></script>
-
-    <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
-    <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>
-    <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.resize.min.js"></script>
 </body>
 </html>
