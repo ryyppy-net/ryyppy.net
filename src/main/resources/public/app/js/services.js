@@ -176,7 +176,7 @@
         $.pnotify.defaults.pnotify_history = false;
 
         this.success = function (title, text) {
-            $.pnotify({
+            return $.pnotify({
                 title: title,
                 text: text,
                 type: 'success'

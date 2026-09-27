@@ -38,7 +38,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
             var message = participant.type === 'participant'
                 ? "Käyttäjälle " + participant.name + " lisättiin juoma."
                 : "Sinulle lisättiin juoma.";
-            Notify.success(self.getRandomSalutation(), message);
+            self.addedNotice = Notify.success(self.getRandomSalutation(), message);
             self.drinksChanged(participant);
             return saved;
         });
@@ -67,6 +67,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         $timeout.cancel(self.dismissTimeout);
         var participant = self.participant;
         self.savedDrink.then(function (saved) {
+            self.addedNotice.pnotify_remove();
             return RyyppyAPI.deleteDrink(participant, saved.id);
         }).then(function () {
             self.drinksChanged(participant);

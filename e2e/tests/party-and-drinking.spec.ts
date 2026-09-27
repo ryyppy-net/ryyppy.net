@@ -103,6 +103,8 @@ test('undoing a drink right after the tap deletes the saved drink', async ({ pag
   const drinkerTile = await openOwnPartyTile(page, 'undo');
   const saved = await tapToDrink(page, drinkerTile);
   expect(await getOwnDrinks(page)).toHaveLength(1);
+  const addedNotice = page.locator('.ui-pnotify', { hasText: 'lisättiin juoma' });
+  await expect(addedNotice).toBeVisible();
 
   const deleted = page.waitForResponse(
     (response) => response.url().endsWith(`/drinks/${saved.id}`) && response.request().method() === 'DELETE'
@@ -111,6 +113,7 @@ test('undoing a drink right after the tap deletes the saved drink', async ({ pag
   expect((await deleted).ok()).toBeTruthy();
 
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeHidden();
+  await expect(addedNotice).toBeHidden();
   expect(await getOwnDrinks(page)).toHaveLength(0);
 });
 
