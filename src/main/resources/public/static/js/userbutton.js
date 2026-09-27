@@ -70,9 +70,6 @@ function UserButton(userId, element, color) {
     this.defaultPortionSize = 0.33;
     this.defaultPortionAlcoholPercentage = 0.047;
     
-    this.selectedPortionSize = this.defaultPortionSize;
-    this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
-    
     this.progressBar = null;
     
     this.timeoutId = undefined;
@@ -281,46 +278,66 @@ UserButton.prototype.buttonClick = function() {
         return;
 
     this.clicked = true;
-    // Feedback for the click, so it sounds here rather than when the drink
-    // posts 5s later. The edit overlay's accept button is reachable only from
-    // this click, so a drink never sounds twice.
     playSound();
+    this.savedDrink = this.addDrink();
     this.showAdding();
 }
 
+// Resolves with the saved drink's id.
 UserButton.prototype.addDrink = function() {
+    var saved = $.Deferred();
     RyyppyAPI.addDrinkToUser(
         this.userId,
-        this.selectedPortionSize,
-        this.selectedPortionAlcoholPercentage,
-        $.proxy(function(data) {
-            this.update();
+        this.defaultPortionSize,
+        this.defaultPortionAlcoholPercentage,
+        $.proxy(function(drinkId) {
+            this.drinksChanged();
+            saved.resolve(drinkId);
         }, this),
         function() {
             alert(getMessage('drink_add_failed'));
+            saved.reject();
         }
     );
-
-    this.selectedPortionSize = this.defaultPortionSize;
-    this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
+    return saved.promise();
 }
 
+UserButton.prototype.editDrink = function(volume, alcohol) {
+    var that = this;
+    this.savedDrink.done(function(drinkId) {
+        RyyppyAPI.editDrinkOfUser(that.userId, drinkId, volume, alcohol, function() {
+            that.drinksChanged();
+        });
+    });
+}
 
-UserButton.prototype.scheduleAddingDrink = function() {
-    this.cancelAddingDrink();
+UserButton.prototype.removeDrink = function() {
+    var that = this;
+    this.savedDrink.done(function(drinkId) {
+        RyyppyAPI.removeDrinkFromUser(that.userId, drinkId, function() {
+            that.drinksChanged();
+        });
+    });
+}
+
+UserButton.prototype.drinksChanged = function() {
+    this.update();
+    if (this.onDrunk) {
+        this.onDrunk(this.userId);
+    }
+}
+
+// The drink is saved on the click; the overlay stays up for 5s to offer undo or edit.
+UserButton.prototype.scheduleClosingOverlay = function() {
+    this.cancelClosingOverlay();
     this.timeoutId = setTimeout($.proxy(function() {
         this.fadeAndRemove(this.undoDiv);
         this.enableButton();
-
-        this.addDrink();
         this.progressBar.remove();
-        if (this.onDrunk) {
-           this.onDrunk(this.userId);
-        }
     }, this), 5000);
 }
 
-UserButton.prototype.cancelAddingDrink = function() {
+UserButton.prototype.cancelClosingOverlay = function() {
     clearTimeout(this.timeoutId);
 }
 
@@ -349,7 +366,7 @@ UserButton.prototype.showAdding = function() {
 
         var editButton = $('#editButton' + that.userId);
         editButton.click(function() {
-            that.cancelAddingDrink();
+            that.cancelClosingOverlay();
             editButton.css('background-color', 'green');
 
             $.get('/static/templates/editDrink.html', function(template) {
@@ -361,9 +378,9 @@ UserButton.prototype.showAdding = function() {
                 editDiv.show();
 
                 $('#acceptButton' + that.userId).click(function() {
-                    that.selectedPortionSize = $('#portionSize' + that.userId).val();
-                    that.selectedPortionAlcoholPercentage = $('#portionAlcoholPercentage' + that.userId).val();
-                    that.addDrink();
+                    that.editDrink(
+                        $('#portionSize' + that.userId).val(),
+                        $('#portionAlcoholPercentage' + that.userId).val());
                     that.undoDiv.remove();
                     that.fadeAndRemove(editDiv);
                     that.enableButton();
@@ -373,7 +390,8 @@ UserButton.prototype.showAdding = function() {
 
         var undoButton = $('#undoButton' + that.userId);
         undoButton.click(function() {
-            that.cancelAddingDrink();
+            that.cancelClosingOverlay();
+            that.removeDrink();
             editButton.unbind('click');
             that.progressBar.stop();
 
@@ -388,7 +406,7 @@ UserButton.prototype.showAdding = function() {
         });
 
         that.undoDiv.fadeIn(500, function() {
-            that.scheduleAddingDrink();
+            that.scheduleClosingOverlay();
         });
     });
 }
@@ -422,7 +440,7 @@ UserButton.prototype.fitElementOnAnotherOrFullScreen = function(element, another
 
 UserButton.prototype.updatePortionSizeAndAlcoholPercentage = function() {
     $('#userNameLabel' + this.userId).html(this.name);
-    $("#portionLabel" + this.userId).html(this.portionSizes[this.selectedPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.selectedPortionAlcoholPercentage]);
+    $("#portionLabel" + this.userId).html(this.portionSizes[this.defaultPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.defaultPortionAlcoholPercentage]);
 }
 
 

@@ -121,15 +121,11 @@ export async function getClassicUserId(page: Page): Promise<number> {
   return page.evaluate(() => (window as any).userId);
 }
 
-/**
- * Clicks a classic-UI drinker button and immediately accepts the drink via
- * the edit-drink overlay, skipping the 5s undo countdown (see
- * UserButton.showAdding/scheduleAddingDrink).
- */
-export async function addDrinkImmediatelyClassic(page: Page, userId: number): Promise<void> {
+/** Clicks a classic-UI drinker button and waits for the drink to be saved. */
+export async function addDrinkClassic(page: Page, userId: number): Promise<void> {
+  const saved = page.waitForResponse((response) => response.url().includes(`/API/users/${userId}/add-drink`));
   await page.click(`#user${userId}`);
-  await page.locator(`#editButton${userId}`).click();
-  await page.click(`#acceptButton${userId}`);
+  expect((await saved).ok()).toBeTruthy();
 }
 
 /** The logged-in user's drinks, read straight from the REST API. */

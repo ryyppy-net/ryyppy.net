@@ -77,7 +77,7 @@ test.describe('drink sounds', () => {
 
 // Its own user: the click below logs a real drink, and the shared user must
 // not gain any (see shared-user.setup.ts).
-test('the classic UI plays a drink sound on the click, not when the drink posts', async ({ page }) => {
+test('the classic UI plays a drink sound on the click', async ({ page }) => {
   await instrumentWebAudio(page);
 
   const user = makeTestUser('sound-classic');
@@ -90,8 +90,7 @@ test('the classic UI plays a drink sound on the click, not when the drink posts'
   const userId = await getClassicUserId(page);
   await page.click(`#user${userId}`);
 
-  // play() starts the buffer synchronously inside the click handler, and the
-  // POST is 5s later behind the undo countdown, so a sound tied to the
-  // response would not have started by now.
+  // play() starts the buffer synchronously inside the click handler, so the
+  // sound has started before the drink's POST can have returned.
   expect(await playedSounds(page)).toBeGreaterThan(0);
 });

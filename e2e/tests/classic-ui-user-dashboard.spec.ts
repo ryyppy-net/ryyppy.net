@@ -7,7 +7,8 @@ import {
   loginClassic,
   createPartyClassic,
   getClassicUserId,
-  addDrinkImmediatelyClassic,
+  addDrinkClassic,
+  getOwnDrinks,
 } from './helpers';
 
 // Read-only, and the shared user never drinks, so its reading stays 0.00.
@@ -88,7 +89,7 @@ test('U5: drinks dialog lists existing drinks and removing one via confirm remov
   await loginClassic(page, user);
 
   const userId = await getClassicUserId(page);
-  await addDrinkImmediatelyClassic(page, userId);
+  await addDrinkClassic(page, userId);
 
   page.on('dialog', (dialog) => dialog.accept());
 
@@ -150,7 +151,49 @@ test('U8: clicking the drinker button adds a drink and changes the promille read
   const promilleLocator = page.locator(`#info${userId} .details`).first();
   await expect(promilleLocator).toHaveText('0.00‰', { timeout: 10_000 });
 
-  await addDrinkImmediatelyClassic(page, userId);
+  await addDrinkClassic(page, userId);
 
   await expect(promilleLocator).not.toHaveText('0.00‰', { timeout: 10_000 });
+});
+
+test('U9: cancelling right after the click deletes the saved drink', async ({ page }) => {
+  const user = makeTestUser('dash-u9');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+
+  const userId = await getClassicUserId(page);
+  await addDrinkClassic(page, userId);
+  expect(await getOwnDrinks(page)).toHaveLength(1);
+
+  const removed = page.waitForResponse((response) => response.url().includes(`/API/users/${userId}/remove-drink/`));
+  await page.click(`#undoButton${userId}`);
+  expect((await removed).ok()).toBeTruthy();
+
+  await expect(page.locator(`#undoButton${userId}`)).toHaveText('Juoma peruttiin!');
+  expect(await getOwnDrinks(page)).toHaveLength(0);
+});
+
+test('U10: editing right after the click changes the saved drink', async ({ page }) => {
+  const user = makeTestUser('dash-u10');
+  await registerUser(page, user);
+  await page.goto('/logout');
+  await loginClassic(page, user);
+
+  const userId = await getClassicUserId(page);
+  await addDrinkClassic(page, userId);
+  const [saved] = await getOwnDrinks(page);
+
+  await page.click(`#editButton${userId}`);
+  await page.selectOption(`#portionSize${userId}`, '1.0');
+
+  const edited = page.waitForResponse((response) => response.url().includes(`/API/users/${userId}/edit-drink/${saved.id}`));
+  await page.click(`#acceptButton${userId}`);
+  expect((await edited).ok()).toBeTruthy();
+
+  const drinks = await getOwnDrinks(page);
+  expect(drinks).toHaveLength(1);
+  expect(drinks[0].id).toBe(saved.id);
+  // 1.0 l of 4.7% beer is about three standard drinks; the default 0.33 l is one.
+  expect(drinks[0].amountOfShots).toBeGreaterThan(2.5);
 });
