@@ -4,6 +4,7 @@ import drinkcounter.dao.DrinkDAO;
 import drinkcounter.dao.UserDAO;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class DrinkCounterServiceImplTest {
@@ -22,6 +25,7 @@ public class DrinkCounterServiceImplTest {
     private DrinkCounterServiceImpl service;
     private UserDAO userDAO;
     private User user;
+    private DrinkDAO drinkDAO;
 
     @BeforeEach
     public void setUp() {
@@ -29,7 +33,7 @@ public class DrinkCounterServiceImplTest {
 
         service = new DrinkCounterServiceImpl();
         userDAO = mock(UserDAO.class);
-        DrinkDAO drinkDAO = mock(DrinkDAO.class);
+        drinkDAO = mock(DrinkDAO.class);
         AtomicInteger nextDrinkId = new AtomicInteger(1);
         when(drinkDAO.save(any(Drink.class))).thenAnswer(invocation -> {
             Drink drink = invocation.getArgument(0);
@@ -59,5 +63,18 @@ public class DrinkCounterServiceImplTest {
     public void addDrinkToDateRejectsFutureDates() {
         String farFuture = "01.01.2099 00:00";
         assertThrows(IllegalArgumentException.class, () -> service.addDrinkToDate(1, farFuture, 0));
+    }
+
+    @Test
+    public void removeDrinkFromUserRejectsAnotherUsersDrink() {
+        User other = new User();
+        other.setId(2);
+        Drink othersDrink = new Drink();
+        othersDrink.setId(99);
+        othersDrink.setDrinker(other);
+        when(drinkDAO.findById(99)).thenReturn(Optional.of(othersDrink));
+
+        assertThrows(EntityNotFoundException.class, () -> service.removeDrinkFromUser(1, 99));
+        verify(drinkDAO, never()).delete(any(Drink.class));
     }
 }

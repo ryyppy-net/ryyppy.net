@@ -113,7 +113,7 @@ public class PartyApiController {
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
         if(!party.getParticipants().contains(participant)){
-            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
+            throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participant.getId(), party.getId()));
         }
         return ParticipantDTO.fromUser(participant);
     }
@@ -126,7 +126,7 @@ public class PartyApiController {
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
         if(!party.getParticipants().contains(participant)){
-            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
+            throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participant.getId(), party.getId()));
         }
         float alcoholAmount = (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
         if (volume != null && alcoholPercentage != null) {
