@@ -33,6 +33,10 @@ function RyyppyAPI() {
             .error(errorCallback);
     }
 
+    this.editDrinkOfUser = function(userId, drinkId, volume, alcohol, callback) {
+        $.get('/API/users/{0}/edit-drink/{1}'.format(userId, drinkId), {'volume': volume, 'alcohol': alcohol}, callback);
+    }
+
     this.removeDrinkFromUser = function(userId, drinkId, callback) {
         $.get('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
     }
@@ -168,13 +172,13 @@ MESSAGES['en']['idle'] = 'Idle ';
 MESSAGES['en']['cancel_drink'] = 'Cancel drink';
 MESSAGES['en']['drink_was_canceled'] = 'The drink was canceled!';
 MESSAGES['en']['loading'] = 'Loading...';
-MESSAGES['en']['drink_added'] = "Adding a drink...";
+MESSAGES['en']['drink_added'] = "Drink added";
 MESSAGES['en']['drink_add_failed'] = "Adding a drink failed! Please refresh the page and try again.";
 MESSAGES['en']['wait_for_adding_drink'] = "Please wait...";
 MESSAGES['en']['liters'] = 'liters';
 MESSAGES['en']['portion_size'] = 'Portion size';
 MESSAGES['en']['portion_alcohol_percentage'] = 'Alc-%';
-MESSAGES['en']['accept'] = 'Add the drink';
+MESSAGES['en']['accept'] = 'Save';
 MESSAGES['en']['edit_drink'] = 'Edit drink';
 
 MESSAGES['fi']['click_me'] = 'Paina tästä juodaksesi';
@@ -184,13 +188,13 @@ MESSAGES['fi']['idle'] = 'Juomatta ';
 MESSAGES['fi']['cancel_drink'] = 'Peru juoma';
 MESSAGES['fi']['drink_was_canceled'] = 'Juoma peruttiin!';
 MESSAGES['fi']['loading'] = 'Ladataan...';
-MESSAGES['fi']['drink_added'] = "Juomaa lisätään...";
+MESSAGES['fi']['drink_added'] = "Juoma lisätty";
 MESSAGES['fi']['drink_add_failed'] = "Juoman lisääminen epäonnistui! Ole hyvä ja lataa sivu uudestaan.";
 MESSAGES['fi']['wait_for_adding_drink'] = "Ole hyvä ja odota...";
 MESSAGES['fi']['liters'] = 'l';
 MESSAGES['fi']['portion_size'] = 'Annoskoko';
 MESSAGES['fi']['portion_alcohol_percentage'] = 'Alkoholi-%';
-MESSAGES['fi']['accept'] = 'Lisää juoma';
+MESSAGES['fi']['accept'] = 'Tallenna';
 MESSAGES['fi']['edit_drink'] = 'Muokkaa juomaa';
 
 

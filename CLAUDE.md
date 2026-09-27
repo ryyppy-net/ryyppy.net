@@ -61,8 +61,9 @@ args; omit them locally and it is skipped. Two invariants:
   Finnish is the default locale.
 - Drink sounds: adding a clip means dropping an `.ogg` + `.mp3` pair with the same
   stem into `public/static/sounds/`; `SoundManifest` finds them. The sound plays on
-  the click that starts a drink, not when the drink is saved after the 5s undo
-  countdown.
+  the click that starts a drink.
+- A drink is saved on that click. The overlay that follows offers undo and edit
+  for 5s, which delete or change the saved drink, in both front ends.
 - Use constructor injection in new code.
 
 ## Comments
