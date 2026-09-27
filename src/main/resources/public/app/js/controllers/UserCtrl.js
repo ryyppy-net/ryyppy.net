@@ -73,11 +73,11 @@ function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
     };
 
     $scope.partySort = function (party) {
-        return moment(party.startTime);
+        return new Date(party.startTime).getTime();
     };
 
     $scope.drinkSort = function (drink) {
-        return moment(drink.timestamp);
+        return new Date(drink.timestamp).getTime();
     };
 
     this.refreshParties();
