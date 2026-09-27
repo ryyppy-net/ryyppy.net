@@ -69,10 +69,13 @@ test('a user can create a party, appear as a participant, and logging a drink up
   expect(await page.evaluate(() => (window as any).__playedSounds__ as number)).toBeGreaterThan(0);
   // Both the "adding" and "editing" overlays exist in the DOM at once
   // (toggled via ng-show), so scope to the one shown right after a click.
-  await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
+  const addingOverlay = drinkerTile.locator('.drinker-overlay').first();
+  await expect(addingOverlay).toBeVisible();
   expect((await drinkResponse).ok()).toBeTruthy();
 
-  await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '', { timeout: 10_000 });
+  // The tile refreshes as soon as the drink is saved, under the still-open overlay.
+  await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '');
+  await expect(addingOverlay).toBeVisible();
 });
 
 /** Registers a fresh user with a new party of their own and returns their tile on it. */
@@ -130,4 +133,24 @@ test('editing a drink right after the tap changes the saved drink', async ({ pag
   expect(drinks[0].id).toBe(saved.id);
   // 1.0 l of 4.7% beer is about three standard drinks; the default 0.33 l is one.
   expect(drinks[0].amountOfShots).toBeGreaterThan(2.5);
+});
+
+test('tapping the dashboard tile saves the drink and refreshes the tile under the open overlay', async ({ page }) => {
+  const user = makeTestUser('dashboard');
+  await registerUser(page, user);
+  await page.goto('/app/index.html#/', { waitUntil: 'domcontentloaded' });
+
+  const drinkerTile = page.locator('.drinker', { has: page.getByText(user.name) });
+  const promilleLocator = drinkerTile.locator('p', { hasText: 'Promilleja' });
+  await expect(promilleLocator).toBeVisible();
+  const initialPromilleText = await promilleLocator.textContent();
+
+  const saved = page.waitForResponse(
+    (response) => response.url().endsWith('/API/v2/profile/drinks') && response.request().method() === 'POST'
+  );
+  await drinkerTile.locator('.container-fluid').first().click();
+  expect((await saved).ok()).toBeTruthy();
+
+  await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '');
+  await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
 });

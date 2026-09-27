@@ -8,7 +8,13 @@ function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
     function applyProfile(data) {
         data.type = 'profile';
         data.color = 1;
-        $scope.participants = [data];
+        // Updating the shown profile in place keeps its tile, and any open
+        // drink overlay, on screen.
+        if ($scope.participants && $scope.participants[0].id === data.id) {
+            angular.extend($scope.participants[0], data);
+        } else {
+            $scope.participants = [data];
+        }
 
         setTimeout(function () {
             var graph = new UserHistoryGraph($scope.participants[0], $("#historyGraph"));

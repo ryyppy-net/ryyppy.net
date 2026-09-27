@@ -68,8 +68,7 @@ npx playwright show-trace test-results/<dir>/trace.zip
   `workers: 4`, and a retry only turns a real race into a green build.
 - A drink is saved on the tap and the undo/edit overlay then stays up for 5s.
   Undo and edit act on the saved drink, so assert on their requests or on
-  `getOwnDrinks` rather than waiting the 5s out. The modern UI only redraws
-  the tile's promille once that overlay closes.
+  `getOwnDrinks` rather than waiting the 5s out.
 
 ## Shared vs. dedicated users
 

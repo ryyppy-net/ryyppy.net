@@ -12,14 +12,13 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         Sound.playSound();
 
         var defaultDrink = {volume: '0.33', alcohol: '0.047'};
-        $scope.participant = participant;
         self.addDrink(participant, defaultDrink);
     };
 
     // The drink is saved on the tap; the overlay then offers a 5s window to
-    // undo or edit it. Tiles refresh only once the overlay closes, because the
-    // refresh re-renders them and would drop the open overlay.
+    // undo or edit it.
     this.addDrink = function (participant, drink) {
+        self.participant = participant;
         $scope.showDrinkDialog = true;
         $scope.addingDrink = true;
         $scope.editingDrink = false;
@@ -40,15 +39,11 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
                 ? "Käyttäjälle " + participant.name + " lisättiin juoma."
                 : "Sinulle lisättiin juoma.";
             Notify.success(self.getRandomSalutation(), message);
+            self.drinksChanged(participant);
             return saved;
         });
 
-        self.dismissTimeout = $timeout(function () {
-            $scope.hideDialog();
-            self.savedDrink.then(function () {
-                self.drinksChanged(participant);
-            });
-        }, 5000);
+        self.dismissTimeout = $timeout($scope.hideDialog, 5000);
     };
 
     $scope.editDrink = function() {
@@ -58,7 +53,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.saveEditedDrink = function () {
-        var participant = $scope.participant;
+        var participant = self.participant;
         var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage};
         self.savedDrink.then(function (saved) {
             return RyyppyAPI.changeDrink(participant, saved.id, editedDrink);
@@ -70,7 +65,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
 
     $scope.cancelDrink = function () {
         $timeout.cancel(self.dismissTimeout);
-        var participant = $scope.participant;
+        var participant = self.participant;
         self.savedDrink.then(function (saved) {
             return RyyppyAPI.deleteDrink(participant, saved.id);
         }).then(function () {
@@ -212,9 +207,9 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         $.plot(graphElement, series, graphOptions);
     }
 
-    setTimeout(function () {
-        historyLoaded();
-    }, 0);
+    $scope.$watch('participant.history', function () {
+        setTimeout(historyLoaded, 0);
+    });
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
