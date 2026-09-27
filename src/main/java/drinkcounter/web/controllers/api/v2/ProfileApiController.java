@@ -8,7 +8,6 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
-import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -82,12 +81,7 @@ public class ProfileApiController {
 
     @GetMapping("drinks")
     public List<DrinkDTO> getDrinks(){
-        List<Drink> drinks = currentUser.getUser().getDrinks();
-        List<DrinkDTO> drinkDTOs = new ArrayList<DrinkDTO>();
-        for (Drink drink : drinks) {
-            drinkDTOs.add(DrinkDTO.fromDrink(drink));
-        }
-        return drinkDTOs;
+        return currentUser.getUser().getDrinks().stream().map(DrinkDTO::fromDrink).toList();
     }
 
     @PutMapping("drinks/{drinkId}")

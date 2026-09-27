@@ -110,12 +110,7 @@ public class PartyApiController {
 
     @GetMapping("{partyId}/participants/{participantId}")
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
-        Party party = drinkCounterService.getParty(partyId);
-        User participant = userService.getUser(participantId);
-        if(!party.getParticipants().contains(participant)){
-            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
-        }
-        return ParticipantDTO.fromUser(participant);
+        return ParticipantDTO.fromUser(requireParticipant(partyId, participantId));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
@@ -152,12 +147,13 @@ public class PartyApiController {
         drinkCounterService.removeDrinkFromUser(participantId, drinkId);
     }
 
-    private void requireParticipant(Integer partyId, Integer participantId) {
+    private User requireParticipant(Integer partyId, Integer participantId) {
         Party party = drinkCounterService.getParty(partyId);
         User participant = userService.getUser(participantId);
         if(!party.getParticipants().contains(participant)){
-            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
+            throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participant.getId(), party.getId()));
         }
+        return participant;
     }
 
     @GetMapping("{partyId}/invitations")

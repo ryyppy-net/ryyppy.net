@@ -120,7 +120,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = findDrinkOf(user, drinkId);
         user.changeDrinkAlcohol(drink, alcoholAmount);
-        drinkDao.save(drink);
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), alcoholAmount);
     }
 

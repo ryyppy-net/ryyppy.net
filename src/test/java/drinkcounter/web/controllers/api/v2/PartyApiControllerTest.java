@@ -19,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -105,7 +105,8 @@ public class PartyApiControllerTest {
 
     @Test
     public void changeDrinkRejectsNonParticipant() {
-        assertThrows(RuntimeException.class, () -> controller.changeDrink(1, 3, 7, 0.5f, 0.05f));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> controller.changeDrink(1, 3, 7, 0.5f, 0.05f));
+        assertEquals("Participant 3 doesn't belong to party 1", ex.getMessage());
 
         verify(drinkCounterService, never()).changeDrinkAlcohol(anyInt(), anyInt(), any(Float.class));
     }
