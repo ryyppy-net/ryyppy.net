@@ -11,7 +11,7 @@
 
     navigator.serviceWorker.addEventListener('message', function (event) {
         if (event.data && event.data.type === 'RYYPPY_NEW_VERSION') {
-            console.log('New version detected, reloading.');
+            console.log('New version detected, reloading.', event.data.detail);
             window.location.reload();
         }
     });
@@ -20,5 +20,13 @@
     // own resource fetches - see sound.js's preload for the same pattern.
     window.addEventListener('load', function () {
         navigator.serviceWorker.register('/sw.js');
+
+        var meta = document.querySelector('meta[name="ryyppy-net-commit"]');
+        var version = meta && meta.getAttribute('content');
+        if (version) {
+            navigator.serviceWorker.ready.then(function (registration) {
+                registration.active.postMessage({ type: 'RYYPPY_PAGE_VERSION', version: version });
+            });
+        }
     });
 })(window, navigator);
