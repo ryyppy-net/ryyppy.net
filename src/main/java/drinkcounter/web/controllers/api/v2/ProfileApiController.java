@@ -8,7 +8,6 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.CurrentUser;
-import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,7 +63,7 @@ public class ProfileApiController {
     }
 
     @PostMapping("drinks")
-    public void drink(
+    public DrinkDTO drink(
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
@@ -77,22 +76,20 @@ public class ProfileApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        drinkCounterService.addDrink(userId, time, (float)alcoholAmount);
-        
+        return DrinkDTO.fromDrink(drinkCounterService.addDrink(userId, time, (float)alcoholAmount));
     }
 
     @GetMapping("drinks")
     public List<DrinkDTO> getDrinks(){
-        List<Drink> drinks = currentUser.getUser().getDrinks();
-        List<DrinkDTO> drinkDTOs = new ArrayList<DrinkDTO>();
-        for (Drink drink : drinks) {
-            DrinkDTO drinkDTO = new DrinkDTO();
-            drinkDTO.setId(drink.getId());
-            drinkDTO.setTimestamp(drink.getTimeStamp().toString());
-            drinkDTO.setAmountOfShots(drink.getAmountOfShots());
-            drinkDTOs.add(drinkDTO);
-        }
-        return drinkDTOs;
+        return currentUser.getUser().getDrinks().stream().map(DrinkDTO::fromDrink).toList();
+    }
+
+    @PutMapping("drinks/{drinkId}")
+    public void changeDrink(@PathVariable Integer drinkId,
+            @RequestParam("volume") Float volume,
+            @RequestParam("alcohol") Float alcoholPercentage){
+        drinkCounterService.changeDrinkAlcohol(currentUser.getUser().getId(), drinkId,
+                AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
     }
 
     @DeleteMapping("drinks/{drinkId}")

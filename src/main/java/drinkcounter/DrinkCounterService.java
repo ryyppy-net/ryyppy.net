@@ -25,9 +25,10 @@ public interface DrinkCounterService {
     int addDrink(int userId);
     int addDrink(int userId, float alcoholAmount);
     void removeDrinkFromUser(int userId, int drinkId);
+    void changeDrinkAlcohol(int userId, int drinkId, float alcoholAmount);
     int addDrinkToDate(int id, String date, double timezoneOffset);
     int addDrink(int userId, Date date);
-    void addDrink(int userId, Date date, Float alcoholAmount);
+    Drink addDrink(int userId, Date date, Float alcoholAmount);
     long getTotalDrinkCount();
     List<Friend> suggestInvitations(int forUser, int partyId, int amount);
 

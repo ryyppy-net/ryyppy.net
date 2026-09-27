@@ -9,6 +9,7 @@ public interface AlcoholService {
     void initializeUser(User user);
     void drinkAdded(User user, Drink drink);
     void drinkRemoved(User user, Drink drink);
+    void drinkChanged(User user, Drink drink);
     float getPromilles(User user);
     List<Float> getPromillesAtInterval(User user, Date start, Date end, int intervalMs);
     int getTotalDrinks(User user);

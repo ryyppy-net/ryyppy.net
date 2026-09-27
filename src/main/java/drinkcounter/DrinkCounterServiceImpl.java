@@ -114,6 +114,15 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         log.info("{} has removed a drink {}", user, drink.getTimeStamp());
     }
 
+    @Override
+    @Transactional
+    public void changeDrinkAlcohol(int userId, int drinkId, float alcoholAmount) {
+        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        Drink drink = findDrinkOf(user, drinkId);
+        user.changeDrinkAlcohol(drink, alcoholAmount);
+        log.info("{} has changed drink {} to {} grams", user, drink.getId(), alcoholAmount);
+    }
+
     private Drink findDrinkOf(User user, int drinkId) {
         Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
         if (drink.getDrinker() == null || !user.getId().equals(drink.getDrinker().getId())) {
@@ -192,7 +201,7 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
 
     @Override
     @Transactional
-    public void addDrink(int userId, Date date, Float alcoholAmount) {
+    public Drink addDrink(int userId, Date date, Float alcoholAmount) {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         if(date != null){
@@ -207,5 +216,6 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
         user.drink(drink);
         drinkDao.save(drink);
         log.info("{} has drunk a drink at {}", user, drink.getTimeStamp());
+        return drink;
     }
 }
