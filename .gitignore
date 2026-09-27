@@ -21,3 +21,6 @@ e2e/.cache
 
 # Railway IaC SDK
 node_modules
+
+# esbuild prototype
+frontend/node_modules

@@ -175,7 +175,7 @@
      * RyyppyAPI object is registered as an Angular service so that controllers or
      * other services can depend on it.
      */
-    angular.module('ryyppy.services', [], function ($provide) {
+    angular.module('ryyppy.services', [], ['$provide', function ($provide) {
         $provide.factory('RyyppyAPI', ['$http', function ($http) {
             return new RyyppyAPI($http);
         }]);
@@ -191,6 +191,6 @@
         $provide.factory('Notify', function () {
             return new NotificationService();
         });
-    });
+    }]);
 })(angular);
 
