@@ -57,21 +57,14 @@ test('a user can create a party, appear as a participant, and logging a drink up
 
   await waitForSoundsReady(page);
 
-  // On the party page, PartyCtrl tags every participant (self included) with
-  // type: 'participant', so the drink goes to the party-scoped drinks
-  // endpoint (/API/v2/parties/{id}/participants/{id}/drinks), not
-  // /API/v2/profile/drinks (that one's only used from the dashboard).
-  const drinkResponse = page.waitForResponse(
-    (response) => /\/participants\/\d+\/drinks$/.test(response.url()) && response.request().method() === 'POST'
-  );
-  await drinkerTile.locator('.container-fluid').first().click();
+  // PartyCtrl marks every drinker here, self included, as a party participant.
+  await tapToDrink(page, drinkerTile, /\/participants\/\d+\/drinks$/);
 
   expect(await page.evaluate(() => (window as any).__playedSounds__ as number)).toBeGreaterThan(0);
   // Both the "adding" and "editing" overlays exist in the DOM at once
   // (toggled via ng-show), so scope to the one shown right after a click.
   const addingOverlay = drinkerTile.locator('.drinker-overlay').first();
   await expect(addingOverlay).toBeVisible();
-  expect((await drinkResponse).ok()).toBeTruthy();
 
   // The tile refreshes as soon as the drink is saved, under the still-open overlay.
   await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '');
@@ -89,9 +82,9 @@ async function openOwnPartyTile(page: Page, prefix: string) {
 }
 
 /** Taps the tile and waits until the drink it saves comes back from the server. */
-async function tapToDrink(page: Page, drinkerTile: Locator) {
+async function tapToDrink(page: Page, drinkerTile: Locator, drinksUrl = /\/drinks$/) {
   const saved = page.waitForResponse(
-    (response) => /\/drinks$/.test(response.url()) && response.request().method() === 'POST'
+    (response) => drinksUrl.test(response.url()) && response.request().method() === 'POST'
   );
   await drinkerTile.locator('.container-fluid').first().click();
   const response = await saved;
@@ -148,11 +141,7 @@ test('tapping the dashboard tile saves the drink and refreshes the tile under th
   await expect(promilleLocator).toBeVisible();
   const initialPromilleText = await promilleLocator.textContent();
 
-  const saved = page.waitForResponse(
-    (response) => response.url().endsWith('/API/v2/profile/drinks') && response.request().method() === 'POST'
-  );
-  await drinkerTile.locator('.container-fluid').first().click();
-  expect((await saved).ok()).toBeTruthy();
+  await tapToDrink(page, drinkerTile, /\/API\/v2\/profile\/drinks$/);
 
   await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '');
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
