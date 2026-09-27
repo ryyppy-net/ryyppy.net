@@ -108,10 +108,18 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     @Transactional
     public void removeDrinkFromUser(int userId, int drinkId) {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
-        Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
+        Drink drink = findDrinkOf(user, drinkId);
         user.removeDrink(drink);
         drinkDao.delete(drink);
         log.info("{} has removed a drink {}", user, drink.getTimeStamp());
+    }
+
+    private Drink findDrinkOf(User user, int drinkId) {
+        Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
+        if (drink.getDrinker() == null || !user.getId().equals(drink.getDrinker().getId())) {
+            throw new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId());
+        }
+        return drink;
     }
 
     @Override

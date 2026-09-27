@@ -42,6 +42,9 @@ public class PartyApiControllerTest {
 
         when(drinkCounterService.getParty(1)).thenReturn(party);
         when(userService.getUser(2)).thenReturn(participant);
+        User outsider = new User();
+        outsider.setId(3);
+        when(userService.getUser(3)).thenReturn(outsider);
 
         controller = new PartyApiController(currentUser, drinkCounterService, userService);
     }
@@ -65,6 +68,13 @@ public class PartyApiControllerTest {
     public void drinkRejectsMalformedTimestamp() {
         assertThrows(DateTimeParseException.class,
                 () -> controller.drink(1, 2, null, null, "not-a-timestamp"));
+    }
+
+    @Test
+    public void getParticipantRejectsNonParticipantNamingBoth() {
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> controller.getParticipant(1, 3));
+
+        assertEquals("Participant 3 doesn't belong to party 1", ex.getMessage());
     }
 
     @Test
