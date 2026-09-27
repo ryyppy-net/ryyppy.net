@@ -20,6 +20,16 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
                 data[i].color = (i % 12) + 1;
             }
 
+            // Updating the shown participants in place keeps their tiles, and
+            // any open drink overlay, on screen.
+            var shown = self.shownParticipants();
+            if (sameIds(shown, data)) {
+                for (var k = 0; k < shown.length; k++) {
+                    angular.extend(shown[k], data[k]);
+                }
+                return;
+            }
+
             var rowsAmount = Math.ceil(data.length / 3);
             var rows = new Array(rowsAmount);
             for (var i = 0; i < rowsAmount; i++) {
@@ -33,6 +43,26 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
             $scope.rows = rows;
         });
     };
+
+    this.shownParticipants = function () {
+        var shown = [];
+        angular.forEach($scope.rows || [], function (cols) {
+            shown = shown.concat(cols);
+        });
+        return shown;
+    };
+
+    function sameIds(a, b) {
+        if (a.length !== b.length) {
+            return false;
+        }
+        for (var i = 0; i < a.length; i++) {
+            if (a[i].id !== b[i].id) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     this.startPolling = function () {
         stopPolling = Poller.start(self.refreshParticipants, 60000);

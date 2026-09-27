@@ -1,4 +1,4 @@
-function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
+function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     "use strict";
 
     var self = this;
@@ -201,9 +201,9 @@ function DrinkerCtrl($scope, $rootScope, RyyppyAPI, Sound, Notify) {
         $.plot(graphElement, series, graphOptions);
     }
 
-    setTimeout(function () {
-        historyLoaded();
-    }, 0);
+    $scope.$watch('participant.history', function () {
+        $timeout(historyLoaded, 0, false);
+    });
 }
 
-DrinkerCtrl.$inject = ['$scope', '$rootScope', 'RyyppyAPI', 'Sound', 'Notify'];
+DrinkerCtrl.$inject = ['$scope', '$rootScope', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
