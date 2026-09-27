@@ -18,7 +18,6 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     // The drink is saved on the tap; the overlay then offers a 5s window to
     // undo or edit it.
     this.addDrink = function (participant, drink) {
-        self.participant = participant;
         $scope.showDrinkDialog = true;
         $scope.addingDrink = true;
         $scope.editingDrink = false;
@@ -53,7 +52,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     };
 
     $scope.saveEditedDrink = function () {
-        var participant = self.participant;
+        var participant = $scope.participant;
         var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage};
         self.savedDrink.then(function (saved) {
             return RyyppyAPI.changeDrink(participant, saved.id, editedDrink);
@@ -65,9 +64,9 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
 
     $scope.cancelDrink = function () {
         $timeout.cancel(self.dismissTimeout);
-        var participant = self.participant;
+        var participant = $scope.participant;
         self.savedDrink.then(function (saved) {
-            self.addedNotice.pnotify_remove();
+            Notify.remove(self.addedNotice);
             return RyyppyAPI.deleteDrink(participant, saved.id);
         }).then(function () {
             self.drinksChanged(participant);
@@ -209,7 +208,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     }
 
     $scope.$watch('participant.history', function () {
-        setTimeout(historyLoaded, 0);
+        $timeout(historyLoaded, 0, false);
     });
 }
 

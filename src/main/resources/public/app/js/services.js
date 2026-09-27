@@ -182,6 +182,10 @@
                 type: 'success'
             });
         };
+
+        this.remove = function (notice) {
+            notice.pnotify_remove();
+        };
     }
 
 
