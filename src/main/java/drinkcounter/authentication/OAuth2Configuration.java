@@ -55,7 +55,7 @@ public class OAuth2Configuration {
      */
     @Bean
     public OidcUserService oidcUserService(CustomOAuth2UserService customOAuth2UserService) {
-        OidcUserService oidcUserService = new OidcUserService();
+        OidcUserService oidcUserService = new DrinkcounterOidcUserService();
         oidcUserService.setOauth2UserService(customOAuth2UserService);
         return oidcUserService;
     }

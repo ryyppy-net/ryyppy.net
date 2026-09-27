@@ -24,16 +24,13 @@ public class SpringSecurityCurrentUserImpl implements CurrentUser{
     public User getUser(){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        // Handle form login (username/password)
-        if(principal instanceof DrinkcounterUserDetails){
-            int userId = ((DrinkcounterUserDetails) principal).getUserId();
-            return userService.getUser(userId);
+        if(principal instanceof DrinkcounterPrincipal drinkcounterPrincipal){
+            return userService.getUser(drinkcounterPrincipal.getUserId());
         }
 
-        // Handle OAuth2 login (Google) - OIDC
-        if(principal instanceof OAuth2User){
-            OAuth2User oauth2User = (OAuth2User) principal;
-            Integer userId = oauth2User.getAttribute("userId");
+        // Sessions live for a year, so some OAuth2 logins still hold a plain OAuth2User with the id as an attribute.
+        if(principal instanceof OAuth2User oauth2User){
+            Integer userId = oauth2User.getAttribute(CustomOAuth2UserService.USER_ID_ATTRIBUTE);
             if(userId != null){
                 return userService.getUser(userId);
             }

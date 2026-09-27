@@ -6,7 +6,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collections;
@@ -19,6 +18,8 @@ import java.util.Set;
  * {@link GoogleIdentityLinkingService}.
  */
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+
+    static final String USER_ID_ATTRIBUTE = "userId";
 
     private final GoogleIdentityLinkingService identityLinkingService;
 
@@ -53,9 +54,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // Add userId to attributes so we can access it later
         Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
-        attributes.put("userId", user.getId());
+        attributes.put(USER_ID_ATTRIBUTE, user.getId());
 
         // Return OAuth2User with user details
-        return new DefaultOAuth2User(authorities, attributes, "email");
+        return new DrinkcounterOAuth2User(authorities, attributes, "email", user.getId());
     }
 }
