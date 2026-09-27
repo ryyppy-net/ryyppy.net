@@ -42,7 +42,7 @@ public class ParticipantPreviewDTO {
     public static ParticipantPreviewDTO fromUser(User user) {
         ParticipantPreviewDTO participant = new ParticipantPreviewDTO();
         participant.setName(user.getName());
-        participant.setProfilePictureUrl(GravatarService.getGravatarUrl(user));
+        participant.setProfilePictureUrl(GravatarUrls.forUser(user));
         return participant;
     }
 }

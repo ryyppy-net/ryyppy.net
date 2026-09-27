@@ -13,6 +13,6 @@ public class ParticipantDTOTest {
         user.setWeight(66);
         user.setEmail("matti.meikalainen@example.org");
         ParticipantDTO participant = ParticipantDTO.fromUser(user);
-        assertEquals("http://www.gravatar.com/avatar/56f4f87e829c34b149d35e0e1a2ff08d.jpg?d=wavatar", participant.getProfilePictureUrl());
+        assertEquals("https://www.gravatar.com/avatar/56f4f87e829c34b149d35e0e1a2ff08d.jpg?d=wavatar", participant.getProfilePictureUrl());
     }
 }

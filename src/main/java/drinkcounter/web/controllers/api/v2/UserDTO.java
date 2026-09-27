@@ -104,7 +104,7 @@ public class UserDTO {
         userDTO.setWeight(user.getWeight());
         userDTO.setPromilles(user.getPromilles());
         userDTO.setTotalDrinks(user.getTotalDrinks());
-        userDTO.setProfilePictureUrl(GravatarService.getGravatarUrl(user));
+        userDTO.setProfilePictureUrl(GravatarUrls.forUser(user));
         return userDTO;
     }
 }
