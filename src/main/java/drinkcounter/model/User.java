@@ -202,6 +202,11 @@ public class User extends AbstractEntity{
         AlcoholServiceImpl.getInstance().drinkRemoved(this, drink);
     }
 
+    public void changeDrinkAlcohol(Drink drink, float alcohol) {
+        drink.setAlcohol(alcohol);
+        AlcoholServiceImpl.getInstance().drinkChanged(this, drink);
+    }
+
     @Transient
     public float getPromilles() {
         return AlcoholServiceImpl.getInstance().getPromilles(this);

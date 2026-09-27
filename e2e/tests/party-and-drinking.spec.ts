@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, createParty, waitForSoundsReady } from './helpers';
+import { Locator, Page } from '@playwright/test';
+import { makeTestUser, registerUser, createParty, waitForSoundsReady, getOwnDrinks } from './helpers';
 import { SHARED_STORAGE_STATE } from './shared-user';
 
 // Creates a party and asserts only on that party's own tile, so the shared
@@ -56,26 +57,77 @@ test('a user can create a party, appear as a participant, and logging a drink up
 
   await waitForSoundsReady(page);
 
-  // Clicking the tile starts a 5s "undo" countdown before the drink is
-  // actually posted (see DrinkerCtrl.addDrink), so give it plenty of room.
+  // On the party page, PartyCtrl tags every participant (self included) with
+  // type: 'participant', so the drink goes to the party-scoped drinks
+  // endpoint (/API/v2/parties/{id}/participants/{id}/drinks), not
+  // /API/v2/profile/drinks (that one's only used from the dashboard).
+  const drinkResponse = page.waitForResponse(
+    (response) => /\/participants\/\d+\/drinks$/.test(response.url()) && response.request().method() === 'POST'
+  );
   await drinkerTile.locator('.container-fluid').first().click();
 
-  // The sound is feedback for the click, so it has to be audible during the
-  // countdown, before the POST below.
   expect(await page.evaluate(() => (window as any).__playedSounds__ as number)).toBeGreaterThan(0);
   // Both the "adding" and "editing" overlays exist in the DOM at once
   // (toggled via ng-show), so scope to the one shown right after a click.
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
-
-  // On the party page, PartyCtrl tags every participant (self included) with
-  // type: 'participant', so DrinkerCtrl posts to the party-scoped drinks
-  // endpoint (/API/v2/parties/{id}/participants/{id}/drinks), not
-  // /API/v2/profile/drinks (that one's only used from the dashboard).
-  const drinkResponse = await page.waitForResponse(
-    (response) => /\/drinks$/.test(response.url()) && response.request().method() === 'POST',
-    { timeout: 10_000 }
-  );
-  expect(drinkResponse.ok()).toBeTruthy();
+  expect((await drinkResponse).ok()).toBeTruthy();
 
   await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '', { timeout: 10_000 });
+});
+
+/** Registers a fresh user with a new party of their own and returns their tile on it. */
+async function openOwnPartyTile(page: Page, prefix: string) {
+  const user = makeTestUser(prefix);
+  await registerUser(page, user);
+  await createParty(page, `E2E Party ${Date.now()}`);
+  const drinkerTile = page.locator('.drinker', { has: page.getByText(user.name) });
+  await expect(drinkerTile).toBeVisible();
+  return drinkerTile;
+}
+
+/** Taps the tile and waits until the drink it saves comes back from the server. */
+async function tapToDrink(page: Page, drinkerTile: Locator) {
+  const saved = page.waitForResponse(
+    (response) => /\/drinks$/.test(response.url()) && response.request().method() === 'POST'
+  );
+  await drinkerTile.locator('.container-fluid').first().click();
+  const response = await saved;
+  expect(response.ok()).toBeTruthy();
+  return (await response.json()) as { id: number };
+}
+
+test('undoing a drink right after the tap deletes the saved drink', async ({ page }) => {
+  const drinkerTile = await openOwnPartyTile(page, 'undo');
+  const saved = await tapToDrink(page, drinkerTile);
+  expect(await getOwnDrinks(page)).toHaveLength(1);
+
+  const deleted = page.waitForResponse(
+    (response) => response.url().endsWith(`/drinks/${saved.id}`) && response.request().method() === 'DELETE'
+  );
+  await drinkerTile.locator('.drinker-overlay').first().getByText('Peruuta').click();
+  expect((await deleted).ok()).toBeTruthy();
+
+  await expect(drinkerTile.locator('.drinker-overlay').first()).toBeHidden();
+  expect(await getOwnDrinks(page)).toHaveLength(0);
+});
+
+test('editing a drink right after the tap changes the saved drink', async ({ page }) => {
+  const drinkerTile = await openOwnPartyTile(page, 'edit');
+  const saved = await tapToDrink(page, drinkerTile);
+
+  await drinkerTile.locator('.drinker-overlay').first().getByText('Muokkaa').click();
+  const editOverlay = drinkerTile.locator('.drinker-overlay').nth(1);
+  await editOverlay.locator('#portionSize').selectOption({ label: '1.0 l' });
+
+  const changed = page.waitForResponse(
+    (response) => response.url().endsWith(`/drinks/${saved.id}`) && response.request().method() === 'PUT'
+  );
+  await editOverlay.getByRole('button', { name: 'Tallenna' }).click();
+  expect((await changed).ok()).toBeTruthy();
+
+  const drinks = await getOwnDrinks(page);
+  expect(drinks).toHaveLength(1);
+  expect(drinks[0].id).toBe(saved.id);
+  // 1.0 l of 4.7% beer is about three standard drinks; the default 0.33 l is one.
+  expect(drinks[0].amountOfShots).toBeGreaterThan(2.5);
 });

@@ -4,7 +4,9 @@ import drinkcounter.dao.DrinkDAO;
 import drinkcounter.dao.UserDAO;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +15,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class DrinkCounterServiceImplTest {
@@ -22,6 +27,7 @@ public class DrinkCounterServiceImplTest {
     private DrinkCounterServiceImpl service;
     private UserDAO userDAO;
     private User user;
+    private DrinkDAO drinkDAO;
 
     @BeforeEach
     public void setUp() {
@@ -29,7 +35,7 @@ public class DrinkCounterServiceImplTest {
 
         service = new DrinkCounterServiceImpl();
         userDAO = mock(UserDAO.class);
-        DrinkDAO drinkDAO = mock(DrinkDAO.class);
+        drinkDAO = mock(DrinkDAO.class);
         AtomicInteger nextDrinkId = new AtomicInteger(1);
         when(drinkDAO.save(any(Drink.class))).thenAnswer(invocation -> {
             Drink drink = invocation.getArgument(0);
@@ -59,5 +65,42 @@ public class DrinkCounterServiceImplTest {
     public void addDrinkToDateRejectsFutureDates() {
         String farFuture = "01.01.2099 00:00";
         assertThrows(IllegalArgumentException.class, () -> service.addDrinkToDate(1, farFuture, 0));
+    }
+
+    @Test
+    public void changeDrinkAlcoholUpdatesDrinkAndPromilles() {
+        int drinkId = service.addDrink(1, new Date());
+        Drink drink = user.getDrinks().get(0);
+        when(drinkDAO.findById(drinkId)).thenReturn(Optional.of(drink));
+        float promillesBefore = user.getPromilles();
+
+        service.changeDrinkAlcohol(1, drinkId, drink.getAlcohol() * 2);
+
+        assertTrue(user.getPromilles() > promillesBefore);
+    }
+
+    @Test
+    public void changeDrinkAlcoholRejectsAnotherUsersDrink() {
+        Drink othersDrink = othersDrink();
+
+        assertThrows(EntityNotFoundException.class, () -> service.changeDrinkAlcohol(1, othersDrink.getId(), 1f));
+    }
+
+    @Test
+    public void removeDrinkFromUserRejectsAnotherUsersDrink() {
+        Drink othersDrink = othersDrink();
+
+        assertThrows(EntityNotFoundException.class, () -> service.removeDrinkFromUser(1, othersDrink.getId()));
+        verify(drinkDAO, never()).delete(any(Drink.class));
+    }
+
+    private Drink othersDrink() {
+        User other = new User();
+        other.setId(2);
+        Drink drink = new Drink();
+        drink.setId(99);
+        drink.setDrinker(other);
+        when(drinkDAO.findById(99)).thenReturn(Optional.of(drink));
+        return drink;
     }
 }

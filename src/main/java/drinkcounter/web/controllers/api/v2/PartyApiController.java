@@ -119,15 +119,11 @@ public class PartyApiController {
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
-    public void drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+    public DrinkDTO drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
-        Party party = drinkCounterService.getParty(partyId);
-        User participant = userService.getUser(participantId);
-        if(!party.getParticipants().contains(participant)){
-            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
-        }
+        requireParticipant(partyId, participantId);
         float alcoholAmount = (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
         if (volume != null && alcoholPercentage != null) {
             alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
@@ -136,7 +132,32 @@ public class PartyApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        drinkCounterService.addDrink(participantId, time, alcoholAmount);
+        return DrinkDTO.fromDrink(drinkCounterService.addDrink(participantId, time, alcoholAmount));
+    }
+
+    @PutMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
+    public void changeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+            @PathVariable Integer drinkId,
+            @RequestParam("volume") Float volume,
+            @RequestParam("alcohol") Float alcoholPercentage){
+        requireParticipant(partyId, participantId);
+        drinkCounterService.changeDrinkAlcohol(participantId, drinkId,
+                AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
+    }
+
+    @DeleteMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
+    public void removeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+            @PathVariable Integer drinkId){
+        requireParticipant(partyId, participantId);
+        drinkCounterService.removeDrinkFromUser(participantId, drinkId);
+    }
+
+    private void requireParticipant(Integer partyId, Integer participantId) {
+        Party party = drinkCounterService.getParty(partyId);
+        User participant = userService.getUser(participantId);
+        if(!party.getParticipants().contains(participant)){
+            throw new RuntimeException(MessageFormat.format("Participant {} doesn't belong to party {}", participant.getId(), party.getId()));
+        }
     }
 
     @GetMapping("{partyId}/invitations")

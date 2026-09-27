@@ -66,9 +66,10 @@ npx playwright show-trace test-results/<dir>/trace.zip
   `@playwright/test`, so a new spec gets this too.
 - There are no retries, on CI either: the suite is meant to be correct at
   `workers: 4`, and a retry only turns a real race into a green build.
-- Adding a drink through the UI has a built-in ~5s "undo" countdown
-  (`DrinkerCtrl.addDrink`) before the API call actually fires — the drink
-  test accounts for this with a generous `waitForResponse` timeout.
+- A drink is saved on the tap and the undo/edit overlay then stays up for 5s.
+  Undo and edit act on the saved drink, so assert on their requests or on
+  `getOwnDrinks` rather than waiting the 5s out. The modern UI only redraws
+  the tile's promille once that overlay closes.
 
 ## Shared vs. dedicated users
 

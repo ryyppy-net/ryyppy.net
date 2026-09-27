@@ -106,6 +106,17 @@ public class APIController {
         return Integer.toString(drinkCounterService.addDrink(id));
     }
 
+    @RequestMapping("/users/{userId}/edit-drink/{drinkId}")
+    public @ResponseBody String editDrinkOfUser(@PathVariable String userId, @PathVariable String drinkId,
+    @RequestParam("volume") Float volume,
+    @RequestParam("alcohol") Float alcoholPercentage){
+        int userIdInt = Integer.parseInt(userId);
+        authenticationChecks.checkHighLevelRightsToUser(userIdInt);
+        drinkCounterService.changeDrinkAlcohol(userIdInt, Integer.parseInt(drinkId),
+                AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
+        return "";
+    }
+
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
     public @ResponseBody String removeDrinkFromUser(HttpSession session, @PathVariable String userId, @PathVariable String drinkId){
         int userIdInt = Integer.parseInt(userId);

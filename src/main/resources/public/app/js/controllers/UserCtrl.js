@@ -84,7 +84,7 @@ function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
 
     this.startPolling();
 
-    $scope.$on('drinkAdded', function () {
+    $scope.$on('drinksChanged', function () {
         self.endPolling();
         self.startPolling();
     });
