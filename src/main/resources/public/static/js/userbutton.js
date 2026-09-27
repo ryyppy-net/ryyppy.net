@@ -70,9 +70,6 @@ function UserButton(userId, element, color) {
     this.defaultPortionSize = 0.33;
     this.defaultPortionAlcoholPercentage = 0.047;
     
-    this.selectedPortionSize = this.defaultPortionSize;
-    this.selectedPortionAlcoholPercentage = this.defaultPortionAlcoholPercentage;
-    
     this.progressBar = null;
     
     this.timeoutId = undefined;
@@ -282,7 +279,7 @@ UserButton.prototype.buttonClick = function() {
 
     this.clicked = true;
     playSound();
-    this.savedDrinkId = this.addDrink();
+    this.savedDrink = this.addDrink();
     this.showAdding();
 }
 
@@ -291,8 +288,8 @@ UserButton.prototype.addDrink = function() {
     var saved = $.Deferred();
     RyyppyAPI.addDrinkToUser(
         this.userId,
-        this.selectedPortionSize,
-        this.selectedPortionAlcoholPercentage,
+        this.defaultPortionSize,
+        this.defaultPortionAlcoholPercentage,
         $.proxy(function(drinkId) {
             this.drinksChanged();
             saved.resolve(drinkId);
@@ -307,7 +304,7 @@ UserButton.prototype.addDrink = function() {
 
 UserButton.prototype.editDrink = function(volume, alcohol) {
     var that = this;
-    this.savedDrinkId.done(function(drinkId) {
+    this.savedDrink.done(function(drinkId) {
         RyyppyAPI.editDrinkOfUser(that.userId, drinkId, volume, alcohol, function() {
             that.drinksChanged();
         });
@@ -316,7 +313,7 @@ UserButton.prototype.editDrink = function(volume, alcohol) {
 
 UserButton.prototype.removeDrink = function() {
     var that = this;
-    this.savedDrinkId.done(function(drinkId) {
+    this.savedDrink.done(function(drinkId) {
         RyyppyAPI.removeDrinkFromUser(that.userId, drinkId, function() {
             that.drinksChanged();
         });
@@ -330,7 +327,7 @@ UserButton.prototype.drinksChanged = function() {
     }
 }
 
-// The drink is already saved; the overlay stays up for 5s to offer undo or edit.
+// The drink is saved on the click; the overlay stays up for 5s to offer undo or edit.
 UserButton.prototype.scheduleClosingOverlay = function() {
     this.cancelClosingOverlay();
     this.timeoutId = setTimeout($.proxy(function() {
@@ -443,7 +440,7 @@ UserButton.prototype.fitElementOnAnotherOrFullScreen = function(element, another
 
 UserButton.prototype.updatePortionSizeAndAlcoholPercentage = function() {
     $('#userNameLabel' + this.userId).html(this.name);
-    $("#portionLabel" + this.userId).html(this.portionSizes[this.selectedPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.selectedPortionAlcoholPercentage]);
+    $("#portionLabel" + this.userId).html(this.portionSizes[this.defaultPortionSize] + ' @ ' + this.portionAlcoholPercentages[this.defaultPortionAlcoholPercentage]);
 }
 
 
