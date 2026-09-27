@@ -132,6 +132,13 @@ export async function addDrinkImmediatelyClassic(page: Page, userId: number): Pr
   await page.click(`#acceptButton${userId}`);
 }
 
+/** The logged-in user's drinks, read straight from the REST API. */
+export async function getOwnDrinks(page: Page): Promise<{ id: number; amountOfShots: number }[]> {
+  const response = await page.request.get('/API/v2/profile/drinks');
+  expect(response.ok()).toBeTruthy();
+  return response.json();
+}
+
 /**
  * Waits until every drink clip has been loaded by Howler, so a subsequent
  * play() starts immediately instead of racing the load.

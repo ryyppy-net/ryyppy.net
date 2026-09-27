@@ -85,7 +85,7 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
         self.endPolling();
     });
 
-    $scope.$on('drinkAdded', function () {
+    $scope.$on('drinksChanged', function () {
         self.endPolling();
         self.startPolling();
     });
