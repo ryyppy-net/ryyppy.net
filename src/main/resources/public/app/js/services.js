@@ -13,6 +13,7 @@
         // AngularJS would prefer to use application/json but as our backend
         // doesn't support this yet, fallback type must be set.
         http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
+        http.defaults.headers.put["Content-Type"] = "application/x-www-form-urlencoded";
 
         this.getProfile = function (callbackSuccess) {
             http.get(this._baseUrl + "/profile").success(callbackSuccess);
@@ -47,16 +48,29 @@
             http.post(url, $.param({ userId : userId })).success(callbackSuccess);
         };
 
-        this.addDrink = function (partyId, participant, drink, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id + "/drinks";
-            drink.timestamp = (new Date()).toISOString();
-            http.post(url, $.param(drink)).success(callbackSuccess);
+        // On the party page every drinker, self included, is a party
+        // participant; on the dashboard the only drinker is the current user.
+        this._drinksUrl = function (drinker) {
+            if (drinker.type === 'participant') {
+                return this._baseUrl + "/parties/" + drinker.partyId + "/participants/" + drinker.id + "/drinks";
+            }
+            return this._baseUrl + "/profile/drinks";
         };
 
-        this.addDrinkToCurrentUser = function (drink, callbackSuccess) {
-            var url = this._baseUrl + "/profile/drinks";
-            drink.timestamp = (new Date()).toISOString();
-            http.post(url, $.param(drink)).success(callbackSuccess);
+        this.addDrink = function (drinker, drink) {
+            var params = {volume: drink.volume, alcohol: drink.alcohol, timestamp: (new Date()).toISOString()};
+            return http.post(this._drinksUrl(drinker), $.param(params)).then(function (response) {
+                return response.data;
+            });
+        };
+
+        this.changeDrink = function (drinker, drinkId, drink) {
+            var params = {volume: drink.volume, alcohol: drink.alcohol};
+            return http.put(this._drinksUrl(drinker) + "/" + drinkId, $.param(params));
+        };
+
+        this.deleteDrink = function (drinker, drinkId) {
+            return http.delete(this._drinksUrl(drinker) + "/" + drinkId);
         };
 
         this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
@@ -162,11 +176,15 @@
         $.pnotify.defaults.pnotify_history = false;
 
         this.success = function (title, text) {
-            $.pnotify({
+            return $.pnotify({
                 title: title,
                 text: text,
                 type: 'success'
             });
+        };
+
+        this.remove = function (notice) {
+            notice.pnotify_remove();
         };
     }
 

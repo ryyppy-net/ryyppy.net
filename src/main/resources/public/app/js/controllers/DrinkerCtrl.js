@@ -4,26 +4,19 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     var self = this;
 
 
-    this.drinkSuccessfullyAdded = function (participant, drink) {
-        $rootScope.$broadcast('drinkAdded', participant, drink);
+    this.drinksChanged = function (participant) {
+        $rootScope.$broadcast('drinksChanged', participant);
     };
 
     $scope.addDefaultDrink = function (participant) {
-        // Feedback for the tap, so it sounds here rather than when the drink
-        // posts 5s later. addEditedDrink() is reachable only from the overlay
-        // this opens, so a drink never sounds twice.
         Sound.playSound();
 
-        var defaultDrink = {volume: '0.33', alcohol: '0.047', timestamp: null};
-        $scope.participant = participant;
+        var defaultDrink = {volume: '0.33', alcohol: '0.047'};
         self.addDrink(participant, defaultDrink);
     };
 
-    $scope.addEditedDrink = function () {
-        var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage, timestamp: null};
-        self.addDrink($scope.participant, editedDrink);
-    };
-
+    // The drink is saved on the tap; the overlay then offers a 5s window to
+    // undo or edit it.
     this.addDrink = function (participant, drink) {
         $scope.showDrinkDialog = true;
         $scope.addingDrink = true;
@@ -40,31 +33,44 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
             }
         })();
 
-        self.timeoutId = setTimeout(function () {
-            if (participant.type === 'participant') {
-                RyyppyAPI.addDrink(participant.partyId, participant, drink, function () {
-                    Notify.success(self.getRandomSalutation(), "Käyttäjälle " + participant.name + " lisättiin juoma.");
-                    self.drinkSuccessfullyAdded(participant, drink);
-                });
-            }
-            else {
-                RyyppyAPI.addDrinkToCurrentUser(drink, function () {
-                    Notify.success(self.getRandomSalutation(), "Sinulle lisättiin juoma.");
-                    self.drinkSuccessfullyAdded(participant, drink);
-                });
-            }
-            $scope.hideDialog();
-        }, 5000);
+        self.savedDrink = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
+            var message = participant.type === 'participant'
+                ? "Käyttäjälle " + participant.name + " lisättiin juoma."
+                : "Sinulle lisättiin juoma.";
+            self.addedNotice = Notify.success(self.getRandomSalutation(), message);
+            self.drinksChanged(participant);
+            return saved;
+        });
+
+        self.dismissTimeout = $timeout($scope.hideDialog, 5000);
     };
 
     $scope.editDrink = function() {
-        clearTimeout(self.timeoutId);
+        $timeout.cancel(self.dismissTimeout);
         $scope.editingDrink = true;
         $scope.addingDrink = false;
     };
 
+    $scope.saveEditedDrink = function () {
+        var participant = $scope.participant;
+        var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage};
+        self.savedDrink.then(function (saved) {
+            return RyyppyAPI.changeDrink(participant, saved.id, editedDrink);
+        }).then(function () {
+            self.drinksChanged(participant);
+        });
+        $scope.hideDialog();
+    };
+
     $scope.cancelDrink = function () {
-        clearTimeout(self.timeoutId);
+        $timeout.cancel(self.dismissTimeout);
+        var participant = $scope.participant;
+        self.savedDrink.then(function (saved) {
+            Notify.remove(self.addedNotice);
+            return RyyppyAPI.deleteDrink(participant, saved.id);
+        }).then(function () {
+            self.drinksChanged(participant);
+        });
         $scope.hideDialog();
     };
 
