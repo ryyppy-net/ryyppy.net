@@ -61,6 +61,11 @@ public class AlcoholServiceImpl implements AlcoholService {
     }
 
     @Override
+    public void drinkChanged(User user, Drink drink) {
+        initializeUser(user);
+    }
+
+    @Override
     public float getPromilles(User user) {
         AlcoholCalculator alc = getOrInitializeAlcoholCalculator(user);
         return alc.getAlcoholAmountAt(new Date()) / (user.getSex().factor * user.getWeight());

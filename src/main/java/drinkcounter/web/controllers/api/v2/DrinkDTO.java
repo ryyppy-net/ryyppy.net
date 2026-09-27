@@ -4,6 +4,8 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
+import drinkcounter.model.Drink;
+
 /**
  *
  * @author Toni
@@ -12,6 +14,14 @@ public class DrinkDTO {
     private Integer id;
     private String timestamp;
     private Float amountOfShots;
+
+    public static DrinkDTO fromDrink(Drink drink) {
+        DrinkDTO dto = new DrinkDTO();
+        dto.setId(drink.getId());
+        dto.setTimestamp(drink.getTimeStamp().toString());
+        dto.setAmountOfShots(drink.getAmountOfShots());
+        return dto;
+    }
 
     public Integer getId() {
         return id;

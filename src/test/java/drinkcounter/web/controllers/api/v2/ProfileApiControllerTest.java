@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,10 @@ public class ProfileApiControllerTest {
         user = new User();
         user.setId(1);
         when(currentUser.getUser()).thenReturn(user);
+
+        Drink saved = new Drink();
+        saved.setId(7);
+        when(drinkCounterService.addDrink(anyInt(), any(), any())).thenReturn(saved);
 
         controller = new ProfileApiController(drinkCounterService, userService, currentUser);
     }
@@ -129,6 +134,18 @@ public class ProfileApiControllerTest {
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
         verify(drinkCounterService).addDrink(eq(1), eq(expected), any(Float.class));
+    }
+
+    @Test
+    public void drinkReturnsTheSavedDrink() {
+        assertEquals(7, controller.drink(null, null, null).getId());
+    }
+
+    @Test
+    public void changeDrinkUpdatesAlcoholOfOwnDrink() {
+        controller.changeDrink(7, 0.5f, 0.05f);
+
+        verify(drinkCounterService).changeDrinkAlcohol(eq(1), eq(7), any(Float.class));
     }
 
     @Test
