@@ -115,7 +115,7 @@ public class GoogleOneTapController {
         }
 
         User user = identityLinkingService.findOrCreateUser(sub, email, name, givenName, familyName);
-        identityLinkingService.establishSession(user, email, request);
+        identityLinkingService.establishSession(user.getId(), email, request);
 
         log.info("One Tap: authentication successful for user: email={}, userId={}", email, user.getId());
 

@@ -12,10 +12,7 @@ import org.springframework.security.core.userdetails.User;
  *
  * @author Toni
  */
-public class DrinkcounterUserDetails extends User implements DrinkcounterPrincipal {
-    // Sessions are serialized to JDBC and live for a year; keeps them readable across changes to this class.
-    private static final long serialVersionUID = 566890284884385638L;
-
+public class DrinkcounterUserDetails extends User{
     private int userId;
 
     public DrinkcounterUserDetails(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, int userId) {
@@ -23,7 +20,6 @@ public class DrinkcounterUserDetails extends User implements DrinkcounterPrincip
         this.userId = userId;
     }
 
-    @Override
     public int getUserId() {
         return userId;
     }

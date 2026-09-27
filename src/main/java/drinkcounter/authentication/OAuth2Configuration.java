@@ -46,8 +46,9 @@ public class OAuth2Configuration {
      * started it; otherwise this is an ordinary successful login on the current host.
      */
     @Bean
-    public RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService) {
-        return new RelayAwareAuthenticationSuccessHandler(tokenService);
+    public RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService,
+            GoogleIdentityLinkingService identityLinkingService) {
+        return new RelayAwareAuthenticationSuccessHandler(tokenService, identityLinkingService);
     }
 
     /**
@@ -55,7 +56,7 @@ public class OAuth2Configuration {
      */
     @Bean
     public OidcUserService oidcUserService(CustomOAuth2UserService customOAuth2UserService) {
-        OidcUserService oidcUserService = new DrinkcounterOidcUserService();
+        OidcUserService oidcUserService = new OidcUserService();
         oidcUserService.setOauth2UserService(customOAuth2UserService);
         return oidcUserService;
     }
