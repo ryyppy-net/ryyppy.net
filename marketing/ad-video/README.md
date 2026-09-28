@@ -29,3 +29,10 @@ The track runs at 120 BPM. The cut starts on a downbeat, so bars start on even s
 The scripts load Playwright from `e2e/node_modules`. Run `npm install` in `e2e/` first, and set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` if you use a preinstalled Chromium.
 
 To preview single frames, run `node render.mjs 3.0,11.3,27.3`. The frames are written to `preview/`.
+
+## Discord upload
+
+`ryyppy-ad-discord.mp4` is the same video in about 7 MB. It is a two-pass x264 encode at 1850 kb/s video and 128 kb/s AAC audio, for upload limits of 8 MB:
+
+    ffmpeg -i ryyppy-ad.mp4 -c:v libx264 -preset veryslow -tune animation -b:v 1850k -pass 1 -an -f null /dev/null
+    ffmpeg -i ryyppy-ad.mp4 -c:v libx264 -preset veryslow -tune animation -b:v 1850k -pass 2 -c:a aac -b:a 128k -movflags +faststart ryyppy-ad-discord.mp4
