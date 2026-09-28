@@ -1,0 +1,220 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Ryyppy Ad</title>
+<style>
+@font-face{font-family:'Rum Raisin';src:url(rum-raisin-latin.woff2) format('woff2');}
+@font-face{font-family:'Roboto';font-weight:500;src:url(roboto-500-latin.woff2) format('woff2');}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#1b1b1b}
+#stage{position:absolute;inset:0;overflow:hidden;font-family:'Rum Raisin',sans-serif;color:#fff;
+  background:radial-gradient(ellipse at 50% 30%,#3a3a3a 0%,#222 55%,#141414 100%)}
+.abs{position:absolute;will-change:transform,opacity}
+.bubble{position:absolute;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.5),rgba(255,255,255,.05) 60%)}
+#logo{left:90px;top:640px;width:900px}
+.cap{left:0;width:1080px;text-align:center;text-shadow:0 6px 0 rgba(0,0,0,.45)}
+.big{font-size:118px;line-height:1.02}
+.mid{font-size:64px;line-height:1.1;color:#66e3a3}
+.small{font-family:'Roboto';font-size:34px;letter-spacing:1px;color:#bbb}
+#phone{left:196px;top:470px;width:688px;height:1433px;border-radius:84px;background:#0b0b0b;
+  box-shadow:0 0 0 4px #444,0 40px 90px rgba(0,0,0,.7);padding:24px;overflow:hidden}
+#screen{width:640px;height:1385px;border-radius:62px;overflow:hidden;position:relative;background:#555}
+#scroll{position:absolute;left:0;top:0;width:640px}
+#notch{left:260px;top:34px;width:168px;height:34px;border-radius:20px;background:#0b0b0b;z-index:3}
+.card{left:60px;width:960px;height:642px;border-radius:26px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.65)}
+.card img{width:960px;height:642px;display:block}
+#bar{left:31px;top:192px;height:54px;background:linear-gradient(#149bdf,#0480be);border-radius:6px}
+#tap{width:220px;height:220px;border-radius:50%;border:10px solid #fff;margin:-110px 0 0 -110px}
+#finger{width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.85);margin:-60px 0 0 -60px;box-shadow:0 0 40px rgba(255,255,255,.8)}
+.ray{position:absolute;width:12px;height:70px;border-radius:6px;background:#ffd84a;left:-6px;top:-35px}
+#counter{left:0;width:1080px;text-align:center;font-size:250px;line-height:1;color:#fff;text-shadow:0 0 40px rgba(102,227,163,.9),0 10px 0 rgba(0,0,0,.4)}
+#chart{left:40px;top:560px}
+.wipe{position:absolute;left:-400px;width:1880px;height:420px;transform-origin:center}
+.conf{position:absolute;width:22px;height:34px;border-radius:4px}
+#url{left:0;width:1080px;text-align:center;font-size:150px}
+</style></head>
+<body><div id="stage">
+  <div id="bubbles"></div>
+
+  <!-- Scene 1: intro -->
+  <img id="logo" class="abs" src="logo_ryyppy.png">
+  <div id="s1cap" class="abs cap" style="top:1180px"><div class="mid">Your night out.</div><div class="big" style="font-size:96px">Tracked.</div></div>
+
+  <!-- Captions for app scenes -->
+  <div id="capA" class="abs cap" style="top:150px"><div class="big" id="capA1">Start a party.</div><div class="mid" id="capA2">Bring your crew.</div></div>
+  <div id="capB" class="abs cap" style="top:150px"><div class="big">One tap.</div><div class="mid">One drink logged.</div></div>
+  <div id="capC" class="abs cap" style="top:150px"><div class="big">Wrong size?</div><div class="mid">Edit or undo in 5 seconds.</div></div>
+  <div id="capD" class="abs cap" style="top:150px"><div class="big">Live promilles.</div><div class="mid">From weight, sex &amp; time.</div></div>
+  <div id="capE" class="abs cap" style="top:150px"><div class="big">The whole crew.</div><div class="mid">One night, every curve.</div></div>
+
+  <div id="phone" class="abs"><div id="screen"><img id="scroll" src="shots/c_party_full.png"></div></div>
+
+  <div id="cardBefore" class="abs card" style="top:640px"><img src="shots/c_tile_before.png"></div>
+  <div id="cardOverlay" class="abs card" style="top:640px"><img src="shots/c_tile_overlay.png"><div id="bar" class="abs"></div></div>
+  <div id="cardEdit" class="abs card" style="top:640px"><img src="shots/c_tile_edit.png"></div>
+  <div id="cardAfter" class="abs card" style="top:900px"><img src="shots/c_tile_after.png"></div>
+  <div id="counter" class="abs" style="top:560px">0.60‰</div>
+
+  <div id="tap" class="abs"></div>
+  <div id="finger" class="abs"></div>
+  <div id="rays" class="abs"></div>
+  <div id="clink" class="abs" style="font-size:90px;color:#ffd84a;text-shadow:0 6px 0 rgba(0,0,0,.5)">*clink!*</div>
+
+  <svg id="chart" class="abs" width="1000" height="1000" viewBox="0 0 1000 1000"></svg>
+
+  <!-- End card -->
+  <img id="logo2" class="abs" src="logo_ryyppy.png" style="left:115px;top:560px;width:850px">
+  <div id="url" class="abs" style="top:1060px">ryyppy.net</div>
+  <div id="endTag" class="abs cap mid" style="top:1290px;font-size:110px;color:#ffd84a">Kippis!</div>
+  <div id="fine" class="abs cap small" style="top:1800px">Estimates only. Drink responsibly.</div>
+  <div id="confetti"></div>
+
+  <div id="wipes"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = (x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const prog=(t,a,b)=>clamp((t-a)/(b-a));
+const eOut=x=>1-Math.pow(1-x,3);
+const eInOut=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eBack=x=>{const c1=2.2,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+const eElastic=x=>x===0?0:x===1?1:Math.pow(2,-10*x)*Math.sin((x*10-.75)*(2*Math.PI)/3)+1;
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+
+// bubbles
+const bubbles=[];for(let i=0;i<34;i++){const d=document.createElement('div');d.className='bubble';
+  const s=18+rnd()*70;d.style.width=d.style.height=s+'px';$('bubbles').appendChild(d);
+  bubbles.push({d,x:rnd()*1080,sp:120+rnd()*260,ph:rnd()*2400,wob:20+rnd()*40,wf:1+rnd()*2,s});}
+// wipes (colored bars used for scene transitions)
+const colors=['#66e3a3','#64a8e3','#66e366','#ffd84a','#e3668f'];
+const wipes=[];for(let i=0;i<5;i++){const d=document.createElement('div');d.className='wipe';d.style.background=colors[i];$('wipes').appendChild(d);wipes.push(d);}
+// rays
+const rays=[];for(let i=0;i<10;i++){const r=document.createElement('div');r.className='ray';$('rays').appendChild(r);rays.push(r);}
+// confetti
+const conf=[];for(let i=0;i<90;i++){const d=document.createElement('div');d.className='conf';d.style.background=colors[i%5];$('confetti').appendChild(d);
+  const a=rnd()*Math.PI*2;conf.push({d,vx:Math.cos(a)*(400+rnd()*900),vy:Math.sin(a)*(400+rnd()*900)-900,r:rnd()*720-360,delay:rnd()*.12});}
+
+// crew chart: stair-step promille curves like the app's own graph
+const crew=[
+ {n:'Juha',c:'#66e366',kg:90,m:1,d:[0,.25,.55,.8,1.05,1.35,1.6]},
+ {n:'Mikko',c:'#66e3a3',kg:82,m:1,d:[0,.65,1.25,1.85,2.3,2.8]},
+ {n:'Aino',c:'#64a8e3',kg:62,m:0,d:[.35,1.2,2.1]},
+ {n:'Laura',c:'#e3668f',kg:68,m:0,d:[.9,2.0]},
+];
+const T=3,W=900,H=640,ox=70,oy=110,maxP=1.2;
+let svg=`<rect x="${ox}" y="${oy}" width="${W}" height="${H}" rx="24" fill="rgba(0,0,0,.35)" stroke="#666" stroke-width="3"/>`;
+for(let g=0;g<=4;g++){const y=oy+H-g/4*H;svg+=`<line x1="${ox}" x2="${ox+W}" y1="${y}" y2="${y}" stroke="#444" stroke-width="2"/><text x="${ox-14}" y="${y+10}" fill="#999" font-size="30" text-anchor="end" font-family="Roboto">${(g*.3).toFixed(1)}</text>`;}
+crew.forEach((p,i)=>{
+  const r=p.m?0.68:0.55,g=10/(p.kg*r); let pts=[],prom=0,last=0;
+  const push=(t)=>pts.push([ox+t/T*W,oy+H-Math.min(prom,maxP)/maxP*H]);
+  pts.push([ox,oy+H]);
+  p.d.forEach(t=>{prom=Math.max(0,prom-0.15*(t-last));last=t;push(t);prom+=g;push(t);});
+  prom=Math.max(0,prom-0.15*(T-last));push(T);p.final=prom;
+  const d='M'+pts.map(q=>q.map(v=>v.toFixed(1)).join(',')).join(' L');
+  svg+=`<path id="cl${i}" d="${d}" fill="none" stroke="${p.c}" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const ly=pts[pts.length-1][1];
+  svg+=`<g id="lb${i}"><circle cx="${ox+W}" cy="${ly}" r="14" fill="${p.c}"/></g>`;
+});
+svg+=`<g id="legend"></g>`;
+$('chart').innerHTML=svg;
+let leg='';crew.forEach((p,i)=>{leg+=`<g id="lg${i}" transform="translate(${ox+ (i%2)*450},${oy+H+90+Math.floor(i/2)*80})"><rect width="44" height="44" rx="10" fill="${p.c}"/><text x="64" y="38" fill="#fff" font-size="50" font-family="Rum Raisin">${p.n}  <tspan fill="${p.c}">${p.final.toFixed(2)}‰</tspan></text></g>`;});
+$('legend').innerHTML=leg;
+const paths=crew.map((p,i)=>{const e=$('cl'+i);const L=e.getTotalLength();e.style.strokeDasharray=L;return {e,L}});
+
+function set(el,{x=0,y=0,s=1,r=0,o=1}={}){el.style.transform=`translate(${x}px,${y}px) scale(${s}) rotate(${r}deg)`;el.style.opacity=o;el.style.display=o<=0.001?'none':'block';}
+function hide(el){el.style.display='none';}
+function capIn(el,t,a,b){ // pop-in then slide-out caption
+  if(t<a-.01||t>b){hide(el);return;}
+  const i=eBack(prog(t,a,a+.45)), o=prog(t,b-.3,b);
+  set(el,{y:lerp(-80,0,i)-o*60,s:lerp(.6,1,i),o:clamp(prog(t,a,a+.2))*(1-o)});
+}
+function wipe(t,a){ // diagonal bar sweep centered at time a
+  const p=prog(t,a-.35,a+.35);
+  wipes.forEach((w,i)=>{
+    if(p<=0||p>=1){w.style.display='none';return;}
+    w.style.display='block';
+    const k=clamp(p*1.6-i*.12);const x=lerp(-2200,2200,eInOut(k));
+    w.style.top=(i*420-200)+'px';
+    w.style.transform=`translateX(${x}px) rotate(-18deg)`;
+  });
+}
+
+window.render=function(t){
+  // bubbles always drift; brighter in intro/outro
+  const bubAlpha = t<2.4 ? 1 : t>13 ? 1 : .35;
+  bubbles.forEach(b=>{const y=1920+b.s-((t*b.sp+b.ph)%(2100+b.s));const x=b.x+Math.sin(t*b.wf+b.ph)*b.wob;
+    b.d.style.transform=`translate(${x}px,${y}px)`;b.d.style.opacity=bubAlpha;});
+
+  // Scene 1: logo slam (0 - 2.4)
+  { const i=prog(t,.1,.9),o=prog(t,2.05,2.4);
+    const shake=t>.55&&t<.95?Math.sin(t*90)*10*(1-prog(t,.55,.95)):0;
+    if(t<2.4) set($('logo'),{x:shake,y:lerp(-900,0,eBack(i))-o*300,s:lerp(1.6,1,eOut(i))*(1+0.02*Math.sin(t*6)),r:lerp(-25,-4,eOut(i)),o:1-o}); else hide($('logo'));
+    capIn($('s1cap'),t,.85,2.4); }
+
+  // Scene 2: phone with party (2.4 - 5.2)
+  { if(t>=2.3&&t<5.6){
+      const i=eBack(prog(t,2.4,3.1)), o=eInOut(prog(t,4.9,5.5));
+      set($('phone'),{y:lerp(1500,0,i)+o*120,r:lerp(12,0,i),s:1-o*.15,o:1-o});
+      const sc=eInOut(prog(t,3.2,4.6));
+      $('scroll').style.transform=`translateY(${-sc*380}px)`;
+    } else hide($('phone'));
+    capIn($('capA'),t,2.6,5.2); }
+
+  // Scene 3: tap to drink (5.2 - 7.6)
+  { const onB=t>=5.1&&t<6.35;
+    if(onB){const i=eBack(prog(t,5.15,5.6));const press=t>5.95?1-.04*Math.sin(prog(t,5.95,6.25)*Math.PI):1;
+      set($('cardBefore'),{y:lerp(500,0,i),s:lerp(.5,1,i)*press,r:lerp(-8,0,i),o:clamp(prog(t,5.1,5.3))});} else hide($('cardBefore'));
+    const onO=t>=6.2&&t<7.75;
+    if(onO){const f=1-.04*Math.sin(prog(t,6.2,6.4)*Math.PI);set($('cardOverlay'),{s:f,o:1-prog(t,7.55,7.75)*0});
+      $('bar').style.width=(lerp(0,978,prog(t,6.2,11.2)))+'px';} else hide($('cardOverlay'));
+    // finger + ripple
+    const tx=540,ty=960;
+    if(t>=5.55&&t<6.3){const a=prog(t,5.55,5.9);set($('finger'),{x:lerp(tx+260,tx,eOut(a)),y:lerp(ty+420,ty,eOut(a)),s:t>5.95?lerp(1,.8,prog(t,5.95,6.05)):1,o:1-prog(t,6.1,6.3)});}else hide($('finger'));
+    if(t>=5.95&&t<6.6){const a=prog(t,5.95,6.6);set($('tap'),{x:tx,y:ty,s:lerp(.3,2.4,eOut(a)),o:1-a});}else hide($('tap'));
+    if(t>=6.0&&t<6.8){const a=eOut(prog(t,6.0,6.8));$('rays').style.display='block';$('rays').style.transform=`translate(${tx+300}px,${ty-330}px)`;$('rays').style.opacity=1-prog(t,6.5,6.8);
+      rays.forEach((r,k)=>{const ang=k/rays.length*360;r.style.transform=`rotate(${ang}deg) translateY(${-lerp(40,170,a)}px) scaleY(${lerp(1.3,.4,a)})`;});}else hide($('rays'));
+    if(t>=6.0&&t<7.5){const a=prog(t,6.0,6.35);set($('clink'),{x:tx+140,y:ty-470,s:eElastic(a)*1,r:-12+Math.sin(t*20)*3,o:1-prog(t,7.2,7.5)});}else hide($('clink'));
+    capIn($('capB'),t,5.35,7.6); }
+
+  // Scene 3b: edit (7.6 - 8.9)
+  { if(t>=7.6&&t<9.0){const i=prog(t,7.6,7.95);const o=prog(t,8.7,9.0);
+      set($('cardEdit'),{x:lerp(1100,0,eOut(i))-o*1100,r:lerp(8,0,i)-o*6});} else hide($('cardEdit'));
+    if(t>=7.6&&t<9.0){ // overlay slides away as edit slides in
+      const i=eOut(prog(t,7.6,7.95)); if(t<7.95) set($('cardOverlay'),{x:-i*1100,r:-i*6}); }
+    capIn($('capC'),t,7.7,8.95); }
+
+  // Scene 4: promille counter (8.9 - 11.3)
+  { if(t>=8.85&&t<11.4){const i=eBack(prog(t,8.9,9.35));const o=prog(t,11.05,11.4);
+      set($('cardAfter'),{x:lerp(1100,0,eOut(prog(t,8.85,9.2)))-o*0,y:o*900,s:lerp(.9,1,i),o:1-o});
+      const c=eInOut(prog(t,9.3,10.3));const v=lerp(.60,.80,c);$('counter').textContent=v.toFixed(2)+'‰';
+      const pulse=t>10.3?1+.12*Math.sin(prog(t,10.3,10.7)*Math.PI):1;
+      set($('counter'),{y:lerp(-200,0,eBack(prog(t,9.0,9.4))),s:pulse,o:clamp(prog(t,9.0,9.2))*(1-o)});
+      $('counter').style.color=c>=1?'#66e3a3':'#fff';
+    } else {hide($('cardAfter'));hide($('counter'));}
+    capIn($('capD'),t,9.0,11.3); }
+
+  // Scene 5: crew chart (11.3 - 13.4)
+  { if(t>=11.3&&t<13.5){const o=prog(t,13.15,13.45);set($('chart'),{y:o*-200,o:clamp(prog(t,11.3,11.5))*(1-o)});
+      paths.forEach((p,i)=>{const a=eInOut(prog(t,11.4+i*.12,12.5+i*.12));p.e.style.strokeDashoffset=p.L*(1-a);
+        const lb=$('lb'+i);lb.style.opacity=a>=1?1:0;
+        const lg=$('lg'+i);const la=eBack(prog(t,12.0+i*.12,12.4+i*.12));lg.style.opacity=clamp(la);});
+    } else hide($('chart'));
+    capIn($('capE'),t,11.4,13.4); }
+
+  // Scene 6: end card (13.4 - 15)
+  { if(t>=13.35){const i=prog(t,13.4,14.0);
+      set($('logo2'),{s:lerp(.2,1,eElastic(i)),r:lerp(-30,-4,eOut(i))+Math.sin(t*3)*1.5});
+      set($('url'),{y:lerp(120,0,eBack(prog(t,13.7,14.1))),o:clamp(prog(t,13.7,13.85))});
+      set($('endTag'),{s:eElastic(prog(t,14.0,14.6)),r:-6,o:clamp(prog(t,14.0,14.1))});
+      set($('fine'),{o:clamp(prog(t,14.1,14.4))*.9});
+      const ct=t-13.55;$('confetti').style.display=ct>0?'block':'none';
+      conf.forEach(c=>{const tt=Math.max(0,ct-c.delay);const x=540+c.vx*tt*.8,y=820+c.vy*tt+1100*tt*tt;
+        c.d.style.transform=`translate(${x}px,${y}px) rotate(${c.r*tt*3}deg)`;c.d.style.opacity=ct>0?1:0;});
+    } else {hide($('logo2'));hide($('url'));hide($('endTag'));hide($('fine'));hide($('confetti'));}
+    $('url').style.color='#fff'; }
+
+  // transitions
+  const tr=[2.4,11.3,13.4].reduce((m,x)=>Math.abs(t-x)<Math.abs(t-m)?x:m);
+  wipe(t,tr);
+};
+window.ready = document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>i.onload=r))));
+</script></body></html>
