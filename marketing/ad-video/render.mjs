@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 const require = createRequire(new URL('../../e2e/package.json', import.meta.url));
 const { chromium } = require('playwright');
 import { spawn } from 'child_process';
-const FPS=30, DUR=15, only=process.argv[2];
+const FPS=30, DUR=30, only=process.argv[2];
 const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE, args:['--allow-file-access-from-files'] });
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
 page.on('pageerror', e => console.error('PAGEERR', e.message));

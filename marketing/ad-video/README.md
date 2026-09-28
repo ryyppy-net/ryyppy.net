@@ -1,14 +1,31 @@
-# 15-second ad video
+# 30-second ad video
 
-`ryyppy-ad.mp4` is 1080x1920, 30 fps, and 15 s long. It has the app's own drink sounds: one on the tap and one on the end card.
+`ryyppy-ad.mp4` is 1080x1920 and 30 fps. It has a rock backing track and sound effects synced to the on-screen hits.
 
-Rebuild it:
+## Audio
+
+All audio is CC0 (public domain), so it is free to use commercially without attribution. The credits below are a courtesy.
+
+| File | Source | Author |
+|---|---|---|
+| `music_short_theme.mp3` | [Short Theme [Rock/Metal]](https://opengameart.org/content/short-theme-rockmetal) (OpenGameArt), cut from 19.475 s | nene |
+| `bottle_popcling.mp3` | [Beer bottle - Pop and cling](https://freesound.org/people/ldezem/sounds/386169/) | ldezem |
+| `clink.mp3` | [Glass Clink.wav](https://freesound.org/people/Dentrabert/sounds/673315/) | Dentrabert |
+| `pour.mp3` | [Pouring a Beer from the Tap](https://freesound.org/people/zembacraftworks/sounds/428334/) | zembacraftworks |
+| `woosh2.mp3` | [quick woosh](https://freesound.org/people/florianreichelt/sounds/683101/) | florianreichelt |
+| `tick.mp3` | [Button Tick](https://freesound.org/people/NenadSimic/sounds/268108/) | NenadSimic |
+| `ding.mp3` | [Correct.mp3](https://freesound.org/people/LittleRainySeasons/sounds/335908/) | LittleRainySeasons |
+| `popper.mp3` | [partypopper.flac](https://freesound.org/people/Streety/sounds/26349/) | Streety |
+| `crowd.mp3` | [cheering and clapping crowd 2](https://freesound.org/people/AlaskaRobotics/sounds/221567/) | AlaskaRobotics |
+
+The track runs at 120 BPM. The cut starts on a downbeat, so bars start on even seconds of the video. The song's final hit lands at 27 s, where the end-card logo lands.
+
+## Rebuild
 
 1. Start the app on :8080, then run `node capture.mjs`. This seeds a demo party and writes `shots/`.
 2. Run `FF=/path/to/ffmpeg node render.mjs`. This steps `render(t)` in `ad.html` frame by frame and writes `video.mp4`.
-3. Mix in the audio:
-   `ffmpeg -i video.mp4 -i ../../src/main/resources/public/static/sounds/1.mp3 -i ../../src/main/resources/public/static/sounds/2.mp3 -filter_complex "[1]adelay=5950|5950[a];[2]adelay=13450|13450[b];anullsrc=r=44100:cl=stereo,atrim=0:15[s];[s][a][b]amix=inputs=3:duration=first:normalize=0[out]" -map 0:v -map "[out]" -c:v copy -c:a aac ryyppy-ad.mp4`
+3. Run `FF=/path/to/ffmpeg python3 mix.py`. This lays the music and the `CUES` sound effects onto `video.mp4` and writes `ryyppy-ad.mp4`.
 
-The scripts load Playwright from `e2e/node_modules`. Run `npm install` in `e2e/` first.
+The scripts load Playwright from `e2e/node_modules`. Run `npm install` in `e2e/` first, and set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` if you use a preinstalled Chromium.
 
-To preview single frames, run `node render.mjs 3.0,6.3,12.3`. The frames are written to `preview/`, which must exist.
+To preview single frames, run `node render.mjs 3.0,11.3,27.3`. The frames are written to `preview/`.

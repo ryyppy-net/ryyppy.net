@@ -138,82 +138,87 @@ function wipe(t,a){ // diagonal bar sweep centered at time a
   });
 }
 
+function lines(el,t,starts,b){ // pops each caption line in on its own beat, all leave together
+  if(t<starts[0]-.01||t>b){hide(el);return;}
+  el.style.display='block';el.style.opacity=1;el.style.transform='none';
+  const o=prog(t,b-.35,b);
+  [...el.children].forEach((c,k)=>{const a=starts[k]??starts[0];const i=eBack(prog(t,a,a+.45));
+    c.style.transform=`translateY(${lerp(-70,0,i)-o*60}px) scale(${lerp(.6,1,i)})`;c.style.opacity=clamp(prog(t,a,a+.2))*(1-o);});
+}
+// music: 120 BPM, downbeats on even seconds
+const beatPulse=t=>{const ph=(t%0.5)/0.5;return Math.exp(-ph*6);};
+
 window.render=function(t){
-  // bubbles always drift; brighter in intro/outro
-  const bubAlpha = t<2.4 ? 1 : t>13 ? 1 : .35;
-  bubbles.forEach(b=>{const y=1920+b.s-((t*b.sp+b.ph)%(2100+b.s));const x=b.x+Math.sin(t*b.wf+b.ph)*b.wob;
-    b.d.style.transform=`translate(${x}px,${y}px)`;b.d.style.opacity=bubAlpha;});
+  const bp=beatPulse(t), bar=Math.exp(-((t%2)/2)*8);
+  $('stage').style.background=`radial-gradient(ellipse at 50% 30%,rgb(${58+bar*30},${58+bar*30},${58+bar*30}) 0%,#222 55%,#141414 100%)`;
+  const bubAlpha = t<4 ? 1 : t>26 ? 1 : .35;
+  bubbles.forEach(b=>{const y=1920+b.s-((t*b.sp*.8+b.ph)%(2100+b.s));const x=b.x+Math.sin(t*b.wf+b.ph)*b.wob;
+    b.d.style.transform=`translate(${x}px,${y}px) scale(${1+bp*.12})`;b.d.style.opacity=bubAlpha;});
 
-  // Scene 1: logo slam (0 - 2.4)
-  { const i=prog(t,.1,.9),o=prog(t,2.05,2.4);
-    const shake=t>.55&&t<.95?Math.sin(t*90)*10*(1-prog(t,.55,.95)):0;
-    if(t<2.4) set($('logo'),{x:shake,y:lerp(-900,0,eBack(i))-o*300,s:lerp(1.6,1,eOut(i))*(1+0.02*Math.sin(t*6)),r:lerp(-25,-4,eOut(i)),o:1-o}); else hide($('logo'));
-    capIn($('s1cap'),t,.85,2.4); }
+  // Scene 1: logo (0 - 4)
+  { const i=prog(t,.3,1.0),o=prog(t,3.6,4.0);
+    const shake=t>1.0&&t<1.4?Math.sin(t*90)*12*(1-prog(t,1.0,1.4)):0;
+    if(t<4.0) set($('logo'),{x:shake,y:lerp(-900,0,eBack(i))-o*300,s:lerp(1.6,1,eOut(i))*(1+0.025*bar*(t>1)),r:lerp(-25,-4,eOut(i)),o:1-o}); else hide($('logo'));
+    lines($('s1cap'),t,[2.0,3.0],4.0); }
 
-  // Scene 2: phone with party (2.4 - 5.2)
-  { if(t>=2.3&&t<5.6){
-      const i=eBack(prog(t,2.4,3.1)), o=eInOut(prog(t,4.9,5.5));
-      set($('phone'),{y:lerp(1500,0,i)+o*120,r:lerp(12,0,i),s:1-o*.15,o:1-o});
-      const sc=eInOut(prog(t,3.2,4.6));
+  // Scene 2: phone with party (4 - 9)
+  { if(t>=3.9&&t<9.6){
+      const i=eBack(prog(t,4.1,5.0)), o=eInOut(prog(t,9.0,9.5));
+      set($('phone'),{y:lerp(1500,0,i)+o*160,r:lerp(12,0,i),s:1-o*.2,o:1-o});
+      const sc=eInOut(prog(t,5.5,8.3));
       $('scroll').style.transform=`translateY(${-sc*380}px)`;
     } else hide($('phone'));
-    capIn($('capA'),t,2.6,5.2); }
+    lines($('capA'),t,[4.5,6.0],9.0); }
 
-  // Scene 3: tap to drink (5.2 - 7.6)
-  { const onB=t>=5.1&&t<6.35;
-    if(onB){const i=eBack(prog(t,5.15,5.6));const press=t>5.95?1-.04*Math.sin(prog(t,5.95,6.25)*Math.PI):1;
-      set($('cardBefore'),{y:lerp(500,0,i),s:lerp(.5,1,i)*press,r:lerp(-8,0,i),o:clamp(prog(t,5.1,5.3))});} else hide($('cardBefore'));
-    const onO=t>=6.2&&t<7.75;
-    if(onO){const f=1-.04*Math.sin(prog(t,6.2,6.4)*Math.PI);set($('cardOverlay'),{s:f,o:1-prog(t,7.55,7.75)*0});
-      $('bar').style.width=(lerp(0,978,prog(t,6.2,11.2)))+'px';} else hide($('cardOverlay'));
-    // finger + ripple
+  // Scene 3: tap to drink (9 - 14)
+  { if(t>=9.0&&t<11.1){const i=eBack(prog(t,9.1,9.7));const press=t>10.9?1-.04*Math.sin(prog(t,10.9,11.1)*Math.PI):1;
+      set($('cardBefore'),{y:lerp(500,0,i),s:lerp(.5,1,i)*press,r:lerp(-8,0,i),o:clamp(prog(t,9.0,9.25))});} else hide($('cardBefore'));
+    if(t>=11.0&&t<14.4){const f=1-.04*Math.sin(prog(t,11.0,11.2)*Math.PI);
+      const out=eOut(prog(t,14.0,14.4));set($('cardOverlay'),{s:f,x:-out*1100,r:-out*6});
+      $('bar').style.width=(lerp(0,978,prog(t,11.0,16.0)))+'px';} else hide($('cardOverlay'));
     const tx=540,ty=960;
-    if(t>=5.55&&t<6.3){const a=prog(t,5.55,5.9);set($('finger'),{x:lerp(tx+260,tx,eOut(a)),y:lerp(ty+420,ty,eOut(a)),s:t>5.95?lerp(1,.8,prog(t,5.95,6.05)):1,o:1-prog(t,6.1,6.3)});}else hide($('finger'));
-    if(t>=5.95&&t<6.6){const a=prog(t,5.95,6.6);set($('tap'),{x:tx,y:ty,s:lerp(.3,2.4,eOut(a)),o:1-a});}else hide($('tap'));
-    if(t>=6.0&&t<6.8){const a=eOut(prog(t,6.0,6.8));$('rays').style.display='block';$('rays').style.transform=`translate(${tx+300}px,${ty-330}px)`;$('rays').style.opacity=1-prog(t,6.5,6.8);
-      rays.forEach((r,k)=>{const ang=k/rays.length*360;r.style.transform=`rotate(${ang}deg) translateY(${-lerp(40,170,a)}px) scaleY(${lerp(1.3,.4,a)})`;});}else hide($('rays'));
-    if(t>=6.0&&t<7.5){const a=prog(t,6.0,6.35);set($('clink'),{x:tx+140,y:ty-470,s:eElastic(a)*1,r:-12+Math.sin(t*20)*3,o:1-prog(t,7.2,7.5)});}else hide($('clink'));
-    capIn($('capB'),t,5.35,7.6); }
+    if(t>=10.0&&t<11.4){const a=prog(t,10.0,10.8);set($('finger'),{x:lerp(tx+280,tx,eOut(a)),y:lerp(ty+460,ty,eOut(a)),s:t>10.9?lerp(1,.8,prog(t,10.9,11.0)):1,o:1-prog(t,11.1,11.4)});}else hide($('finger'));
+    if(t>=11.0&&t<11.8){const a=prog(t,11.0,11.8);set($('tap'),{x:tx,y:ty,s:lerp(.3,2.6,eOut(a)),o:1-a});}else hide($('tap'));
+    if(t>=11.0&&t<11.9){const a=eOut(prog(t,11.0,11.9));$('rays').style.display='block';$('rays').style.transform=`translate(${tx+300}px,${ty-330}px)`;$('rays').style.opacity=1-prog(t,11.6,11.9);
+      rays.forEach((r,k)=>{const ang=k/rays.length*360;r.style.transform=`rotate(${ang}deg) translateY(${-lerp(40,180,a)}px) scaleY(${lerp(1.3,.4,a)})`;});}else hide($('rays'));
+    if(t>=11.0&&t<13.2){const a=prog(t,11.0,11.4);set($('clink'),{x:tx+140,y:ty-470,s:eElastic(a),r:-12+Math.sin(t*14)*3,o:1-prog(t,12.9,13.2)});}else hide($('clink'));
+    lines($('capB'),t,[9.5,11.0],14.0); }
 
-  // Scene 3b: edit (7.6 - 8.9)
-  { if(t>=7.6&&t<9.0){const i=prog(t,7.6,7.95);const o=prog(t,8.7,9.0);
+  // Scene 3b: edit (14 - 17)
+  { if(t>=14.0&&t<17.4){const i=prog(t,14.0,14.4);const o=prog(t,17.0,17.4);
       set($('cardEdit'),{x:lerp(1100,0,eOut(i))-o*1100,r:lerp(8,0,i)-o*6});} else hide($('cardEdit'));
-    if(t>=7.6&&t<9.0){ // overlay slides away as edit slides in
-      const i=eOut(prog(t,7.6,7.95)); if(t<7.95) set($('cardOverlay'),{x:-i*1100,r:-i*6}); }
-    capIn($('capC'),t,7.7,8.95); }
+    lines($('capC'),t,[14.0,15.0],17.0); }
 
-  // Scene 4: promille counter (8.9 - 11.3)
-  { if(t>=8.85&&t<11.4){const i=eBack(prog(t,8.9,9.35));const o=prog(t,11.05,11.4);
-      set($('cardAfter'),{x:lerp(1100,0,eOut(prog(t,8.85,9.2)))-o*0,y:o*900,s:lerp(.9,1,i),o:1-o});
-      const c=eInOut(prog(t,9.3,10.3));const v=lerp(.60,.80,c);$('counter').textContent=v.toFixed(2)+'‰';
-      const pulse=t>10.3?1+.12*Math.sin(prog(t,10.3,10.7)*Math.PI):1;
-      set($('counter'),{y:lerp(-200,0,eBack(prog(t,9.0,9.4))),s:pulse,o:clamp(prog(t,9.0,9.2))*(1-o)});
-      $('counter').style.color=c>=1?'#66e3a3':'#fff';
+  // Scene 4: promille counter (17 - 22)
+  { if(t>=17.0&&t<22.0){const o=prog(t,21.6,22.0);
+      set($('cardAfter'),{x:lerp(1100,0,eOut(prog(t,17.0,17.4))),y:o*900,s:1+bar*.015*(t>20),o:1-o});
+      const c=prog(t,18.0,20.0);const steps=Math.floor(c*8)/8;const v=lerp(.60,.80,steps);$('counter').textContent=v.toFixed(2)+'‰';
+      const pulse=t>=20?1+.14*Math.exp(-(t-20)*5):1+.05*bp*(t>18);
+      set($('counter'),{y:lerp(-200,0,eBack(prog(t,17.2,17.7))),s:pulse,o:clamp(prog(t,17.2,17.4))*(1-o)});
+      $('counter').style.color=t>=20?'#66e3a3':'#fff';
     } else {hide($('cardAfter'));hide($('counter'));}
-    capIn($('capD'),t,9.0,11.3); }
+    lines($('capD'),t,[17.0,18.0],21.6); }
 
-  // Scene 5: crew chart (11.3 - 13.4)
-  { if(t>=11.3&&t<13.5){const o=prog(t,13.15,13.45);set($('chart'),{y:o*-200,o:clamp(prog(t,11.3,11.5))*(1-o)});
-      paths.forEach((p,i)=>{const a=eInOut(prog(t,11.4+i*.12,12.5+i*.12));p.e.style.strokeDashoffset=p.L*(1-a);
-        const lb=$('lb'+i);lb.style.opacity=a>=1?1:0;
-        const lg=$('lg'+i);const la=eBack(prog(t,12.0+i*.12,12.4+i*.12));lg.style.opacity=clamp(la);});
+  // Scene 5: crew chart (22 - 26)
+  { if(t>=22.0&&t<26.2){const o=prog(t,25.7,26.1);set($('chart'),{y:o*-200,o:clamp(prog(t,22.0,22.2))*(1-o)});
+      paths.forEach((p,i)=>{const a=eInOut(prog(t,22.3+i*.25,24.3+i*.25));p.e.style.strokeDashoffset=p.L*(1-a);
+        $('lb'+i).style.opacity=a>=1?1:0;
+        $('lg'+i).style.opacity=clamp(prog(t,24.0+i*.25,24.3+i*.25));});
     } else hide($('chart'));
-    capIn($('capE'),t,11.4,13.4); }
+    lines($('capE'),t,[22.0,23.0],25.8); }
 
-  // Scene 6: end card (13.4 - 15)
-  { if(t>=13.35){const i=prog(t,13.4,14.0);
+  // Scene 6: end card (26 - 30), logo lands on the song's final hit at 27.0
+  { if(t>=26.3){const i=prog(t,26.4,27.0);
       set($('logo2'),{s:lerp(.2,1,eElastic(i)),r:lerp(-30,-4,eOut(i))+Math.sin(t*3)*1.5});
-      set($('url'),{y:lerp(120,0,eBack(prog(t,13.7,14.1))),o:clamp(prog(t,13.7,13.85))});
-      set($('endTag'),{s:eElastic(prog(t,14.0,14.6)),r:-6,o:clamp(prog(t,14.0,14.1))});
-      set($('fine'),{o:clamp(prog(t,14.1,14.4))*.9});
-      const ct=t-13.55;$('confetti').style.display=ct>0?'block':'none';
-      conf.forEach(c=>{const tt=Math.max(0,ct-c.delay);const x=540+c.vx*tt*.8,y=820+c.vy*tt+1100*tt*tt;
+      set($('url'),{y:lerp(120,0,eBack(prog(t,27.5,27.9))),o:clamp(prog(t,27.5,27.65))});
+      set($('endTag'),{s:eElastic(prog(t,28.0,28.6)),r:-6,o:clamp(prog(t,28.0,28.1))});
+      set($('fine'),{o:clamp(prog(t,28.5,28.8))*.9});
+      const ct=t-27.0;$('confetti').style.display=ct>0?'block':'none';
+      conf.forEach(c=>{const tt=Math.max(0,ct-c.delay)*.8;const x=540+c.vx*tt*.8,y=820+c.vy*tt+1100*tt*tt;
         c.d.style.transform=`translate(${x}px,${y}px) rotate(${c.r*tt*3}deg)`;c.d.style.opacity=ct>0?1:0;});
-    } else {hide($('logo2'));hide($('url'));hide($('endTag'));hide($('fine'));hide($('confetti'));}
-    $('url').style.color='#fff'; }
+    } else {hide($('logo2'));hide($('url'));hide($('endTag'));hide($('fine'));hide($('confetti'));} }
 
-  // transitions
-  const tr=[2.4,11.3,13.4].reduce((m,x)=>Math.abs(t-x)<Math.abs(t-m)?x:m);
+  const tr=[4.0,22.0,26.0].reduce((m,x)=>Math.abs(t-x)<Math.abs(t-m)?x:m);
   wipe(t,tr);
 };
 window.ready = document.fonts.ready.then(()=>Promise.all([...document.images].map(i=>i.complete?1:new Promise(r=>i.onload=r))));
