@@ -1,5 +1,6 @@
 package drinkcounter.authentication.relay;
 
+import drinkcounter.authentication.GoogleIdentityLinkingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -16,17 +17,20 @@ import java.nio.charset.StandardCharsets;
 /**
  * Completes classical OAuth2 login on the hub. If this login was started via the relay (see
  * AuthRelayController#redirect / #start), mints a handoff token for the verified Google identity
- * and sends the browser back to the environment that started the sign-in. Otherwise behaves like
- * an ordinary successful login on this environment.
+ * and sends the browser back to the environment that started the sign-in. Otherwise signs the user
+ * in on this environment with the same session One Tap establishes.
  */
 public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RelayAwareAuthenticationSuccessHandler.class);
 
     private final AuthRelayTokenService tokenService;
+    private final GoogleIdentityLinkingService identityLinkingService;
 
-    public RelayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService) {
+    public RelayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService,
+            GoogleIdentityLinkingService identityLinkingService) {
         this.tokenService = tokenService;
+        this.identityLinkingService = identityLinkingService;
     }
 
     @Override
@@ -36,13 +40,13 @@ public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuc
         String returnTo = session != null
                 ? (String) session.getAttribute(AuthRelayController.RETURN_TO_SESSION_ATTR)
                 : null;
+        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oauth2User.getAttribute("email");
 
         if (returnTo != null) {
             session.removeAttribute(AuthRelayController.RETURN_TO_SESSION_ATTR);
 
-            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
             String sub = oauth2User.getAttribute("sub");
-            String email = oauth2User.getAttribute("email");
             String name = oauth2User.getAttribute("name");
 
             String token = tokenService.mint(sub, email, name, returnTo);
@@ -51,6 +55,7 @@ public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuc
             return;
         }
 
+        identityLinkingService.establishSession(oauth2User.getAttribute("userId"), email, request);
         response.sendRedirect("/app/index.html");
     }
 }

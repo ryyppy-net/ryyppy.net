@@ -99,7 +99,7 @@ public class AuthRelayController {
         }
 
         User user = identityLinkingService.findOrCreateUser(claims.sub, claims.email, claims.name, null, null);
-        identityLinkingService.establishSession(user, claims.email, request);
+        identityLinkingService.establishSession(user.getId(), claims.email, request);
 
         log.info("Auth relay: authentication completed for user: email={}, userId={}", claims.email, user.getId());
 

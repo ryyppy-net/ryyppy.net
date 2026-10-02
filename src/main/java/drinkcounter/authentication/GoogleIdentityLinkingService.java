@@ -73,7 +73,7 @@ public class GoogleIdentityLinkingService {
     }
 
     /** Sets the Spring Security context for this user and saves it into the HTTP session. */
-    public void establishSession(User user, String email, HttpServletRequest request) {
+    public void establishSession(int userId, String email, HttpServletRequest request) {
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
         DrinkcounterUserDetails userDetails = new DrinkcounterUserDetails(
@@ -81,7 +81,7 @@ public class GoogleIdentityLinkingService {
                 "", // No password for OAuth users
                 true, true, true, true,
                 authorities,
-                user.getId()
+                userId
         );
 
         UsernamePasswordAuthenticationToken authentication =
