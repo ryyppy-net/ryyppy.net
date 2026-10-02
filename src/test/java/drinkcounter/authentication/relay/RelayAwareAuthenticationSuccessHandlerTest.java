@@ -48,6 +48,7 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
 
         handler.onAuthenticationSuccess(request, response, authentication);
 
+        // CurrentUser only resolves a DrinkcounterUserDetails principal, so the OAuth2 one must be replaced.
         verify(identityLinkingService).establishSession(42, "user@example.com", request);
         assertEquals("/app/index.html", response.getRedirectedUrl());
     }
@@ -62,7 +63,9 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
 
         handler.onAuthenticationSuccess(request, response, authentication);
 
+        // The user signs in on the environment that started the relay, not on the hub.
         verify(identityLinkingService, never()).establishSession(anyInt(), anyString(), any());
+        // That environment redeems the token to establish its own session.
         assertTrue(response.getRedirectedUrl().startsWith(returnTo + "/api/auth/relay/complete?token="));
     }
 }
