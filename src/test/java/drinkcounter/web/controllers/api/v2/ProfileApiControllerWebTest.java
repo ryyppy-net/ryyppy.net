@@ -158,7 +158,7 @@ public class ProfileApiControllerWebTest {
     // The history buckets by UTC day, so its "Time" column must be midnight UTC, not
     // midnight in the server's default zone.
     @Test
-    public void getDrinkHistoryTimeColumnRepresentsMidnightUtc_issue55() throws Exception {
+    public void drinkHistoryTimeColumnIsMidnightUtcNotServerZone() throws Exception {
         originalDefaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
 
@@ -173,7 +173,7 @@ public class ProfileApiControllerWebTest {
     }
 
     @Test
-    public void getDrinkHistoryTodayBucketUsesUtc_issue55() throws Exception {
+    public void drinkHistoryTodayBucketIsTheUtcDate() throws Exception {
         originalDefaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
         // 2024-03-06T02:00:00Z is still 2024-03-05 in America/Los_Angeles.
