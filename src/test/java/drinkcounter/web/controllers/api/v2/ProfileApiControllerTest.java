@@ -3,7 +3,7 @@ package drinkcounter.web.controllers.api.v2;
 import com.csvreader.CsvReader;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
-import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.DrinkcounterUserDetails;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.io.ByteArrayInputStream;
@@ -39,23 +39,24 @@ public class ProfileApiControllerTest {
 
     private DrinkCounterService drinkCounterService;
     private User user;
+    private DrinkcounterUserDetails me;
     private ProfileApiController controller;
 
     @BeforeEach
     public void setUp() {
         drinkCounterService = mock(DrinkCounterService.class);
         UserService userService = mock(UserService.class);
-        CurrentUser currentUser = mock(CurrentUser.class);
 
         user = new User();
         user.setId(1);
-        when(currentUser.getUser()).thenReturn(user);
+        when(userService.getUser(1)).thenReturn(user);
+        me = new DrinkcounterUserDetails("user@example.com", "", true, true, true, true, List.of(), 1);
 
         Drink saved = new Drink();
         saved.setId(7);
         when(drinkCounterService.addDrink(anyInt(), any(), any())).thenReturn(saved);
 
-        controller = new ProfileApiController(drinkCounterService, userService, currentUser);
+        controller = new ProfileApiController(drinkCounterService, userService);
     }
 
     private TimeZone originalDefaultTimeZone;
@@ -80,7 +81,7 @@ public class ProfileApiControllerTest {
         drink.setTimeStamp(Instant.parse("2024-03-06T01:00:00Z")); // 2024-03-06 in UTC
         user.drink(drink);
 
-        ResponseEntity<byte[]> response = controller.getDrinkHistory();
+        ResponseEntity<byte[]> response = controller.getDrinkHistory(me);
 
         long millis = findMillisForUtcDay(response.getBody(), "2024-03-06");
 
@@ -102,7 +103,7 @@ public class ProfileApiControllerTest {
 
         // no drinks: only the "today" bucket will be present
 
-        ResponseEntity<byte[]> response = controller.getDrinkHistory();
+        ResponseEntity<byte[]> response = controller.getDrinkHistory(me);
 
         Map<String, Integer> countsByDay = parseTimeCountCsv(response.getBody());
 
@@ -130,7 +131,7 @@ public class ProfileApiControllerTest {
 
     @Test
     public void drinkParsesIsoTimestampParam() {
-        controller.drink(null, null, "2024-03-05T13:37:42.123Z");
+        controller.drink(me, null, null, "2024-03-05T13:37:42.123Z");
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
         verify(drinkCounterService).addDrink(eq(1), eq(expected), any(Float.class));
@@ -138,12 +139,12 @@ public class ProfileApiControllerTest {
 
     @Test
     public void drinkReturnsTheSavedDrink() {
-        assertEquals(7, controller.drink(null, null, null).getId());
+        assertEquals(7, controller.drink(me, null, null, null).getId());
     }
 
     @Test
     public void changeDrinkUpdatesAlcoholOfOwnDrink() {
-        controller.changeDrink(7, 0.5f, 0.05f);
+        controller.changeDrink(me, 7, 0.5f, 0.05f);
 
         verify(drinkCounterService).changeDrinkAlcohol(eq(1), eq(7), any(Float.class));
     }
@@ -151,7 +152,7 @@ public class ProfileApiControllerTest {
     @Test
     public void drinkRejectsMalformedTimestamp() {
         assertThrows(DateTimeParseException.class,
-                () -> controller.drink(null, null, "not-a-timestamp"));
+                () -> controller.drink(me, null, null, "not-a-timestamp"));
     }
 
     @Test
@@ -170,7 +171,7 @@ public class ProfileApiControllerTest {
         drink.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
         user.drink(drink);
 
-        List<DrinkDTO> dtos = controller.getDrinks();
+        List<DrinkDTO> dtos = controller.getDrinks(me);
 
         assertEquals(1, dtos.size());
         assertEquals("2024-03-05T13:37:42.123Z", dtos.get(0).getTimestamp());
@@ -185,7 +186,7 @@ public class ProfileApiControllerTest {
         user.drink(drink1);
         user.drink(drink2);
 
-        ResponseEntity<byte[]> response = controller.getDrinkHistory();
+        ResponseEntity<byte[]> response = controller.getDrinkHistory(me);
 
         // The bucketing offset here is hardcoded to UTC, so the "Time"
         // column is only meaningful when decoded in UTC too -- not the

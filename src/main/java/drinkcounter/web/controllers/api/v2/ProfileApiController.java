@@ -7,7 +7,8 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.DrinkcounterUserDetails;
+import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,31 +31,29 @@ public class ProfileApiController {
 
     private final DrinkCounterService drinkCounterService;
     private final UserService userService;
-    private final CurrentUser currentUser;
 
     private Clock clock = Clock.systemUTC();
 
-    public ProfileApiController(DrinkCounterService drinkCounterService, UserService userService, CurrentUser currentUser) {
+    public ProfileApiController(DrinkCounterService drinkCounterService, UserService userService) {
         this.drinkCounterService = drinkCounterService;
         this.userService = userService;
-        this.currentUser = currentUser;
     }
 
     @GetMapping
-    public UserDTO getUser() {
-        User user = currentUser.getUser();
+    public UserDTO getUser(@LoggedInUser DrinkcounterUserDetails me) {
+        User user = userService.getUser(me.getUserId());
         UserDTO userDTO = UserDTO.fromUser(user);
         userDTO.setHistory(SlopeService.getSlopes(user));
         return userDTO;
     }
 
     @PostMapping
-    public void updateUser(
+    public void updateUser(@LoggedInUser DrinkcounterUserDetails me,
                         @RequestParam("name") String name,
                         @RequestParam("email") String email,
                         @RequestParam("sex") User.Sex sex,
                         @RequestParam("weight") Float weight){
-        User user = currentUser.getUser();
+        User user = userService.getUser(me.getUserId());
         user.setName(name);
         user.setEmail(email);
         user.setSex(sex);
@@ -63,11 +62,10 @@ public class ProfileApiController {
     }
 
     @PostMapping("drinks")
-    public DrinkDTO drink(
+    public DrinkDTO drink(@LoggedInUser DrinkcounterUserDetails me,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
-        Integer userId = currentUser.getUser().getId();
         double alcoholAmount = AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
         if (volume != null && alcoholPercentage != null) {
             alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
@@ -76,30 +74,30 @@ public class ProfileApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        return DrinkDTO.fromDrink(drinkCounterService.addDrink(userId, time, (float)alcoholAmount));
+        return DrinkDTO.fromDrink(drinkCounterService.addDrink(me.getUserId(), time, (float)alcoholAmount));
     }
 
     @GetMapping("drinks")
-    public List<DrinkDTO> getDrinks(){
-        return currentUser.getUser().getDrinks().stream().map(DrinkDTO::fromDrink).toList();
+    public List<DrinkDTO> getDrinks(@LoggedInUser DrinkcounterUserDetails me){
+        return userService.getUser(me.getUserId()).getDrinks().stream().map(DrinkDTO::fromDrink).toList();
     }
 
     @PutMapping("drinks/{drinkId}")
-    public void changeDrink(@PathVariable Integer drinkId,
+    public void changeDrink(@LoggedInUser DrinkcounterUserDetails me, @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
             @RequestParam("alcohol") Float alcoholPercentage){
-        drinkCounterService.changeDrinkAlcohol(currentUser.getUser().getId(), drinkId,
+        drinkCounterService.changeDrinkAlcohol(me.getUserId(), drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
     }
 
     @DeleteMapping("drinks/{drinkId}")
-    public void deleteDrink(@PathVariable Integer drinkId){
-        drinkCounterService.removeDrinkFromUser(currentUser.getUser().getId(), drinkId);
+    public void deleteDrink(@LoggedInUser DrinkcounterUserDetails me, @PathVariable Integer drinkId){
+        drinkCounterService.removeDrinkFromUser(me.getUserId(), drinkId);
     }
 
     @GetMapping("drink-history")
-    public ResponseEntity<byte[]> getDrinkHistory() throws IOException{
-        User user = currentUser.getUser();
+    public ResponseEntity<byte[]> getDrinkHistory(@LoggedInUser DrinkcounterUserDetails me) throws IOException{
+        User user = userService.getUser(me.getUserId());
         String csv = DrinkHistoryService.buildCsv(user.getDrinks(), clock);
 
         HttpHeaders headers = new HttpHeaders();
