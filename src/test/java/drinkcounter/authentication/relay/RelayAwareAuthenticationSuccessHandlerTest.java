@@ -3,16 +3,22 @@ package drinkcounter.authentication.relay;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -41,6 +47,11 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
         authentication = new OAuth2AuthenticationToken(oauth2User, AUTHORITIES, "google");
     }
 
+    @AfterEach
+    public void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     public void directLoginEstablishesTheSameSessionAsOneTap() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
@@ -59,12 +70,18 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.getSession(true).setAttribute(AuthRelayController.RETURN_TO_SESSION_ATTR, returnTo);
         MockHttpServletResponse response = new MockHttpServletResponse();
+        // As OAuth2LoginAuthenticationFilter does before it calls the success handler.
+        SecurityContext context = new SecurityContextImpl(authentication);
+        SecurityContextHolder.setContext(context);
+        new HttpSessionSecurityContextRepository().saveContext(context, request, response);
         when(tokenService.mint("google-sub", "user@example.com", "User", returnTo)).thenReturn("token");
 
         handler.onAuthenticationSuccess(request, response, authentication);
 
         // The user signs in on the environment that started the relay, not on the hub.
         verify(identityLinkingService, never()).establishSession(anyInt(), anyString(), any());
+        assertNull(request.getSession().getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY));
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
         // That environment redeems the token to establish its own session.
         assertTrue(response.getRedirectedUrl().startsWith(returnTo + "/api/auth/relay/complete?token="));
     }
