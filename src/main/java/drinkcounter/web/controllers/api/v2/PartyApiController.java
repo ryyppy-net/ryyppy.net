@@ -3,8 +3,8 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import drinkcounter.authentication.DrinkcounterUserDetails;
 import drinkcounter.authentication.LoggedInUser;
+import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -34,8 +34,8 @@ public class PartyApiController {
     }
 
     @GetMapping
-    public List<PartyDTO> getParties(@LoggedInUser DrinkcounterUserDetails me){
-        List<Party> parties = userService.getUser(me.getUserId()).getParties();
+    public List<PartyDTO> getParties(@LoggedInUser User user){
+        List<Party> parties = user.getParties();
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
@@ -49,9 +49,9 @@ public class PartyApiController {
     }
     
     @PostMapping
-    public PartyDTO addParty(@LoggedInUser DrinkcounterUserDetails me, @RequestParam("name") String partyName){
+    public PartyDTO addParty(@LoggedInUserId int userId, @RequestParam("name") String partyName){
         Party party = drinkCounterService.startParty(partyName);
-        drinkCounterService.linkUserToParty(me.getUserId(), party.getId());
+        drinkCounterService.linkUserToParty(userId, party.getId());
         return PartyDTO.fromParty(party);
     }
 
@@ -155,8 +155,8 @@ public class PartyApiController {
     }
 
     @GetMapping("{partyId}/invitations")
-    public List<Friend> suggestInvite(@LoggedInUser DrinkcounterUserDetails me, @PathVariable Integer partyId, @RequestParam(defaultValue = "10", value="amount") int amount){
-        return drinkCounterService.suggestInvitations(me.getUserId(), partyId, amount);
+    public List<Friend> suggestInvite(@LoggedInUserId int userId, @PathVariable Integer partyId, @RequestParam(defaultValue = "10", value="amount") int amount){
+        return drinkCounterService.suggestInvitations(userId, partyId, amount);
     }
 
     @PostMapping("{partyId}/invitations")

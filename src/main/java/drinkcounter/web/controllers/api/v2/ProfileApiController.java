@@ -7,8 +7,8 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import drinkcounter.authentication.DrinkcounterUserDetails;
 import drinkcounter.authentication.LoggedInUser;
+import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.model.User;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -40,20 +40,18 @@ public class ProfileApiController {
     }
 
     @GetMapping
-    public UserDTO getUser(@LoggedInUser DrinkcounterUserDetails me) {
-        User user = userService.getUser(me.getUserId());
+    public UserDTO getUser(@LoggedInUser User user) {
         UserDTO userDTO = UserDTO.fromUser(user);
         userDTO.setHistory(SlopeService.getSlopes(user));
         return userDTO;
     }
 
     @PostMapping
-    public void updateUser(@LoggedInUser DrinkcounterUserDetails me,
+    public void updateUser(@LoggedInUser User user,
                         @RequestParam("name") String name,
                         @RequestParam("email") String email,
                         @RequestParam("sex") User.Sex sex,
                         @RequestParam("weight") Float weight){
-        User user = userService.getUser(me.getUserId());
         user.setName(name);
         user.setEmail(email);
         user.setSex(sex);
@@ -62,7 +60,7 @@ public class ProfileApiController {
     }
 
     @PostMapping("drinks")
-    public DrinkDTO drink(@LoggedInUser DrinkcounterUserDetails me,
+    public DrinkDTO drink(@LoggedInUserId int userId,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
@@ -74,30 +72,29 @@ public class ProfileApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        return DrinkDTO.fromDrink(drinkCounterService.addDrink(me.getUserId(), time, (float)alcoholAmount));
+        return DrinkDTO.fromDrink(drinkCounterService.addDrink(userId, time, (float)alcoholAmount));
     }
 
     @GetMapping("drinks")
-    public List<DrinkDTO> getDrinks(@LoggedInUser DrinkcounterUserDetails me){
-        return userService.getUser(me.getUserId()).getDrinks().stream().map(DrinkDTO::fromDrink).toList();
+    public List<DrinkDTO> getDrinks(@LoggedInUser User user){
+        return user.getDrinks().stream().map(DrinkDTO::fromDrink).toList();
     }
 
     @PutMapping("drinks/{drinkId}")
-    public void changeDrink(@LoggedInUser DrinkcounterUserDetails me, @PathVariable Integer drinkId,
+    public void changeDrink(@LoggedInUserId int userId, @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
             @RequestParam("alcohol") Float alcoholPercentage){
-        drinkCounterService.changeDrinkAlcohol(me.getUserId(), drinkId,
+        drinkCounterService.changeDrinkAlcohol(userId, drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
     }
 
     @DeleteMapping("drinks/{drinkId}")
-    public void deleteDrink(@LoggedInUser DrinkcounterUserDetails me, @PathVariable Integer drinkId){
-        drinkCounterService.removeDrinkFromUser(me.getUserId(), drinkId);
+    public void deleteDrink(@LoggedInUserId int userId, @PathVariable Integer drinkId){
+        drinkCounterService.removeDrinkFromUser(userId, drinkId);
     }
 
     @GetMapping("drink-history")
-    public ResponseEntity<byte[]> getDrinkHistory(@LoggedInUser DrinkcounterUserDetails me) throws IOException{
-        User user = userService.getUser(me.getUserId());
+    public ResponseEntity<byte[]> getDrinkHistory(@LoggedInUser User user) throws IOException{
         String csv = DrinkHistoryService.buildCsv(user.getDrinks(), clock);
 
         HttpHeaders headers = new HttpHeaders();
