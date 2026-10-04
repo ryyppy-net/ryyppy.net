@@ -5,17 +5,10 @@ import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.web.SoundManifest;
-import drinkcounter.web.WebSecurityConfiguration;
+import drinkcounter.web.ControllerWebTest;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -35,27 +28,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Drives ProfileApiController through MockMvc and the app's security filter chain, so the
  * signed-in user reaches the handlers the same way it does in the running app.
  */
-@WebMvcTest(ProfileApiController.class)
-@Import(WebSecurityConfiguration.class)
+@ControllerWebTest
 public class ProfileApiControllerWebTest {
 
     @Autowired
     private MockMvc mvc;
 
-    @MockitoBean
+    @Autowired
     private DrinkCounterService drinkCounterService;
 
-    @MockitoBean
+    @Autowired
     private UserService userService;
-
-    @MockitoBean
-    private Customizer<HttpSecurity> oauth2LoginCustomizer;
-
-    @MockitoBean
-    private ClientRegistrationRepository clientRegistrationRepository;
-
-    @MockitoBean
-    private SoundManifest soundManifest;
 
     @Test
     @WithDrinkcounterUser(userId = 42)

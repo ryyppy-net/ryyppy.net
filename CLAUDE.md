@@ -90,11 +90,11 @@ neighbours.
 
 Unit tests use JUnit 5 and Mockito and run without a datasource.
 
-A controller that takes the signed-in user via `@LoggedInUser` also gets a `@WebMvcTest`
-that imports `WebSecurityConfiguration` and mocks the services (see
-`ProfileApiControllerWebTest`). Sign tests in with `@WithDrinkcounterUser`, not
-`@WithMockUser`: the app's principal is `DrinkcounterUserDetails`, and `@LoggedInUser`
-resolves anything else to `null`.
+A controller that takes the signed-in user via `@LoggedInUser` also gets a web test
+annotated `@ControllerWebTest` (see `ProfileApiControllerWebTest`). All such tests share
+one Spring context, so add mocks to that annotation rather than a `@MockitoBean` in the
+test. Sign tests in with `@WithDrinkcounterUser`, not `@WithMockUser`: the app's principal
+is `DrinkcounterUserDetails`, and `@LoggedInUser` resolves anything else to `null`.
 
 ### End-to-end tests (Playwright)
 
