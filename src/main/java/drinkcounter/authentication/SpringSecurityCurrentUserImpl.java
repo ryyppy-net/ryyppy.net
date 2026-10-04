@@ -8,6 +8,7 @@ import drinkcounter.UserService;
 import drinkcounter.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,6 +26,13 @@ public class SpringSecurityCurrentUserImpl implements CurrentUser{
 
         if(principal instanceof DrinkcounterUserDetails userDetails){
             return userService.getUser(userDetails.getUserId());
+        }
+
+        if(principal instanceof OAuth2User oauth2User){
+            Integer userId = oauth2User.getAttribute("userId");
+            if(userId != null){
+                return userService.getUser(userId);
+            }
         }
 
         return null;
