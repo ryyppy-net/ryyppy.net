@@ -6,12 +6,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,14 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         User user = identityLinkingService.findOrCreateUser(sub, email, name, givenName, familyName);
 
-        // Create authorities
         Set<GrantedAuthority> authorities = Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
-
-        // Add userId to attributes so we can access it later
-        Map<String, Object> attributes = new HashMap<>(oauth2User.getAttributes());
-        attributes.put("userId", user.getId());
-
-        // Return OAuth2User with user details
-        return new DefaultOAuth2User(authorities, attributes, "email");
+        return new DrinkcounterOAuth2User(authorities, oauth2User.getAttributes(), new LoggedInUser(user.getId(), email));
     }
 }

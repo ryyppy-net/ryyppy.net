@@ -6,7 +6,6 @@ package drinkcounter.authentication;
 
 import drinkcounter.UserService;
 import drinkcounter.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -16,15 +15,18 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SpringSecurityCurrentUserImpl implements CurrentUser{
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public SpringSecurityCurrentUserImpl(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public User getUser(){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if(principal instanceof DrinkcounterUserDetails userDetails){
-            return userService.getUser(userDetails.getUserId());
+        if(principal instanceof LoggedInUserPrincipal loggedInUserPrincipal){
+            return userService.getUser(loggedInUserPrincipal.getLoggedInUser().userId());
         }
 
         return null;

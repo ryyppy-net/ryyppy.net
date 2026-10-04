@@ -1,6 +1,5 @@
 package drinkcounter.authentication.relay;
 
-import drinkcounter.authentication.GoogleIdentityLinkingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -17,20 +16,17 @@ import java.nio.charset.StandardCharsets;
 /**
  * Completes classical OAuth2 login on the hub. If this login was started via the relay (see
  * AuthRelayController#redirect / #start), mints a handoff token for the verified Google identity
- * and sends the browser back to the environment that started the sign-in. Otherwise signs the user
- * in on this environment with the same session One Tap establishes.
+ * and sends the browser back to the environment that started the sign-in. Otherwise the user is
+ * signed in on this environment.
  */
 public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RelayAwareAuthenticationSuccessHandler.class);
 
     private final AuthRelayTokenService tokenService;
-    private final GoogleIdentityLinkingService identityLinkingService;
 
-    public RelayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService,
-            GoogleIdentityLinkingService identityLinkingService) {
+    public RelayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService) {
         this.tokenService = tokenService;
-        this.identityLinkingService = identityLinkingService;
     }
 
     @Override
@@ -55,7 +51,6 @@ public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuc
             return;
         }
 
-        identityLinkingService.establishSession(oauth2User.getAttribute("userId"), email, request);
         response.sendRedirect("/app/index.html");
     }
 }

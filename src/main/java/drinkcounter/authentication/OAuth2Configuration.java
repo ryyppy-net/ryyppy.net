@@ -22,7 +22,7 @@ public class OAuth2Configuration {
     @Bean
     public Customizer<HttpSecurity> oauth2LoginCustomizer(
             CustomOAuth2UserService customOAuth2UserService,
-            OidcUserService oidcUserService,
+            DrinkcounterOidcUserService oidcUserService,
             RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler) {
         return http -> {
             try {
@@ -46,19 +46,16 @@ public class OAuth2Configuration {
      * started it; otherwise this is an ordinary successful login on the current host.
      */
     @Bean
-    public RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService,
-            GoogleIdentityLinkingService identityLinkingService) {
-        return new RelayAwareAuthenticationSuccessHandler(tokenService, identityLinkingService);
+    public RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService) {
+        return new RelayAwareAuthenticationSuccessHandler(tokenService);
     }
 
     /**
-     * Creates the OIDC user service that integrates with our custom OAuth2 user service.
+     * Creates the OIDC user service used for Google login.
      */
     @Bean
-    public OidcUserService oidcUserService(CustomOAuth2UserService customOAuth2UserService) {
-        OidcUserService oidcUserService = new OidcUserService();
-        oidcUserService.setOauth2UserService(customOAuth2UserService);
-        return oidcUserService;
+    public DrinkcounterOidcUserService oidcUserService(GoogleIdentityLinkingService identityLinkingService) {
+        return new DrinkcounterOidcUserService(new OidcUserService(), identityLinkingService);
     }
 
     /**
