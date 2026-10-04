@@ -3,7 +3,8 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.DrinkcounterUserDetails;
+import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -24,19 +25,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("API/v2/parties")
 public class PartyApiController {
 
-    private final CurrentUser currentUser;
     private final DrinkCounterService drinkCounterService;
     private final UserService userService;
 
-    public PartyApiController(CurrentUser currentUser, DrinkCounterService drinkCounterService, UserService userService) {
-        this.currentUser = currentUser;
+    public PartyApiController(DrinkCounterService drinkCounterService, UserService userService) {
         this.drinkCounterService = drinkCounterService;
         this.userService = userService;
     }
 
     @GetMapping
-    public List<PartyDTO> getParties(){
-        List<Party> parties = currentUser.getUser().getParties();
+    public List<PartyDTO> getParties(@LoggedInUser DrinkcounterUserDetails me){
+        List<Party> parties = userService.getUser(me.getUserId()).getParties();
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
@@ -50,10 +49,9 @@ public class PartyApiController {
     }
     
     @PostMapping
-    public PartyDTO addParty(@RequestParam("name") String partyName){
-        User user = currentUser.getUser();
+    public PartyDTO addParty(@LoggedInUser DrinkcounterUserDetails me, @RequestParam("name") String partyName){
         Party party = drinkCounterService.startParty(partyName);
-        drinkCounterService.linkUserToParty(user.getId(), party.getId());
+        drinkCounterService.linkUserToParty(me.getUserId(), party.getId());
         return PartyDTO.fromParty(party);
     }
 
@@ -157,8 +155,8 @@ public class PartyApiController {
     }
 
     @GetMapping("{partyId}/invitations")
-    public List<Friend> suggestInvite(@PathVariable Integer partyId,  @RequestParam(defaultValue = "10", value="amount") int amount){
-        return drinkCounterService.suggestInvitations(currentUser.getUser().getId(), partyId, amount);
+    public List<Friend> suggestInvite(@LoggedInUser DrinkcounterUserDetails me, @PathVariable Integer partyId, @RequestParam(defaultValue = "10", value="amount") int amount){
+        return drinkCounterService.suggestInvitations(me.getUserId(), partyId, amount);
     }
 
     @PostMapping("{partyId}/invitations")
