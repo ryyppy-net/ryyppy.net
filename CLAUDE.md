@@ -86,6 +86,9 @@ The `forward-headers-strategy` comment in `application-production.yml` is the
 model. Existing long comments are not precedent - match the rule, not the
 neighbours.
 
+The same holds for names: no issue or ticket numbers in class, method or test names.
+The code must explain itself without GitHub.
+
 ## Testing
 
 Unit tests use JUnit 5 and Mockito and run without a datasource.
