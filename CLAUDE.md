@@ -90,6 +90,12 @@ neighbours.
 
 Unit tests use JUnit 5 and Mockito and run without a datasource.
 
+A controller that takes the signed-in user via `@LoggedInUser` also gets a `@WebMvcTest`
+that imports `WebSecurityConfiguration` and mocks the services (see
+`ProfileApiControllerWebTest`). Sign tests in with `@WithDrinkcounterUser`, not
+`@WithMockUser`: the app's principal is `DrinkcounterUserDetails`, and `@LoggedInUser`
+resolves anything else to `null`.
+
 ### End-to-end tests (Playwright)
 
 A Playwright suite in `e2e/` drives the real app through a browser, covering both
