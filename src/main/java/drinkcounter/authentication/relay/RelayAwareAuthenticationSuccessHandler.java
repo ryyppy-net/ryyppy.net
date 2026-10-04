@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -45,6 +47,10 @@ public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuc
 
         if (returnTo != null) {
             session.removeAttribute(AuthRelayController.RETURN_TO_SESSION_ATTR);
+            // The login filter has already saved this OAuth2 login into the hub's session; the user
+            // signs in on the environment that started the relay, not here.
+            session.removeAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+            SecurityContextHolder.clearContext();
 
             String sub = oauth2User.getAttribute("sub");
             String name = oauth2User.getAttribute("name");
