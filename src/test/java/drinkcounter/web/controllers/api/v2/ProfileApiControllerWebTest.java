@@ -7,6 +7,7 @@ import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
+import jakarta.servlet.ServletException;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -23,10 +24,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -86,6 +89,18 @@ public class ProfileApiControllerWebTest {
         if (originalDefaultTimeZone != null) {
             TimeZone.setDefault(originalDefaultTimeZone);
         }
+    }
+
+    @Test
+    public void profileUpdateIsSavedOnTheSignedInUser() throws Exception {
+        mvc.perform(post("/API/v2/profile")
+                        .param("name", "Ville").param("email", "ville@example.com")
+                        .param("sex", "MALE").param("weight", "80"))
+                .andExpect(status().isOk());
+
+        verify(userService).updateUser(user);
+        assertEquals("Ville", user.getName());
+        assertEquals(80f, user.getWeight());
     }
 
     @Test
@@ -150,6 +165,16 @@ public class ProfileApiControllerWebTest {
         mvc.perform(post("/API/v2/profile/drinks"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
+
+        verifyNoInteractions(drinkCounterService);
+        verify(userService, never()).getUser(anyInt());
+    }
+
+    @Test
+    @WithMockUser
+    public void principalThatIsNotDrinkcounterUserDetailsFailsTheRequest() {
+        assertThrows(ServletException.class, () -> mvc.perform(delete("/API/v2/profile/drinks/7")));
+        assertThrows(ServletException.class, () -> mvc.perform(get("/API/v2/profile/drinks")));
 
         verifyNoInteractions(drinkCounterService);
         verify(userService, never()).getUser(anyInt());
