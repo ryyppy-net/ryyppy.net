@@ -1,13 +1,11 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
-import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,17 +20,18 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("ui")
 public class PartyController {
 
-    @Autowired private DrinkCounterService drinkCounterService;
-    @Autowired private UserService userService;
-    @Autowired private CurrentUser currentUser;
+    private final DrinkCounterService drinkCounterService;
+    private final AuthenticationChecks authenticationChecks;
 
-    @Autowired private AuthenticationChecks authenticationChecks;
+    public PartyController(DrinkCounterService drinkCounterService, AuthenticationChecks authenticationChecks) {
+        this.drinkCounterService = drinkCounterService;
+        this.authenticationChecks = authenticationChecks;
+    }
 
     @RequestMapping("/party")
-    public ModelAndView party(HttpSession session, @RequestParam("id") String partyId){
+    public ModelAndView party(HttpSession session, @LoggedInUser User user, @RequestParam("id") String partyId){
         int pid = Integer.parseInt(partyId);
         authenticationChecks.checkRightsForParty(pid);
-        User user = currentUser.getUser();
 
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
