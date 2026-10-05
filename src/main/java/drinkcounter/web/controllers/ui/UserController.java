@@ -9,12 +9,11 @@ import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
-import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Party;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.ModelAndView;
 
 import org.springframework.http.HttpHeaders;
@@ -41,15 +40,26 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @Controller
 @RequestMapping("ui")
 public class UserController {
-    @Autowired private DrinkCounterService drinkCounterService;
-    @Autowired private UserService userService;
-
-    @Autowired private AuthenticationChecks authenticationChecks;
-    @Autowired private UserDetailsService userDetailsService;
-    @Autowired private CurrentUser currentUser;
-    @Autowired private PasswordEncoder passwordEncoder;
+    private final DrinkCounterService drinkCounterService;
+    private final UserService userService;
+    private final AuthenticationChecks authenticationChecks;
+    private final UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
 
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+
+    public UserController(
+            DrinkCounterService drinkCounterService,
+            UserService userService,
+            AuthenticationChecks authenticationChecks,
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        this.drinkCounterService = drinkCounterService;
+        this.userService = userService;
+        this.authenticationChecks = authenticationChecks;
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @RequestMapping("/newuser")
     public String newUser(HttpSession session){
@@ -148,9 +158,7 @@ public class UserController {
     }
 
     @RequestMapping("/user")
-    public ModelAndView userPage(HttpSession session){
-        User user = currentUser.getUser();
-        
+    public ModelAndView userPage(HttpSession session, @LoggedInUser User user){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
         mav.addObject("user", user);
@@ -194,16 +202,16 @@ public class UserController {
     }
     
     @RequestMapping("/passphrase")
-    public ModelAndView passphrase(){
+    public ModelAndView passphrase(@LoggedInUser User user){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("passphrase");
-        mav.addObject("passphrase", currentUser.getUser().getPassphrase());
+        mav.addObject("passphrase", user.getPassphrase());
         return mav;
     }
     
     @RequestMapping("/passphrase-generate")
-    public String generatePassphrase() {
-        userService.generatePassphrase(currentUser.getUser());
+    public String generatePassphrase(@LoggedInUser User user) {
+        userService.generatePassphrase(user);
         return "redirect:passphrase";
     }    
 }
