@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers;
 
-import drinkcounter.authentication.CurrentUser;
+import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -35,12 +35,10 @@ public class DefaultController {
     public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#/";
 
     private final ResourcePatternResolver resourcePatternResolver;
-    private final CurrentUser currentUser;
     private final ObjectMapper objectMapper;
 
-    public DefaultController(ResourcePatternResolver resourcePatternResolver, CurrentUser currentUser, ObjectMapper objectMapper) {
+    public DefaultController(ResourcePatternResolver resourcePatternResolver, ObjectMapper objectMapper) {
         this.resourcePatternResolver = resourcePatternResolver;
-        this.currentUser = currentUser;
         this.objectMapper = objectMapper;
     }
 
@@ -50,7 +48,7 @@ public class DefaultController {
     }
 
     @GetMapping("/app/index.html")
-    public String appIndex(Model model) {
+    public String appIndex(@LoggedInUser User user, Model model) {
         // Pre-populate Angular's $templateCache for every route's template so
         // it doesn't have to fetch any of them over XHR after bootstrap - see
         // the comment in app/index.jsp. Read fresh on every request for now
@@ -58,22 +56,21 @@ public class DefaultController {
         model.addAttribute("templates", loadPartialTemplates());
         // Dashboard data UserCtrl (and its promille history graph) would
         // otherwise fetch over the API right after load - see app/index.jsp.
-        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialProfile())));
-        model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties())));
-        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinks())));
-        model.addAttribute("initialDrinkHistory", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinkHistory())));
+        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialProfile(user))));
+        model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
+        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinks(user))));
+        model.addAttribute("initialDrinkHistory", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinkHistory(user))));
         return "app/index";
     }
 
-    private UserDTO loadInitialProfile() {
-        User user = currentUser.getUser();
+    private UserDTO loadInitialProfile(User user) {
         UserDTO userDTO = UserDTO.fromUser(user);
         userDTO.setHistory(SlopeService.getSlopes(user));
         return userDTO;
     }
 
-    private List<PartyDTO> loadInitialParties() {
-        List<Party> parties = currentUser.getUser().getParties();
+    private List<PartyDTO> loadInitialParties(User user) {
+        List<Party> parties = user.getParties();
         List<PartyDTO> partyDTOs = new ArrayList<>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
@@ -85,8 +82,8 @@ public class DefaultController {
         return partyDTOs;
     }
 
-    private List<DrinkDTO> loadInitialDrinks() {
-        List<Drink> drinks = currentUser.getUser().getDrinks();
+    private List<DrinkDTO> loadInitialDrinks(User user) {
+        List<Drink> drinks = user.getDrinks();
         List<DrinkDTO> drinkDTOs = new ArrayList<>();
         for (Drink drink : drinks) {
             DrinkDTO drinkDTO = new DrinkDTO();
@@ -98,9 +95,9 @@ public class DefaultController {
         return drinkDTOs;
     }
 
-    private String loadInitialDrinkHistory() {
+    private String loadInitialDrinkHistory(User user) {
         try {
-            return DrinkHistoryService.buildCsv(currentUser.getUser().getDrinks(), Clock.systemUTC());
+            return DrinkHistoryService.buildCsv(user.getDrinks(), Clock.systemUTC());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
