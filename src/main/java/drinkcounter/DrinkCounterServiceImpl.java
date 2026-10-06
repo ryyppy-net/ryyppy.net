@@ -187,6 +187,11 @@ public class DrinkCounterServiceImpl implements DrinkCounterService {
     }
 
     @Override
+    public boolean shareParty(int userId, int otherUserId) {
+        return partyDao.countSharedParties(userId, otherUserId) > 0;
+    }
+
+    @Override
     @Transactional
     public int addDrink(int userId, float alcoholAmount) {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);

@@ -5,6 +5,7 @@ import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
+import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -56,12 +57,14 @@ public class PartyApiController {
     }
 
     @GetMapping("{partyId}")
+    @PartyMember
     public PartyDTO getParty(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         return PartyDTO.fromParty(party);
     }
 
     @GetMapping("{partyId}/participants")
+    @PartyMember
     public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
         Party party = drinkCounterService.getParty(partyId);
         List<User> participants = party.getParticipants();
@@ -78,6 +81,7 @@ public class PartyApiController {
     }
 
     @PostMapping("{partyId}/participants")
+    @PartyMember
     public void addParticipant(@PathVariable Integer partyId, @RequestParam(value="email", required=false) String email,
             @RequestParam(value="name", required=false) String name,
             @RequestParam(value="sex", required=false) User.Sex sex,
@@ -102,16 +106,19 @@ public class PartyApiController {
     }
 
     @DeleteMapping("{partyId}/participants/{participantId}")
+    @PartyMember
     public void removeParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         drinkCounterService.unlinkUserFromParty(participantId, partyId);
     }
 
     @GetMapping("{partyId}/participants/{participantId}")
+    @PartyMember
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         return ParticipantDTO.fromUser(requireParticipant(partyId, participantId));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
+    @PartyMember
     public DrinkDTO drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
@@ -129,6 +136,7 @@ public class PartyApiController {
     }
 
     @PutMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
+    @PartyMember
     public void changeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
@@ -139,6 +147,7 @@ public class PartyApiController {
     }
 
     @DeleteMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
+    @PartyMember
     public void removeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @PathVariable Integer drinkId){
         requireParticipant(partyId, participantId);
@@ -155,11 +164,13 @@ public class PartyApiController {
     }
 
     @GetMapping("{partyId}/invitations")
+    @PartyMember
     public List<Friend> suggestInvite(@LoggedInUserId int userId, @PathVariable Integer partyId, @RequestParam(defaultValue = "10", value="amount") int amount){
         return drinkCounterService.suggestInvitations(userId, partyId, amount);
     }
 
     @PostMapping("{partyId}/invitations")
+    @PartyMember
     public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
         drinkCounterService.linkUserToParty(userId, partyId);
     }
