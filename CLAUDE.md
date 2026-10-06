@@ -12,6 +12,11 @@ the backend: an AngularJS app (`public/app/`) and a classic jQuery UI (`party.ht
 `user.html` with scripts in `public/static/js/`). A change to shared behaviour must
 work in both.
 
+## Access rules
+
+`docs/access-rules.md` states who can see and change users, parties and drinks.
+An endpoint you add or change must enforce them, in both front ends.
+
 ## Commands
 
 ```bash
