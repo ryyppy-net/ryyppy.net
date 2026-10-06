@@ -1,6 +1,6 @@
 "use strict";
 
-function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
+function PartyAdminCtrl($scope, $routeParams, $location, RyyppyAPI, Notify) {
     var self = this;
 
     this._updatePartyInformation = function () {
@@ -59,6 +59,11 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     this.removeUser = function (participant) {
         RyyppyAPI.removeUser($routeParams.partyId, participant, function (data) {
             Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
+            // Only party members may read the party, so after leaving it there is nothing to show here.
+            if ($scope.profile && participant.id === $scope.profile.id) {
+                $location.path('/party-admin/');
+                return;
+            }
             self._updatePartyParticipants();
             self._updatePartyInvitations();
         });
@@ -83,9 +88,12 @@ function PartyAdminCtrl($scope, $routeParams, RyyppyAPI, Notify) {
     $scope.addUser = this.addUser;
     $scope.removeUser = this.removeUser;
 
+    RyyppyAPI.getProfile(function (data) {
+        $scope.profile = data;
+    });
     this._updatePartyInformation();
     this._updatePartyParticipants();
     this._updatePartyInvitations();
 }
 
-PartyAdminCtrl.$inject = ['$scope', '$routeParams', 'RyyppyAPI', 'Notify'];
+PartyAdminCtrl.$inject = ['$scope', '$routeParams', '$location', 'RyyppyAPI', 'Notify'];

@@ -23,6 +23,7 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,6 +78,7 @@ public class PartyApiControllerWebTest {
         party.setId(1);
         party.setName("Sauna");
         party.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
+        party.addParticipant(signedIn);
         party.addParticipant(participant);
 
         when(userService.getUser(42)).thenReturn(signedIn);
@@ -100,7 +102,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("Sauna"))
-                .andExpect(jsonPath("$[0].participants.length()").value(1));
+                .andExpect(jsonPath("$[0].participants.length()").value(2));
     }
 
     @Test
@@ -214,8 +216,8 @@ public class PartyApiControllerWebTest {
     public void memberGetsTheParticipants() throws Exception {
         mvc.perform(get(PARTIES + "/1/participants"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(2));
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].id", containsInAnyOrder(42, 2)));
     }
 
     @Test
