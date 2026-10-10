@@ -6,7 +6,9 @@ const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
-  reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'list',
+  // On CI the app's log shares the job log; 'github' repeats each failure after it
+  // and annotates the check run with it.
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
 
   use: {
     baseURL: BASE_URL,
