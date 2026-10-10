@@ -17,7 +17,7 @@ test("an outsider is forbidden from another user's classic API and changes nothi
     const ownerId = (await (await owner.get('/API/v2/profile')).json()).id;
     const outsiderId = (await (await outsider.get('/API/v2/profile')).json()).id;
     const party = await (await owner.post(PARTIES, { form: { name: 'Private classic party' } })).json();
-    const drinkId = await (await owner.get(`/API/users/${ownerId}/add-drink`)).text();
+    const drinkId = await (await owner.post(`/API/users/${ownerId}/add-drink`)).text();
     const participantsBefore = await (await owner.get(`${PARTIES}/${party.id}/participants`)).json();
     const drinksBefore = await (await owner.get('/API/v2/profile/drinks')).json();
 
@@ -25,14 +25,14 @@ test("an outsider is forbidden from another user's classic API and changes nothi
     const u = `/API/users/${ownerId}`;
     const requests: (() => Promise<APIResponse>)[] = [
       () => outsider.get(p),
-      () => outsider.get(`${p}/add-anonymous-user`, { params: { name: 'Planted', sex: 'MALE', weight: '80' } }),
-      () => outsider.get(`${p}/link-user-to-party/${outsiderId}`),
+      () => outsider.post(`${p}/add-anonymous-user`, { params: { name: 'Planted', sex: 'MALE', weight: '80' } }),
+      () => outsider.post(`${p}/link-user-to-party/${outsiderId}`),
       () => outsider.get(`${u}/show-drinks`),
       () => outsider.get(`${u}/drinks`),
       () => outsider.get(u),
-      () => outsider.get(`${u}/add-drink`),
-      () => outsider.get(`${u}/edit-drink/${drinkId}`, { params: { volume: '1.0', alcohol: '0.4' } }),
-      () => outsider.get(`${u}/remove-drink/${drinkId}`),
+      () => outsider.post(`${u}/add-drink`),
+      () => outsider.post(`${u}/edit-drink/${drinkId}`, { params: { volume: '1.0', alcohol: '0.4' } }),
+      () => outsider.post(`${u}/remove-drink/${drinkId}`),
       () => outsider.get(`${u}/show-history`),
     ];
     for (const request of requests) {

@@ -14,7 +14,7 @@ test("an outsider is forbidden from another user's classic /ui actions and chang
 
     const profile = await (await owner.get('/API/v2/profile')).json();
     const party = await (await owner.post('/API/v2/parties', { form: { name: 'Private ui party' } })).json();
-    const drinkId = await (await owner.get(`/API/users/${profile.id}/add-drink`)).text();
+    const drinkId = await (await owner.post(`/API/users/${profile.id}/add-drink`)).text();
     const drinksBefore = await (await owner.get('/API/v2/profile/drinks')).json();
 
     const noFollow = { maxRedirects: 0 };
