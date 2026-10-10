@@ -26,8 +26,9 @@ mvn test -Dtest=ClassName    # single test class
 docker build -t ryyppynet .  # container image (see Container image)
 ```
 
-`main` is the default and only long-lived branch; base every PR on it. Releases are
-git tags on `main` marking a milestone - see README.md.
+`main` is the default and only long-lived branch; base every PR on it. Merge PRs with
+the squash method on GitHub unless told otherwise. Releases are git tags on `main`
+marking a milestone - see README.md.
 
 ## Database
 
