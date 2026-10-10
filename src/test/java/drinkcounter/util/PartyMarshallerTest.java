@@ -1,6 +1,6 @@
 package drinkcounter.util;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.io.ByteArrayOutputStream;
@@ -29,11 +29,11 @@ public class PartyMarshallerTest {
         user.setId(1);
         user.drink(drink);
 
-        UserService userService = mock(UserService.class);
-        when(userService.getUser(1)).thenReturn(user);
+        UserAccounts userAccounts = mock(UserAccounts.class);
+        when(userAccounts.get(1)).thenReturn(user);
 
         PartyMarshaller marshaller = new PartyMarshaller();
-        ReflectionTestUtils.setField(marshaller, "userService", userService);
+        ReflectionTestUtils.setField(marshaller, "userAccounts", userAccounts);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         marshaller.marshallDrinks(1, out);

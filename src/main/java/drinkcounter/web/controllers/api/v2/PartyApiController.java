@@ -2,7 +2,7 @@ package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.DrinkLog;
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
@@ -29,12 +29,12 @@ public class PartyApiController {
 
     private final DrinkCounterService drinkCounterService;
     private final DrinkLog drinkLog;
-    private final UserService userService;
+    private final UserAccounts userAccounts;
 
-    public PartyApiController(DrinkCounterService drinkCounterService, DrinkLog drinkLog, UserService userService) {
+    public PartyApiController(DrinkCounterService drinkCounterService, DrinkLog drinkLog, UserAccounts userAccounts) {
         this.drinkCounterService = drinkCounterService;
         this.drinkLog = drinkLog;
-        this.userService = userService;
+        this.userAccounts = userAccounts;
     }
 
     @GetMapping
@@ -90,7 +90,7 @@ public class PartyApiController {
             @RequestParam(value="sex", required=false) User.Sex sex,
             @RequestParam(value="weight", required=false) Float weight){
         if(email != null){
-            User user = userService.getUserByEmail(email);
+            User user = userAccounts.byEmail(email);
             drinkCounterService.linkUserToParty(user.getId(), partyId);
             return;
         }
@@ -104,7 +104,7 @@ public class PartyApiController {
         user.setSex(sex);
         user.setWeight(weight);
         user.setGuest(true);
-        userService.addUser(user);
+        userAccounts.add(user);
         drinkCounterService.linkUserToParty(user.getId(), partyId);
     }
 
@@ -159,7 +159,7 @@ public class PartyApiController {
 
     private User requireParticipant(Integer partyId, Integer participantId) {
         Party party = drinkCounterService.getParty(partyId);
-        User participant = userService.getUser(participantId);
+        User participant = userAccounts.get(participantId);
         if(!party.getParticipants().contains(participant)){
             throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participant.getId(), party.getId()));
         }

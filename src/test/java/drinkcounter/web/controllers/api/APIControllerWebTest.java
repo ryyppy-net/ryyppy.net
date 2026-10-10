@@ -3,7 +3,8 @@ package drinkcounter.web.controllers.api;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
-import drinkcounter.UserService;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
@@ -70,15 +71,18 @@ public class APIControllerWebTest {
     private PartyRepository partyRepository;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
+
+    @Autowired
+    private PassphraseLogin passphraseLogin;
 
     @Autowired
     private PartyMarshaller partyMarshaller;
 
     @BeforeEach
     public void setUp() {
-        when(userService.getUser(SIGNED_IN)).thenReturn(drinker(SIGNED_IN));
-        when(userService.getUser(OTHER_USER)).thenReturn(drinker(OTHER_USER));
+        when(userAccounts.get(SIGNED_IN)).thenReturn(drinker(SIGNED_IN));
+        when(userAccounts.get(OTHER_USER)).thenReturn(drinker(OTHER_USER));
     }
 
     static Stream<Arguments> outsiderRequests() {
@@ -107,7 +111,7 @@ public class APIControllerWebTest {
             case OWN_USER -> { }
         }
         verifyNoMoreInteractions(drinkCounterService, drinkLog);
-        verifyNoInteractions(userService, partyMarshaller);
+        verifyNoInteractions(userAccounts, passphraseLogin, partyMarshaller);
     }
 
     static Stream<Arguments> passphraseRequests() {
@@ -124,8 +128,8 @@ public class APIControllerWebTest {
             throws Exception {
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verify(userService).getUserByPassphrase("unknown");
-        verifyNoMoreInteractions(userService);
+        verify(passphraseLogin).findUser("unknown");
+        verifyNoMoreInteractions(passphraseLogin);
         verifyNoInteractions(drinkCounterService, drinkLog);
     }
 
@@ -159,7 +163,7 @@ public class APIControllerWebTest {
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService, drinkLog, userService, partyMarshaller);
+        verifyNoInteractions(drinkCounterService, drinkLog, userAccounts, passphraseLogin, partyMarshaller);
     }
 
     static Stream<Arguments> ownUserRequests() {
@@ -219,7 +223,7 @@ public class APIControllerWebTest {
     @Test
     public void memberAddsAGuest() throws Exception {
         when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
-        when(userService.addUser(any(User.class))).thenAnswer(invocation -> {
+        when(userAccounts.add(any(User.class))).thenAnswer(invocation -> {
             User guest = invocation.getArgument(0);
             guest.setId(8);
             return guest;
@@ -247,7 +251,7 @@ public class APIControllerWebTest {
         mvc.perform(showDrinks(SIGNED_IN)).andExpect(status().isOk());
 
         verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
-        verifyNoInteractions(drinkCounterService, drinkLog);
+        verifyNoInteractions(drinkCounterService, drinkLog, drinkLog);
     }
 
     @Test

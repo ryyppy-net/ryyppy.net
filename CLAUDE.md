@@ -100,10 +100,10 @@ The code must explain itself without GitHub.
 Unit tests use JUnit 5 and Mockito and run without a datasource.
 
 Controllers take the signed-in user as `@LoggedInUserId int` (the id, from the principal) or
-`@LoggedInUser User` (the entity, loaded through `UserService`). Such a controller is tested
+`@LoggedInUser User` (the entity, loaded through `UserAccounts`). Such a controller is tested
 through MockMvc in a test annotated `@ControllerWebTest` (see `ProfileApiControllerWebTest`).
 All such tests share one Spring context, so add mocks to that annotation rather than a
-`@MockitoBean` in the test; stub `UserService.getUser` for the signed-in id when a handler
+`@MockitoBean` in the test; stub `UserAccounts.get` for the signed-in id when a handler
 takes `@LoggedInUser User`. Sign tests in with `@WithDrinkcounterUser`, not `@WithMockUser`:
 the app's principal is `DrinkcounterUserDetails`, and both annotations fail the request with
 any other principal.
