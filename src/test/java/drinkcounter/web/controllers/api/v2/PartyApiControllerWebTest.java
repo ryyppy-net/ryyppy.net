@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -43,6 +44,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -103,6 +105,15 @@ public class PartyApiControllerWebTest {
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
         when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
+    }
+
+    @Test
+    public void partiesAreJsonWhateverTheBrowserPrefers() throws Exception {
+        signedIn.setParties(List.of(party));
+
+        mvc.perform(get(PARTIES).header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
 
     @Test

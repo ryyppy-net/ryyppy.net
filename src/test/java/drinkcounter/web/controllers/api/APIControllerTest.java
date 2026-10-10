@@ -8,7 +8,6 @@ import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
@@ -47,7 +46,7 @@ public class APIControllerTest {
 
         userAccounts = mock(UserAccounts.class);
         session = mock(HttpSession.class);
-        controller = new APIController(mock(PartyMarshaller.class), mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
+        controller = new APIController(mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
                 mock(PassphraseLogin.class));
     }
 

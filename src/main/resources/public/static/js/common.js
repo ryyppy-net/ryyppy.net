@@ -24,6 +24,7 @@ function RyyppyAPI() {
         $.ajax(
             {
                 url: '/API/users/{0}/add-drink'.format(userId),
+                type: 'POST',
                 data: {
                     'volume': volume,
                     'alcohol': alcohol
@@ -34,11 +35,11 @@ function RyyppyAPI() {
     }
 
     this.editDrinkOfUser = function(userId, drinkId, volume, alcohol, callback) {
-        $.get('/API/users/{0}/edit-drink/{1}'.format(userId, drinkId), {'volume': volume, 'alcohol': alcohol}, callback);
+        $.post('/API/users/{0}/edit-drink/{1}'.format(userId, drinkId), {'volume': volume, 'alcohol': alcohol}, callback);
     }
 
     this.removeDrinkFromUser = function(userId, drinkId, callback) {
-        $.get('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
+        $.post('/API/users/{0}/remove-drink/{1}'.format(userId, drinkId), callback);
     }
 
     this.getPartyData = function(partyId, callback) {
@@ -49,6 +50,7 @@ function RyyppyAPI() {
         $.ajax(
             {
                 url: '/API/parties/{0}/add-anonymous-user'.format(partyId),
+                type: 'POST',
                 data: {
                     'name': name,
                     'sex': sex,
@@ -62,7 +64,8 @@ function RyyppyAPI() {
     this.linkUserToParty = function(partyId, userId, successCallback, errorCallback) {
         $.ajax(
             {
-                url: '/API/parties/{0}/link-user-to-party/{1}'.format(partyId, userId)
+                url: '/API/parties/{0}/link-user-to-party/{1}'.format(partyId, userId),
+                type: 'POST'
             })
             .success(successCallback)
             .error(errorCallback);        

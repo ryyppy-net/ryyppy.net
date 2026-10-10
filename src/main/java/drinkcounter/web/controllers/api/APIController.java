@@ -11,7 +11,6 @@ import drinkcounter.authentication.OwnUserOrPartyMate;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,19 +33,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  *
  * @author Toni
  */
-@Controller
+@RestController
 @RequestMapping("API")
 public class APIController {
 
@@ -56,7 +58,9 @@ public class APIController {
      */
     public static final float ALCOHOL_DENSITY = 789;
 
-    private final PartyMarshaller partyMarshaller;
+    private static final String XML = MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8";
+    private static final XmlMapper XML_MAPPER = new XmlMapper();
+
     private final PartyRoster partyRoster;
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
@@ -64,9 +68,8 @@ public class APIController {
 
     private Clock clock = Clock.systemUTC();
 
-    public APIController(PartyMarshaller partyMarshaller, PartyRoster partyRoster,
+    public APIController(PartyRoster partyRoster,
             DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin) {
-        this.partyMarshaller = partyMarshaller;
         this.partyRoster = partyRoster;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
@@ -74,26 +77,20 @@ public class APIController {
     }
 
     @PartyMember
-    @RequestMapping("/parties/{partyId}")
-    public @ResponseBody byte[] printXml(@PathVariable int partyId) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshall(partyId, baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+    @GetMapping(value = "/parties/{partyId}", produces = XML)
+    public String party(@PathVariable int partyId) {
+        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), partyRoster.members(partyId), clock));
     }
 
     @OwnUser
-    @RequestMapping("/users/{userId}/show-drinks")
-    public @ResponseBody byte[] showDrinks(@PathVariable int userId) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshallDrinks(userId, baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+    @GetMapping(value = "/users/{userId}/show-drinks", produces = XML)
+    public String showDrinks(@PathVariable int userId) {
+        return xml(ClassicUserDrinksDTO.fromUser(userAccounts.get(userId)));
     }
 
     @OwnUserOrPartyMate
-    @RequestMapping("/users/{userId}/add-drink")
-    public @ResponseBody String addDrink(
+    @PostMapping("/users/{userId}/add-drink")
+    public String addDrink(
     @PathVariable int userId, 
     @RequestParam(value="volume", required=false) Float volume,
     @RequestParam(value="alcohol", required=false) Float alcoholPercentage ){
@@ -106,8 +103,8 @@ public class APIController {
     }
 
     @OwnUserOrPartyMate
-    @RequestMapping("/users/{userId}/edit-drink/{drinkId}")
-    public @ResponseBody String editDrinkOfUser(@PathVariable int userId, @PathVariable String drinkId,
+    @PostMapping("/users/{userId}/edit-drink/{drinkId}")
+    public String editDrinkOfUser(@PathVariable int userId, @PathVariable String drinkId,
     @RequestParam("volume") Float volume,
     @RequestParam("alcohol") Float alcoholPercentage){
         drinkLog.correctAlcohol(userId, Integer.parseInt(drinkId),
@@ -116,8 +113,8 @@ public class APIController {
     }
 
     @OwnUserOrPartyMate
-    @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
-    public @ResponseBody String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId){
+    @PostMapping("/users/{userId}/remove-drink/{drinkId}")
+    public String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId){
         int drinkIdInt = Integer.parseInt(drinkId);
         drinkLog.undo(userId, drinkIdInt);
         log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userId));
@@ -125,16 +122,13 @@ public class APIController {
     }
     
     @OwnUserOrPartyMate
-    @RequestMapping("/users/{userId}")
-    public @ResponseBody byte[] userXml(@PathVariable int userId) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshallUser(userId, baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+    @GetMapping(value = "/users/{userId}", produces = XML)
+    public String user(@PathVariable int userId) {
+        return xml(ClassicUserDTO.fromUser(userAccounts.get(userId), clock));
     }
-    
+
     @OwnUser
-    @RequestMapping("/users/{userId}/drinks")
+    @GetMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException{
         User user = userAccounts.get(userId);
         List<Drink> drinks = user.getDrinks();
@@ -176,7 +170,7 @@ public class APIController {
     }
 
     @OwnUserOrPartyMate
-    @RequestMapping("/users/{userId}/show-history")
+    @GetMapping("/users/{userId}/show-history")
     public ResponseEntity<byte[]> showHistory(@PathVariable int userId) throws IOException{
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
@@ -196,8 +190,8 @@ public class APIController {
     }
 
     @PartyMember
-    @RequestMapping("/parties/{partyId}/add-anonymous-user")
-    public @ResponseBody String addAnonymousUser(
+    @PostMapping("/parties/{partyId}/add-anonymous-user")
+    public String addAnonymousUser(
             @PathVariable int partyId,
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
@@ -213,11 +207,15 @@ public class APIController {
     }
     
     @PartyMember
-    @RequestMapping("/parties/{partyId}/link-user-to-party/{userId}")
-    public @ResponseBody String linkUserToParty(@PathVariable int partyId,
+    @PostMapping("/parties/{partyId}/link-user-to-party/{userId}")
+    public String linkUserToParty(@PathVariable int partyId,
             @PathVariable int userId){
         partyRoster.join(partyId, userId);
         return "";
+    }
+
+    private static String xml(Object dto) {
+        return XML_MAPPER.writeValueAsString(dto);
     }
 
     private List<String[]> getSlopes(User user, boolean getId) {
@@ -258,8 +256,8 @@ public class APIController {
         return new String[]{Long.toString(x), Float.toString(y)};
     }
     
-    @RequestMapping("/passphrase/{passphrase}")
-    public @ResponseBody String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
+    @GetMapping("/passphrase/{passphrase}")
+    public String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -267,8 +265,8 @@ public class APIController {
         return getUserCsv(user);
     }
 
-    @RequestMapping("/passphrase/{passphrase}/add-drink/{time}")
-    public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
+    @PostMapping("/passphrase/{passphrase}/add-drink/{time}")
+    public String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -285,8 +283,8 @@ public class APIController {
         return getUserCsv(user);
     }
 
-    @RequestMapping("/passphrase/{passphrase}/undo-drink")
-    public @ResponseBody String undoDrink(@PathVariable String passphrase) throws IOException{
+    @PostMapping("/passphrase/{passphrase}/undo-drink")
+    public String undoDrink(@PathVariable String passphrase) throws IOException{
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);

@@ -8,6 +8,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
+import org.springframework.http.converter.HttpMessageConverters;
+import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -34,6 +36,16 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new LoggedInUserArgumentResolver(userAccounts));
+    }
+
+    /**
+     * XML is written only by the classic /API handlers, which serialize it themselves. Keeping
+     * the XML converter out of content negotiation leaves JSON the default for every other endpoint.
+     */
+    @Override
+    public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+        builder.configureMessageConvertersList(
+                converters -> converters.removeIf(JacksonXmlHttpMessageConverter.class::isInstance));
     }
 
     @Override
