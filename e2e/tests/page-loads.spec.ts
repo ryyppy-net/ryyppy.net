@@ -18,7 +18,7 @@ test('/ui/login renders the login form for an anonymous visitor', async ({ page 
   const response = await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
   expect(response?.status()).toBe(200);
 
-  await expect(page).toHaveTitle('Forced CI failure');
+  await expect(page).toHaveTitle('Ryyppy.net');
   await expect(page.locator('#logo')).toBeVisible();
   await expect(page.locator('#username')).toBeVisible();
   await expect(page.locator('#password')).toBeVisible();
