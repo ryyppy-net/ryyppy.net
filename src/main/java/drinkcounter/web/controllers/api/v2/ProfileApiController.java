@@ -10,6 +10,7 @@ import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.model.User;
+import drinkcounter.util.DrinksPerDayCsv;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
@@ -42,7 +43,7 @@ public class ProfileApiController {
     @GetMapping
     public UserDTO getUser(@LoggedInUser User user) {
         UserDTO userDTO = UserDTO.fromUser(user);
-        userDTO.setHistory(SlopeService.getSlopes(user));
+        userDTO.setHistory(PromilleHistory.forUser(user));
         return userDTO;
     }
 
@@ -95,7 +96,7 @@ public class ProfileApiController {
 
     @GetMapping("drink-history")
     public ResponseEntity<byte[]> getDrinkHistory(@LoggedInUser User user) throws IOException{
-        String csv = DrinkHistoryService.buildCsv(user.getDrinks(), clock);
+        String csv = DrinksPerDayCsv.build(user.getDrinks(), clock);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");

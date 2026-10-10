@@ -1,7 +1,7 @@
 package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvReader;
-import drinkcounter.AlcoholService;
+import drinkcounter.PromilleTracker;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.model.Drink;
@@ -41,7 +41,7 @@ public class APIControllerTest {
 
     @BeforeEach
     public void setUp() {
-        AlcoholService.getInstance().reset();
+        PromilleTracker.getInstance().reset();
 
         userService = mock(UserService.class);
         session = mock(HttpSession.class);

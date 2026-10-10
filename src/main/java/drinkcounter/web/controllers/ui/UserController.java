@@ -11,6 +11,7 @@ import drinkcounter.UserService;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
+import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Party;
 import java.util.Comparator;
@@ -43,6 +44,7 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @RequestMapping("ui")
 public class UserController {
     private final DrinkCounterService drinkCounterService;
+    private final PartyAccess partyAccess;
     private final UserService userService;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
@@ -51,10 +53,12 @@ public class UserController {
 
     public UserController(
             DrinkCounterService drinkCounterService,
+            PartyAccess partyAccess,
             UserService userService,
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
         this.drinkCounterService = drinkCounterService;
+        this.partyAccess = partyAccess;
         this.userService = userService;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
@@ -183,7 +187,7 @@ public class UserController {
             return "0";
         }
         else {
-            if(drinkCounterService.isUserParticipant(partyId, user.getId())){
+            if(partyAccess.isMember(partyId, user.getId())){
                 return "0";
             }else{
                 return Integer.toString(user.getId());

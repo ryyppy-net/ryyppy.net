@@ -15,8 +15,8 @@ import java.util.List;
  *
  * @author thardas
  */
-public class SlopeService {
-    public static List<HistoryPoint> getSlopes(User user) {
+public class PromilleHistory {
+    public static List<HistoryPoint> forUser(User user) {
         int intervalMs = 60 * 1000;
         Instant now = Instant.now();
         Instant start = now.minus(Duration.ofMinutes(300));

@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
@@ -37,6 +38,9 @@ public class PartyControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
+    private PartyRepository partyRepository;
+
+    @Autowired
     private UserService userService;
 
     private User user;
@@ -53,7 +57,7 @@ public class PartyControllerWebTest {
         Party party = new Party();
         party.setId(5);
         when(drinkCounterService.getParty(5)).thenReturn(party);
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
 
         mvc.perform(get("/ui/party").param("id", "5"))
                 .andExpect(status().isOk())
@@ -61,7 +65,7 @@ public class PartyControllerWebTest {
                 .andExpect(model().attribute("party", party))
                 .andExpect(model().attribute("user", user));
 
-        verify(drinkCounterService).isUserParticipant(5, 42);
+        verify(partyRepository).countUserParticipations(5, 42);
     }
 
     @Test
@@ -79,7 +83,7 @@ public class PartyControllerWebTest {
 
     @Test
     public void removeUserFromPartyUnlinksYourselfAndRedirectsToUserPage() throws Exception {
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
 
         mvc.perform(removeUserFromParty(5, 42))
                 .andExpect(status().is3xxRedirection())
@@ -90,8 +94,8 @@ public class PartyControllerWebTest {
 
     @Test
     public void removeUserFromPartyUnlinksAPartyMate() throws Exception {
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
-        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(removeUserFromParty(5, 7))
                 .andExpect(status().is3xxRedirection())
@@ -102,12 +106,12 @@ public class PartyControllerWebTest {
 
     @Test
     public void partyPageIsForbiddenToAnOutsider() throws Exception {
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(false);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(0L);
 
         mvc.perform(get("/ui/party").param("id", "5"))
                 .andExpect(status().isForbidden());
 
-        verify(drinkCounterService).isUserParticipant(5, 42);
+        verify(partyRepository).countUserParticipations(5, 42);
         verifyNoMoreInteractions(drinkCounterService);
     }
 
@@ -121,7 +125,7 @@ public class PartyControllerWebTest {
 
     @Test
     public void addPartyIsForbiddenForAPartyMate() throws Exception {
-        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
                 .andExpect(status().isForbidden());
@@ -131,37 +135,37 @@ public class PartyControllerWebTest {
 
     @Test
     public void removeUserFromPartyIsForbiddenToAnOutsiderOfTheParty() throws Exception {
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(false);
-        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(0L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(removeUserFromParty(5, 7))
                 .andExpect(status().isForbidden());
 
-        verify(drinkCounterService).isUserParticipant(5, 42);
+        verify(partyRepository).countUserParticipations(5, 42);
         verifyNoMoreInteractions(drinkCounterService);
     }
 
     @Test
     public void removeUserFromPartyIsForbiddenToAnOutsiderRemovingThemself() throws Exception {
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(false);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(0L);
 
         mvc.perform(removeUserFromParty(5, 42))
                 .andExpect(status().isForbidden());
 
-        verify(drinkCounterService).isUserParticipant(5, 42);
+        verify(partyRepository).countUserParticipations(5, 42);
         verifyNoMoreInteractions(drinkCounterService);
     }
 
     @Test
     public void removeUserFromPartyIsForbiddenForAUserWhoSharesNoPartyWithTheMember() throws Exception {
-        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
-        when(drinkCounterService.shareParty(42, 7)).thenReturn(false);
+        when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(0L);
 
         mvc.perform(removeUserFromParty(5, 7))
                 .andExpect(status().isForbidden());
 
-        verify(drinkCounterService).isUserParticipant(5, 42);
-        verify(drinkCounterService).shareParty(42, 7);
+        verify(partyRepository).countUserParticipations(5, 42);
+        verify(partyRepository).countSharedParties(42, 7);
         verifyNoMoreInteractions(drinkCounterService);
     }
 

@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
@@ -59,6 +60,9 @@ public class PartyApiControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
+    private PartyRepository partyRepository;
+
+    @Autowired
     private UserService userService;
 
     private User signedIn;
@@ -85,7 +89,7 @@ public class PartyApiControllerWebTest {
         when(userService.getUser(2)).thenReturn(participant);
         when(userService.getUser(3)).thenReturn(outsider);
         when(drinkCounterService.getParty(1)).thenReturn(party);
-        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(true);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
 
         Drink saved = new Drink();
         saved.setId(7);
@@ -285,11 +289,11 @@ public class PartyApiControllerWebTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("partyRequests")
     public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request) throws Exception {
-        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(false);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(0L);
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verify(drinkCounterService).isUserParticipant(1, 42);
+        verify(partyRepository).countUserParticipations(1, 42);
         verifyNoMoreInteractions(drinkCounterService);
         verifyNoInteractions(userService);
     }
