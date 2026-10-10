@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -32,7 +32,7 @@ public class DefaultControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
 
     private User user;
 
@@ -42,7 +42,7 @@ public class DefaultControllerWebTest {
         user.setId(42);
         user.setName("Ville");
         user.setParties(new ArrayList<>());
-        when(userService.getUser(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class DefaultControllerWebTest {
                 .andExpect(model().attribute("initialDrinkHistory", containsString("Time")))
                 .andExpect(model().attributeExists("templates"));
 
-        verify(userService).getUser(42);
+        verify(userAccounts).get(42);
     }
 
     @Test
@@ -78,6 +78,6 @@ public class DefaultControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verify(userService, never()).getUser(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 }

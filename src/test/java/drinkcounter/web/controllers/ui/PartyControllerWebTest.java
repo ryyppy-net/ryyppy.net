@@ -2,7 +2,7 @@ package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.repository.PartyRepository;
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -41,7 +41,7 @@ public class PartyControllerWebTest {
     private PartyRepository partyRepository;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
 
     private User user;
 
@@ -49,7 +49,7 @@ public class PartyControllerWebTest {
     public void setUp() {
         user = new User();
         user.setId(42);
-        when(userService.getUser(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class PartyControllerWebTest {
                 .andExpect(redirectedUrl("/ui/login"));
 
         verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).getUser(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 
     private static MockHttpServletRequestBuilder removeUserFromParty(int partyId, int userId) {

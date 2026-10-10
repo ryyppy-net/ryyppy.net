@@ -2,7 +2,7 @@ package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.repository.PartyRepository;
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
@@ -63,7 +63,7 @@ public class PartyApiControllerWebTest {
     private PartyRepository partyRepository;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
 
     private User signedIn;
     private User participant;
@@ -85,9 +85,9 @@ public class PartyApiControllerWebTest {
         party.addParticipant(signedIn);
         party.addParticipant(participant);
 
-        when(userService.getUser(42)).thenReturn(signedIn);
-        when(userService.getUser(2)).thenReturn(participant);
-        when(userService.getUser(3)).thenReturn(outsider);
+        when(userAccounts.get(42)).thenReturn(signedIn);
+        when(userAccounts.get(2)).thenReturn(participant);
+        when(userAccounts.get(3)).thenReturn(outsider);
         when(drinkCounterService.getParty(1)).thenReturn(party);
         when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
 
@@ -233,7 +233,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void memberAddsAGuestParticipant() throws Exception {
-        when(userService.addUser(any(User.class))).thenAnswer(invocation -> {
+        when(userAccounts.add(any(User.class))).thenAnswer(invocation -> {
             User guest = invocation.getArgument(0);
             guest.setId(8);
             return guest;
@@ -247,7 +247,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void memberAddsAParticipantByEmail() throws Exception {
-        when(userService.getUserByEmail("outsider@example.com")).thenReturn(outsider);
+        when(userAccounts.byEmail("outsider@example.com")).thenReturn(outsider);
 
         mvc.perform(post(PARTIES + "/1/participants").param("email", "outsider@example.com"))
                 .andExpect(status().isOk());
@@ -295,7 +295,7 @@ public class PartyApiControllerWebTest {
 
         verify(partyRepository).countUserParticipations(1, 42);
         verifyNoMoreInteractions(drinkCounterService);
-        verifyNoInteractions(userService);
+        verifyNoInteractions(userAccounts);
     }
 
     @Test
@@ -316,6 +316,6 @@ public class PartyApiControllerWebTest {
                 .andExpect(redirectedUrl("/ui/login"));
 
         verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).getUser(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 }

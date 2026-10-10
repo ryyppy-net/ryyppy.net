@@ -2,7 +2,7 @@ package drinkcounter.web.controllers.api.v2;
 
 import com.csvreader.CsvReader;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -63,7 +63,7 @@ public class ProfileApiControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
 
     @Autowired
     private ProfileApiController controller;
@@ -75,7 +75,7 @@ public class ProfileApiControllerWebTest {
     public void setUp() {
         user = new User();
         user.setId(42);
-        when(userService.getUser(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
 
         Drink saved = new Drink();
         saved.setId(7);
@@ -98,7 +98,7 @@ public class ProfileApiControllerWebTest {
                         .param("sex", "MALE").param("weight", "80"))
                 .andExpect(status().isOk());
 
-        verify(userService).updateUser(user);
+        verify(userAccounts).update(user);
         assertEquals("Ville", user.getName());
         assertEquals(80f, user.getWeight());
     }
@@ -167,7 +167,7 @@ public class ProfileApiControllerWebTest {
                 .andExpect(redirectedUrl("/ui/login"));
 
         verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).getUser(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class ProfileApiControllerWebTest {
         assertThrows(ServletException.class, () -> mvc.perform(get("/API/v2/profile/drinks")));
 
         verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).getUser(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 
     // The history buckets by UTC day, so its "Time" column must be midnight UTC, not

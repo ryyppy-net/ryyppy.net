@@ -2,7 +2,8 @@ package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.repository.PartyRepository;
-import drinkcounter.UserService;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -46,7 +47,10 @@ public class UserControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
+
+    @Autowired
+    private PassphraseLogin passphraseLogin;
 
     @Autowired
     private DrinkCounterService drinkCounterService;
@@ -60,7 +64,7 @@ public class UserControllerWebTest {
     public void setUp() {
         user = new User();
         user.setId(42);
-        when(userService.getUser(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
     }
 
     @Test
@@ -92,7 +96,7 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("passphrase"));
 
-        verify(userService).generatePassphrase(user);
+        verify(passphraseLogin).issue(user);
     }
 
     @Test
@@ -104,8 +108,8 @@ public class UserControllerWebTest {
                     .andExpect(redirectedUrl("/ui/login"));
         }
 
-        verify(userService, never()).getUser(42);
-        verify(userService, never()).generatePassphrase(any());
+        verify(userAccounts, never()).get(42);
+        verify(passphraseLogin, never()).issue(any());
     }
 
     @Test
@@ -116,7 +120,7 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(userService).updateUser(user);
+        verify(userAccounts).update(user);
         assertEquals("New name", user.getName());
     }
 
@@ -126,8 +130,8 @@ public class UserControllerWebTest {
 
         mvc.perform(modifyUser(7)).andExpect(status().isForbidden());
 
-        verify(userService, never()).getUser(7);
-        verify(userService, never()).updateUser(any());
+        verify(userAccounts, never()).get(7);
+        verify(userAccounts, never()).update(any());
         verifyNoInteractions(drinkCounterService);
     }
 
@@ -191,8 +195,7 @@ public class UserControllerWebTest {
         User invitee = new User();
         invitee.setId(9);
         when(partyRepository.countUserParticipations(3, 42)).thenReturn(1L);
-        when(userService.emailIsCorrect("friend@example.com")).thenReturn(true);
-        when(userService.getUserByEmail("friend@example.com")).thenReturn(invitee);
+        when(userAccounts.byEmail("friend@example.com")).thenReturn(invitee);
 
         mvc.perform(getUserByEmail(3))
                 .andExpect(status().isOk())
@@ -205,7 +208,7 @@ public class UserControllerWebTest {
 
         verify(partyRepository).countUserParticipations(3, 42);
         verifyNoMoreInteractions(drinkCounterService);
-        verify(userService, never()).getUserByEmail(any());
+        verify(userAccounts, never()).byEmail(any());
     }
 
     @Test
@@ -216,7 +219,7 @@ public class UserControllerWebTest {
         mvc.perform(getUserByEmail("abc")).andExpect(status().isBadRequest());
 
         verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).updateUser(any());
+        verify(userAccounts, never()).update(any());
     }
 
     @Test
@@ -229,7 +232,7 @@ public class UserControllerWebTest {
         }
 
         verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).updateUser(any());
+        verify(userAccounts, never()).update(any());
     }
 
     private MockHttpServletRequestBuilder modifyUser(Object userId) {

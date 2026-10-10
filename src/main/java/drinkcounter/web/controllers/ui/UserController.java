@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.EmailAddress;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
@@ -45,7 +47,8 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 public class UserController {
     private final DrinkCounterService drinkCounterService;
     private final PartyAccess partyAccess;
-    private final UserService userService;
+    private final UserAccounts userAccounts;
+    private final PassphraseLogin passphraseLogin;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
@@ -54,12 +57,14 @@ public class UserController {
     public UserController(
             DrinkCounterService drinkCounterService,
             PartyAccess partyAccess,
-            UserService userService,
+            UserAccounts userAccounts,
+            PassphraseLogin passphraseLogin,
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
         this.drinkCounterService = drinkCounterService;
         this.partyAccess = partyAccess;
-        this.userService = userService;
+        this.userAccounts = userAccounts;
+        this.passphraseLogin = passphraseLogin;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -84,7 +89,7 @@ public class UserController {
             session.setAttribute(AuthenticationController.TIMEZONEOFFSET, (double) 0);
         }
 
-        if (name == null || name.length() == 0 || weight < 1 || !userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null) {
+        if (name == null || name.length() == 0 || weight < 1 || !EmailAddress.isValid(email) || userAccounts.byEmail(email) != null) {
             throw new IllegalArgumentException();
         }
 
@@ -98,7 +103,7 @@ public class UserController {
         user.setPassword(passwordEncoder.encode(password));
         user.setAuthMethod(User.AuthMethod.PASSWORD);
 
-        userService.addUser(user);
+        userAccounts.add(user);
         authenticate(user, request, response);
 
         return REDIRECT_TO_FRONTPAGE;
@@ -123,9 +128,9 @@ public class UserController {
             @RequestParam("weight") float weight, 
             @RequestParam("email") String email){
                 
-        User user = userService.getUser(userId);
+        User user = userAccounts.get(userId);
 
-        if (!user.getEmail().equalsIgnoreCase(email) && (!userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null))
+        if (!user.getEmail().equalsIgnoreCase(email) && (!EmailAddress.isValid(email) || userAccounts.byEmail(email) != null))
             throw new IllegalArgumentException();
 
         if (name == null || name.length() == 0 || weight < 1)
@@ -135,7 +140,7 @@ public class UserController {
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
         user.setEmail(email);
-        userService.updateUser(user);
+        userAccounts.update(user);
         return "redirect:user";
     }
 
@@ -168,7 +173,7 @@ public class UserController {
     
     @RequestMapping("/checkEmail")
     public ResponseEntity<byte[]> checkEmail(@RequestParam("email") String email){
-        String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
+        String data = EmailAddress.isValid(email) && userAccounts.byEmail(email) == null ? "1" : "0";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
@@ -178,11 +183,11 @@ public class UserController {
     @RequestMapping("/getUserByEmail")
     @PartyMember
     public @ResponseBody String getUserNotInPartyByEmail(@RequestParam("email") String email, @RequestParam("partyId") int partyId){
-        if (!userService.emailIsCorrect(email)){
+        if (!EmailAddress.isValid(email)){
             return "0";
         }
         
-        User user = userService.getUserByEmail(email);
+        User user = userAccounts.byEmail(email);
         if (user == null){
             return "0";
         }
@@ -205,7 +210,7 @@ public class UserController {
     
     @RequestMapping("/passphrase-generate")
     public String generatePassphrase(@LoggedInUser User user) {
-        userService.generatePassphrase(user);
+        passphraseLogin.issue(user);
         return "redirect:passphrase";
     }    
 }

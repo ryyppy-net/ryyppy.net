@@ -1,6 +1,6 @@
 package drinkcounter.authentication;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -25,10 +25,10 @@ public class GoogleIdentityLinkingService {
 
     private static final Logger log = LoggerFactory.getLogger(GoogleIdentityLinkingService.class);
 
-    private final UserService userService;
+    private final UserAccounts userAccounts;
 
-    public GoogleIdentityLinkingService(UserService userService) {
-        this.userService = userService;
+    public GoogleIdentityLinkingService(UserAccounts userAccounts) {
+        this.userAccounts = userAccounts;
     }
 
     /**
@@ -36,16 +36,16 @@ public class GoogleIdentityLinkingService {
      * needed. googleSub is Google's "sub" claim, stored as User.openId.
      */
     public User findOrCreateUser(String googleSub, String email, String name, String givenName, String familyName) {
-        User user = userService.getUserByOpenId(googleSub);
+        User user = userAccounts.byOpenId(googleSub);
         if (user != null) {
             log.info("Existing user logged in via Google: email={}, userId={}, googleId={}", email, user.getId(), googleSub);
             return user;
         }
 
-        user = userService.getUserByEmail(email);
+        user = userAccounts.byEmail(email);
         if (user != null) {
             user.setOpenId(googleSub);
-            userService.updateUser(user);
+            userAccounts.update(user);
             log.info("Linked Google account to existing user: email={}, userId={}, googleId={}", email, user.getId(), googleSub);
             return user;
         }
@@ -67,7 +67,7 @@ public class GoogleIdentityLinkingService {
         user.setAuthMethod(User.AuthMethod.OPENID);
         user.setGuest(false);
 
-        user = userService.addUser(user);
+        user = userAccounts.add(user);
         log.info("Created new user via Google: email={}, name={}, googleId={}", email, user.getName(), googleSub);
         return user;
     }
