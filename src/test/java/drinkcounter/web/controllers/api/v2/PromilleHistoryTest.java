@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class SlopeServiceTest {
+public class PromilleHistoryTest {
 
     private static final long WINDOW_MILLIS = Duration.ofMinutes(300).toMillis();
     private static final long TOLERANCE_MILLIS = 5000;
@@ -24,7 +24,7 @@ public class SlopeServiceTest {
     }
 
     @Test
-    public void getSlopesCoversLast300MinutesAtOneMinuteResolution() {
+    public void forUserCoversLast300MinutesAtOneMinuteResolution() {
         User user = new User();
         user.setId(1);
         user.setWeight(80);
@@ -35,7 +35,7 @@ public class SlopeServiceTest {
         user.drink(drink);
 
         long before = System.currentTimeMillis();
-        List<HistoryPoint> slopes = SlopeService.getSlopes(user);
+        List<HistoryPoint> slopes = PromilleHistory.forUser(user);
         long after = System.currentTimeMillis();
 
         assertFalse(slopes.isEmpty());

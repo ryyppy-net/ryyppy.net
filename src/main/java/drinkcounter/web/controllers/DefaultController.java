@@ -4,11 +4,11 @@ import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.util.DrinksPerDayCsv;
 import drinkcounter.web.controllers.api.v2.DrinkDTO;
-import drinkcounter.web.controllers.api.v2.DrinkHistoryService;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
-import drinkcounter.web.controllers.api.v2.SlopeService;
+import drinkcounter.web.controllers.api.v2.PromilleHistory;
 import drinkcounter.web.controllers.api.v2.UserDTO;
 import org.springframework.core.io.Resource;
 import tools.jackson.databind.ObjectMapper;
@@ -65,7 +65,7 @@ public class DefaultController {
 
     private UserDTO loadInitialProfile(User user) {
         UserDTO userDTO = UserDTO.fromUser(user);
-        userDTO.setHistory(SlopeService.getSlopes(user));
+        userDTO.setHistory(PromilleHistory.forUser(user));
         return userDTO;
     }
 
@@ -97,7 +97,7 @@ public class DefaultController {
 
     private String loadInitialDrinkHistory(User user) {
         try {
-            return DrinkHistoryService.buildCsv(user.getDrinks(), Clock.systemUTC());
+            return DrinksPerDayCsv.build(user.getDrinks(), Clock.systemUTC());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

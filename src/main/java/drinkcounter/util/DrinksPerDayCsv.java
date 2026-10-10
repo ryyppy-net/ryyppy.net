@@ -1,4 +1,4 @@
-package drinkcounter.web.controllers.api.v2;
+package drinkcounter.util;
 
 import com.csvreader.CsvWriter;
 import drinkcounter.model.Drink;
@@ -16,11 +16,11 @@ import java.util.Map;
 
 /**
  * Builds the "Time,Drinks" per-day CSV that ProfileApiController.getDrinkHistory()
- * serves and userhistorygraph.js parses, extracted so DefaultController can build
- * the same data to embed on first render.
+ * serves and userhistorygraph.js parses; DefaultController embeds the same data
+ * on first render.
  */
-public class DrinkHistoryService {
-    public static String buildCsv(List<Drink> drinks, Clock clock) throws IOException {
+public class DrinksPerDayCsv {
+    public static String build(List<Drink> drinks, Clock clock) throws IOException {
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
