@@ -1,8 +1,8 @@
 package drinkcounter;
 
-import drinkcounter.dao.DrinkDAO;
-import drinkcounter.dao.PartyDAO;
-import drinkcounter.dao.UserDAO;
+import drinkcounter.repository.DrinkRepository;
+import drinkcounter.repository.PartyRepository;
+import drinkcounter.repository.UserRepository;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
@@ -35,11 +35,11 @@ public class DrinkCounterService {
     private static final DateTimeFormatter ADD_DRINK_TO_DATE_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     @Autowired
-    private PartyDAO partyDao;
+    private PartyRepository partyRepository;
     @Autowired
-    private DrinkDAO drinkDao;
+    private DrinkRepository drinkRepository;
     @Autowired
-    private UserDAO userDAO;
+    private UserRepository userRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -53,14 +53,14 @@ public class DrinkCounterService {
         Party party = new Party();
         party.setName(partyName);
         party.setStartTime(Instant.now());
-        partyDao.save(party);
+        partyRepository.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());
         return party;
     }
 
     public Party getParty(int partyId) {
-        return partyDao.findById(partyId).orElseThrow(EntityNotFoundException::new);
+        return partyRepository.findById(partyId).orElseThrow(EntityNotFoundException::new);
     }
 
     public List<User> listUsersByParty(int partyId) {
@@ -70,7 +70,7 @@ public class DrinkCounterService {
     @Transactional
     public void linkUserToParty(int userId, int partyIdentifier) {
         Party party = getParty(partyIdentifier);
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
 
         for (User current : getParty(party.getId()).getParticipants()) {
             if (current.getId().equals(user.getId())) {
@@ -80,16 +80,16 @@ public class DrinkCounterService {
         }
         
         party.addParticipant(user);
-        partyDao.save(party);
+        partyRepository.save(party);
         log.info("{} was added to party {}", user, party.getName());
     }
 
     @Transactional
     public void unlinkUserFromParty(int userId, int partyId) {
         Party party = getParty(partyId);
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         party.removeParticipant(user);
-        partyDao.save(party);
+        partyRepository.save(party);
         log.info("{} was removed from party {}", user, party.getName());
     }
 
@@ -100,23 +100,23 @@ public class DrinkCounterService {
 
     @Transactional
     public void removeDrinkFromUser(int userId, int drinkId) {
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = findDrinkOf(user, drinkId);
         user.removeDrink(drink);
-        drinkDao.delete(drink);
+        drinkRepository.delete(drink);
         log.info("{} has removed a drink {}", user, drink.getTimeStamp());
     }
 
     @Transactional
     public void changeDrinkAlcohol(int userId, int drinkId, float alcoholAmount) {
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = findDrinkOf(user, drinkId);
         user.changeDrinkAlcohol(drink, alcoholAmount);
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), alcoholAmount);
     }
 
     private Drink findDrinkOf(User user, int drinkId) {
-        Drink drink = drinkDao.findById(drinkId).orElseThrow(EntityNotFoundException::new);
+        Drink drink = drinkRepository.findById(drinkId).orElseThrow(EntityNotFoundException::new);
         if (drink.getDrinker() == null || !user.getId().equals(drink.getDrinker().getId())) {
             throw new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId());
         }
@@ -135,17 +135,17 @@ public class DrinkCounterService {
     @Transactional
     public int addDrink(int userId, Date date) {
         if (date.after(new Date())) throw new IllegalArgumentException("date");
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         drink.setTimeStamp(date.toInstant());
         user.drink(drink);
-        drinkDao.save(drink);
+        drinkRepository.save(drink);
         log.info("{} has drunk a drink at {}", user, date.toString());
         return drink.getId();
     }
 
     public long getTotalDrinkCount() {
-        return drinkDao.count();
+        return drinkRepository.count();
     }
 
     @Transactional(readOnly = true)
@@ -163,35 +163,35 @@ public class DrinkCounterService {
         List<Object[]> results = q.getResultList();
         List<Friend> friends = new ArrayList<Friend>();
         for (Object[] tuple : results) {
-            User user = userDAO.findById((Integer)tuple[0]).orElseThrow(EntityNotFoundException::new);
+            User user = userRepository.findById((Integer)tuple[0]).orElseThrow(EntityNotFoundException::new);
             friends.add(new Friend(user.getId(), user.getName(), GravatarUrls.forUser(user)));
         }
         return friends;
     }
 
     public boolean isUserParticipant(int partyId, int userId) {
-        return partyDao.countUserParticipations(partyId, userId) > 0;
+        return partyRepository.countUserParticipations(partyId, userId) > 0;
     }
 
     public boolean shareParty(int userId, int otherUserId) {
-        return partyDao.countSharedParties(userId, otherUserId) > 0;
+        return partyRepository.countSharedParties(userId, otherUserId) > 0;
     }
 
     @Transactional
     public int addDrink(int userId, float alcoholAmount) {
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         drink.setTimeStamp(Instant.now());
         drink.setAlcohol(alcoholAmount);
         user.drink(drink);
-        drinkDao.save(drink);
+        drinkRepository.save(drink);
         log.info("User {} has drunk a drink", user.getName());
         return drink.getId();
     }
 
     @Transactional
     public Drink addDrink(int userId, Date date, Float alcoholAmount) {
-        User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
+        User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = new Drink();
         if(date != null){
             drink.setTimeStamp(date.toInstant());
@@ -203,7 +203,7 @@ public class DrinkCounterService {
             drink.setAlcohol(alcoholAmount);
         }
         user.drink(drink);
-        drinkDao.save(drink);
+        drinkRepository.save(drink);
         log.info("{} has drunk a drink at {}", user, drink.getTimeStamp());
         return drink;
     }

@@ -1,4 +1,4 @@
-package drinkcounter.dao;
+package drinkcounter.repository;
 
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -10,6 +10,6 @@ import java.util.List;
  *
  * @author Toni
  */
-public interface DrinkDAO extends CrudRepository<Drink, Integer> {
+public interface DrinkRepository extends CrudRepository<Drink, Integer> {
     List<Drink> findByDrinker(User drinker);
 }
