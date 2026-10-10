@@ -22,18 +22,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class DrinkCounterServiceImplTest {
+public class DrinkCounterServiceTest {
 
-    private DrinkCounterServiceImpl service;
+    private DrinkCounterService service;
     private UserDAO userDAO;
     private User user;
     private DrinkDAO drinkDAO;
 
     @BeforeEach
     public void setUp() {
-        AlcoholServiceImpl.getInstance().reset();
+        AlcoholService.getInstance().reset();
 
-        service = new DrinkCounterServiceImpl();
+        service = new DrinkCounterService();
         userDAO = mock(UserDAO.class);
         drinkDAO = mock(DrinkDAO.class);
         AtomicInteger nextDrinkId = new AtomicInteger(1);
