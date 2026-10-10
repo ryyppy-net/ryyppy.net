@@ -1,8 +1,10 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.LoggedInUser;
+import drinkcounter.authentication.OwnUser;
+import drinkcounter.authentication.PartyMember;
+import drinkcounter.authentication.PartyMemberAndOwnUserOrPartyMate;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpSession;
@@ -21,43 +23,34 @@ import org.springframework.web.servlet.ModelAndView;
 public class PartyController {
 
     private final DrinkCounterService drinkCounterService;
-    private final AuthenticationChecks authenticationChecks;
 
-    public PartyController(DrinkCounterService drinkCounterService, AuthenticationChecks authenticationChecks) {
+    public PartyController(DrinkCounterService drinkCounterService) {
         this.drinkCounterService = drinkCounterService;
-        this.authenticationChecks = authenticationChecks;
     }
 
     @RequestMapping("/party")
-    public ModelAndView party(HttpSession session, @LoggedInUser User user, @RequestParam("id") String partyId){
-        int pid = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(pid);
-
+    @PartyMember
+    public ModelAndView party(HttpSession session, @LoggedInUser User user, @RequestParam("id") int partyId){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
-        mav.addObject("party", drinkCounterService.getParty(pid));
+        mav.addObject("party", drinkCounterService.getParty(partyId));
         mav.addObject("user", user);
         return mav;
     }
 
     @RequestMapping("/addParty")
-    public String addParty(HttpSession session, @RequestParam("name") String partyName, @RequestParam("userId") String userId){
-        int uid = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(uid);
-        
+    @OwnUser
+    public String addParty(HttpSession session, @RequestParam("name") String partyName, @RequestParam("userId") int userId){
         Party party = drinkCounterService.startParty(partyName);
-        drinkCounterService.linkUserToParty(uid, party.getId());
+        drinkCounterService.linkUserToParty(userId, party.getId());
         return "redirect:party?id="+party.getId();
     }
    
     @RequestMapping("/removeUserFromParty")
-    public String removeUserFromParty(HttpSession session, @RequestParam("partyId") String partyId,
-            @RequestParam("userId") String userId){
-        int pid = Integer.parseInt(partyId);
-        int uid = Integer.parseInt(userId);
-        authenticationChecks.checkRightsForParty(pid);
-        authenticationChecks.checkHighLevelRightsToUser(uid);
-        drinkCounterService.unlinkUserFromParty(uid, pid);
+    @PartyMemberAndOwnUserOrPartyMate
+    public String removeUserFromParty(HttpSession session, @RequestParam("partyId") int partyId,
+            @RequestParam("userId") int userId){
+        drinkCounterService.unlinkUserFromParty(userId, partyId);
 
         return "redirect:user";
     }

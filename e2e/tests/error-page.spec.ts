@@ -17,7 +17,7 @@ test('requesting a party you are not a participant of renders the error page', a
   await registerUser(outsiderPage, outsider);
 
   const response = await outsiderPage.goto(`/ui/party?id=${partyId}`, { waitUntil: 'domcontentloaded' });
-  expect(response?.status()).toBeGreaterThanOrEqual(400);
+  expect(response?.status()).toBe(403);
   await expect(outsiderPage).toHaveTitle('Ryyppy.net - Virhe!');
   await expect(outsiderPage.locator('h2')).toContainText('Tapahtui virhe!');
 

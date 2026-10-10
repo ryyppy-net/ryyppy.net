@@ -2,7 +2,6 @@ package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
-import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -12,11 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -38,9 +39,6 @@ public class PartyControllerWebTest {
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private AuthenticationChecks authenticationChecks;
-
     private User user;
 
     @BeforeEach
@@ -55,6 +53,7 @@ public class PartyControllerWebTest {
         Party party = new Party();
         party.setId(5);
         when(drinkCounterService.getParty(5)).thenReturn(party);
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
 
         mvc.perform(get("/ui/party").param("id", "5"))
                 .andExpect(status().isOk())
@@ -62,7 +61,7 @@ public class PartyControllerWebTest {
                 .andExpect(model().attribute("party", party))
                 .andExpect(model().attribute("user", user));
 
-        verify(authenticationChecks).checkRightsForParty(5);
+        verify(drinkCounterService).isUserParticipant(5, 42);
     }
 
     @Test
@@ -75,19 +74,108 @@ public class PartyControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("party?id=8"));
 
-        verify(authenticationChecks).checkLowLevelRightsToUser(42);
         verify(drinkCounterService).linkUserToParty(42, 8);
     }
 
     @Test
-    public void removeUserFromPartyUnlinksAndRedirectsToUserPage() throws Exception {
-        mvc.perform(get("/ui/removeUserFromParty").param("partyId", "5").param("userId", "42"))
+    public void removeUserFromPartyUnlinksYourselfAndRedirectsToUserPage() throws Exception {
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
+
+        mvc.perform(removeUserFromParty(5, 42))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(authenticationChecks).checkRightsForParty(5);
-        verify(authenticationChecks).checkHighLevelRightsToUser(42);
         verify(drinkCounterService).unlinkUserFromParty(42, 5);
+    }
+
+    @Test
+    public void removeUserFromPartyUnlinksAPartyMate() throws Exception {
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        mvc.perform(removeUserFromParty(5, 7))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("user"));
+
+        verify(drinkCounterService).unlinkUserFromParty(7, 5);
+    }
+
+    @Test
+    public void partyPageIsForbiddenToAnOutsider() throws Exception {
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(false);
+
+        mvc.perform(get("/ui/party").param("id", "5"))
+                .andExpect(status().isForbidden());
+
+        verify(drinkCounterService).isUserParticipant(5, 42);
+        verifyNoMoreInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void addPartyIsForbiddenForAnotherUser() throws Exception {
+        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void addPartyIsForbiddenForAPartyMate() throws Exception {
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void removeUserFromPartyIsForbiddenToAnOutsiderOfTheParty() throws Exception {
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(false);
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        mvc.perform(removeUserFromParty(5, 7))
+                .andExpect(status().isForbidden());
+
+        verify(drinkCounterService).isUserParticipant(5, 42);
+        verifyNoMoreInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void removeUserFromPartyIsForbiddenToAnOutsiderRemovingThemself() throws Exception {
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(false);
+
+        mvc.perform(removeUserFromParty(5, 42))
+                .andExpect(status().isForbidden());
+
+        verify(drinkCounterService).isUserParticipant(5, 42);
+        verifyNoMoreInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void removeUserFromPartyIsForbiddenForAUserWhoSharesNoPartyWithTheMember() throws Exception {
+        when(drinkCounterService.isUserParticipant(5, 42)).thenReturn(true);
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(false);
+
+        mvc.perform(removeUserFromParty(5, 7))
+                .andExpect(status().isForbidden());
+
+        verify(drinkCounterService).isUserParticipant(5, 42);
+        verify(drinkCounterService).shareParty(42, 7);
+        verifyNoMoreInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void nonNumericIdsAreRejectedBeforeAnyAccessCheck() throws Exception {
+        mvc.perform(get("/ui/party").param("id", "abc")).andExpect(status().isBadRequest());
+        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "abc"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/ui/removeUserFromParty").param("partyId", "abc").param("userId", "42"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/ui/removeUserFromParty").param("partyId", "5").param("userId", "abc"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(drinkCounterService);
     }
 
     @Test
@@ -99,5 +187,10 @@ public class PartyControllerWebTest {
 
         verifyNoInteractions(drinkCounterService);
         verify(userService, never()).getUser(anyInt());
+    }
+
+    private static MockHttpServletRequestBuilder removeUserFromParty(int partyId, int userId) {
+        return get("/ui/removeUserFromParty").param("partyId", String.valueOf(partyId))
+                .param("userId", String.valueOf(userId));
     }
 }

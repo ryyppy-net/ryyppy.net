@@ -38,6 +38,10 @@ public class AccessAnnotationsTest {
         @OwnUserOrPartyMate
         public void ownUserOrPartyMate(int userId) {
         }
+
+        @PartyMemberAndOwnUserOrPartyMate
+        public void partyMemberAndOwnUserOrPartyMate(int partyId, int userId) {
+        }
     }
 
     private DrinkCounterService drinkCounterService;
@@ -115,5 +119,37 @@ public class AccessAnnotationsTest {
         when(drinkCounterService.shareParty(42, 7)).thenReturn(false);
 
         assertThrows(AccessDeniedException.class, () -> handlers.ownUserOrPartyMate(7));
+    }
+
+    @Test
+    public void partyMemberAndOwnUserOrPartyMateAllowsMemberActingOnThemself() {
+        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(true);
+
+        assertDoesNotThrow(() -> handlers.partyMemberAndOwnUserOrPartyMate(1, 42));
+    }
+
+    @Test
+    public void partyMemberAndOwnUserOrPartyMateAllowsMemberActingOnPartyMate() {
+        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(true);
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        assertDoesNotThrow(() -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
+    }
+
+    @Test
+    public void partyMemberAndOwnUserOrPartyMateDeniesNonParticipantEvenForPartyMate() {
+        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(false);
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
+        assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 42));
+    }
+
+    @Test
+    public void partyMemberAndOwnUserOrPartyMateDeniesMemberActingOnStranger() {
+        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(true);
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(false);
+
+        assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
     }
 }

@@ -109,8 +109,8 @@ the app's principal is `DrinkcounterUserDetails`, and both annotations fail the 
 any other principal.
 
 Access rules are `@PreAuthorize` meta-annotations in `authentication/`: `@PartyMember` reads the
-handler's `partyId` parameter, `@OwnUser` and `@OwnUserOrPartyMate` its numeric `userId`. A failed
-rule is a 403. `AccessAnnotationsTest` covers the rules themselves; in a web test, stub
+handler's `partyId` parameter, `@OwnUser` and `@OwnUserOrPartyMate` its numeric `userId`; `@PartyMemberAndOwnUserOrPartyMate` requires both
+`@PartyMember` and `@OwnUserOrPartyMate`. A failed rule is a 403. `AccessAnnotationsTest` covers the rules themselves; in a web test, stub
 `DrinkCounterService.isUserParticipant` (or `shareParty`) and assert an outsider gets 403 with no
 service side effect.
 
