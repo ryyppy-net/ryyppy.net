@@ -14,6 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -22,6 +23,9 @@ import static drinkcounter.web.controllers.api.ClassicApiRequests.addGuest;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.drinksPerDay;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.editDrink;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.linkUser;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseAddDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseInfo;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseUndoDrink;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.partyXml;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.removeDrink;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.showDrinks;
@@ -95,6 +99,25 @@ public class APIControllerWebTest {
         }
         verifyNoMoreInteractions(drinkCounterService);
         verifyNoInteractions(userService, partyMarshaller);
+    }
+
+    static Stream<Arguments> passphraseRequests() {
+        return Stream.of(
+                Arguments.of("info", passphraseInfo("unknown")),
+                Arguments.of("add drink", passphraseAddDrink("unknown")),
+                Arguments.of("undo drink", passphraseUndoDrink("unknown")));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("passphraseRequests")
+    @WithAnonymousUser
+    public void unknownPassphraseIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request)
+            throws Exception {
+        mvc.perform(request).andExpect(status().isForbidden());
+
+        verify(userService).getUserByPassphrase("unknown");
+        verifyNoMoreInteractions(userService);
+        verifyNoInteractions(drinkCounterService);
     }
 
     static Stream<Arguments> partyMateRequests() {

@@ -53,4 +53,16 @@ final class ClassicApiRequests {
     static MockHttpServletRequestBuilder showHistory(int userId) {
         return get("/API/users/{userId}/show-history", userId);
     }
+
+    static MockHttpServletRequestBuilder passphraseInfo(String passphrase) {
+        return get("/API/passphrase/{passphrase}", passphrase);
+    }
+
+    static MockHttpServletRequestBuilder passphraseAddDrink(String passphrase) {
+        return get("/API/passphrase/{passphrase}/add-drink/{time}", passphrase, 0);
+    }
+
+    static MockHttpServletRequestBuilder passphraseUndoDrink(String passphrase) {
+        return get("/API/passphrase/{passphrase}/undo-drink", passphrase);
+    }
 }

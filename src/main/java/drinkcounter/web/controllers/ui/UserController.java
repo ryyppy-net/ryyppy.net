@@ -61,7 +61,7 @@ public class UserController {
     }
 
     @RequestMapping("/newuser")
-    public String newUser(HttpSession session){
+    public String newUser(){
         return "newuser";
     }
     
@@ -117,8 +117,7 @@ public class UserController {
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight, 
-            @RequestParam("email") String email, 
-            HttpSession session){
+            @RequestParam("email") String email){
                 
         User user = userService.getUser(userId);
 
@@ -145,13 +144,13 @@ public class UserController {
 
     @RequestMapping("/removeDrink")
     @OwnUser
-    public String removeDrink(HttpSession session, @RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId){
+    public String removeDrink(@RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId){
         drinkCounterService.removeDrinkFromUser(userId, drinkId);
         return "redirect:user";
     }
 
     @RequestMapping("/user")
-    public ModelAndView userPage(HttpSession session, @LoggedInUser User user){
+    public ModelAndView userPage(@LoggedInUser User user){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
         mav.addObject("user", user);
@@ -164,7 +163,7 @@ public class UserController {
     }
     
     @RequestMapping("/checkEmail")
-    public ResponseEntity<byte[]> checkEmail(HttpSession session, @RequestParam("email") String email){
+    public ResponseEntity<byte[]> checkEmail(@RequestParam("email") String email){
         String data = userService.emailIsCorrect(email) && userService.getUserByEmail(email) == null ? "1" : "0";
 
         HttpHeaders headers = new HttpHeaders();
@@ -174,7 +173,7 @@ public class UserController {
     
     @RequestMapping("/getUserByEmail")
     @PartyMember
-    public @ResponseBody String getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") int partyId){
+    public @ResponseBody String getUserNotInPartyByEmail(@RequestParam("email") String email, @RequestParam("partyId") int partyId){
         if (!userService.emailIsCorrect(email)){
             return "0";
         }
