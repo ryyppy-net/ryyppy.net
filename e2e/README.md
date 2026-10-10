@@ -47,7 +47,10 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE=/path/to/chrome SKIP_WEBSERVER=1 npm test
 ## Debugging a failure
 
 Traces and videos are not recorded; a failure leaves a stack trace and a
-screenshot. Re-run the failing test with recording on:
+screenshot. On CI each failure is an annotation on the `E2E tests` check, and
+its error and location are the last thing the test step prints; the HTML report,
+with the screenshot, is the job's `playwright-report` artifact. Re-run the failing
+test with recording on:
 
 ```bash
 npx playwright test --trace=on -g "<test name>"
