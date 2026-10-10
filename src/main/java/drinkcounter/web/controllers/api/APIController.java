@@ -9,7 +9,6 @@ import drinkcounter.authentication.OwnUserOrPartyMate;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,35 +54,27 @@ public class APIController {
      */
     public static final float ALCOHOL_DENSITY = 789;
 
-    private final PartyMarshaller partyMarshaller;
     private final DrinkCounterService drinkCounterService;
     private final UserService userService;
 
     private Clock clock = Clock.systemUTC();
 
-    public APIController(PartyMarshaller partyMarshaller, DrinkCounterService drinkCounterService,
-            UserService userService) {
-        this.partyMarshaller = partyMarshaller;
+    public APIController(DrinkCounterService drinkCounterService, UserService userService) {
         this.drinkCounterService = drinkCounterService;
         this.userService = userService;
     }
 
     @PartyMember
-    @RequestMapping("/parties/{partyId}")
-    public @ResponseBody byte[] printXml(@PathVariable int partyId) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshall(partyId, baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+    @RequestMapping(value = "/parties/{partyId}", produces = MediaType.APPLICATION_XML_VALUE)
+    public @ResponseBody ClassicPartyDTO party(@PathVariable int partyId) {
+        return ClassicPartyDTO.fromParty(drinkCounterService.getParty(partyId),
+                drinkCounterService.listUsersByParty(partyId), clock);
     }
 
     @OwnUser
-    @RequestMapping("/users/{userId}/show-drinks")
-    public @ResponseBody byte[] showDrinks(@PathVariable int userId) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshallDrinks(userId, baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+    @RequestMapping(value = "/users/{userId}/show-drinks", produces = MediaType.APPLICATION_XML_VALUE)
+    public @ResponseBody ClassicUserDrinksDTO showDrinks(@PathVariable int userId) {
+        return ClassicUserDrinksDTO.fromUser(userService.getUser(userId));
     }
 
     @OwnUserOrPartyMate
@@ -119,14 +111,11 @@ public class APIController {
     }
     
     @OwnUserOrPartyMate
-    @RequestMapping("/users/{userId}")
-    public @ResponseBody byte[] userXml(@PathVariable int userId) throws IOException{
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        partyMarshaller.marshallUser(userId, baos);
-        byte[] bytesXml = baos.toByteArray();
-        return bytesXml;
+    @RequestMapping(value = "/users/{userId}", produces = MediaType.APPLICATION_XML_VALUE)
+    public @ResponseBody ClassicUserDTO user(@PathVariable int userId) {
+        return ClassicUserDTO.fromUser(userService.getUser(userId), clock);
     }
-    
+
     @OwnUser
     @RequestMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException{

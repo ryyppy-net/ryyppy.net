@@ -4,10 +4,11 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.dao.PartyDAO;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
+import drinkcounter.model.Party;
 import drinkcounter.model.User;
-import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.ControllerWebTest;
 import drinkcounter.web.controllers.ui.AuthenticationController;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 /**
  * Drives the classic /API controller, used by the jQuery UI, through MockMvc and the app's
@@ -66,9 +69,6 @@ public class APIControllerWebTest {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private PartyMarshaller partyMarshaller;
 
     @BeforeEach
     public void setUp() {
@@ -102,7 +102,7 @@ public class APIControllerWebTest {
             case OWN_USER -> { }
         }
         verifyNoMoreInteractions(drinkCounterService);
-        verifyNoInteractions(userService, partyMarshaller);
+        verifyNoInteractions(userService);
     }
 
     static Stream<Arguments> passphraseRequests() {
@@ -154,7 +154,7 @@ public class APIControllerWebTest {
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService, userService, partyMarshaller);
+        verifyNoInteractions(drinkCounterService, userService);
     }
 
     static Stream<Arguments> ownUserRequests() {
@@ -206,9 +206,20 @@ public class APIControllerWebTest {
     public void memberGetsTheParty() throws Exception {
         when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
-        mvc.perform(partyXml(PARTY)).andExpect(status().isOk());
+        Party party = new Party();
+        party.setId(PARTY);
+        party.setName("Sauna");
+        when(drinkCounterService.getParty(PARTY)).thenReturn(party);
+        when(drinkCounterService.listUsersByParty(PARTY)).thenReturn(List.of(drinker(SIGNED_IN)));
 
-        verify(partyMarshaller).marshall(eq(PARTY), any());
+        mvc.perform(partyXml(PARTY))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+                .andExpect(xpath("/party/id").string(Integer.toString(PARTY)))
+                .andExpect(xpath("/party/name").string("Sauna"))
+                .andExpect(xpath("/party/users/user/id").string(Integer.toString(SIGNED_IN)))
+                .andExpect(xpath("/party/users/user/alcoholInPromilles").exists())
+                .andExpect(xpath("/party/users/user/idle").string("0"));
     }
 
     @Test
@@ -239,9 +250,12 @@ public class APIControllerWebTest {
 
     @Test
     public void ownUserGetsTheirDrinks() throws Exception {
-        mvc.perform(showDrinks(SIGNED_IN)).andExpect(status().isOk());
+        mvc.perform(showDrinks(SIGNED_IN))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+                .andExpect(xpath("/user/id").string(Integer.toString(SIGNED_IN)))
+                .andExpect(xpath("/user/drinks/count").string("0"));
 
-        verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
         verifyNoInteractions(drinkCounterService);
     }
 

@@ -6,7 +6,6 @@ import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.dao.PartyDAO;
-import drinkcounter.util.PartyMarshaller;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,7 +28,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         DrinkCounterService.class,
         PartyDAO.class,
         UserService.class,
-        PartyMarshaller.class,
         GoogleIdentityLinkingService.class,
         AuthRelayTokenService.class
 })

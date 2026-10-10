@@ -6,7 +6,6 @@ import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
@@ -45,7 +44,7 @@ public class APIControllerTest {
 
         userService = mock(UserService.class);
         session = mock(HttpSession.class);
-        controller = new APIController(mock(PartyMarshaller.class), mock(DrinkCounterService.class), userService);
+        controller = new APIController(mock(DrinkCounterService.class), userService);
     }
 
     private TimeZone originalDefaultTimeZone;
