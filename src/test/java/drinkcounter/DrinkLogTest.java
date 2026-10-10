@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,9 +21,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class DrinkCounterServiceTest {
+public class DrinkLogTest {
 
-    private DrinkCounterService service;
+    private DrinkLog drinkLog;
     private UserRepository userRepository;
     private User user;
     private DrinkRepository drinkRepository;
@@ -33,7 +32,6 @@ public class DrinkCounterServiceTest {
     public void setUp() {
         PromilleTracker.getInstance().reset();
 
-        service = new DrinkCounterService();
         userRepository = mock(UserRepository.class);
         drinkRepository = mock(DrinkRepository.class);
         AtomicInteger nextDrinkId = new AtomicInteger(1);
@@ -42,8 +40,7 @@ public class DrinkCounterServiceTest {
             drink.setId(nextDrinkId.getAndIncrement());
             return drink;
         });
-        ReflectionTestUtils.setField(service, "userRepository", userRepository);
-        ReflectionTestUtils.setField(service, "drinkRepository", drinkRepository);
+        drinkLog = new DrinkLog(drinkRepository, userRepository);
 
         user = new User();
         user.setId(1);
@@ -53,44 +50,44 @@ public class DrinkCounterServiceTest {
     }
 
     @Test
-    public void addDrinkToDateParsesLocalTimeUsingClientTimezoneOffset() {
+    public void recordAtParsesLocalTimeUsingClientTimezoneOffset() {
         // Client timezone offset is JS-style: UTC+02:00 is reported as -120.
-        service.addDrinkToDate(1, "05.03.2024 13:37", -120);
+        drinkLog.recordAt(1, "05.03.2024 13:37", -120);
 
         assertEquals(1, user.getDrinks().size());
         assertEquals(Instant.parse("2024-03-05T11:37:00Z"), user.getDrinks().get(0).getTimeStamp());
     }
 
     @Test
-    public void addDrinkToDateRejectsFutureDates() {
+    public void recordAtRejectsFutureDates() {
         String farFuture = "01.01.2099 00:00";
-        assertThrows(IllegalArgumentException.class, () -> service.addDrinkToDate(1, farFuture, 0));
+        assertThrows(IllegalArgumentException.class, () -> drinkLog.recordAt(1, farFuture, 0));
     }
 
     @Test
-    public void changeDrinkAlcoholUpdatesDrinkAndPromilles() {
-        int drinkId = service.addDrink(1, new Date());
+    public void correctAlcoholUpdatesDrinkAndPromilles() {
+        int drinkId = drinkLog.record(1, new Date());
         Drink drink = user.getDrinks().get(0);
         when(drinkRepository.findById(drinkId)).thenReturn(Optional.of(drink));
         float promillesBefore = user.getPromilles();
 
-        service.changeDrinkAlcohol(1, drinkId, drink.getAlcohol() * 2);
+        drinkLog.correctAlcohol(1, drinkId, drink.getAlcohol() * 2);
 
         assertTrue(user.getPromilles() > promillesBefore);
     }
 
     @Test
-    public void changeDrinkAlcoholRejectsAnotherUsersDrink() {
+    public void correctAlcoholRejectsAnotherUsersDrink() {
         Drink othersDrink = othersDrink();
 
-        assertThrows(EntityNotFoundException.class, () -> service.changeDrinkAlcohol(1, othersDrink.getId(), 1f));
+        assertThrows(EntityNotFoundException.class, () -> drinkLog.correctAlcohol(1, othersDrink.getId(), 1f));
     }
 
     @Test
-    public void removeDrinkFromUserRejectsAnotherUsersDrink() {
+    public void undoRejectsAnotherUsersDrink() {
         Drink othersDrink = othersDrink();
 
-        assertThrows(EntityNotFoundException.class, () -> service.removeDrinkFromUser(1, othersDrink.getId()));
+        assertThrows(EntityNotFoundException.class, () -> drinkLog.undo(1, othersDrink.getId()));
         verify(drinkRepository, never()).delete(any(Drink.class));
     }
 

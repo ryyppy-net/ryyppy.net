@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -8,6 +9,7 @@ import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.ControllerWebTest;
 import drinkcounter.web.controllers.ui.AuthenticationController;
+import java.util.Date;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,6 +64,9 @@ public class APIControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
+    private DrinkLog drinkLog;
+
+    @Autowired
     private PartyRepository partyRepository;
 
     @Autowired
@@ -101,7 +106,7 @@ public class APIControllerWebTest {
             case OWN_USER_OR_PARTY_MATE -> verify(partyRepository).countSharedParties(SIGNED_IN, OTHER_USER);
             case OWN_USER -> { }
         }
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(drinkCounterService, drinkLog);
         verifyNoInteractions(userService, partyMarshaller);
     }
 
@@ -121,7 +126,7 @@ public class APIControllerWebTest {
 
         verify(userService).getUserByPassphrase("unknown");
         verifyNoMoreInteractions(userService);
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkCounterService, drinkLog);
     }
 
     static Stream<Arguments> partyMateRequests() {
@@ -154,7 +159,7 @@ public class APIControllerWebTest {
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService, userService, partyMarshaller);
+        verifyNoInteractions(drinkCounterService, drinkLog, userService, partyMarshaller);
     }
 
     static Stream<Arguments> ownUserRequests() {
@@ -177,7 +182,7 @@ public class APIControllerWebTest {
     @Test
     public void partyMateAddsADrinkForTheOtherUser() throws Exception {
         when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
-        when(drinkCounterService.addDrink(OTHER_USER)).thenReturn(9);
+        when(drinkLog.record(eq(OTHER_USER), any(Date.class))).thenReturn(9);
 
         mvc.perform(addDrink(OTHER_USER))
                 .andExpect(status().isOk())
@@ -190,7 +195,7 @@ public class APIControllerWebTest {
 
         mvc.perform(editDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
-        verify(drinkCounterService).changeDrinkAlcohol(eq(OTHER_USER), eq(DRINK), anyFloat());
+        verify(drinkLog).correctAlcohol(eq(OTHER_USER), eq(DRINK), anyFloat());
     }
 
     @Test
@@ -199,7 +204,7 @@ public class APIControllerWebTest {
 
         mvc.perform(removeDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
-        verify(drinkCounterService).removeDrinkFromUser(OTHER_USER, DRINK);
+        verify(drinkLog).undo(OTHER_USER, DRINK);
     }
 
     @Test
@@ -242,7 +247,7 @@ public class APIControllerWebTest {
         mvc.perform(showDrinks(SIGNED_IN)).andExpect(status().isOk());
 
         verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkCounterService, drinkLog);
     }
 
     @Test

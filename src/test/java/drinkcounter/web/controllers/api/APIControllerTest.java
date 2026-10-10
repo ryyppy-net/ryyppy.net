@@ -3,6 +3,7 @@ package drinkcounter.web.controllers.api;
 import com.csvreader.CsvReader;
 import drinkcounter.PromilleTracker;
 import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.UserService;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -45,7 +46,7 @@ public class APIControllerTest {
 
         userService = mock(UserService.class);
         session = mock(HttpSession.class);
-        controller = new APIController(mock(PartyMarshaller.class), mock(DrinkCounterService.class), userService);
+        controller = new APIController(mock(PartyMarshaller.class), mock(DrinkCounterService.class), mock(DrinkLog.class), userService);
     }
 
     private TimeZone originalDefaultTimeZone;

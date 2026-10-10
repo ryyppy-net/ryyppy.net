@@ -2,6 +2,7 @@ package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
 import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.OwnUser;
@@ -56,14 +57,16 @@ public class APIController {
 
     private final PartyMarshaller partyMarshaller;
     private final DrinkCounterService drinkCounterService;
+    private final DrinkLog drinkLog;
     private final UserService userService;
 
     private Clock clock = Clock.systemUTC();
 
     public APIController(PartyMarshaller partyMarshaller, DrinkCounterService drinkCounterService,
-            UserService userService) {
+            DrinkLog drinkLog, UserService userService) {
         this.partyMarshaller = partyMarshaller;
         this.drinkCounterService = drinkCounterService;
+        this.drinkLog = drinkLog;
         this.userService = userService;
     }
 
@@ -93,10 +96,10 @@ public class APIController {
     @RequestParam(value="alcohol", required=false) Float alcoholPercentage ){
         if(volume != null && alcoholPercentage != null){
             float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
-            return Integer.toString(drinkCounterService.addDrink(userId, alcoholAmount));
+            return Integer.toString(drinkLog.record(userId, alcoholAmount));
         }
         
-        return Integer.toString(drinkCounterService.addDrink(userId));
+        return Integer.toString(drinkLog.record(userId, new Date()));
     }
 
     @OwnUserOrPartyMate
@@ -104,7 +107,7 @@ public class APIController {
     public @ResponseBody String editDrinkOfUser(@PathVariable int userId, @PathVariable String drinkId,
     @RequestParam("volume") Float volume,
     @RequestParam("alcohol") Float alcoholPercentage){
-        drinkCounterService.changeDrinkAlcohol(userId, Integer.parseInt(drinkId),
+        drinkLog.correctAlcohol(userId, Integer.parseInt(drinkId),
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
         return "";
     }
@@ -113,7 +116,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
     public @ResponseBody String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId){
         int drinkIdInt = Integer.parseInt(drinkId);
-        drinkCounterService.removeDrinkFromUser(userId, drinkIdInt);
+        drinkLog.undo(userId, drinkIdInt);
         log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userId));
         return "";
     }
@@ -269,9 +272,9 @@ public class APIController {
 
         try {
             if (time == null || time.equals("") || time.equals("0"))
-                drinkCounterService.addDrink(user.getId());
+                drinkLog.record(user.getId(), new Date());
             else
-                drinkCounterService.addDrink(user.getId(), new Date(Long.parseLong(time)));
+                drinkLog.record(user.getId(), new Date(Long.parseLong(time)));
         } catch (Exception e) {
             return "-1";
         }
@@ -287,7 +290,7 @@ public class APIController {
 
         int count = user.getDrinks().size();
         if (count > 0)
-            drinkCounterService.removeDrinkFromUser(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
+            drinkLog.undo(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
 
         return getUserCsv(user);
     }

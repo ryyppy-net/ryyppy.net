@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -49,7 +49,7 @@ public class UserControllerWebTest {
     private UserService userService;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private DrinkLog drinkLog;
 
     @Autowired
     private PartyRepository partyRepository;
@@ -128,7 +128,7 @@ public class UserControllerWebTest {
 
         verify(userService, never()).getUser(7);
         verify(userService, never()).updateUser(any());
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(drinkCounterService).addDrinkToDate(42, DATE, 0.0);
+        verify(drinkLog).recordAt(42, DATE, 0.0);
     }
 
     @Test
@@ -145,7 +145,7 @@ public class UserControllerWebTest {
         mvc.perform(addDrinkToDate(42).sessionAttr(AuthenticationController.TIMEZONEOFFSET, -120.0))
                 .andExpect(status().is3xxRedirection());
 
-        verify(drinkCounterService).addDrinkToDate(42, DATE, -120.0);
+        verify(drinkLog).recordAt(42, DATE, -120.0);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class UserControllerWebTest {
                 .andExpect(redirectedUrl("user"));
 
         verify(partyRepository).countSharedParties(42, 7);
-        verify(drinkCounterService).addDrinkToDate(7, DATE, 0.0);
+        verify(drinkLog).recordAt(7, DATE, 0.0);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class UserControllerWebTest {
         mvc.perform(addDrinkToDate(7)).andExpect(status().isForbidden());
 
         verify(partyRepository).countSharedParties(42, 7);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(drinkLog);
     }
 
     @Test
@@ -174,7 +174,7 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(drinkCounterService).removeDrinkFromUser(42, 5);
+        verify(drinkLog).undo(42, 5);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class UserControllerWebTest {
 
         mvc.perform(removeDrink(7)).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
     }
 
     @Test
@@ -204,7 +204,7 @@ public class UserControllerWebTest {
         mvc.perform(getUserByEmail(3)).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(3, 42);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(drinkLog);
         verify(userService, never()).getUserByEmail(any());
     }
 
@@ -215,7 +215,7 @@ public class UserControllerWebTest {
         mvc.perform(removeDrink("abc")).andExpect(status().isBadRequest());
         mvc.perform(getUserByEmail("abc")).andExpect(status().isBadRequest());
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
         verify(userService, never()).updateUser(any());
     }
 
@@ -228,7 +228,7 @@ public class UserControllerWebTest {
                     .andExpect(redirectedUrl("/ui/login"));
         }
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
         verify(userService, never()).updateUser(any());
     }
 
