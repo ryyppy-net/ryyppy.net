@@ -17,7 +17,7 @@
 
 package drinkcounter.model;
 
-import drinkcounter.AlcoholServiceImpl;
+import drinkcounter.AlcoholService;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -105,7 +105,7 @@ public class User extends AbstractEntity{
     }
 
     public void drink(Drink drink){
-        AlcoholServiceImpl.getInstance().drinkAdded(this, drink);
+        AlcoholService.getInstance().drinkAdded(this, drink);
         getDrinks().add(drink);
         drink.setDrinker(this);
     }
@@ -131,12 +131,12 @@ public class User extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
-        AlcoholServiceImpl.getInstance().initializeUser(this);
+        AlcoholService.getInstance().initializeUser(this);
     }
 
     public void setSex(Sex sex) {
         this.sex = sex;
-        AlcoholServiceImpl.getInstance().initializeUser(this);
+        AlcoholService.getInstance().initializeUser(this);
     }
 
     @Enumerated(EnumType.STRING)
@@ -199,31 +199,31 @@ public class User extends AbstractEntity{
     public void removeDrink(Drink drink) {
         getDrinks().remove(drink);
         drink.setDrinker(null);
-        AlcoholServiceImpl.getInstance().drinkRemoved(this, drink);
+        AlcoholService.getInstance().drinkRemoved(this, drink);
     }
 
     public void changeDrinkAlcohol(Drink drink, float alcohol) {
         drink.setAlcohol(alcohol);
-        AlcoholServiceImpl.getInstance().drinkChanged(this, drink);
+        AlcoholService.getInstance().drinkChanged(this, drink);
     }
 
     @Transient
     public float getPromilles() {
-        return AlcoholServiceImpl.getInstance().getPromilles(this);
+        return AlcoholService.getInstance().getPromilles(this);
     }
 
     @Transient
     public int getTotalDrinks() {
-        return AlcoholServiceImpl.getInstance().getTotalDrinks(this);
+        return AlcoholService.getInstance().getTotalDrinks(this);
     }
 
     public List<Float> getPromillesAtInterval(Date startTime, Date endTime, int intervalMs) {
-        return AlcoholServiceImpl.getInstance().getPromillesAtInterval(this, startTime, endTime, intervalMs);
+        return AlcoholService.getInstance().getPromillesAtInterval(this, startTime, endTime, intervalMs);
     }
 
     @Transient
     public float getBloodAlcoholGrams() {
-        return AlcoholServiceImpl.getInstance().getBloodAlcoholGrams(this);
+        return AlcoholService.getInstance().getBloodAlcoholGrams(this);
     }
 
     public String getPassword() {
