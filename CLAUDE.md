@@ -107,6 +107,12 @@ takes `@LoggedInUser User`. Sign tests in with `@WithDrinkcounterUser`, not `@Wi
 the app's principal is `DrinkcounterUserDetails`, and both annotations fail the request with
 any other principal.
 
+Access rules are `@PreAuthorize` meta-annotations in `authentication/`: `@PartyMember` reads the
+handler's `partyId` parameter, `@OwnUser` and `@OwnUserOrPartyMate` its numeric `userId`. A failed
+rule is a 403. `AccessAnnotationsTest` covers the rules themselves; in a web test, stub
+`DrinkCounterService.isUserParticipant` (or `shareParty`) and assert an outsider gets 403 with no
+service side effect.
+
 ### End-to-end tests (Playwright)
 
 A Playwright suite in `e2e/` drives the real app through a browser, covering both

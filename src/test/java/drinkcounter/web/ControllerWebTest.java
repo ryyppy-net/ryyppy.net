@@ -5,6 +5,7 @@ import drinkcounter.UserService;
 import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
+import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.util.PartyMarshaller;
 import java.lang.annotation.ElementType;
@@ -24,7 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
-@Import({WebSecurityConfiguration.class, SoundManifest.class})
+@Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class})
 @MockitoBean(types = {
         DrinkCounterService.class,
         UserService.class,

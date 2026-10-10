@@ -12,12 +12,18 @@ import jakarta.servlet.ServletException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -71,12 +78,14 @@ public class PartyApiControllerWebTest {
         party.setId(1);
         party.setName("Sauna");
         party.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
+        party.addParticipant(signedIn);
         party.addParticipant(participant);
 
         when(userService.getUser(42)).thenReturn(signedIn);
         when(userService.getUser(2)).thenReturn(participant);
         when(userService.getUser(3)).thenReturn(outsider);
         when(drinkCounterService.getParty(1)).thenReturn(party);
+        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(true);
 
         Drink saved = new Drink();
         saved.setId(7);
@@ -93,7 +102,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].name").value("Sauna"))
-                .andExpect(jsonPath("$[0].participants.length()").value(1));
+                .andExpect(jsonPath("$[0].participants.length()").value(2));
     }
 
     @Test
@@ -193,6 +202,106 @@ public class PartyApiControllerWebTest {
         assertThrows(ServletException.class, () -> mvc.perform(delete(PARTIES + "/1/participants/3/drinks/7")));
 
         verify(drinkCounterService, never()).removeDrinkFromUser(anyInt(), anyInt());
+    }
+
+    @Test
+    public void memberGetsTheParty() throws Exception {
+        mvc.perform(get(PARTIES + "/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Sauna"));
+    }
+
+    @Test
+    public void memberGetsTheParticipants() throws Exception {
+        mvc.perform(get(PARTIES + "/1/participants"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].id", containsInAnyOrder(42, 2)));
+    }
+
+    @Test
+    public void memberGetsAParticipant() throws Exception {
+        mvc.perform(get(PARTIES + "/1/participants/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(2));
+    }
+
+    @Test
+    public void memberAddsAGuestParticipant() throws Exception {
+        when(userService.addUser(any(User.class))).thenAnswer(invocation -> {
+            User guest = invocation.getArgument(0);
+            guest.setId(8);
+            return guest;
+        });
+
+        mvc.perform(post(PARTIES + "/1/participants").param("name", "Vieras").param("sex", "FEMALE").param("weight", "60"))
+                .andExpect(status().isOk());
+
+        verify(drinkCounterService).linkUserToParty(8, 1);
+    }
+
+    @Test
+    public void memberAddsAParticipantByEmail() throws Exception {
+        when(userService.getUserByEmail("outsider@example.com")).thenReturn(outsider);
+
+        mvc.perform(post(PARTIES + "/1/participants").param("email", "outsider@example.com"))
+                .andExpect(status().isOk());
+
+        verify(drinkCounterService).linkUserToParty(3, 1);
+    }
+
+    @Test
+    public void memberRemovesAParticipant() throws Exception {
+        mvc.perform(delete(PARTIES + "/1/participants/2"))
+                .andExpect(status().isOk());
+
+        verify(drinkCounterService).unlinkUserFromParty(2, 1);
+    }
+
+    @Test
+    public void memberInvitesAnyUser() throws Exception {
+        mvc.perform(post(PARTIES + "/1/invitations").param("userId", "3"))
+                .andExpect(status().isOk());
+
+        verify(drinkCounterService).linkUserToParty(3, 1);
+    }
+
+    static Stream<Arguments> partyRequests() {
+        return Stream.of(
+                Arguments.of("get party", get(PARTIES + "/1")),
+                Arguments.of("get participants", get(PARTIES + "/1/participants")),
+                Arguments.of("add guest", post(PARTIES + "/1/participants").param("name", "Vieras").param("sex", "MALE").param("weight", "80")),
+                Arguments.of("add participant by email", post(PARTIES + "/1/participants").param("email", "user@example.com")),
+                Arguments.of("remove participant", delete(PARTIES + "/1/participants/2")),
+                Arguments.of("get participant", get(PARTIES + "/1/participants/2")),
+                Arguments.of("add drink", post(PARTIES + "/1/participants/2/drinks")),
+                Arguments.of("change drink", put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05")),
+                Arguments.of("remove drink", delete(PARTIES + "/1/participants/2/drinks/7")),
+                Arguments.of("suggest invitations", get(PARTIES + "/1/invitations")),
+                Arguments.of("invite", post(PARTIES + "/1/invitations").param("userId", "42")));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("partyRequests")
+    public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request) throws Exception {
+        when(drinkCounterService.isUserParticipant(1, 42)).thenReturn(false);
+
+        mvc.perform(request).andExpect(status().isForbidden());
+
+        verify(drinkCounterService).isUserParticipant(1, 42);
+        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void anonymousPartyRequestIsSentToTheLoginPage() throws Exception {
+        mvc.perform(get(PARTIES + "/1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/ui/login"));
+
+        verifyNoInteractions(drinkCounterService);
     }
 
     @Test
