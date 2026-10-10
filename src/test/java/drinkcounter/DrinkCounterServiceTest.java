@@ -1,7 +1,7 @@
 package drinkcounter;
 
-import drinkcounter.dao.DrinkDAO;
-import drinkcounter.dao.UserDAO;
+import drinkcounter.repository.DrinkRepository;
+import drinkcounter.repository.UserRepository;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,31 +25,31 @@ import static org.mockito.Mockito.when;
 public class DrinkCounterServiceTest {
 
     private DrinkCounterService service;
-    private UserDAO userDAO;
+    private UserRepository userRepository;
     private User user;
-    private DrinkDAO drinkDAO;
+    private DrinkRepository drinkRepository;
 
     @BeforeEach
     public void setUp() {
         PromilleTracker.getInstance().reset();
 
         service = new DrinkCounterService();
-        userDAO = mock(UserDAO.class);
-        drinkDAO = mock(DrinkDAO.class);
+        userRepository = mock(UserRepository.class);
+        drinkRepository = mock(DrinkRepository.class);
         AtomicInteger nextDrinkId = new AtomicInteger(1);
-        when(drinkDAO.save(any(Drink.class))).thenAnswer(invocation -> {
+        when(drinkRepository.save(any(Drink.class))).thenAnswer(invocation -> {
             Drink drink = invocation.getArgument(0);
             drink.setId(nextDrinkId.getAndIncrement());
             return drink;
         });
-        ReflectionTestUtils.setField(service, "userDAO", userDAO);
-        ReflectionTestUtils.setField(service, "drinkDao", drinkDAO);
+        ReflectionTestUtils.setField(service, "userRepository", userRepository);
+        ReflectionTestUtils.setField(service, "drinkRepository", drinkRepository);
 
         user = new User();
         user.setId(1);
         user.setWeight(80);
         user.setSex(User.Sex.MALE);
-        when(userDAO.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.findById(1)).thenReturn(Optional.of(user));
     }
 
     @Test
@@ -71,7 +71,7 @@ public class DrinkCounterServiceTest {
     public void changeDrinkAlcoholUpdatesDrinkAndPromilles() {
         int drinkId = service.addDrink(1, new Date());
         Drink drink = user.getDrinks().get(0);
-        when(drinkDAO.findById(drinkId)).thenReturn(Optional.of(drink));
+        when(drinkRepository.findById(drinkId)).thenReturn(Optional.of(drink));
         float promillesBefore = user.getPromilles();
 
         service.changeDrinkAlcohol(1, drinkId, drink.getAlcohol() * 2);
@@ -91,7 +91,7 @@ public class DrinkCounterServiceTest {
         Drink othersDrink = othersDrink();
 
         assertThrows(EntityNotFoundException.class, () -> service.removeDrinkFromUser(1, othersDrink.getId()));
-        verify(drinkDAO, never()).delete(any(Drink.class));
+        verify(drinkRepository, never()).delete(any(Drink.class));
     }
 
     private Drink othersDrink() {
@@ -100,7 +100,7 @@ public class DrinkCounterServiceTest {
         Drink drink = new Drink();
         drink.setId(99);
         drink.setDrinker(other);
-        when(drinkDAO.findById(99)).thenReturn(Optional.of(drink));
+        when(drinkRepository.findById(99)).thenReturn(Optional.of(drink));
         return drink;
     }
 }

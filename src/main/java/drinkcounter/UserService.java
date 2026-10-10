@@ -1,7 +1,7 @@
 package drinkcounter;
 
-import drinkcounter.dao.DrinkDAO;
-import drinkcounter.dao.UserDAO;
+import drinkcounter.repository.DrinkRepository;
+import drinkcounter.repository.UserRepository;
 import drinkcounter.model.User;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,25 +23,25 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(DrinkCounterService.class);
 
-    @Autowired UserDAO userDAO;
-    @Autowired DrinkDAO drinkDAO;
+    @Autowired UserRepository userRepository;
+    @Autowired DrinkRepository drinkRepository;
 
     @Transactional
     public void updateUser(User user) {
-        userDAO.save(user);
+        userRepository.save(user);
     }
 
     @Transactional
     public User addUser(User user) {
         if (!user.isGuest())
             user.setEmail(user.getEmail().toLowerCase());
-        userDAO.save(user);
+        userRepository.save(user);
         log.info("User with name {} was added", user.getName());
         return user;
     }
 
     public User getUser(int userId) {
-        return userDAO.findById(userId).orElse(null);
+        return userRepository.findById(userId).orElse(null);
     }
 
     @Transactional
@@ -50,9 +50,9 @@ public class UserService {
         
         /*
          * TODO Does this cascade automatically? Test if these are needed
-        List<Drink> drinks = drinkDAO.findByDrinker(user);
+        List<Drink> drinks = drinkRepository.findByDrinker(user);
         for (Drink drink : drinks) {
-            drinkDAO.delete(drink);
+            drinkRepository.delete(drink);
         }
 
         // not sure if necessary, stupid object db's
@@ -65,14 +65,14 @@ public class UserService {
          * 
          */
 
-        userDAO.delete(user);
+        userRepository.delete(user);
     }
 
     public User getUserByOpenId(String openId) {
         if (openId == null || openId.length() == 0)
             throw new IllegalArgumentException("openId");
 
-        return userDAO.findByOpenId(openId);
+        return userRepository.findByOpenId(openId);
     }
     
     public boolean emailIsCorrect(String email) {
@@ -87,7 +87,7 @@ public class UserService {
     public User getUserByEmail(String email) {
         if (email == null || email.length() == 0) return null;
         
-        return userDAO.findByEmail(email.toLowerCase());
+        return userRepository.findByEmail(email.toLowerCase());
     }
 
     public void generatePassphrase(User user) {
@@ -97,6 +97,6 @@ public class UserService {
     }
 
     public User getUserByPassphrase(String passphrase) {
-        return userDAO.findByPassphrase(passphrase);
+        return userRepository.findByPassphrase(passphrase);
     }
 }

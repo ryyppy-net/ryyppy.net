@@ -1,7 +1,7 @@
 package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.dao.PartyDAO;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
@@ -52,7 +52,7 @@ public class UserControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
-    private PartyDAO partyDAO;
+    private PartyRepository partyRepository;
 
     private User user;
 
@@ -122,7 +122,7 @@ public class UserControllerWebTest {
 
     @Test
     public void modifyUserIsForbiddenForAnotherUserEvenInASharedParty() throws Exception {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(modifyUser(7)).andExpect(status().isForbidden());
 
@@ -150,13 +150,13 @@ public class UserControllerWebTest {
 
     @Test
     public void addDrinkToDateAddsADrinkForAPartyMate()throws Exception {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(addDrinkToDate(7))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(partyDAO).countSharedParties(42, 7);
+        verify(partyRepository).countSharedParties(42, 7);
         verify(drinkCounterService).addDrinkToDate(7, DATE, 0.0);
     }
 
@@ -164,7 +164,7 @@ public class UserControllerWebTest {
     public void addDrinkToDateIsForbiddenForAnOutsider() throws Exception {
         mvc.perform(addDrinkToDate(7)).andExpect(status().isForbidden());
 
-        verify(partyDAO).countSharedParties(42, 7);
+        verify(partyRepository).countSharedParties(42, 7);
         verifyNoMoreInteractions(drinkCounterService);
     }
 
@@ -179,7 +179,7 @@ public class UserControllerWebTest {
 
     @Test
     public void removeDrinkIsForbiddenForAnotherUserEvenInASharedParty() throws Exception {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(removeDrink(7)).andExpect(status().isForbidden());
 
@@ -190,7 +190,7 @@ public class UserControllerWebTest {
     public void getUserByEmailAnswersAMemberOfTheParty() throws Exception {
         User invitee = new User();
         invitee.setId(9);
-        when(partyDAO.countUserParticipations(3, 42)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(3, 42)).thenReturn(1L);
         when(userService.emailIsCorrect("friend@example.com")).thenReturn(true);
         when(userService.getUserByEmail("friend@example.com")).thenReturn(invitee);
 
@@ -203,7 +203,7 @@ public class UserControllerWebTest {
     public void getUserByEmailIsForbiddenForAnOutsiderOfTheParty() throws Exception {
         mvc.perform(getUserByEmail(3)).andExpect(status().isForbidden());
 
-        verify(partyDAO).countUserParticipations(3, 42);
+        verify(partyRepository).countUserParticipations(3, 42);
         verifyNoMoreInteractions(drinkCounterService);
         verify(userService, never()).getUserByEmail(any());
     }

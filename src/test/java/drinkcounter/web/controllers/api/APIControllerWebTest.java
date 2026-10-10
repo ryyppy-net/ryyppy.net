@@ -1,7 +1,7 @@
 package drinkcounter.web.controllers.api;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.dao.PartyDAO;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.User;
@@ -62,7 +62,7 @@ public class APIControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
-    private PartyDAO partyDAO;
+    private PartyRepository partyRepository;
 
     @Autowired
     private UserService userService;
@@ -97,8 +97,8 @@ public class APIControllerWebTest {
         mvc.perform(request).andExpect(status().isForbidden());
 
         switch (rule) {
-            case PARTY_MEMBER -> verify(partyDAO).countUserParticipations(PARTY, SIGNED_IN);
-            case OWN_USER_OR_PARTY_MATE -> verify(partyDAO).countSharedParties(SIGNED_IN, OTHER_USER);
+            case PARTY_MEMBER -> verify(partyRepository).countUserParticipations(PARTY, SIGNED_IN);
+            case OWN_USER_OR_PARTY_MATE -> verify(partyRepository).countSharedParties(SIGNED_IN, OTHER_USER);
             case OWN_USER -> { }
         }
         verifyNoMoreInteractions(drinkCounterService);
@@ -136,7 +136,7 @@ public class APIControllerWebTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("partyMateRequests")
     public void partyMateIsAllowed(String name, MockHttpServletRequestBuilder request) throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isOk());
     }
@@ -150,7 +150,7 @@ public class APIControllerWebTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("ownOnlyRequests")
     public void partyMateIsForbiddenFromTheFullDrinkLog(String name, MockHttpServletRequestBuilder request) throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isForbidden());
 
@@ -176,7 +176,7 @@ public class APIControllerWebTest {
 
     @Test
     public void partyMateAddsADrinkForTheOtherUser() throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
         when(drinkCounterService.addDrink(OTHER_USER)).thenReturn(9);
 
         mvc.perform(addDrink(OTHER_USER))
@@ -186,7 +186,7 @@ public class APIControllerWebTest {
 
     @Test
     public void partyMateEditsTheOtherUsersDrink() throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(editDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
@@ -195,7 +195,7 @@ public class APIControllerWebTest {
 
     @Test
     public void partyMateRemovesTheOtherUsersDrink() throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(removeDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
@@ -204,7 +204,7 @@ public class APIControllerWebTest {
 
     @Test
     public void memberGetsTheParty() throws Exception {
-        when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
         mvc.perform(partyXml(PARTY)).andExpect(status().isOk());
 
@@ -213,7 +213,7 @@ public class APIControllerWebTest {
 
     @Test
     public void memberAddsAGuest() throws Exception {
-        when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
         when(userService.addUser(any(User.class))).thenAnswer(invocation -> {
             User guest = invocation.getArgument(0);
             guest.setId(8);
@@ -229,7 +229,7 @@ public class APIControllerWebTest {
 
     @Test
     public void memberLinksAUserToTheParty() throws Exception {
-        when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
         mvc.perform(linkUser(PARTY, OTHER_USER))
                 .andExpect(status().isOk());

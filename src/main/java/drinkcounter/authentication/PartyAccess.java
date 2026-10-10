@@ -1,6 +1,6 @@
 package drinkcounter.authentication;
 
-import drinkcounter.dao.PartyDAO;
+import drinkcounter.repository.PartyRepository;
 import org.springframework.stereotype.Component;
 
 /**
@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 @Component("partyAccess")
 public class PartyAccess {
 
-    private final PartyDAO partyDao;
+    private final PartyRepository partyRepository;
 
-    public PartyAccess(PartyDAO partyDao) {
-        this.partyDao = partyDao;
+    public PartyAccess(PartyRepository partyRepository) {
+        this.partyRepository = partyRepository;
     }
 
     public boolean isMember(int partyId, int userId) {
-        return partyDao.countUserParticipations(partyId, userId) > 0;
+        return partyRepository.countUserParticipations(partyId, userId) > 0;
     }
 
     public boolean isPartyMate(int userId, int otherUserId) {
-        return partyDao.countSharedParties(userId, otherUserId) > 0;
+        return partyRepository.countSharedParties(userId, otherUserId) > 0;
     }
 }
