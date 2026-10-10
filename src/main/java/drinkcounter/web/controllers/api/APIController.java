@@ -258,10 +258,6 @@ public class APIController {
         return new ResponseEntity(HttpStatus.FORBIDDEN);
     }
 
-
-
-
-
     @RequestMapping("/passphrase/{passphrase}")
     public @ResponseBody String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());

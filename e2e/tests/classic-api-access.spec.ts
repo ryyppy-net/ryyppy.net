@@ -19,6 +19,7 @@ test("an outsider is forbidden from another user's classic API and changes nothi
     const party = await (await owner.post(PARTIES, { form: { name: 'Private classic party' } })).json();
     const drinkId = await (await owner.get(`/API/users/${ownerId}/add-drink`)).text();
     const participantsBefore = await (await owner.get(`${PARTIES}/${party.id}/participants`)).json();
+    const drinksBefore = await (await owner.get('/API/v2/profile/drinks')).json();
 
     const p = `/API/parties/${party.id}`;
     const u = `/API/users/${ownerId}`;
@@ -42,6 +43,7 @@ test("an outsider is forbidden from another user's classic API and changes nothi
     const participantsAfter = await (await owner.get(`${PARTIES}/${party.id}/participants`)).json();
     expect(participantsAfter.map((x: any) => [x.id, x.totalDrinks]))
       .toEqual(participantsBefore.map((x: any) => [x.id, x.totalDrinks]));
+    expect(await (await owner.get('/API/v2/profile/drinks')).json()).toEqual(drinksBefore);
   } finally {
     for (const context of contexts) {
       await context.close();

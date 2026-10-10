@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -105,31 +104,37 @@ public class APIControllerWebTest {
                 .param("name", "Vieras").param("sex", "MALE").param("weight", "80");
     }
 
-    private static MockHttpServletRequestBuilder linkSignedInUser() {
-        return get("/API/parties/{partyId}/link-user-to-party/{userId}", PARTY, SIGNED_IN);
+    private static MockHttpServletRequestBuilder linkUser(int userId) {
+        return get("/API/parties/{partyId}/link-user-to-party/{userId}", PARTY, userId);
     }
+
+    private enum Rule { PARTY_MEMBER, OWN_USER, OWN_USER_OR_PARTY_MATE }
 
     static Stream<Arguments> outsiderRequests() {
         return Stream.of(
-                Arguments.of("party", partyXml()),
-                Arguments.of("add guest to party", addGuest()),
-                Arguments.of("link user to party", linkSignedInUser()),
-                Arguments.of("show drinks", showDrinks(OTHER_USER)),
-                Arguments.of("drinks per day", drinksPerDay(OTHER_USER)),
-                Arguments.of("user", userXml(OTHER_USER)),
-                Arguments.of("add drink", addDrink(OTHER_USER)),
-                Arguments.of("edit drink", editDrink(OTHER_USER)),
-                Arguments.of("remove drink", removeDrink(OTHER_USER)),
-                Arguments.of("show history", showHistory(OTHER_USER)));
+                Arguments.of("party", partyXml(), Rule.PARTY_MEMBER),
+                Arguments.of("add guest to party", addGuest(), Rule.PARTY_MEMBER),
+                Arguments.of("link user to party", linkUser(SIGNED_IN), Rule.PARTY_MEMBER),
+                Arguments.of("show drinks", showDrinks(OTHER_USER), Rule.OWN_USER),
+                Arguments.of("drinks per day", drinksPerDay(OTHER_USER), Rule.OWN_USER),
+                Arguments.of("user", userXml(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("add drink", addDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("edit drink", editDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("remove drink", removeDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("show history", showHistory(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("outsiderRequests")
-    public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request) throws Exception {
+    public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request, Rule rule)
+            throws Exception {
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verify(drinkCounterService, atMost(1)).isUserParticipant(PARTY, SIGNED_IN);
-        verify(drinkCounterService, atMost(1)).shareParty(SIGNED_IN, OTHER_USER);
+        switch (rule) {
+            case PARTY_MEMBER -> verify(drinkCounterService).isUserParticipant(PARTY, SIGNED_IN);
+            case OWN_USER_OR_PARTY_MATE -> verify(drinkCounterService).shareParty(SIGNED_IN, OTHER_USER);
+            case OWN_USER -> { }
+        }
         verifyNoMoreInteractions(drinkCounterService);
         verifyNoInteractions(userService, partyMarshaller);
     }
@@ -164,7 +169,7 @@ public class APIControllerWebTest {
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verifyNoInteractions(userService, partyMarshaller);
+        verifyNoInteractions(drinkCounterService, userService, partyMarshaller);
     }
 
     static Stream<Arguments> ownUserRequests() {
@@ -241,7 +246,7 @@ public class APIControllerWebTest {
     public void memberLinksAUserToTheParty() throws Exception {
         when(drinkCounterService.isUserParticipant(PARTY, SIGNED_IN)).thenReturn(true);
 
-        mvc.perform(get("/API/parties/{partyId}/link-user-to-party/{userId}", PARTY, OTHER_USER))
+        mvc.perform(linkUser(OTHER_USER))
                 .andExpect(status().isOk());
 
         verify(drinkCounterService).linkUserToParty(OTHER_USER, PARTY);
