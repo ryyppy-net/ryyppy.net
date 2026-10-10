@@ -212,6 +212,23 @@ public class APIControllerWebTest {
     }
 
     @Test
+    public void partyMateGetsTheOtherUserAsXml() throws Exception {
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        User other = drinker(OTHER_USER);
+        other.setName("Matti");
+        when(userAccounts.get(OTHER_USER)).thenReturn(other);
+
+        mvc.perform(userXml(OTHER_USER))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
+                .andExpect(xpath("/user/id").string(Integer.toString(OTHER_USER)))
+                .andExpect(xpath("/user/name").string("Matti"))
+                .andExpect(xpath("/user/alcoholInPromilles").exists())
+                .andExpect(xpath("/user/totalDrinks").string("0"))
+                .andExpect(xpath("/user/idle").string("0"));
+    }
+
+    @Test
     public void memberGetsTheParty() throws Exception {
         when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
