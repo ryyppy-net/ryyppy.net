@@ -251,7 +251,7 @@ public class APIControllerWebTest {
         mvc.perform(showDrinks(SIGNED_IN)).andExpect(status().isOk());
 
         verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
-        verifyNoInteractions(drinkCounterService, drinkLog, drinkLog);
+        verifyNoInteractions(drinkCounterService, drinkLog);
     }
 
     @Test

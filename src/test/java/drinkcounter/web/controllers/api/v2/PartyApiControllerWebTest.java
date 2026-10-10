@@ -309,7 +309,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService, drinkLog, drinkLog);
+        verifyNoInteractions(drinkCounterService, drinkLog);
     }
 
     @Test
