@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.AlcoholService;
+import drinkcounter.PromilleTracker;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Duration;
@@ -20,7 +20,7 @@ public class SlopeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        AlcoholService.getInstance().reset();
+        PromilleTracker.getInstance().reset();
     }
 
     @Test

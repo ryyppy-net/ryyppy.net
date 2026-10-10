@@ -1,6 +1,6 @@
 package drinkcounter.model;
 
-import drinkcounter.AlcoholService;
+import drinkcounter.PromilleTracker;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import java.time.Duration;
 import java.time.Instant;
@@ -36,7 +36,7 @@ public class UserTest {
         woman90.setSex(User.Sex.FEMALE);
         woman90.setId(4);
 
-        AlcoholService.getInstance().reset();
+        PromilleTracker.getInstance().reset();
     }
 
     // Basic tests
