@@ -1,7 +1,7 @@
 package drinkcounter.util;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.model.Party;
@@ -30,7 +30,7 @@ public class PartyMarshaller {
     @Autowired
     private DrinkCounterService service;
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
 
     public void marshall(int partyId, OutputStream out) {
         try {
@@ -114,7 +114,7 @@ public class PartyMarshaller {
 
     public void marshallDrinks(int userId, OutputStream out) {
         try {
-            User user = userService.getUser(userId);
+            User user = userAccounts.get(userId);
 
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             DocumentBuilder b = f.newDocumentBuilder();
@@ -143,7 +143,7 @@ public class PartyMarshaller {
 
     public void marshallUser(int userId, ByteArrayOutputStream out) {
         try {
-            User user = userService.getUser(userId);
+            User user = userAccounts.get(userId);
 
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             DocumentBuilder b = f.newDocumentBuilder();

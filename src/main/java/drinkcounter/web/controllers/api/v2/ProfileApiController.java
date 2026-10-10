@@ -5,7 +5,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
@@ -31,13 +31,13 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileApiController {
 
     private final DrinkCounterService drinkCounterService;
-    private final UserService userService;
+    private final UserAccounts userAccounts;
 
     private Clock clock = Clock.systemUTC();
 
-    public ProfileApiController(DrinkCounterService drinkCounterService, UserService userService) {
+    public ProfileApiController(DrinkCounterService drinkCounterService, UserAccounts userAccounts) {
         this.drinkCounterService = drinkCounterService;
-        this.userService = userService;
+        this.userAccounts = userAccounts;
     }
 
     @GetMapping
@@ -57,7 +57,7 @@ public class ProfileApiController {
         user.setEmail(email);
         user.setSex(sex);
         user.setWeight(weight); 
-        userService.updateUser(user);
+        userAccounts.update(user);
     }
 
     @PostMapping("drinks")

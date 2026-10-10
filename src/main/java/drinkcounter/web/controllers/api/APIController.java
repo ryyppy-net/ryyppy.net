@@ -2,7 +2,8 @@ package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
 import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
@@ -56,15 +57,17 @@ public class APIController {
 
     private final PartyMarshaller partyMarshaller;
     private final DrinkCounterService drinkCounterService;
-    private final UserService userService;
+    private final UserAccounts userAccounts;
+    private final PassphraseLogin passphraseLogin;
 
     private Clock clock = Clock.systemUTC();
 
     public APIController(PartyMarshaller partyMarshaller, DrinkCounterService drinkCounterService,
-            UserService userService) {
+            UserAccounts userAccounts, PassphraseLogin passphraseLogin) {
         this.partyMarshaller = partyMarshaller;
         this.drinkCounterService = drinkCounterService;
-        this.userService = userService;
+        this.userAccounts = userAccounts;
+        this.passphraseLogin = passphraseLogin;
     }
 
     @PartyMember
@@ -130,7 +133,7 @@ public class APIController {
     @OwnUser
     @RequestMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException{
-        User user = userService.getUser(userId);
+        User user = userAccounts.get(userId);
         List<Drink> drinks = user.getDrinks();
 
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
@@ -178,7 +181,7 @@ public class APIController {
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
-        User user = userService.getUser(userId);
+        User user = userAccounts.get(userId);
         List<String[]> history = getSlopes(user, false);
 
         for (String[] s : history) {
@@ -201,7 +204,7 @@ public class APIController {
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
         user.setGuest(true);
-        userService.addUser(user);
+        userAccounts.add(user);
         drinkCounterService.linkUserToParty(user.getId(), partyId);
         return user.getId().toString();
     }
@@ -254,7 +257,7 @@ public class APIController {
     
     @RequestMapping("/passphrase/{passphrase}")
     public @ResponseBody String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
-        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
@@ -263,7 +266,7 @@ public class APIController {
 
     @RequestMapping("/passphrase/{passphrase}/add-drink/{time}")
     public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
-        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
@@ -281,7 +284,7 @@ public class APIController {
 
     @RequestMapping("/passphrase/{passphrase}/undo-drink")
     public @ResponseBody String undoDrink(@PathVariable String passphrase) throws IOException{
-        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 

@@ -1,6 +1,6 @@
 package drinkcounter.web;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.LoggedInUserArgumentResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.GitProperties;
@@ -25,15 +25,15 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
-    private final UserService userService;
+    private final UserAccounts userAccounts;
 
-    public WebConfiguration(UserService userService) {
-        this.userService = userService;
+    public WebConfiguration(UserAccounts userAccounts) {
+        this.userAccounts = userAccounts;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoggedInUserArgumentResolver(userService));
+        resolvers.add(new LoggedInUserArgumentResolver(userAccounts));
     }
 
     @Override

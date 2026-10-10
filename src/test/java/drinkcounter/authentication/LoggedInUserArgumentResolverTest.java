@@ -1,6 +1,6 @@
 package drinkcounter.authentication;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.model.User;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -19,8 +19,8 @@ import static org.mockito.Mockito.when;
 
 public class LoggedInUserArgumentResolverTest {
 
-    private final UserService userService = mock(UserService.class);
-    private final LoggedInUserArgumentResolver resolver = new LoggedInUserArgumentResolver(userService);
+    private final UserAccounts userAccounts = mock(UserAccounts.class);
+    private final LoggedInUserArgumentResolver resolver = new LoggedInUserArgumentResolver(userAccounts);
 
     @AfterEach
     public void clearSecurityContext() {
@@ -30,7 +30,7 @@ public class LoggedInUserArgumentResolverTest {
     @Test
     public void loadsTheUserNamedByThePrincipal() {
         User user = new User();
-        when(userService.getUser(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
         DrinkcounterUserDetails principal = new DrinkcounterUserDetails("user@example.com", "",
                 true, true, true, true, List.of(new SimpleGrantedAuthority("ROLE_USER")), 42);
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken(principal, null));
@@ -43,7 +43,7 @@ public class LoggedInUserArgumentResolverTest {
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("anonymousUser", null));
 
         assertThrows(IllegalStateException.class, () -> resolver.resolveArgument(null, null, null, null));
-        verify(userService, never()).getUser(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 
     @Test
