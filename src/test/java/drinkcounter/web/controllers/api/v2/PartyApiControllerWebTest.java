@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -60,6 +61,9 @@ public class PartyApiControllerWebTest {
     private DrinkCounterService drinkCounterService;
 
     @Autowired
+    private DrinkLog drinkLog;
+
+    @Autowired
     private PartyRepository partyRepository;
 
     @Autowired
@@ -94,7 +98,7 @@ public class PartyApiControllerWebTest {
         Drink saved = new Drink();
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
-        when(drinkCounterService.addDrink(anyInt(), any(), any())).thenReturn(saved);
+        when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
     }
 
     @Test
@@ -141,7 +145,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().isOk());
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
-        verify(drinkCounterService).addDrink(eq(2), eq(expected), any(Float.class));
+        verify(drinkLog).record(eq(2), eq(expected), any(Float.class));
     }
 
     @Test
@@ -149,7 +153,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).addDrink(eq(2), eq((Date) null), any(Float.class));
+        verify(drinkLog).record(eq(2), eq((Date) null), any(Float.class));
     }
 
     @Test
@@ -157,7 +161,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks").param("timestamp", "not-a-timestamp"))
                 .andExpect(status().isBadRequest());
 
-        verify(drinkCounterService, never()).addDrink(anyInt(), any(), any());
+        verify(drinkLog, never()).record(anyInt(), any(), any());
     }
 
     @Test
@@ -181,7 +185,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).changeDrinkAlcohol(eq(2), eq(7), any(Float.class));
+        verify(drinkLog).correctAlcohol(eq(2), eq(7), any(Float.class));
     }
 
     @Test
@@ -190,7 +194,7 @@ public class PartyApiControllerWebTest {
                 put(PARTIES + "/1/participants/3/drinks/7").param("volume", "0.5").param("alcohol", "0.05")));
         assertEquals("Participant 3 doesn't belong to party 1", ex.getCause().getMessage());
 
-        verify(drinkCounterService, never()).changeDrinkAlcohol(anyInt(), anyInt(), any(Float.class));
+        verify(drinkLog, never()).correctAlcohol(anyInt(), anyInt(), any(Float.class));
     }
 
     @Test
@@ -198,14 +202,14 @@ public class PartyApiControllerWebTest {
         mvc.perform(delete(PARTIES + "/1/participants/2/drinks/7"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).removeDrinkFromUser(2, 7);
+        verify(drinkLog).undo(2, 7);
     }
 
     @Test
     public void removeDrinkRejectsNonParticipant() {
         assertThrows(ServletException.class, () -> mvc.perform(delete(PARTIES + "/1/participants/3/drinks/7")));
 
-        verify(drinkCounterService, never()).removeDrinkFromUser(anyInt(), anyInt());
+        verify(drinkLog, never()).undo(anyInt(), anyInt());
     }
 
     @Test
@@ -294,7 +298,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(request).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(1, 42);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(drinkCounterService, drinkLog);
         verifyNoInteractions(userAccounts);
     }
 
@@ -305,7 +309,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkCounterService, drinkLog);
     }
 
     @Test
@@ -315,7 +319,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkCounterService, drinkLog);
         verify(userAccounts, never()).get(anyInt());
     }
 }

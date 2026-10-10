@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class AuthenticationController {
     
     public static final String TIMEZONEOFFSET = "timeZoneOffset";
 
-    @Autowired private DrinkCounterService drinkCounterService;
+    @Autowired private DrinkLog drinkLog;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
@@ -52,7 +52,7 @@ public class AuthenticationController {
         }
 
         ModelAndView mav = new ModelAndView("login");
-        mav.addObject("totalDrinkCount", drinkCounterService.getTotalDrinkCount());
+        mav.addObject("totalDrinkCount", drinkLog.total());
         return mav;
     }
 }

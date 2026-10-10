@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
@@ -27,10 +28,12 @@ import org.springframework.web.bind.annotation.*;
 public class PartyApiController {
 
     private final DrinkCounterService drinkCounterService;
+    private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
 
-    public PartyApiController(DrinkCounterService drinkCounterService, UserAccounts userAccounts) {
+    public PartyApiController(DrinkCounterService drinkCounterService, DrinkLog drinkLog, UserAccounts userAccounts) {
         this.drinkCounterService = drinkCounterService;
+        this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
     }
 
@@ -132,7 +135,7 @@ public class PartyApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        return DrinkDTO.fromDrink(drinkCounterService.addDrink(participantId, time, alcoholAmount));
+        return DrinkDTO.fromDrink(drinkLog.record(participantId, time, alcoholAmount));
     }
 
     @PutMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
@@ -142,7 +145,7 @@ public class PartyApiController {
             @RequestParam("volume") Float volume,
             @RequestParam("alcohol") Float alcoholPercentage){
         requireParticipant(partyId, participantId);
-        drinkCounterService.changeDrinkAlcohol(participantId, drinkId,
+        drinkLog.correctAlcohol(participantId, drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
     }
 
@@ -151,7 +154,7 @@ public class PartyApiController {
     public void removeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @PathVariable Integer drinkId){
         requireParticipant(partyId, participantId);
-        drinkCounterService.removeDrinkFromUser(participantId, drinkId);
+        drinkLog.undo(participantId, drinkId);
     }
 
     private User requireParticipant(Integer partyId, Integer participantId) {

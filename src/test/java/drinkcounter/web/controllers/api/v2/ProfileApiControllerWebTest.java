@@ -1,7 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import com.csvreader.CsvReader;
-import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
@@ -60,7 +60,7 @@ public class ProfileApiControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private DrinkLog drinkLog;
 
     @Autowired
     private UserAccounts userAccounts;
@@ -80,7 +80,7 @@ public class ProfileApiControllerWebTest {
         Drink saved = new Drink();
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42Z"));
-        when(drinkCounterService.addDrink(anyInt(), any(), any())).thenReturn(saved);
+        when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
     }
 
     @AfterEach
@@ -109,7 +109,7 @@ public class ProfileApiControllerWebTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(7));
 
-        verify(drinkCounterService).addDrink(eq(42), any(), any());
+        verify(drinkLog).record(eq(42), any(), any());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ProfileApiControllerWebTest {
                 .andExpect(status().isOk());
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
-        verify(drinkCounterService).addDrink(eq(42), eq(expected), any(Float.class));
+        verify(drinkLog).record(eq(42), eq(expected), any(Float.class));
     }
 
     @Test
@@ -126,7 +126,7 @@ public class ProfileApiControllerWebTest {
         mvc.perform(post("/API/v2/profile/drinks").param("timestamp", "not-a-timestamp"))
                 .andExpect(status().isBadRequest());
 
-        verify(drinkCounterService, never()).addDrink(anyInt(), any(), any());
+        verify(drinkLog, never()).record(anyInt(), any(), any());
     }
 
     @Test
@@ -134,7 +134,7 @@ public class ProfileApiControllerWebTest {
         mvc.perform(put("/API/v2/profile/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).changeDrinkAlcohol(eq(42), eq(7), any(Float.class));
+        verify(drinkLog).correctAlcohol(eq(42), eq(7), any(Float.class));
     }
 
     @Test
@@ -142,7 +142,7 @@ public class ProfileApiControllerWebTest {
         mvc.perform(delete("/API/v2/profile/drinks/7"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).removeDrinkFromUser(42, 7);
+        verify(drinkLog).undo(42, 7);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ProfileApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
         verify(userAccounts, never()).get(anyInt());
     }
 
@@ -176,7 +176,7 @@ public class ProfileApiControllerWebTest {
         assertThrows(ServletException.class, () -> mvc.perform(delete("/API/v2/profile/drinks/7")));
         assertThrows(ServletException.class, () -> mvc.perform(get("/API/v2/profile/drinks")));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
         verify(userAccounts, never()).get(anyInt());
     }
 

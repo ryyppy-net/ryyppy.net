@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
-import drinkcounter.DrinkCounterService;
+import drinkcounter.DrinkLog;
 import drinkcounter.EmailAddress;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
@@ -45,7 +45,7 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @Controller
 @RequestMapping("ui")
 public class UserController {
-    private final DrinkCounterService drinkCounterService;
+    private final DrinkLog drinkLog;
     private final PartyAccess partyAccess;
     private final UserAccounts userAccounts;
     private final PassphraseLogin passphraseLogin;
@@ -55,13 +55,13 @@ public class UserController {
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     public UserController(
-            DrinkCounterService drinkCounterService,
+            DrinkLog drinkLog,
             PartyAccess partyAccess,
             UserAccounts userAccounts,
             PassphraseLogin passphraseLogin,
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
-        this.drinkCounterService = drinkCounterService;
+        this.drinkLog = drinkLog;
         this.partyAccess = partyAccess;
         this.userAccounts = userAccounts;
         this.passphraseLogin = passphraseLogin;
@@ -147,14 +147,14 @@ public class UserController {
     @RequestMapping("/addDrinkToDate")
     @OwnUserOrPartyMate
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") int userId, @RequestParam("date") String date){
-        drinkCounterService.addDrinkToDate(userId, date, AuthenticationController.timezoneOffset(session));
+        drinkLog.recordAt(userId, date, AuthenticationController.timezoneOffset(session));
         return "redirect:user";
     }
 
     @RequestMapping("/removeDrink")
     @OwnUser
     public String removeDrink(@RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId){
-        drinkCounterService.removeDrinkFromUser(userId, drinkId);
+        drinkLog.undo(userId, drinkId);
         return "redirect:user";
     }
 
