@@ -137,7 +137,7 @@ public class APIController {
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        double timezoneOffset = (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET);
+        double timezoneOffset = AuthenticationController.timezoneOffset(session);
         ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
 
         for (Drink d : drinks) {

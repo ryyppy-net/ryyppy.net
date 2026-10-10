@@ -1,6 +1,5 @@
 package drinkcounter.web.controllers.api;
 
-import drinkcounter.web.controllers.ui.AuthenticationController;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,9 +29,8 @@ final class ClassicApiRequests {
         return get("/API/users/{userId}/show-drinks", userId);
     }
 
-    /** The endpoint buckets drinks by the client's timezone offset, which login stores in the session. */
     static MockHttpServletRequestBuilder drinksPerDay(int userId) {
-        return get("/API/users/{userId}/drinks", userId).sessionAttr(AuthenticationController.TIMEZONEOFFSET, 0.0);
+        return get("/API/users/{userId}/drinks", userId);
     }
 
     static MockHttpServletRequestBuilder userXml(int userId) {

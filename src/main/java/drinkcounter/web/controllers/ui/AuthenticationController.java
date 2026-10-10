@@ -31,6 +31,12 @@ public class AuthenticationController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
+    /** The client's offset in the JS convention; 0 until the login page has reported it. */
+    public static double timezoneOffset(HttpSession session) {
+        Double offset = (Double) session.getAttribute(TIMEZONEOFFSET);
+        return offset == null ? 0 : offset;
+    }
+
     @RequestMapping("/timezone/{timezoneOffset}")
     public @ResponseBody String receiveTimezone(HttpSession session,  @PathVariable String timezoneOffset) {
         session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezoneOffset));
