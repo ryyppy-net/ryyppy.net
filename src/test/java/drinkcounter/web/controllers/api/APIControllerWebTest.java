@@ -6,7 +6,6 @@ import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.ControllerWebTest;
-import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static drinkcounter.web.controllers.api.ClassicApiRequests.addDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.addGuest;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.drinksPerDay;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.editDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.linkUser;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.partyXml;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.removeDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.showDrinks;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.showHistory;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.userXml;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,8 +33,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +47,7 @@ public class APIControllerWebTest {
     private static final int SIGNED_IN = 42;
     private static final int OTHER_USER = 7;
     private static final int PARTY = 1;
+    private static final int DRINK = 5;
 
     @Autowired
     private MockMvc mvc;
@@ -61,15 +69,15 @@ public class APIControllerWebTest {
 
     static Stream<Arguments> outsiderRequests() {
         return Stream.of(
-                Arguments.of("party", partyXml(), Rule.PARTY_MEMBER),
-                Arguments.of("add guest to party", addGuest(), Rule.PARTY_MEMBER),
-                Arguments.of("link user to party", linkUser(SIGNED_IN), Rule.PARTY_MEMBER),
+                Arguments.of("party", partyXml(PARTY), Rule.PARTY_MEMBER),
+                Arguments.of("add guest to party", addGuest(PARTY), Rule.PARTY_MEMBER),
+                Arguments.of("link user to party", linkUser(PARTY, SIGNED_IN), Rule.PARTY_MEMBER),
                 Arguments.of("show drinks", showDrinks(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("drinks per day", drinksPerDay(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("user", userXml(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
                 Arguments.of("add drink", addDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
-                Arguments.of("edit drink", editDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
-                Arguments.of("remove drink", removeDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("edit drink", editDrink(OTHER_USER, DRINK), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("remove drink", removeDrink(OTHER_USER, DRINK), Rule.OWN_USER_OR_PARTY_MATE),
                 Arguments.of("show history", showHistory(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE));
     }
 
@@ -92,8 +100,8 @@ public class APIControllerWebTest {
         return Stream.of(
                 Arguments.of("user", userXml(OTHER_USER)),
                 Arguments.of("add drink", addDrink(OTHER_USER)),
-                Arguments.of("edit drink", editDrink(OTHER_USER)),
-                Arguments.of("remove drink", removeDrink(OTHER_USER)),
+                Arguments.of("edit drink", editDrink(OTHER_USER, DRINK)),
+                Arguments.of("remove drink", removeDrink(OTHER_USER, DRINK)),
                 Arguments.of("show history", showHistory(OTHER_USER)));
     }
 
@@ -127,8 +135,8 @@ public class APIControllerWebTest {
                 Arguments.of("drinks per day", drinksPerDay(SIGNED_IN)),
                 Arguments.of("user", userXml(SIGNED_IN)),
                 Arguments.of("add drink", addDrink(SIGNED_IN)),
-                Arguments.of("edit drink", editDrink(SIGNED_IN)),
-                Arguments.of("remove drink", removeDrink(SIGNED_IN)),
+                Arguments.of("edit drink", editDrink(SIGNED_IN, DRINK)),
+                Arguments.of("remove drink", removeDrink(SIGNED_IN, DRINK)),
                 Arguments.of("show history", showHistory(SIGNED_IN)));
     }
 
@@ -152,25 +160,25 @@ public class APIControllerWebTest {
     public void partyMateEditsTheOtherUsersDrink() throws Exception {
         when(drinkCounterService.shareParty(SIGNED_IN, OTHER_USER)).thenReturn(true);
 
-        mvc.perform(editDrink(OTHER_USER)).andExpect(status().isOk());
+        mvc.perform(editDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
-        verify(drinkCounterService).changeDrinkAlcohol(eq(OTHER_USER), eq(5), anyFloat());
+        verify(drinkCounterService).changeDrinkAlcohol(eq(OTHER_USER), eq(DRINK), anyFloat());
     }
 
     @Test
     public void partyMateRemovesTheOtherUsersDrink() throws Exception {
         when(drinkCounterService.shareParty(SIGNED_IN, OTHER_USER)).thenReturn(true);
 
-        mvc.perform(removeDrink(OTHER_USER)).andExpect(status().isOk());
+        mvc.perform(removeDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
-        verify(drinkCounterService).removeDrinkFromUser(OTHER_USER, 5);
+        verify(drinkCounterService).removeDrinkFromUser(OTHER_USER, DRINK);
     }
 
     @Test
     public void memberGetsTheParty() throws Exception {
         when(drinkCounterService.isUserParticipant(PARTY, SIGNED_IN)).thenReturn(true);
 
-        mvc.perform(partyXml()).andExpect(status().isOk());
+        mvc.perform(partyXml(PARTY)).andExpect(status().isOk());
 
         verify(partyMarshaller).marshall(eq(PARTY), any());
     }
@@ -184,7 +192,7 @@ public class APIControllerWebTest {
             return guest;
         });
 
-        mvc.perform(addGuest())
+        mvc.perform(addGuest(PARTY))
                 .andExpect(status().isOk())
                 .andExpect(content().string("8"));
 
@@ -195,7 +203,7 @@ public class APIControllerWebTest {
     public void memberLinksAUserToTheParty() throws Exception {
         when(drinkCounterService.isUserParticipant(PARTY, SIGNED_IN)).thenReturn(true);
 
-        mvc.perform(linkUser(OTHER_USER))
+        mvc.perform(linkUser(PARTY, OTHER_USER))
                 .andExpect(status().isOk());
 
         verify(drinkCounterService).linkUserToParty(OTHER_USER, PARTY);
@@ -215,47 +223,6 @@ public class APIControllerWebTest {
         user.setWeight(80);
         user.setSex(User.Sex.MALE);
         return user;
-    }
-
-    private static MockHttpServletRequestBuilder showDrinks(int userId) {
-        return get("/API/users/{userId}/show-drinks", userId);
-    }
-
-    private static MockHttpServletRequestBuilder drinksPerDay(int userId) {
-        return get("/API/users/{userId}/drinks", userId).sessionAttr(AuthenticationController.TIMEZONEOFFSET, 0.0);
-    }
-
-    private static MockHttpServletRequestBuilder userXml(int userId) {
-        return get("/API/users/{userId}", userId);
-    }
-
-    private static MockHttpServletRequestBuilder addDrink(int userId) {
-        return post("/API/users/{userId}/add-drink", userId);
-    }
-
-    private static MockHttpServletRequestBuilder editDrink(int userId) {
-        return get("/API/users/{userId}/edit-drink/5", userId).param("volume", "0.5").param("alcohol", "0.05");
-    }
-
-    private static MockHttpServletRequestBuilder removeDrink(int userId) {
-        return get("/API/users/{userId}/remove-drink/5", userId);
-    }
-
-    private static MockHttpServletRequestBuilder showHistory(int userId) {
-        return get("/API/users/{userId}/show-history", userId);
-    }
-
-    private static MockHttpServletRequestBuilder partyXml() {
-        return get("/API/parties/{partyId}", PARTY);
-    }
-
-    private static MockHttpServletRequestBuilder addGuest() {
-        return post("/API/parties/{partyId}/add-anonymous-user", PARTY)
-                .param("name", "Vieras").param("sex", "MALE").param("weight", "80");
-    }
-
-    private static MockHttpServletRequestBuilder linkUser(int userId) {
-        return get("/API/parties/{partyId}/link-user-to-party/{userId}", PARTY, userId);
     }
 
     private enum Rule { PARTY_MEMBER, OWN_USER, OWN_USER_OR_PARTY_MATE }
