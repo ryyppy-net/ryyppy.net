@@ -137,7 +137,15 @@ public class UserControllerWebTest {
     }
 
     @Test
-    public void addDrinkToDateAddsADrinkForAPartyMate() throws Exception {
+    public void addDrinkToDateUsesTheOffsetStoredInTheSession() throws Exception {
+        mvc.perform(addDrinkToDate(42).sessionAttr(AuthenticationController.TIMEZONEOFFSET, -120.0))
+                .andExpect(status().is3xxRedirection());
+
+        verify(drinkCounterService).addDrinkToDate(42, DATE, -120.0);
+    }
+
+    @Test
+    public void addDrinkToDateAddsADrinkForAPartyMate()throws Exception {
         when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
 
         mvc.perform(addDrinkToDate(7))
@@ -231,7 +239,6 @@ public class UserControllerWebTest {
 
     private MockHttpServletRequestBuilder addDrinkToDate(Object userId) {
         return post("/ui/addDrinkToDate")
-                .sessionAttr(AuthenticationController.TIMEZONEOFFSET, 0.0)
                 .param("userId", userId.toString())
                 .param("date", DATE);
     }

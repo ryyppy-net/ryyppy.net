@@ -6,6 +6,7 @@ import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.User;
 import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.ControllerWebTest;
+import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -215,6 +216,12 @@ public class APIControllerWebTest {
 
         verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
         verifyNoInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void drinksPerDayHonoursTheOffsetStoredInTheSession() throws Exception {
+        mvc.perform(drinksPerDay(SIGNED_IN).sessionAttr(AuthenticationController.TIMEZONEOFFSET, -120.0))
+                .andExpect(status().isOk());
     }
 
     private static User drinker(int id) {
