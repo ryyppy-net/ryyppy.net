@@ -3,7 +3,6 @@ package drinkcounter.web.controllers.api;
 import com.csvreader.CsvReader;
 import drinkcounter.AlcoholServiceImpl;
 import drinkcounter.UserService;
-import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.ui.AuthenticationController;
@@ -44,11 +43,9 @@ public class APIControllerTest {
 
         controller = new APIController();
         userService = mock(UserService.class);
-        AuthenticationChecks authenticationChecks = mock(AuthenticationChecks.class);
         session = mock(HttpSession.class);
 
         ReflectionTestUtils.setField(controller, "userService", userService);
-        ReflectionTestUtils.setField(controller, "authenticationChecks", authenticationChecks);
     }
 
     private TimeZone originalDefaultTimeZone;
@@ -80,7 +77,7 @@ public class APIControllerTest {
 
         when(userService.getUser(1)).thenReturn(user);
 
-        ResponseEntity<byte[]> response = controller.drinkHistory(session, "1");
+        ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
         long millis = findMillisForClientDay(response.getBody(), ZoneOffset.ofHours(2), "2024-03-06");
 
@@ -124,7 +121,7 @@ public class APIControllerTest {
 
         when(userService.getUser(1)).thenReturn(user);
 
-        ResponseEntity<byte[]> response = controller.drinkHistory(session, "1");
+        ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
         Map<String, Integer> countsByDay = parseTimeCountCsv(response.getBody(), ZoneOffset.ofHours(14));
 
@@ -150,7 +147,7 @@ public class APIControllerTest {
 
         when(userService.getUser(1)).thenReturn(user);
 
-        ResponseEntity<byte[]> response = controller.drinkHistory(session, "1");
+        ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
         // The "Time" column is only meaningful when decoded in the same zone
         // the server used to produce it: the client's zone (dtz), not the
@@ -178,7 +175,7 @@ public class APIControllerTest {
         when(userService.getUser(1)).thenReturn(user);
 
         long before = System.currentTimeMillis();
-        ResponseEntity<byte[]> response = controller.showHistory(session, "1");
+        ResponseEntity<byte[]> response = controller.showHistory(session, 1);
         long after = System.currentTimeMillis();
 
         List<long[]> rows = parseTimeValueCsv(response.getBody());

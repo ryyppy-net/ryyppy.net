@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Browser, BrowserContext, Page, expect } from '@playwright/test';
 
 export interface TestUser {
   name: string;
@@ -33,6 +33,16 @@ export async function registerUser(page: Page, user: TestUser): Promise<void> {
   // here — the dashboard heading below is the real signal of readiness.
   await expect(page).toHaveURL(/\/app\/index\.html/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
+}
+
+/** Opens a browser context signed in as a freshly registered user, blocking other origins as fixtures.ts does. */
+export async function signedInContext(browser: Browser, baseURL: string, label: string): Promise<BrowserContext> {
+  const context = await browser.newContext();
+  const appOrigin = new URL(baseURL).origin;
+  await context.route((url) => url.origin !== appOrigin, (route) => route.abort());
+  const page = await context.newPage();
+  await registerUser(page, makeTestUser(label));
+  return context;
 }
 
 /** Logs an already-registered user in via the /ui/login form. */

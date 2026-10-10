@@ -1,17 +1,8 @@
-import { APIResponse, Browser, BrowserContext } from '@playwright/test';
+import { APIResponse, BrowserContext } from '@playwright/test';
 import { test, expect } from './fixtures';
-import { createParty, makeTestUser, registerUser } from './helpers';
+import { createParty, makeTestUser, registerUser, signedInContext } from './helpers';
 
 const PARTIES = '/API/v2/parties';
-
-async function signedInContext(browser: Browser, baseURL: string, label: string): Promise<BrowserContext> {
-  const context = await browser.newContext();
-  const appOrigin = new URL(baseURL).origin;
-  await context.route((url) => url.origin !== appOrigin, (route) => route.abort());
-  const page = await context.newPage();
-  await registerUser(page, makeTestUser(label));
-  return context;
-}
 
 test("an outsider is forbidden from another user's party API and changes nothing", async ({ browser, baseURL }) => {
   const contexts: BrowserContext[] = [];
