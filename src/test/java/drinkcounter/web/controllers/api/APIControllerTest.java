@@ -2,9 +2,11 @@ package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvReader;
 import drinkcounter.AlcoholServiceImpl;
+import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import drinkcounter.util.PartyMarshaller;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
@@ -41,11 +43,9 @@ public class APIControllerTest {
     public void setUp() {
         AlcoholServiceImpl.getInstance().reset();
 
-        controller = new APIController();
         userService = mock(UserService.class);
         session = mock(HttpSession.class);
-
-        ReflectionTestUtils.setField(controller, "userService", userService);
+        controller = new APIController(mock(PartyMarshaller.class), mock(DrinkCounterService.class), userService);
     }
 
     private TimeZone originalDefaultTimeZone;
@@ -57,11 +57,10 @@ public class APIControllerTest {
         }
     }
 
-    // Issue #55: the CSV "Time" column for a day bucket must represent
-    // midnight in the CLIENT's zone (the same zone used to decide which
-    // bucket the drink belongs to), not the server's JVM zone.
+    // The "Time" column of a day bucket is midnight in the client's zone,
+    // the zone that decides which bucket a drink belongs to, not the JVM's.
     @Test
-    public void drinkHistoryTimeColumnRepresentsMidnightInClientZone_issue55() throws Exception {
+    public void drinkHistoryTimeColumnRepresentsMidnightInClientZone() throws Exception {
         originalDefaultTimeZone = TimeZone.getDefault();
         TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
 
@@ -105,12 +104,10 @@ public class APIControllerTest {
         return result;
     }
 
-    // Issue #55: "today" must always be decided in the CLIENT's zone,
-    // not the server's. Client at UTC+14 (Kiritimati); a fixed instant
-    // that is already the next calendar day there while UTC is still on
-    // the previous day.
+    // "Today" is decided in the client's zone. At UTC+14 the fixed instant
+    // below is already the next calendar day while UTC is still on the previous one.
     @Test
-    public void drinkHistoryTodayBucketUsesClientZone_issue55() throws Exception {
+    public void drinkHistoryTodayBucketUsesClientZone() throws Exception {
         when(session.getAttribute(AuthenticationController.TIMEZONEOFFSET)).thenReturn(-840.0); // UTC+14
 
         Clock fixedClock = Clock.fixed(Instant.parse("2024-03-05T23:00:00Z"), ZoneOffset.UTC);
@@ -175,7 +172,7 @@ public class APIControllerTest {
         when(userService.getUser(1)).thenReturn(user);
 
         long before = System.currentTimeMillis();
-        ResponseEntity<byte[]> response = controller.showHistory(session, 1);
+        ResponseEntity<byte[]> response = controller.showHistory(1);
         long after = System.currentTimeMillis();
 
         List<long[]> rows = parseTimeValueCsv(response.getBody());

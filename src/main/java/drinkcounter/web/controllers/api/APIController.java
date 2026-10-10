@@ -4,7 +4,6 @@ import com.csvreader.CsvWriter;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import drinkcounter.authentication.NotEnoughRightsException;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
 import drinkcounter.authentication.PartyMember;
@@ -31,17 +30,15 @@ import java.util.Map.Entry;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  *
@@ -57,20 +54,22 @@ public class APIController {
      */
     public static final float ALCOHOL_DENSITY = 789;
 
-    @Autowired
-    private PartyMarshaller partyMarshaller;
-
-    @Autowired
-    private DrinkCounterService drinkCounterService;
-    
-    @Autowired
-    private UserService userService;
+    private final PartyMarshaller partyMarshaller;
+    private final DrinkCounterService drinkCounterService;
+    private final UserService userService;
 
     private Clock clock = Clock.systemUTC();
 
+    public APIController(PartyMarshaller partyMarshaller, DrinkCounterService drinkCounterService,
+            UserService userService) {
+        this.partyMarshaller = partyMarshaller;
+        this.drinkCounterService = drinkCounterService;
+        this.userService = userService;
+    }
+
     @PartyMember
     @RequestMapping("/parties/{partyId}")
-    public @ResponseBody byte[] printXml(HttpSession session, @PathVariable int partyId) throws IOException{
+    public @ResponseBody byte[] printXml(@PathVariable int partyId) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshall(partyId, baos);
         byte[] bytesXml = baos.toByteArray();
@@ -79,7 +78,7 @@ public class APIController {
 
     @OwnUser
     @RequestMapping("/users/{userId}/show-drinks")
-    public @ResponseBody byte[] showDrinks(HttpSession session, @PathVariable int userId) throws IOException{
+    public @ResponseBody byte[] showDrinks(@PathVariable int userId) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshallDrinks(userId, baos);
         byte[] bytesXml = baos.toByteArray();
@@ -88,7 +87,7 @@ public class APIController {
 
     @OwnUserOrPartyMate
     @RequestMapping("/users/{userId}/add-drink")
-    public @ResponseBody String addDrink(HttpSession session, 
+    public @ResponseBody String addDrink(
     @PathVariable int userId, 
     @RequestParam(value="volume", required=false) Float volume,
     @RequestParam(value="alcohol", required=false) Float alcoholPercentage ){
@@ -112,7 +111,7 @@ public class APIController {
 
     @OwnUserOrPartyMate
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
-    public @ResponseBody String removeDrinkFromUser(HttpSession session, @PathVariable int userId, @PathVariable String drinkId){
+    public @ResponseBody String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId){
         int drinkIdInt = Integer.parseInt(drinkId);
         drinkCounterService.removeDrinkFromUser(userId, drinkIdInt);
         log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userId));
@@ -121,7 +120,7 @@ public class APIController {
     
     @OwnUserOrPartyMate
     @RequestMapping("/users/{userId}")
-    public @ResponseBody byte[] userXml(HttpSession session, @PathVariable int userId) throws IOException{
+    public @ResponseBody byte[] userXml(@PathVariable int userId) throws IOException{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         partyMarshaller.marshallUser(userId, baos);
         byte[] bytesXml = baos.toByteArray();
@@ -172,7 +171,7 @@ public class APIController {
 
     @OwnUserOrPartyMate
     @RequestMapping("/users/{userId}/show-history")
-    public ResponseEntity<byte[]> showHistory(HttpSession session, @PathVariable int userId) throws IOException{
+    public ResponseEntity<byte[]> showHistory(@PathVariable int userId) throws IOException{
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -192,7 +191,7 @@ public class APIController {
 
     @PartyMember
     @RequestMapping("/parties/{partyId}/add-anonymous-user")
-    public @ResponseBody String addAnonymousUser(HttpSession session,
+    public @ResponseBody String addAnonymousUser(
             @PathVariable int partyId,
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
@@ -209,7 +208,7 @@ public class APIController {
     
     @PartyMember
     @RequestMapping("/parties/{partyId}/link-user-to-party/{userId}")
-    public @ResponseBody String linkUserToParty(HttpSession session, @PathVariable int partyId,
+    public @ResponseBody String linkUserToParty(@PathVariable int partyId,
             @PathVariable int userId){
         drinkCounterService.linkUserToParty(userId, partyId);
         return "";
@@ -253,16 +252,11 @@ public class APIController {
         return new String[]{Long.toString(x), Float.toString(y)};
     }
     
-    @ExceptionHandler(NotEnoughRightsException.class)
-    public HttpEntity handleForbidden(){
-        return new ResponseEntity(HttpStatus.FORBIDDEN);
-    }
-
     @RequestMapping("/passphrase/{passphrase}")
     public @ResponseBody String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
-            throw new NotEnoughRightsException();
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         return getUserCsv(user);
     }
@@ -271,7 +265,7 @@ public class APIController {
     public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
-            throw new NotEnoughRightsException();
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         try {
             if (time == null || time.equals("") || time.equals("0"))
@@ -289,7 +283,7 @@ public class APIController {
     public @ResponseBody String undoDrink(@PathVariable String passphrase) throws IOException{
         User user = userService.getUserByPassphrase(passphrase.toLowerCase());
         if (user == null)
-            throw new NotEnoughRightsException();
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         int count = user.getDrinks().size();
         if (count > 0)

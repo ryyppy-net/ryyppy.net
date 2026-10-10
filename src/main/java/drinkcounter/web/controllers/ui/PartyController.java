@@ -7,7 +7,6 @@ import drinkcounter.authentication.PartyMember;
 import drinkcounter.authentication.PartyMemberAndOwnUserOrPartyMate;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +29,7 @@ public class PartyController {
 
     @RequestMapping("/party")
     @PartyMember
-    public ModelAndView party(HttpSession session, @LoggedInUser User user, @RequestParam("id") int partyId){
+    public ModelAndView party(@LoggedInUser User user, @RequestParam("id") int partyId){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", drinkCounterService.getParty(partyId));
@@ -40,7 +39,7 @@ public class PartyController {
 
     @RequestMapping("/addParty")
     @OwnUser
-    public String addParty(HttpSession session, @RequestParam("name") String partyName, @RequestParam("userId") int userId){
+    public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") int userId){
         Party party = drinkCounterService.startParty(partyName);
         drinkCounterService.linkUserToParty(userId, party.getId());
         return "redirect:party?id="+party.getId();
@@ -48,7 +47,7 @@ public class PartyController {
    
     @RequestMapping("/removeUserFromParty")
     @PartyMemberAndOwnUserOrPartyMate
-    public String removeUserFromParty(HttpSession session, @RequestParam("partyId") int partyId,
+    public String removeUserFromParty(@RequestParam("partyId") int partyId,
             @RequestParam("userId") int userId){
         drinkCounterService.unlinkUserFromParty(userId, partyId);
 

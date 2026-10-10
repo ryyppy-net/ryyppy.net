@@ -2,8 +2,6 @@ package drinkcounter.web;
 
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
-import drinkcounter.authentication.AuthenticationChecks;
-import drinkcounter.authentication.CurrentUser;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
@@ -29,8 +27,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @MockitoBean(types = {
         DrinkCounterService.class,
         UserService.class,
-        CurrentUser.class,
-        AuthenticationChecks.class,
         PartyMarshaller.class,
         GoogleIdentityLinkingService.class,
         AuthRelayTokenService.class
