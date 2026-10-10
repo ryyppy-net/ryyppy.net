@@ -33,11 +33,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Drives the signed-in user handlers of UserController through MockMvc and the app's
- * security filter chain.
+ * security filter chain, including the access rule of each user action.
  */
 @ControllerWebTest
 @WithDrinkcounterUser(userId = 42)
 public class UserControllerWebTest {
+
+    private static final String DATE = "01.01.2024 12:00";
 
     @Autowired
     private MockMvc mvc;
@@ -47,8 +49,6 @@ public class UserControllerWebTest {
 
     @Autowired
     private DrinkCounterService drinkCounterService;
-
-    private static final String DATE = "01.01.2024 12:00";
 
     private User user;
 
@@ -209,7 +209,7 @@ public class UserControllerWebTest {
 
     @Test
     @WithAnonymousUser
-    public void anonymousWritesAreSentToTheLoginPage() throws Exception {
+    public void anonymousRequestsToTheUserActionsAreSentToTheLoginPage() throws Exception {
         for (var request : List.of(modifyUser(42), addDrinkToDate(42), removeDrink(42), getUserByEmail(3))) {
             mvc.perform(request)
                     .andExpect(status().is3xxRedirection())
