@@ -169,14 +169,6 @@ public class DrinkCounterService {
         return friends;
     }
 
-    public boolean isUserParticipant(int partyId, int userId) {
-        return partyDao.countUserParticipations(partyId, userId) > 0;
-    }
-
-    public boolean shareParty(int userId, int otherUserId) {
-        return partyDao.countSharedParties(userId, otherUserId) > 0;
-    }
-
     @Transactional
     public int addDrink(int userId, float alcoholAmount) {
         User user = userDAO.findById(userId).orElseThrow(EntityNotFoundException::new);
