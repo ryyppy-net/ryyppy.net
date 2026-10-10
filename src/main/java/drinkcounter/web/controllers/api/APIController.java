@@ -265,7 +265,7 @@ public class APIController {
         return getUserCsv(user);
     }
 
-    @GetMapping("/passphrase/{passphrase}/add-drink/{time}")
+    @PostMapping("/passphrase/{passphrase}/add-drink/{time}")
     public String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
@@ -283,7 +283,7 @@ public class APIController {
         return getUserCsv(user);
     }
 
-    @GetMapping("/passphrase/{passphrase}/undo-drink")
+    @PostMapping("/passphrase/{passphrase}/undo-drink")
     public String undoDrink(@PathVariable String passphrase) throws IOException{
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)

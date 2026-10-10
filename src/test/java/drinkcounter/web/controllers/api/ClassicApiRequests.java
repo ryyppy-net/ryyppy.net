@@ -60,10 +60,10 @@ final class ClassicApiRequests {
     }
 
     static MockHttpServletRequestBuilder passphraseAddDrink(String passphrase) {
-        return get("/API/passphrase/{passphrase}/add-drink/{time}", passphrase, 0);
+        return post("/API/passphrase/{passphrase}/add-drink/{time}", passphrase, 0);
     }
 
     static MockHttpServletRequestBuilder passphraseUndoDrink(String passphrase) {
-        return get("/API/passphrase/{passphrase}/undo-drink", passphrase);
+        return post("/API/passphrase/{passphrase}/undo-drink", passphrase);
     }
 }
