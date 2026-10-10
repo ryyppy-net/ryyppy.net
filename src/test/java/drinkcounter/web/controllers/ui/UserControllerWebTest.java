@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
+import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
@@ -12,13 +13,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import drinkcounter.web.ControllerWebTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,6 +44,11 @@ public class UserControllerWebTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DrinkCounterService drinkCounterService;
+
+    private static final String DATE = "01.01.2024 12:00";
 
     private User user;
 
@@ -90,6 +102,150 @@ public class UserControllerWebTest {
 
         verify(userService, never()).getUser(42);
         verify(userService, never()).generatePassphrase(any());
+    }
+
+    @Test
+    public void modifyUserChangesTheSignedInUser() throws Exception {
+        user.setEmail("me@example.com");
+
+        mvc.perform(modifyUser(42))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("user"));
+
+        verify(userService).updateUser(user);
+        assertEquals("New name", user.getName());
+    }
+
+    @Test
+    public void modifyUserIsForbiddenForAnotherUserEvenInASharedParty() throws Exception {
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        mvc.perform(modifyUser(7)).andExpect(status().isForbidden());
+
+        verify(userService, never()).getUser(7);
+        verify(userService, never()).updateUser(any());
+        verifyNoInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void addDrinkToDateAddsADrinkForTheSignedInUser() throws Exception {
+        mvc.perform(addDrinkToDate(42))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("user"));
+
+        verify(drinkCounterService).addDrinkToDate(42, DATE, 0.0);
+    }
+
+    @Test
+    public void addDrinkToDateAddsADrinkForAPartyMate() throws Exception {
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        mvc.perform(addDrinkToDate(7))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("user"));
+
+        verify(drinkCounterService).shareParty(42, 7);
+        verify(drinkCounterService).addDrinkToDate(7, DATE, 0.0);
+    }
+
+    @Test
+    public void addDrinkToDateIsForbiddenForAnOutsider() throws Exception {
+        mvc.perform(addDrinkToDate(7)).andExpect(status().isForbidden());
+
+        verify(drinkCounterService).shareParty(42, 7);
+        verifyNoMoreInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void removeDrinkRemovesADrinkOfTheSignedInUser() throws Exception {
+        mvc.perform(removeDrink(42))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("user"));
+
+        verify(drinkCounterService).removeDrinkFromUser(42, 5);
+    }
+
+    @Test
+    public void removeDrinkIsForbiddenForAnotherUserEvenInASharedParty() throws Exception {
+        when(drinkCounterService.shareParty(42, 7)).thenReturn(true);
+
+        mvc.perform(removeDrink(7)).andExpect(status().isForbidden());
+
+        verifyNoInteractions(drinkCounterService);
+    }
+
+    @Test
+    public void getUserByEmailAnswersAMemberOfTheParty() throws Exception {
+        User invitee = new User();
+        invitee.setId(9);
+        when(drinkCounterService.isUserParticipant(3, 42)).thenReturn(true);
+        when(userService.emailIsCorrect("friend@example.com")).thenReturn(true);
+        when(userService.getUserByEmail("friend@example.com")).thenReturn(invitee);
+
+        mvc.perform(getUserByEmail(3))
+                .andExpect(status().isOk())
+                .andExpect(content().string("9"));
+    }
+
+    @Test
+    public void getUserByEmailIsForbiddenForAnOutsiderOfTheParty() throws Exception {
+        mvc.perform(getUserByEmail(3)).andExpect(status().isForbidden());
+
+        verify(drinkCounterService).isUserParticipant(3, 42);
+        verifyNoMoreInteractions(drinkCounterService);
+        verify(userService, never()).getUserByEmail(any());
+    }
+
+    @Test
+    public void nonNumericIdsAreBadRequests() throws Exception {
+        mvc.perform(modifyUser("abc")).andExpect(status().isBadRequest());
+        mvc.perform(addDrinkToDate("abc")).andExpect(status().isBadRequest());
+        mvc.perform(removeDrink("abc")).andExpect(status().isBadRequest());
+        mvc.perform(getUserByEmail("abc")).andExpect(status().isBadRequest());
+
+        verifyNoInteractions(drinkCounterService);
+        verify(userService, never()).updateUser(any());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void anonymousWritesAreSentToTheLoginPage() throws Exception {
+        for (var request : List.of(modifyUser(42), addDrinkToDate(42), removeDrink(42), getUserByEmail(3))) {
+            mvc.perform(request)
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/ui/login"));
+        }
+
+        verifyNoInteractions(drinkCounterService);
+        verify(userService, never()).updateUser(any());
+    }
+
+    private MockHttpServletRequestBuilder modifyUser(Object userId) {
+        return post("/ui/modifyUser")
+                .param("userId", userId.toString())
+                .param("name", "New name")
+                .param("sex", "MALE")
+                .param("weight", "80")
+                .param("email", "me@example.com");
+    }
+
+    private MockHttpServletRequestBuilder addDrinkToDate(Object userId) {
+        return post("/ui/addDrinkToDate")
+                .sessionAttr(AuthenticationController.TIMEZONEOFFSET, 0.0)
+                .param("userId", userId.toString())
+                .param("date", DATE);
+    }
+
+    private MockHttpServletRequestBuilder removeDrink(Object userId) {
+        return get("/ui/removeDrink")
+                .param("userId", userId.toString())
+                .param("drinkId", "5");
+    }
+
+    private MockHttpServletRequestBuilder getUserByEmail(Object partyId) {
+        return get("/ui/getUserByEmail")
+                .param("partyId", partyId.toString())
+                .param("email", "friend@example.com");
     }
 
     private Party party(String start) {

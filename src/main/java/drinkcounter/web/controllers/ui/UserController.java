@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
 import drinkcounter.DrinkCounterService;
 import drinkcounter.UserService;
-import drinkcounter.authentication.AuthenticationChecks;
 import drinkcounter.authentication.LoggedInUser;
+import drinkcounter.authentication.OwnUser;
+import drinkcounter.authentication.OwnUserOrPartyMate;
+import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Party;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -42,7 +44,6 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 public class UserController {
     private final DrinkCounterService drinkCounterService;
     private final UserService userService;
-    private final AuthenticationChecks authenticationChecks;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
@@ -51,12 +52,10 @@ public class UserController {
     public UserController(
             DrinkCounterService drinkCounterService,
             UserService userService,
-            AuthenticationChecks authenticationChecks,
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
         this.drinkCounterService = drinkCounterService;
         this.userService = userService;
-        this.authenticationChecks = authenticationChecks;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -112,18 +111,16 @@ public class UserController {
     }
 
     @RequestMapping("/modifyUser")
+    @OwnUser
     public String modifyUser(
-            @RequestParam("userId") String userId,
+            @RequestParam("userId") int userId,
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
             @RequestParam("weight") float weight, 
             @RequestParam("email") String email, 
             HttpSession session){
                 
-        int uid = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser( uid);
-        
-        User user = userService.getUser(uid);
+        User user = userService.getUser(userId);
 
         if (!user.getEmail().equalsIgnoreCase(email) && (!userService.emailIsCorrect(email) || userService.getUserByEmail(email) != null))
             throw new IllegalArgumentException();
@@ -140,20 +137,16 @@ public class UserController {
     }
 
     @RequestMapping("/addDrinkToDate")
-    public String addDrinkToDate(HttpSession session, @RequestParam("userId") String userId, @RequestParam("date") String date){
-        int id = Integer.parseInt(userId);
-        authenticationChecks.checkHighLevelRightsToUser(id);
-
-        drinkCounterService.addDrinkToDate(id, date, (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET));
+    @OwnUserOrPartyMate
+    public String addDrinkToDate(HttpSession session, @RequestParam("userId") int userId, @RequestParam("date") String date){
+        drinkCounterService.addDrinkToDate(userId, date, (Double)session.getAttribute(AuthenticationController.TIMEZONEOFFSET));
         return "redirect:user";
     }
 
     @RequestMapping("/removeDrink")
-    public String removeDrink(HttpSession session, @RequestParam("userId") String userId, @RequestParam("drinkId") String drinkId){
-        int id = Integer.parseInt(userId);
-        authenticationChecks.checkLowLevelRightsToUser(id);
-
-        drinkCounterService.removeDrinkFromUser(id, Integer.parseInt(drinkId));
+    @OwnUser
+    public String removeDrink(HttpSession session, @RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId){
+        drinkCounterService.removeDrinkFromUser(userId, drinkId);
         return "redirect:user";
     }
 
@@ -180,10 +173,8 @@ public class UserController {
     }
     
     @RequestMapping("/getUserByEmail")
-    public @ResponseBody String getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") String partyId){
-        int id = Integer.parseInt(partyId);
-        authenticationChecks.checkRightsForParty(id);
-
+    @PartyMember
+    public @ResponseBody String getUserNotInPartyByEmail(HttpSession session, @RequestParam("email") String email, @RequestParam("partyId") int partyId){
         if (!userService.emailIsCorrect(email)){
             return "0";
         }
@@ -193,7 +184,7 @@ public class UserController {
             return "0";
         }
         else {
-            if(drinkCounterService.isUserParticipant(id, user.getId())){
+            if(drinkCounterService.isUserParticipant(partyId, user.getId())){
                 return "0";
             }else{
                 return Integer.toString(user.getId());
