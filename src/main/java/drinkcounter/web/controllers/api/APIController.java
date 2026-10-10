@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 /**
  *
@@ -55,6 +56,9 @@ public class APIController {
      * Gram's per litre
      */
     public static final float ALCOHOL_DENSITY = 789;
+
+    private static final String XML = MediaType.APPLICATION_XML_VALUE + ";charset=UTF-8";
+    private static final XmlMapper XML_MAPPER = new XmlMapper();
 
     private final PartyRoster partyRoster;
     private final DrinkLog drinkLog;
@@ -72,15 +76,15 @@ public class APIController {
     }
 
     @PartyMember
-    @RequestMapping(value = "/parties/{partyId}", produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ClassicPartyDTO party(@PathVariable int partyId) {
-        return ClassicPartyDTO.fromParty(partyRoster.get(partyId), partyRoster.members(partyId), clock);
+    @RequestMapping(value = "/parties/{partyId}", produces = XML)
+    public @ResponseBody String party(@PathVariable int partyId) {
+        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), partyRoster.members(partyId), clock));
     }
 
     @OwnUser
-    @RequestMapping(value = "/users/{userId}/show-drinks", produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ClassicUserDrinksDTO showDrinks(@PathVariable int userId) {
-        return ClassicUserDrinksDTO.fromUser(userAccounts.get(userId));
+    @RequestMapping(value = "/users/{userId}/show-drinks", produces = XML)
+    public @ResponseBody String showDrinks(@PathVariable int userId) {
+        return xml(ClassicUserDrinksDTO.fromUser(userAccounts.get(userId)));
     }
 
     @OwnUserOrPartyMate
@@ -117,9 +121,9 @@ public class APIController {
     }
     
     @OwnUserOrPartyMate
-    @RequestMapping(value = "/users/{userId}", produces = MediaType.APPLICATION_XML_VALUE)
-    public @ResponseBody ClassicUserDTO user(@PathVariable int userId) {
-        return ClassicUserDTO.fromUser(userAccounts.get(userId), clock);
+    @RequestMapping(value = "/users/{userId}", produces = XML)
+    public @ResponseBody String user(@PathVariable int userId) {
+        return xml(ClassicUserDTO.fromUser(userAccounts.get(userId), clock));
     }
 
     @OwnUser
@@ -207,6 +211,10 @@ public class APIController {
             @PathVariable int userId){
         partyRoster.join(partyId, userId);
         return "";
+    }
+
+    private static String xml(Object dto) {
+        return XML_MAPPER.writeValueAsString(dto);
     }
 
     private List<String[]> getSlopes(User user, boolean getId) {
