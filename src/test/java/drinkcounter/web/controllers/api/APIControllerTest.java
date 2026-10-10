@@ -2,7 +2,7 @@ package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvReader;
 import drinkcounter.PromilleTracker;
-import drinkcounter.DrinkCounterService;
+import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
@@ -47,7 +47,7 @@ public class APIControllerTest {
 
         userAccounts = mock(UserAccounts.class);
         session = mock(HttpSession.class);
-        controller = new APIController(mock(PartyMarshaller.class), mock(DrinkCounterService.class), mock(DrinkLog.class), userAccounts,
+        controller = new APIController(mock(PartyMarshaller.class), mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
                 mock(PassphraseLogin.class));
     }
 

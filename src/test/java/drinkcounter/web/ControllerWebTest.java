@@ -1,6 +1,7 @@
 package drinkcounter.web;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
@@ -28,7 +29,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @WebMvcTest
 @Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class})
 @MockitoBean(types = {
-        DrinkCounterService.class,
+        PartyRoster.class,
+        InvitationSuggestions.class,
         DrinkLog.class,
         PartyRepository.class,
         UserAccounts.class,

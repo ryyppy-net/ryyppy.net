@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers.api;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.PassphraseLogin;
@@ -62,7 +62,7 @@ public class APIControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private PartyRoster partyRoster;
 
     @Autowired
     private DrinkLog drinkLog;
@@ -110,7 +110,7 @@ public class APIControllerWebTest {
             case OWN_USER_OR_PARTY_MATE -> verify(partyRepository).countSharedParties(SIGNED_IN, OTHER_USER);
             case OWN_USER -> { }
         }
-        verifyNoMoreInteractions(drinkCounterService, drinkLog);
+        verifyNoMoreInteractions(partyRoster, drinkLog);
         verifyNoInteractions(userAccounts, passphraseLogin, partyMarshaller);
     }
 
@@ -130,7 +130,7 @@ public class APIControllerWebTest {
 
         verify(passphraseLogin).findUser("unknown");
         verifyNoMoreInteractions(passphraseLogin);
-        verifyNoInteractions(drinkCounterService, drinkLog);
+        verifyNoInteractions(partyRoster, drinkLog);
     }
 
     static Stream<Arguments> partyMateRequests() {
@@ -163,7 +163,7 @@ public class APIControllerWebTest {
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService, drinkLog, userAccounts, passphraseLogin, partyMarshaller);
+        verifyNoInteractions(partyRoster, drinkLog, userAccounts, passphraseLogin, partyMarshaller);
     }
 
     static Stream<Arguments> ownUserRequests() {
@@ -233,7 +233,7 @@ public class APIControllerWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("8"));
 
-        verify(drinkCounterService).linkUserToParty(8, PARTY);
+        verify(partyRoster).join(PARTY, 8);
     }
 
     @Test
@@ -243,7 +243,7 @@ public class APIControllerWebTest {
         mvc.perform(linkUser(PARTY, OTHER_USER))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(OTHER_USER, PARTY);
+        verify(partyRoster).join(PARTY, OTHER_USER);
     }
 
     @Test
@@ -251,7 +251,7 @@ public class APIControllerWebTest {
         mvc.perform(showDrinks(SIGNED_IN)).andExpect(status().isOk());
 
         verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
-        verifyNoInteractions(drinkCounterService, drinkLog);
+        verifyNoInteractions(partyRoster, drinkLog);
     }
 
     @Test

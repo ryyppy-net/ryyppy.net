@@ -1,7 +1,7 @@
 package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
-import drinkcounter.DrinkCounterService;
+import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
@@ -57,17 +57,17 @@ public class APIController {
     public static final float ALCOHOL_DENSITY = 789;
 
     private final PartyMarshaller partyMarshaller;
-    private final DrinkCounterService drinkCounterService;
+    private final PartyRoster partyRoster;
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
     private final PassphraseLogin passphraseLogin;
 
     private Clock clock = Clock.systemUTC();
 
-    public APIController(PartyMarshaller partyMarshaller, DrinkCounterService drinkCounterService,
+    public APIController(PartyMarshaller partyMarshaller, PartyRoster partyRoster,
             DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin) {
         this.partyMarshaller = partyMarshaller;
-        this.drinkCounterService = drinkCounterService;
+        this.partyRoster = partyRoster;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
         this.passphraseLogin = passphraseLogin;
@@ -208,7 +208,7 @@ public class APIController {
         user.setWeight(weight);
         user.setGuest(true);
         userAccounts.add(user);
-        drinkCounterService.linkUserToParty(user.getId(), partyId);
+        partyRoster.join(partyId, user.getId());
         return user.getId().toString();
     }
     
@@ -216,7 +216,7 @@ public class APIController {
     @RequestMapping("/parties/{partyId}/link-user-to-party/{userId}")
     public @ResponseBody String linkUserToParty(@PathVariable int partyId,
             @PathVariable int userId){
-        drinkCounterService.linkUserToParty(userId, partyId);
+        partyRoster.join(partyId, userId);
         return "";
     }
 

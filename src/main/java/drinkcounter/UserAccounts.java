@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserAccounts {
 
-    private static final Logger log = LoggerFactory.getLogger(DrinkCounterService.class);
+    private static final Logger log = LoggerFactory.getLogger(UserAccounts.class);
 
     private final UserRepository userRepository;
 

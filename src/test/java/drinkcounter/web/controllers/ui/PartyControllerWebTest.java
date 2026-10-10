@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.PartyRoster;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -35,7 +35,7 @@ public class PartyControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private PartyRoster partyRoster;
 
     @Autowired
     private PartyRepository partyRepository;
@@ -56,7 +56,7 @@ public class PartyControllerWebTest {
     public void partyPageShowsThePartyAndTheSignedInUser() throws Exception {
         Party party = new Party();
         party.setId(5);
-        when(drinkCounterService.getParty(5)).thenReturn(party);
+        when(partyRoster.get(5)).thenReturn(party);
         when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
 
         mvc.perform(get("/ui/party").param("id", "5"))
@@ -72,13 +72,13 @@ public class PartyControllerWebTest {
     public void addPartyStartsAndLinksThePartyThenRedirectsToIt() throws Exception {
         Party party = new Party();
         party.setId(8);
-        when(drinkCounterService.startParty("Sauna")).thenReturn(party);
+        when(partyRoster.start("Sauna")).thenReturn(party);
 
         mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "42"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("party?id=8"));
 
-        verify(drinkCounterService).linkUserToParty(42, 8);
+        verify(partyRoster).join(8, 42);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class PartyControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(drinkCounterService).unlinkUserFromParty(42, 5);
+        verify(partyRoster).leave(5, 42);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class PartyControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(drinkCounterService).unlinkUserFromParty(7, 5);
+        verify(partyRoster).leave(5, 7);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class PartyControllerWebTest {
                 .andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(partyRoster);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class PartyControllerWebTest {
         mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
                 .andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(partyRoster);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class PartyControllerWebTest {
         mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
                 .andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(partyRoster);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class PartyControllerWebTest {
                 .andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(partyRoster);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class PartyControllerWebTest {
                 .andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(partyRoster);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class PartyControllerWebTest {
 
         verify(partyRepository).countUserParticipations(5, 42);
         verify(partyRepository).countSharedParties(42, 7);
-        verifyNoMoreInteractions(drinkCounterService);
+        verifyNoMoreInteractions(partyRoster);
     }
 
     @Test
@@ -179,7 +179,7 @@ public class PartyControllerWebTest {
         mvc.perform(get("/ui/removeUserFromParty").param("partyId", "5").param("userId", "abc"))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(partyRoster);
     }
 
     @Test
@@ -189,7 +189,7 @@ public class PartyControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(partyRoster);
         verify(userAccounts, never()).get(anyInt());
     }
 
