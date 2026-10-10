@@ -172,6 +172,8 @@ public class PartyControllerWebTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(get("/ui/removeUserFromParty").param("partyId", "abc").param("userId", "42"))
                 .andExpect(status().isBadRequest());
+        mvc.perform(get("/ui/removeUserFromParty").param("partyId", "5").param("userId", "abc"))
+                .andExpect(status().isBadRequest());
 
         verifyNoInteractions(drinkCounterService);
     }
