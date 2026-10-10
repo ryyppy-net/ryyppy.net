@@ -72,7 +72,7 @@ public class PartyApiController {
         for (User participant : participants) {
             ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
             
-            List<HistoryPoint> history = SlopeService.getSlopes(participant);
+            List<HistoryPoint> history = PromilleHistory.forUser(participant);
             participantDTO.setHistory(history);
             
             participantDTOs.add(participantDTO);
