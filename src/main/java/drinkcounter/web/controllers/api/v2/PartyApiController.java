@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
@@ -27,12 +28,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("API/v2/parties")
 public class PartyApiController {
 
-    private final DrinkCounterService drinkCounterService;
+    private final PartyRoster partyRoster;
+    private final InvitationSuggestions invitationSuggestions;
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
 
-    public PartyApiController(DrinkCounterService drinkCounterService, DrinkLog drinkLog, UserAccounts userAccounts) {
-        this.drinkCounterService = drinkCounterService;
+    public PartyApiController(PartyRoster partyRoster, InvitationSuggestions invitationSuggestions,
+            DrinkLog drinkLog, UserAccounts userAccounts) {
+        this.partyRoster = partyRoster;
+        this.invitationSuggestions = invitationSuggestions;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
     }
@@ -54,22 +58,22 @@ public class PartyApiController {
     
     @PostMapping
     public PartyDTO addParty(@LoggedInUserId int userId, @RequestParam("name") String partyName){
-        Party party = drinkCounterService.startParty(partyName);
-        drinkCounterService.linkUserToParty(userId, party.getId());
+        Party party = partyRoster.start(partyName);
+        partyRoster.join(party.getId(), userId);
         return PartyDTO.fromParty(party);
     }
 
     @GetMapping("{partyId}")
     @PartyMember
     public PartyDTO getParty(@PathVariable Integer partyId){
-        Party party = drinkCounterService.getParty(partyId);
+        Party party = partyRoster.get(partyId);
         return PartyDTO.fromParty(party);
     }
 
     @GetMapping("{partyId}/participants")
     @PartyMember
     public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
-        Party party = drinkCounterService.getParty(partyId);
+        Party party = partyRoster.get(partyId);
         List<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (User participant : participants) {
@@ -91,7 +95,7 @@ public class PartyApiController {
             @RequestParam(value="weight", required=false) Float weight){
         if(email != null){
             User user = userAccounts.byEmail(email);
-            drinkCounterService.linkUserToParty(user.getId(), partyId);
+            partyRoster.join(partyId, user.getId());
             return;
         }
         
@@ -105,13 +109,13 @@ public class PartyApiController {
         user.setWeight(weight);
         user.setGuest(true);
         userAccounts.add(user);
-        drinkCounterService.linkUserToParty(user.getId(), partyId);
+        partyRoster.join(partyId, user.getId());
     }
 
     @DeleteMapping("{partyId}/participants/{participantId}")
     @PartyMember
     public void removeParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
-        drinkCounterService.unlinkUserFromParty(participantId, partyId);
+        partyRoster.leave(partyId, participantId);
     }
 
     @GetMapping("{partyId}/participants/{participantId}")
@@ -158,7 +162,7 @@ public class PartyApiController {
     }
 
     private User requireParticipant(Integer partyId, Integer participantId) {
-        Party party = drinkCounterService.getParty(partyId);
+        Party party = partyRoster.get(partyId);
         User participant = userAccounts.get(participantId);
         if(!party.getParticipants().contains(participant)){
             throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participant.getId(), party.getId()));
@@ -169,13 +173,13 @@ public class PartyApiController {
     @GetMapping("{partyId}/invitations")
     @PartyMember
     public List<Friend> suggestInvite(@LoggedInUserId int userId, @PathVariable Integer partyId, @RequestParam(defaultValue = "10", value="amount") int amount){
-        return drinkCounterService.suggestInvitations(userId, partyId, amount);
+        return invitationSuggestions.forParty(userId, partyId, amount);
     }
 
     @PostMapping("{partyId}/invitations")
     @PartyMember
     public void invitePerson(@PathVariable Integer partyId, @RequestParam(value="userId") int userId){
-        drinkCounterService.linkUserToParty(userId, partyId);
+        partyRoster.join(partyId, userId);
     }
 
     @ExceptionHandler(DateTimeParseException.class)

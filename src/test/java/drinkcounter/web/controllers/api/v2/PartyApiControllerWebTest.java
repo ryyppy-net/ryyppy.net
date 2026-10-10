@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserAccounts;
@@ -58,7 +59,10 @@ public class PartyApiControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private PartyRoster partyRoster;
+
+    @Autowired
+    private InvitationSuggestions invitationSuggestions;
 
     @Autowired
     private DrinkLog drinkLog;
@@ -92,7 +96,7 @@ public class PartyApiControllerWebTest {
         when(userAccounts.get(42)).thenReturn(signedIn);
         when(userAccounts.get(2)).thenReturn(participant);
         when(userAccounts.get(3)).thenReturn(outsider);
-        when(drinkCounterService.getParty(1)).thenReturn(party);
+        when(partyRoster.get(1)).thenReturn(party);
         when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
 
         Drink saved = new Drink();
@@ -119,24 +123,24 @@ public class PartyApiControllerWebTest {
         started.setId(5);
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
-        when(drinkCounterService.startParty("Mökki")).thenReturn(started);
+        when(partyRoster.start("Mökki")).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5));
 
-        verify(drinkCounterService).linkUserToParty(42, 5);
+        verify(partyRoster).join(5, 42);
     }
 
     @Test
     public void invitationSuggestionsAreForTheSignedInUser() throws Exception {
-        when(drinkCounterService.suggestInvitations(42, 1, 10)).thenReturn(List.of(new Friend(9, "Ville", "ville@example.com")));
+        when(invitationSuggestions.forParty(42, 1, 10)).thenReturn(List.of(new Friend(9, "Ville", "ville@example.com")));
 
         mvc.perform(get(PARTIES + "/1/invitations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 
-        verify(drinkCounterService).suggestInvitations(42, 1, 10);
+        verify(invitationSuggestions).forParty(42, 1, 10);
     }
 
     @Test
@@ -246,7 +250,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants").param("name", "Vieras").param("sex", "FEMALE").param("weight", "60"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(8, 1);
+        verify(partyRoster).join(1, 8);
     }
 
     @Test
@@ -256,7 +260,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants").param("email", "outsider@example.com"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(3, 1);
+        verify(partyRoster).join(1, 3);
     }
 
     @Test
@@ -264,7 +268,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(delete(PARTIES + "/1/participants/2"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).unlinkUserFromParty(2, 1);
+        verify(partyRoster).leave(1, 2);
     }
 
     @Test
@@ -272,7 +276,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/invitations").param("userId", "3"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(3, 1);
+        verify(partyRoster).join(1, 3);
     }
 
     static Stream<Arguments> partyRequests() {
@@ -298,7 +302,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(request).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(1, 42);
-        verifyNoMoreInteractions(drinkCounterService, drinkLog);
+        verifyNoMoreInteractions(partyRoster, invitationSuggestions, drinkLog);
         verifyNoInteractions(userAccounts);
     }
 
@@ -309,7 +313,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService, drinkLog);
+        verifyNoInteractions(partyRoster, invitationSuggestions, drinkLog);
     }
 
     @Test
@@ -319,7 +323,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService, drinkLog);
+        verifyNoInteractions(partyRoster, invitationSuggestions, drinkLog);
         verify(userAccounts, never()).get(anyInt());
     }
 }

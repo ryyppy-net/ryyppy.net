@@ -1,5 +1,6 @@
 package drinkcounter.util;
 
+import drinkcounter.PartyRoster;
 import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -7,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -32,8 +32,7 @@ public class PartyMarshallerTest {
         UserAccounts userAccounts = mock(UserAccounts.class);
         when(userAccounts.get(1)).thenReturn(user);
 
-        PartyMarshaller marshaller = new PartyMarshaller();
-        ReflectionTestUtils.setField(marshaller, "userAccounts", userAccounts);
+        PartyMarshaller marshaller = new PartyMarshaller(mock(PartyRoster.class), userAccounts);
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         marshaller.marshallDrinks(1, out);

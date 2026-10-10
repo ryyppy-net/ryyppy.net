@@ -1,6 +1,6 @@
 package drinkcounter.util;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.PartyRoster;
 import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -18,7 +18,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -27,14 +26,17 @@ import org.w3c.dom.Node;
 @Component
 public class PartyMarshaller {
 
-    @Autowired
-    private DrinkCounterService service;
-    @Autowired
-    private UserAccounts userAccounts;
+    private final PartyRoster partyRoster;
+    private final UserAccounts userAccounts;
+
+    public PartyMarshaller(PartyRoster partyRoster, UserAccounts userAccounts) {
+        this.partyRoster = partyRoster;
+        this.userAccounts = userAccounts;
+    }
 
     public void marshall(int partyId, OutputStream out) {
         try {
-            Party party = service.getParty(partyId);
+            Party party = partyRoster.get(partyId);
 
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             DocumentBuilder b = f.newDocumentBuilder();
@@ -49,7 +51,7 @@ public class PartyMarshaller {
             rootNode.appendChild(partyNameNode);
             Node usersNode = d.createElement("users");
             rootNode.appendChild(usersNode);
-            for (User user : service.listUsersByParty(partyId)) {
+            for (User user : partyRoster.members(partyId)) {
                 usersNode.appendChild(createUserNode(d, user));
             }
             StreamResult streamResult = new StreamResult(out);
