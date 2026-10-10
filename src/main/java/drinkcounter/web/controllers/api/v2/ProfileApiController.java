@@ -4,8 +4,8 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.DrinkLog;
+import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
@@ -30,14 +30,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("API/v2/profile")
 public class ProfileApiController {
 
-    private final DrinkCounterService drinkCounterService;
-    private final UserService userService;
+    private final DrinkLog drinkLog;
+    private final UserAccounts userAccounts;
 
     private Clock clock = Clock.systemUTC();
 
-    public ProfileApiController(DrinkCounterService drinkCounterService, UserService userService) {
-        this.drinkCounterService = drinkCounterService;
-        this.userService = userService;
+    public ProfileApiController(DrinkLog drinkLog, UserAccounts userAccounts) {
+        this.drinkLog = drinkLog;
+        this.userAccounts = userAccounts;
     }
 
     @GetMapping
@@ -57,7 +57,7 @@ public class ProfileApiController {
         user.setEmail(email);
         user.setSex(sex);
         user.setWeight(weight); 
-        userService.updateUser(user);
+        userAccounts.update(user);
     }
 
     @PostMapping("drinks")
@@ -73,7 +73,7 @@ public class ProfileApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        return DrinkDTO.fromDrink(drinkCounterService.addDrink(userId, time, (float)alcoholAmount));
+        return DrinkDTO.fromDrink(drinkLog.record(userId, time, (float)alcoholAmount));
     }
 
     @GetMapping("drinks")
@@ -85,13 +85,13 @@ public class ProfileApiController {
     public void changeDrink(@LoggedInUserId int userId, @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
             @RequestParam("alcohol") Float alcoholPercentage){
-        drinkCounterService.changeDrinkAlcohol(userId, drinkId,
+        drinkLog.correctAlcohol(userId, drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
     }
 
     @DeleteMapping("drinks/{drinkId}")
     public void deleteDrink(@LoggedInUserId int userId, @PathVariable Integer drinkId){
-        drinkCounterService.removeDrinkFromUser(userId, drinkId);
+        drinkLog.undo(userId, drinkId);
     }
 
     @GetMapping("drink-history")

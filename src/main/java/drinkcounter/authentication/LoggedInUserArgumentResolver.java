@@ -1,6 +1,6 @@
 package drinkcounter.authentication;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,10 +15,10 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class LoggedInUserArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final UserService userService;
+    private final UserAccounts userAccounts;
 
-    public LoggedInUserArgumentResolver(UserService userService) {
-        this.userService = userService;
+    public LoggedInUserArgumentResolver(UserAccounts userAccounts) {
+        this.userAccounts = userAccounts;
     }
 
     @Override
@@ -35,6 +35,6 @@ public class LoggedInUserArgumentResolver implements HandlerMethodArgumentResolv
             throw new IllegalStateException("@LoggedInUser needs a DrinkcounterUserDetails principal, got "
                     + (principal == null ? null : principal.getClass().getName()));
         }
-        return userService.getUser(details.getUserId());
+        return userAccounts.get(details.getUserId());
     }
 }

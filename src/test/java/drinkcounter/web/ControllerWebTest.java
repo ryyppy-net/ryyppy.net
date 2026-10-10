@@ -1,11 +1,14 @@
 package drinkcounter.web;
 
-import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyRoster;
+import drinkcounter.DrinkLog;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
-import drinkcounter.dao.PartyDAO;
+import drinkcounter.repository.PartyRepository;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,9 +28,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @WebMvcTest
 @Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class})
 @MockitoBean(types = {
-        DrinkCounterService.class,
-        PartyDAO.class,
-        UserService.class,
+        PartyRoster.class,
+        InvitationSuggestions.class,
+        DrinkLog.class,
+        PartyRepository.class,
+        UserAccounts.class,
+        PassphraseLogin.class,
         GoogleIdentityLinkingService.class,
         AuthRelayTokenService.class
 })

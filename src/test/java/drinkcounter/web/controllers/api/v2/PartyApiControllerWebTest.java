@@ -1,8 +1,10 @@
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.DrinkCounterService;
-import drinkcounter.dao.PartyDAO;
-import drinkcounter.UserService;
+import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyRoster;
+import drinkcounter.DrinkLog;
+import drinkcounter.repository.PartyRepository;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
@@ -57,13 +59,19 @@ public class PartyApiControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private PartyRoster partyRoster;
 
     @Autowired
-    private PartyDAO partyDAO;
+    private InvitationSuggestions invitationSuggestions;
 
     @Autowired
-    private UserService userService;
+    private DrinkLog drinkLog;
+
+    @Autowired
+    private PartyRepository partyRepository;
+
+    @Autowired
+    private UserAccounts userAccounts;
 
     private User signedIn;
     private User participant;
@@ -85,16 +93,16 @@ public class PartyApiControllerWebTest {
         party.addParticipant(signedIn);
         party.addParticipant(participant);
 
-        when(userService.getUser(42)).thenReturn(signedIn);
-        when(userService.getUser(2)).thenReturn(participant);
-        when(userService.getUser(3)).thenReturn(outsider);
-        when(drinkCounterService.getParty(1)).thenReturn(party);
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(1L);
+        when(userAccounts.get(42)).thenReturn(signedIn);
+        when(userAccounts.get(2)).thenReturn(participant);
+        when(userAccounts.get(3)).thenReturn(outsider);
+        when(partyRoster.get(1)).thenReturn(party);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
 
         Drink saved = new Drink();
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
-        when(drinkCounterService.addDrink(anyInt(), any(), any())).thenReturn(saved);
+        when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
     }
 
     @Test
@@ -115,24 +123,24 @@ public class PartyApiControllerWebTest {
         started.setId(5);
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
-        when(drinkCounterService.startParty("Mökki")).thenReturn(started);
+        when(partyRoster.start("Mökki")).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5));
 
-        verify(drinkCounterService).linkUserToParty(42, 5);
+        verify(partyRoster).join(5, 42);
     }
 
     @Test
     public void invitationSuggestionsAreForTheSignedInUser() throws Exception {
-        when(drinkCounterService.suggestInvitations(42, 1, 10)).thenReturn(List.of(new Friend(9, "Ville", "ville@example.com")));
+        when(invitationSuggestions.forParty(42, 1, 10)).thenReturn(List.of(new Friend(9, "Ville", "ville@example.com")));
 
         mvc.perform(get(PARTIES + "/1/invitations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
 
-        verify(drinkCounterService).suggestInvitations(42, 1, 10);
+        verify(invitationSuggestions).forParty(42, 1, 10);
     }
 
     @Test
@@ -141,7 +149,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().isOk());
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
-        verify(drinkCounterService).addDrink(eq(2), eq(expected), any(Float.class));
+        verify(drinkLog).record(eq(2), eq(expected), any(Float.class));
     }
 
     @Test
@@ -149,7 +157,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).addDrink(eq(2), eq((Date) null), any(Float.class));
+        verify(drinkLog).record(eq(2), eq((Date) null), any(Float.class));
     }
 
     @Test
@@ -157,7 +165,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks").param("timestamp", "not-a-timestamp"))
                 .andExpect(status().isBadRequest());
 
-        verify(drinkCounterService, never()).addDrink(anyInt(), any(), any());
+        verify(drinkLog, never()).record(anyInt(), any(), any());
     }
 
     @Test
@@ -181,7 +189,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).changeDrinkAlcohol(eq(2), eq(7), any(Float.class));
+        verify(drinkLog).correctAlcohol(eq(2), eq(7), any(Float.class));
     }
 
     @Test
@@ -190,7 +198,7 @@ public class PartyApiControllerWebTest {
                 put(PARTIES + "/1/participants/3/drinks/7").param("volume", "0.5").param("alcohol", "0.05")));
         assertEquals("Participant 3 doesn't belong to party 1", ex.getCause().getMessage());
 
-        verify(drinkCounterService, never()).changeDrinkAlcohol(anyInt(), anyInt(), any(Float.class));
+        verify(drinkLog, never()).correctAlcohol(anyInt(), anyInt(), any(Float.class));
     }
 
     @Test
@@ -198,14 +206,14 @@ public class PartyApiControllerWebTest {
         mvc.perform(delete(PARTIES + "/1/participants/2/drinks/7"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).removeDrinkFromUser(2, 7);
+        verify(drinkLog).undo(2, 7);
     }
 
     @Test
     public void removeDrinkRejectsNonParticipant() {
         assertThrows(ServletException.class, () -> mvc.perform(delete(PARTIES + "/1/participants/3/drinks/7")));
 
-        verify(drinkCounterService, never()).removeDrinkFromUser(anyInt(), anyInt());
+        verify(drinkLog, never()).undo(anyInt(), anyInt());
     }
 
     @Test
@@ -233,7 +241,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void memberAddsAGuestParticipant() throws Exception {
-        when(userService.addUser(any(User.class))).thenAnswer(invocation -> {
+        when(userAccounts.add(any(User.class))).thenAnswer(invocation -> {
             User guest = invocation.getArgument(0);
             guest.setId(8);
             return guest;
@@ -242,17 +250,17 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants").param("name", "Vieras").param("sex", "FEMALE").param("weight", "60"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(8, 1);
+        verify(partyRoster).join(1, 8);
     }
 
     @Test
     public void memberAddsAParticipantByEmail() throws Exception {
-        when(userService.getUserByEmail("outsider@example.com")).thenReturn(outsider);
+        when(userAccounts.byEmail("outsider@example.com")).thenReturn(outsider);
 
         mvc.perform(post(PARTIES + "/1/participants").param("email", "outsider@example.com"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(3, 1);
+        verify(partyRoster).join(1, 3);
     }
 
     @Test
@@ -260,7 +268,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(delete(PARTIES + "/1/participants/2"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).unlinkUserFromParty(2, 1);
+        verify(partyRoster).leave(1, 2);
     }
 
     @Test
@@ -268,7 +276,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/invitations").param("userId", "3"))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(3, 1);
+        verify(partyRoster).join(1, 3);
     }
 
     static Stream<Arguments> partyRequests() {
@@ -289,13 +297,13 @@ public class PartyApiControllerWebTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("partyRequests")
     public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request) throws Exception {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(0L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(0L);
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verify(partyDAO).countUserParticipations(1, 42);
-        verifyNoMoreInteractions(drinkCounterService);
-        verifyNoInteractions(userService);
+        verify(partyRepository).countUserParticipations(1, 42);
+        verifyNoMoreInteractions(partyRoster, invitationSuggestions, drinkLog);
+        verifyNoInteractions(userAccounts);
     }
 
     @Test
@@ -305,7 +313,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(partyRoster, invitationSuggestions, drinkLog);
     }
 
     @Test
@@ -315,7 +323,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).getUser(anyInt());
+        verifyNoInteractions(partyRoster, invitationSuggestions, drinkLog);
+        verify(userAccounts, never()).get(anyInt());
     }
 }

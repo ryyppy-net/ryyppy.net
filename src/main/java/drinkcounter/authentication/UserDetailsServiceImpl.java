@@ -4,7 +4,7 @@
  */
 package drinkcounter.authentication;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.model.User;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,15 +20,15 @@ import java.util.Collections;
  */
 public class UserDetailsServiceImpl implements UserDetailsService{
 
-    private final UserService userService;
+    private final UserAccounts userAccounts;
 
-    public UserDetailsServiceImpl(UserService userService) {
-        this.userService = userService;
+    public UserDetailsServiceImpl(UserAccounts userAccounts) {
+        this.userAccounts = userAccounts;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException, DataAccessException {
-        User user = userService.getUserByEmail(email);
+        User user = userAccounts.byEmail(email);
         if(user == null){
             throw new UsernameNotFoundException("User with username "+email+" doesn't exist");
         }

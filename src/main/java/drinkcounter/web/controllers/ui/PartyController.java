@@ -1,6 +1,6 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.DrinkCounterService;
+import drinkcounter.PartyRoster;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.PartyMember;
@@ -21,10 +21,10 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("ui")
 public class PartyController {
 
-    private final DrinkCounterService drinkCounterService;
+    private final PartyRoster partyRoster;
 
-    public PartyController(DrinkCounterService drinkCounterService) {
-        this.drinkCounterService = drinkCounterService;
+    public PartyController(PartyRoster partyRoster) {
+        this.partyRoster = partyRoster;
     }
 
     @RequestMapping("/party")
@@ -32,7 +32,7 @@ public class PartyController {
     public ModelAndView party(@LoggedInUser User user, @RequestParam("id") int partyId){
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
-        mav.addObject("party", drinkCounterService.getParty(partyId));
+        mav.addObject("party", partyRoster.get(partyId));
         mav.addObject("user", user);
         return mav;
     }
@@ -40,8 +40,8 @@ public class PartyController {
     @RequestMapping("/addParty")
     @OwnUser
     public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") int userId){
-        Party party = drinkCounterService.startParty(partyName);
-        drinkCounterService.linkUserToParty(userId, party.getId());
+        Party party = partyRoster.start(partyName);
+        partyRoster.join(party.getId(), userId);
         return "redirect:party?id="+party.getId();
     }
    
@@ -49,7 +49,7 @@ public class PartyController {
     @PartyMemberAndOwnUserOrPartyMate
     public String removeUserFromParty(@RequestParam("partyId") int partyId,
             @RequestParam("userId") int userId){
-        drinkCounterService.unlinkUserFromParty(userId, partyId);
+        partyRoster.leave(partyId, userId);
 
         return "redirect:user";
     }

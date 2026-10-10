@@ -1,6 +1,6 @@
 package drinkcounter.authentication;
 
-import drinkcounter.dao.PartyDAO;
+import drinkcounter.repository.PartyRepository;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Evaluates each access annotation through Spring Security's {@code @PreAuthorize} interceptor,
- * signed in as user 42, with party membership answered by a mocked {@link PartyDAO}.
+ * signed in as user 42, with party membership answered by a mocked {@link PartyRepository}.
  */
 public class AccessAnnotationsTest {
 
@@ -44,13 +44,13 @@ public class AccessAnnotationsTest {
         }
     }
 
-    private PartyDAO partyDAO;
+    private PartyRepository partyRepository;
     private Handlers handlers;
 
     @BeforeEach
     public void setUp() {
-        partyDAO = mock(PartyDAO.class);
-        PartyAccess partyAccess = new PartyAccess(partyDAO);
+        partyRepository = mock(PartyRepository.class);
+        PartyAccess partyAccess = new PartyAccess(partyRepository);
 
         DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
         StaticApplicationContext beans = new StaticApplicationContext();
@@ -78,14 +78,14 @@ public class AccessAnnotationsTest {
 
     @Test
     public void partyMemberAllowsParticipant() {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
 
         assertDoesNotThrow(() -> handlers.party(1));
     }
 
     @Test
     public void partyMemberDeniesNonParticipant() {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(0L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(0L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.party(1));
     }
@@ -97,7 +97,7 @@ public class AccessAnnotationsTest {
 
     @Test
     public void ownUserDeniesPartyMate() {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.ownUser(7));
     }
@@ -109,37 +109,37 @@ public class AccessAnnotationsTest {
 
     @Test
     public void ownUserOrPartyMateAllowsPartyMate() {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         assertDoesNotThrow(() -> handlers.ownUserOrPartyMate(7));
     }
 
     @Test
     public void ownUserOrPartyMateDeniesStranger() {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(0L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(0L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.ownUserOrPartyMate(7));
     }
 
     @Test
     public void partyMemberAndOwnUserOrPartyMateAllowsMemberActingOnThemself() {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
 
         assertDoesNotThrow(() -> handlers.partyMemberAndOwnUserOrPartyMate(1, 42));
     }
 
     @Test
     public void partyMemberAndOwnUserOrPartyMateAllowsMemberActingOnPartyMate() {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(1L);
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         assertDoesNotThrow(() -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
     }
 
     @Test
     public void partyMemberAndOwnUserOrPartyMateDeniesNonParticipantEvenForPartyMate() {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(0L);
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(0L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
         assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 42));
@@ -147,8 +147,8 @@ public class AccessAnnotationsTest {
 
     @Test
     public void partyMemberAndOwnUserOrPartyMateDeniesMemberActingOnStranger() {
-        when(partyDAO.countUserParticipations(1, 42)).thenReturn(1L);
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(0L);
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(0L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
     }

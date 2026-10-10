@@ -1,8 +1,10 @@
 package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
-import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.PartyRoster;
+import drinkcounter.DrinkLog;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
@@ -54,27 +56,31 @@ public class APIController {
      */
     public static final float ALCOHOL_DENSITY = 789;
 
-    private final DrinkCounterService drinkCounterService;
-    private final UserService userService;
+    private final PartyRoster partyRoster;
+    private final DrinkLog drinkLog;
+    private final UserAccounts userAccounts;
+    private final PassphraseLogin passphraseLogin;
 
     private Clock clock = Clock.systemUTC();
 
-    public APIController(DrinkCounterService drinkCounterService, UserService userService) {
-        this.drinkCounterService = drinkCounterService;
-        this.userService = userService;
+    public APIController(PartyRoster partyRoster,
+            DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin) {
+        this.partyRoster = partyRoster;
+        this.drinkLog = drinkLog;
+        this.userAccounts = userAccounts;
+        this.passphraseLogin = passphraseLogin;
     }
 
     @PartyMember
     @RequestMapping(value = "/parties/{partyId}", produces = MediaType.APPLICATION_XML_VALUE)
     public @ResponseBody ClassicPartyDTO party(@PathVariable int partyId) {
-        return ClassicPartyDTO.fromParty(drinkCounterService.getParty(partyId),
-                drinkCounterService.listUsersByParty(partyId), clock);
+        return ClassicPartyDTO.fromParty(partyRoster.get(partyId), partyRoster.members(partyId), clock);
     }
 
     @OwnUser
     @RequestMapping(value = "/users/{userId}/show-drinks", produces = MediaType.APPLICATION_XML_VALUE)
     public @ResponseBody ClassicUserDrinksDTO showDrinks(@PathVariable int userId) {
-        return ClassicUserDrinksDTO.fromUser(userService.getUser(userId));
+        return ClassicUserDrinksDTO.fromUser(userAccounts.get(userId));
     }
 
     @OwnUserOrPartyMate
@@ -85,10 +91,10 @@ public class APIController {
     @RequestParam(value="alcohol", required=false) Float alcoholPercentage ){
         if(volume != null && alcoholPercentage != null){
             float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
-            return Integer.toString(drinkCounterService.addDrink(userId, alcoholAmount));
+            return Integer.toString(drinkLog.record(userId, alcoholAmount));
         }
         
-        return Integer.toString(drinkCounterService.addDrink(userId));
+        return Integer.toString(drinkLog.record(userId, new Date()));
     }
 
     @OwnUserOrPartyMate
@@ -96,7 +102,7 @@ public class APIController {
     public @ResponseBody String editDrinkOfUser(@PathVariable int userId, @PathVariable String drinkId,
     @RequestParam("volume") Float volume,
     @RequestParam("alcohol") Float alcoholPercentage){
-        drinkCounterService.changeDrinkAlcohol(userId, Integer.parseInt(drinkId),
+        drinkLog.correctAlcohol(userId, Integer.parseInt(drinkId),
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
         return "";
     }
@@ -105,7 +111,7 @@ public class APIController {
     @RequestMapping("/users/{userId}/remove-drink/{drinkId}")
     public @ResponseBody String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId){
         int drinkIdInt = Integer.parseInt(drinkId);
-        drinkCounterService.removeDrinkFromUser(userId, drinkIdInt);
+        drinkLog.undo(userId, drinkIdInt);
         log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userId));
         return "";
     }
@@ -113,13 +119,13 @@ public class APIController {
     @OwnUserOrPartyMate
     @RequestMapping(value = "/users/{userId}", produces = MediaType.APPLICATION_XML_VALUE)
     public @ResponseBody ClassicUserDTO user(@PathVariable int userId) {
-        return ClassicUserDTO.fromUser(userService.getUser(userId), clock);
+        return ClassicUserDTO.fromUser(userAccounts.get(userId), clock);
     }
 
     @OwnUser
     @RequestMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException{
-        User user = userService.getUser(userId);
+        User user = userAccounts.get(userId);
         List<Drink> drinks = user.getDrinks();
 
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
@@ -167,7 +173,7 @@ public class APIController {
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
         csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
 
-        User user = userService.getUser(userId);
+        User user = userAccounts.get(userId);
         List<String[]> history = getSlopes(user, false);
 
         for (String[] s : history) {
@@ -190,8 +196,8 @@ public class APIController {
         user.setSex(User.Sex.valueOf(sex));
         user.setWeight(weight);
         user.setGuest(true);
-        userService.addUser(user);
-        drinkCounterService.linkUserToParty(user.getId(), partyId);
+        userAccounts.add(user);
+        partyRoster.join(partyId, user.getId());
         return user.getId().toString();
     }
     
@@ -199,7 +205,7 @@ public class APIController {
     @RequestMapping("/parties/{partyId}/link-user-to-party/{userId}")
     public @ResponseBody String linkUserToParty(@PathVariable int partyId,
             @PathVariable int userId){
-        drinkCounterService.linkUserToParty(userId, partyId);
+        partyRoster.join(partyId, userId);
         return "";
     }
 
@@ -243,7 +249,7 @@ public class APIController {
     
     @RequestMapping("/passphrase/{passphrase}")
     public @ResponseBody String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
-        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
@@ -252,15 +258,15 @@ public class APIController {
 
     @RequestMapping("/passphrase/{passphrase}/add-drink/{time}")
     public @ResponseBody String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
-        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         try {
             if (time == null || time.equals("") || time.equals("0"))
-                drinkCounterService.addDrink(user.getId());
+                drinkLog.record(user.getId(), new Date());
             else
-                drinkCounterService.addDrink(user.getId(), new Date(Long.parseLong(time)));
+                drinkLog.record(user.getId(), new Date(Long.parseLong(time)));
         } catch (Exception e) {
             return "-1";
         }
@@ -270,13 +276,13 @@ public class APIController {
 
     @RequestMapping("/passphrase/{passphrase}/undo-drink")
     public @ResponseBody String undoDrink(@PathVariable String passphrase) throws IOException{
-        User user = userService.getUserByPassphrase(passphrase.toLowerCase());
+        User user = passphraseLogin.findUser(passphrase.toLowerCase());
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         int count = user.getDrinks().size();
         if (count > 0)
-            drinkCounterService.removeDrinkFromUser(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
+            drinkLog.undo(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
 
         return getUserCsv(user);
     }

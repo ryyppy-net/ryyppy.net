@@ -2,8 +2,10 @@ package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvReader;
 import drinkcounter.PromilleTracker;
-import drinkcounter.DrinkCounterService;
-import drinkcounter.UserService;
+import drinkcounter.PartyRoster;
+import drinkcounter.DrinkLog;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.ui.AuthenticationController;
@@ -35,16 +37,17 @@ import static org.mockito.Mockito.when;
 public class APIControllerTest {
 
     private APIController controller;
-    private UserService userService;
+    private UserAccounts userAccounts;
     private HttpSession session;
 
     @BeforeEach
     public void setUp() {
         PromilleTracker.getInstance().reset();
 
-        userService = mock(UserService.class);
+        userAccounts = mock(UserAccounts.class);
         session = mock(HttpSession.class);
-        controller = new APIController(mock(DrinkCounterService.class), userService);
+        controller = new APIController(mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
+                mock(PassphraseLogin.class));
     }
 
     private TimeZone originalDefaultTimeZone;
@@ -73,7 +76,7 @@ public class APIControllerTest {
         drink.setTimeStamp(Instant.parse("2024-03-05T22:30:00Z")); // 2024-03-06T00:30 in client zone
         user.drink(drink);
 
-        when(userService.getUser(1)).thenReturn(user);
+        when(userAccounts.get(1)).thenReturn(user);
 
         ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
@@ -115,7 +118,7 @@ public class APIControllerTest {
         User user = new User();
         user.setId(1); // no drinks: only the "today" bucket will be present
 
-        when(userService.getUser(1)).thenReturn(user);
+        when(userAccounts.get(1)).thenReturn(user);
 
         ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
@@ -141,7 +144,7 @@ public class APIControllerTest {
         user.drink(beforeMidnightLocal);
         user.drink(afterMidnightLocal);
 
-        when(userService.getUser(1)).thenReturn(user);
+        when(userAccounts.get(1)).thenReturn(user);
 
         ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
@@ -168,7 +171,7 @@ public class APIControllerTest {
         drink.setTimeStamp(Instant.now().minus(Duration.ofMinutes(200)));
         user.drink(drink);
 
-        when(userService.getUser(1)).thenReturn(user);
+        when(userAccounts.get(1)).thenReturn(user);
 
         long before = System.currentTimeMillis();
         ResponseEntity<byte[]> response = controller.showHistory(1);

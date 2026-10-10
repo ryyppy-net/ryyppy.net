@@ -1,8 +1,9 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.DrinkCounterService;
-import drinkcounter.dao.PartyDAO;
-import drinkcounter.UserService;
+import drinkcounter.DrinkLog;
+import drinkcounter.repository.PartyRepository;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -46,13 +47,16 @@ public class UserControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private UserService userService;
+    private UserAccounts userAccounts;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private PassphraseLogin passphraseLogin;
 
     @Autowired
-    private PartyDAO partyDAO;
+    private DrinkLog drinkLog;
+
+    @Autowired
+    private PartyRepository partyRepository;
 
     private User user;
 
@@ -60,7 +64,7 @@ public class UserControllerWebTest {
     public void setUp() {
         user = new User();
         user.setId(42);
-        when(userService.getUser(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
     }
 
     @Test
@@ -92,7 +96,7 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("passphrase"));
 
-        verify(userService).generatePassphrase(user);
+        verify(passphraseLogin).issue(user);
     }
 
     @Test
@@ -104,8 +108,8 @@ public class UserControllerWebTest {
                     .andExpect(redirectedUrl("/ui/login"));
         }
 
-        verify(userService, never()).getUser(42);
-        verify(userService, never()).generatePassphrase(any());
+        verify(userAccounts, never()).get(42);
+        verify(passphraseLogin, never()).issue(any());
     }
 
     @Test
@@ -116,19 +120,19 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(userService).updateUser(user);
+        verify(userAccounts).update(user);
         assertEquals("New name", user.getName());
     }
 
     @Test
     public void modifyUserIsForbiddenForAnotherUserEvenInASharedParty() throws Exception {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(modifyUser(7)).andExpect(status().isForbidden());
 
-        verify(userService, never()).getUser(7);
-        verify(userService, never()).updateUser(any());
-        verifyNoInteractions(drinkCounterService);
+        verify(userAccounts, never()).get(7);
+        verify(userAccounts, never()).update(any());
+        verifyNoInteractions(drinkLog);
     }
 
     @Test
@@ -137,7 +141,7 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(drinkCounterService).addDrinkToDate(42, DATE, 0.0);
+        verify(drinkLog).recordAt(42, DATE, 0.0);
     }
 
     @Test
@@ -145,27 +149,27 @@ public class UserControllerWebTest {
         mvc.perform(addDrinkToDate(42).sessionAttr(AuthenticationController.TIMEZONEOFFSET, -120.0))
                 .andExpect(status().is3xxRedirection());
 
-        verify(drinkCounterService).addDrinkToDate(42, DATE, -120.0);
+        verify(drinkLog).recordAt(42, DATE, -120.0);
     }
 
     @Test
     public void addDrinkToDateAddsADrinkForAPartyMate()throws Exception {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(addDrinkToDate(7))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(partyDAO).countSharedParties(42, 7);
-        verify(drinkCounterService).addDrinkToDate(7, DATE, 0.0);
+        verify(partyRepository).countSharedParties(42, 7);
+        verify(drinkLog).recordAt(7, DATE, 0.0);
     }
 
     @Test
     public void addDrinkToDateIsForbiddenForAnOutsider() throws Exception {
         mvc.perform(addDrinkToDate(7)).andExpect(status().isForbidden());
 
-        verify(partyDAO).countSharedParties(42, 7);
-        verifyNoMoreInteractions(drinkCounterService);
+        verify(partyRepository).countSharedParties(42, 7);
+        verifyNoMoreInteractions(drinkLog);
     }
 
     @Test
@@ -174,25 +178,24 @@ public class UserControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("user"));
 
-        verify(drinkCounterService).removeDrinkFromUser(42, 5);
+        verify(drinkLog).undo(42, 5);
     }
 
     @Test
     public void removeDrinkIsForbiddenForAnotherUserEvenInASharedParty() throws Exception {
-        when(partyDAO.countSharedParties(42, 7)).thenReturn(1L);
+        when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
         mvc.perform(removeDrink(7)).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(drinkLog);
     }
 
     @Test
     public void getUserByEmailAnswersAMemberOfTheParty() throws Exception {
         User invitee = new User();
         invitee.setId(9);
-        when(partyDAO.countUserParticipations(3, 42)).thenReturn(1L);
-        when(userService.emailIsCorrect("friend@example.com")).thenReturn(true);
-        when(userService.getUserByEmail("friend@example.com")).thenReturn(invitee);
+        when(partyRepository.countUserParticipations(3, 42)).thenReturn(1L);
+        when(userAccounts.byEmail("friend@example.com")).thenReturn(invitee);
 
         mvc.perform(getUserByEmail(3))
                 .andExpect(status().isOk())
@@ -203,9 +206,9 @@ public class UserControllerWebTest {
     public void getUserByEmailIsForbiddenForAnOutsiderOfTheParty() throws Exception {
         mvc.perform(getUserByEmail(3)).andExpect(status().isForbidden());
 
-        verify(partyDAO).countUserParticipations(3, 42);
-        verifyNoMoreInteractions(drinkCounterService);
-        verify(userService, never()).getUserByEmail(any());
+        verify(partyRepository).countUserParticipations(3, 42);
+        verifyNoMoreInteractions(drinkLog);
+        verify(userAccounts, never()).byEmail(any());
     }
 
     @Test
@@ -215,8 +218,8 @@ public class UserControllerWebTest {
         mvc.perform(removeDrink("abc")).andExpect(status().isBadRequest());
         mvc.perform(getUserByEmail("abc")).andExpect(status().isBadRequest());
 
-        verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).updateUser(any());
+        verifyNoInteractions(drinkLog);
+        verify(userAccounts, never()).update(any());
     }
 
     @Test
@@ -228,8 +231,8 @@ public class UserControllerWebTest {
                     .andExpect(redirectedUrl("/ui/login"));
         }
 
-        verifyNoInteractions(drinkCounterService);
-        verify(userService, never()).updateUser(any());
+        verifyNoInteractions(drinkLog);
+        verify(userAccounts, never()).update(any());
     }
 
     private MockHttpServletRequestBuilder modifyUser(Object userId) {

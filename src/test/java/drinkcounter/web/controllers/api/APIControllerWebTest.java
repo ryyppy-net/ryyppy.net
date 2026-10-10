@@ -1,13 +1,16 @@
 package drinkcounter.web.controllers.api;
 
-import drinkcounter.DrinkCounterService;
-import drinkcounter.dao.PartyDAO;
-import drinkcounter.UserService;
+import drinkcounter.PartyRoster;
+import drinkcounter.DrinkLog;
+import drinkcounter.repository.PartyRepository;
+import drinkcounter.PassphraseLogin;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
 import drinkcounter.web.controllers.ui.AuthenticationController;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,18 +65,24 @@ public class APIControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private DrinkCounterService drinkCounterService;
+    private PartyRoster partyRoster;
 
     @Autowired
-    private PartyDAO partyDAO;
+    private DrinkLog drinkLog;
 
     @Autowired
-    private UserService userService;
+    private PartyRepository partyRepository;
+
+    @Autowired
+    private UserAccounts userAccounts;
+
+    @Autowired
+    private PassphraseLogin passphraseLogin;
 
     @BeforeEach
     public void setUp() {
-        when(userService.getUser(SIGNED_IN)).thenReturn(drinker(SIGNED_IN));
-        when(userService.getUser(OTHER_USER)).thenReturn(drinker(OTHER_USER));
+        when(userAccounts.get(SIGNED_IN)).thenReturn(drinker(SIGNED_IN));
+        when(userAccounts.get(OTHER_USER)).thenReturn(drinker(OTHER_USER));
     }
 
     static Stream<Arguments> outsiderRequests() {
@@ -97,12 +106,12 @@ public class APIControllerWebTest {
         mvc.perform(request).andExpect(status().isForbidden());
 
         switch (rule) {
-            case PARTY_MEMBER -> verify(partyDAO).countUserParticipations(PARTY, SIGNED_IN);
-            case OWN_USER_OR_PARTY_MATE -> verify(partyDAO).countSharedParties(SIGNED_IN, OTHER_USER);
+            case PARTY_MEMBER -> verify(partyRepository).countUserParticipations(PARTY, SIGNED_IN);
+            case OWN_USER_OR_PARTY_MATE -> verify(partyRepository).countSharedParties(SIGNED_IN, OTHER_USER);
             case OWN_USER -> { }
         }
-        verifyNoMoreInteractions(drinkCounterService);
-        verifyNoInteractions(userService);
+        verifyNoMoreInteractions(partyRoster, drinkLog);
+        verifyNoInteractions(userAccounts, passphraseLogin);
     }
 
     static Stream<Arguments> passphraseRequests() {
@@ -119,9 +128,9 @@ public class APIControllerWebTest {
             throws Exception {
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verify(userService).getUserByPassphrase("unknown");
-        verifyNoMoreInteractions(userService);
-        verifyNoInteractions(drinkCounterService);
+        verify(passphraseLogin).findUser("unknown");
+        verifyNoMoreInteractions(passphraseLogin);
+        verifyNoInteractions(partyRoster, drinkLog);
     }
 
     static Stream<Arguments> partyMateRequests() {
@@ -136,7 +145,7 @@ public class APIControllerWebTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("partyMateRequests")
     public void partyMateIsAllowed(String name, MockHttpServletRequestBuilder request) throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isOk());
     }
@@ -150,11 +159,11 @@ public class APIControllerWebTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("ownOnlyRequests")
     public void partyMateIsForbiddenFromTheFullDrinkLog(String name, MockHttpServletRequestBuilder request) throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isForbidden());
 
-        verifyNoInteractions(drinkCounterService, userService);
+        verifyNoInteractions(partyRoster, drinkLog, userAccounts, passphraseLogin);
     }
 
     static Stream<Arguments> ownUserRequests() {
@@ -176,8 +185,8 @@ public class APIControllerWebTest {
 
     @Test
     public void partyMateAddsADrinkForTheOtherUser() throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
-        when(drinkCounterService.addDrink(OTHER_USER)).thenReturn(9);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(drinkLog.record(eq(OTHER_USER), any(Date.class))).thenReturn(9);
 
         mvc.perform(addDrink(OTHER_USER))
                 .andExpect(status().isOk())
@@ -186,31 +195,31 @@ public class APIControllerWebTest {
 
     @Test
     public void partyMateEditsTheOtherUsersDrink() throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(editDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
-        verify(drinkCounterService).changeDrinkAlcohol(eq(OTHER_USER), eq(DRINK), anyFloat());
+        verify(drinkLog).correctAlcohol(eq(OTHER_USER), eq(DRINK), anyFloat());
     }
 
     @Test
     public void partyMateRemovesTheOtherUsersDrink() throws Exception {
-        when(partyDAO.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(removeDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
 
-        verify(drinkCounterService).removeDrinkFromUser(OTHER_USER, DRINK);
+        verify(drinkLog).undo(OTHER_USER, DRINK);
     }
 
     @Test
     public void memberGetsTheParty() throws Exception {
-        when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
         Party party = new Party();
         party.setId(PARTY);
         party.setName("Sauna");
-        when(drinkCounterService.getParty(PARTY)).thenReturn(party);
-        when(drinkCounterService.listUsersByParty(PARTY)).thenReturn(List.of(drinker(SIGNED_IN)));
+        when(partyRoster.get(PARTY)).thenReturn(party);
+        when(partyRoster.members(PARTY)).thenReturn(List.of(drinker(SIGNED_IN)));
 
         mvc.perform(partyXml(PARTY))
                 .andExpect(status().isOk())
@@ -224,8 +233,8 @@ public class APIControllerWebTest {
 
     @Test
     public void memberAddsAGuest() throws Exception {
-        when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
-        when(userService.addUser(any(User.class))).thenAnswer(invocation -> {
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(userAccounts.add(any(User.class))).thenAnswer(invocation -> {
             User guest = invocation.getArgument(0);
             guest.setId(8);
             return guest;
@@ -235,17 +244,17 @@ public class APIControllerWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("8"));
 
-        verify(drinkCounterService).linkUserToParty(8, PARTY);
+        verify(partyRoster).join(PARTY, 8);
     }
 
     @Test
     public void memberLinksAUserToTheParty() throws Exception {
-        when(partyDAO.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
         mvc.perform(linkUser(PARTY, OTHER_USER))
                 .andExpect(status().isOk());
 
-        verify(drinkCounterService).linkUserToParty(OTHER_USER, PARTY);
+        verify(partyRoster).join(PARTY, OTHER_USER);
     }
 
     @Test
@@ -256,7 +265,7 @@ public class APIControllerWebTest {
                 .andExpect(xpath("/user/id").string(Integer.toString(SIGNED_IN)))
                 .andExpect(xpath("/user/drinks/count").string("0"));
 
-        verifyNoInteractions(drinkCounterService);
+        verifyNoInteractions(partyRoster, drinkLog);
     }
 
     @Test

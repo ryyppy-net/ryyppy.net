@@ -1,6 +1,6 @@
 package drinkcounter.web;
 
-import drinkcounter.UserService;
+import drinkcounter.UserAccounts;
 import drinkcounter.authentication.UserDetailsServiceImpl;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +20,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class WebSecurityConfiguration {
 
-    private final UserService userService;
+    private final UserAccounts userAccounts;
     private final Customizer<HttpSecurity> oauth2LoginCustomizer;
 
     @Autowired
     public WebSecurityConfiguration(
-            UserService userService,
+            UserAccounts userAccounts,
             Customizer<HttpSecurity> oauth2LoginCustomizer) {
-        this.userService = userService;
+        this.userAccounts = userAccounts;
         this.oauth2LoginCustomizer = oauth2LoginCustomizer;
     }
 
@@ -76,7 +76,7 @@ public class WebSecurityConfiguration {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new UserDetailsServiceImpl(userService);
+        return new UserDetailsServiceImpl(userAccounts);
     }
 
     @Bean
