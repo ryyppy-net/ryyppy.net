@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AlcoholService {
+public class PromilleTracker {
 
     private final Map<Integer, AlcoholCalculator> alcoholCalculators = new HashMap<Integer, AlcoholCalculator>();
     private final Object maplock = new Object();
-    private final static AlcoholService instance = new AlcoholService();
+    private final static PromilleTracker instance = new PromilleTracker();
 
-    private AlcoholService() {
+    private PromilleTracker() {
 
     }
 
@@ -110,7 +110,7 @@ public class AlcoholService {
         return user.drinksSince(soberTime);
     }
 
-    public static AlcoholService getInstance() {
+    public static PromilleTracker getInstance() {
         return instance;
     }
 

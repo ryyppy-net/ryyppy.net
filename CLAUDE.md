@@ -55,7 +55,7 @@ args; omit them locally and it is skipped. Two invariants:
 
 ## Things that are easy to get wrong
 
-- `AlcoholService.getInstance()` is a static singleton outside Spring that keeps
+- `PromilleTracker.getInstance()` is a static singleton outside Spring that keeps
   an in-memory `AlcoholCalculator` per user id. Change drinks through `User.drink()` /
   `User.removeDrink()` so it stays in sync.
 - Google sign-in only works on the hub domain registered with Google

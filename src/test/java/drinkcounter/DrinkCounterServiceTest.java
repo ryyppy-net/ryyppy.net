@@ -31,7 +31,7 @@ public class DrinkCounterServiceTest {
 
     @BeforeEach
     public void setUp() {
-        AlcoholService.getInstance().reset();
+        PromilleTracker.getInstance().reset();
 
         service = new DrinkCounterService();
         userDAO = mock(UserDAO.class);
