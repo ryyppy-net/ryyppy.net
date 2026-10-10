@@ -59,57 +59,6 @@ public class APIControllerWebTest {
         when(userService.getUser(OTHER_USER)).thenReturn(drinker(OTHER_USER));
     }
 
-    private static User drinker(int id) {
-        User user = new User();
-        user.setId(id);
-        user.setWeight(80);
-        user.setSex(User.Sex.MALE);
-        return user;
-    }
-
-    private static MockHttpServletRequestBuilder showDrinks(int userId) {
-        return get("/API/users/{userId}/show-drinks", userId);
-    }
-
-    private static MockHttpServletRequestBuilder drinksPerDay(int userId) {
-        return get("/API/users/{userId}/drinks", userId).sessionAttr(AuthenticationController.TIMEZONEOFFSET, 0.0);
-    }
-
-    private static MockHttpServletRequestBuilder userXml(int userId) {
-        return get("/API/users/{userId}", userId);
-    }
-
-    private static MockHttpServletRequestBuilder addDrink(int userId) {
-        return post("/API/users/{userId}/add-drink", userId);
-    }
-
-    private static MockHttpServletRequestBuilder editDrink(int userId) {
-        return get("/API/users/{userId}/edit-drink/5", userId).param("volume", "0.5").param("alcohol", "0.05");
-    }
-
-    private static MockHttpServletRequestBuilder removeDrink(int userId) {
-        return get("/API/users/{userId}/remove-drink/5", userId);
-    }
-
-    private static MockHttpServletRequestBuilder showHistory(int userId) {
-        return get("/API/users/{userId}/show-history", userId);
-    }
-
-    private static MockHttpServletRequestBuilder partyXml() {
-        return get("/API/parties/{partyId}", PARTY);
-    }
-
-    private static MockHttpServletRequestBuilder addGuest() {
-        return post("/API/parties/{partyId}/add-anonymous-user", PARTY)
-                .param("name", "Vieras").param("sex", "MALE").param("weight", "80");
-    }
-
-    private static MockHttpServletRequestBuilder linkUser(int userId) {
-        return get("/API/parties/{partyId}/link-user-to-party/{userId}", PARTY, userId);
-    }
-
-    private enum Rule { PARTY_MEMBER, OWN_USER, OWN_USER_OR_PARTY_MATE }
-
     static Stream<Arguments> outsiderRequests() {
         return Stream.of(
                 Arguments.of("party", partyXml(), Rule.PARTY_MEMBER),
@@ -259,4 +208,55 @@ public class APIControllerWebTest {
         verify(partyMarshaller).marshallDrinks(eq(SIGNED_IN), any());
         verifyNoInteractions(drinkCounterService);
     }
+
+    private static User drinker(int id) {
+        User user = new User();
+        user.setId(id);
+        user.setWeight(80);
+        user.setSex(User.Sex.MALE);
+        return user;
+    }
+
+    private static MockHttpServletRequestBuilder showDrinks(int userId) {
+        return get("/API/users/{userId}/show-drinks", userId);
+    }
+
+    private static MockHttpServletRequestBuilder drinksPerDay(int userId) {
+        return get("/API/users/{userId}/drinks", userId).sessionAttr(AuthenticationController.TIMEZONEOFFSET, 0.0);
+    }
+
+    private static MockHttpServletRequestBuilder userXml(int userId) {
+        return get("/API/users/{userId}", userId);
+    }
+
+    private static MockHttpServletRequestBuilder addDrink(int userId) {
+        return post("/API/users/{userId}/add-drink", userId);
+    }
+
+    private static MockHttpServletRequestBuilder editDrink(int userId) {
+        return get("/API/users/{userId}/edit-drink/5", userId).param("volume", "0.5").param("alcohol", "0.05");
+    }
+
+    private static MockHttpServletRequestBuilder removeDrink(int userId) {
+        return get("/API/users/{userId}/remove-drink/5", userId);
+    }
+
+    private static MockHttpServletRequestBuilder showHistory(int userId) {
+        return get("/API/users/{userId}/show-history", userId);
+    }
+
+    private static MockHttpServletRequestBuilder partyXml() {
+        return get("/API/parties/{partyId}", PARTY);
+    }
+
+    private static MockHttpServletRequestBuilder addGuest() {
+        return post("/API/parties/{partyId}/add-anonymous-user", PARTY)
+                .param("name", "Vieras").param("sex", "MALE").param("weight", "80");
+    }
+
+    private static MockHttpServletRequestBuilder linkUser(int userId) {
+        return get("/API/parties/{partyId}/link-user-to-party/{userId}", PARTY, userId);
+    }
+
+    private enum Rule { PARTY_MEMBER, OWN_USER, OWN_USER_OR_PARTY_MATE }
 }
