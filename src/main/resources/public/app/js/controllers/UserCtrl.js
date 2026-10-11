@@ -101,4 +101,6 @@ function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
     };
 }
 
-UserCtrl.$inject = ['$scope', 'Poller', 'RyyppyAPI', 'Notify'];
+UserCtrl.$inject = ['$scope', 'Poller', 'RyyppyAPI', 'Notify'];
+
+angular.module('ryyppy').controller('UserCtrl', UserCtrl);

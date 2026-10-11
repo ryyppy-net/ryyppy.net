@@ -18,7 +18,7 @@ test.describe('party start date', () => {
   const partyName = `E2E Date Party ${Date.now()}`;
   await createParty(page, partyName);
 
-  await page.goto('/app/index.html#/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/index.html#!/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 
   const now = new Date();
@@ -134,7 +134,7 @@ test('editing a drink right after the tap changes the saved drink', async ({ pag
 test('tapping the dashboard tile saves the drink and refreshes the tile under the open overlay', async ({ page }) => {
   const user = makeTestUser('dashboard');
   await registerUser(page, user);
-  await page.goto('/app/index.html#/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/index.html#!/', { waitUntil: 'domcontentloaded' });
 
   const drinkerTile = page.locator('.drinker', { has: page.getByText(user.name) });
   const promilleLocator = drinkerTile.locator('p', { hasText: 'Promilleja' });

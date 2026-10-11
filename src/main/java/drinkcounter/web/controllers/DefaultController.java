@@ -32,7 +32,7 @@ import java.util.Map;
 @Controller
 public class DefaultController {
 
-    public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#/";
+    public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#!/";
 
     private final ResourcePatternResolver resourcePatternResolver;
     private final ObjectMapper objectMapper;

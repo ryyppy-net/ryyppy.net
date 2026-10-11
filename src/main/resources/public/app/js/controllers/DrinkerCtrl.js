@@ -213,3 +213,5 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
 }
 
 DrinkerCtrl.$inject = ['$scope', '$rootScope', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
+
+angular.module('ryyppy').controller('DrinkerCtrl', DrinkerCtrl);

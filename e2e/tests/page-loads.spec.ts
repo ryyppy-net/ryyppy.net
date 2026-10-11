@@ -77,7 +77,7 @@ test.describe('logged-in page loads', () => {
 
   const partyName = `E2E Smoke Party ${Date.now()}`;
   await createParty(page, partyName);
-  const partyId = page.url().match(/#\/party\/(\d+)/)?.[1];
+  const partyId = page.url().match(/#!\/party\/(\d+)/)?.[1];
   expect(partyId).toBeTruthy();
 
   const response = await page.goto(`/ui/party?id=${partyId}`, { waitUntil: 'domcontentloaded' });

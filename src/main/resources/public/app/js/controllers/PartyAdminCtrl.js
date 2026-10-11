@@ -97,3 +97,5 @@ function PartyAdminCtrl($scope, $routeParams, $location, RyyppyAPI, Notify) {
 }
 
 PartyAdminCtrl.$inject = ['$scope', '$routeParams', '$location', 'RyyppyAPI', 'Notify'];
+
+angular.module('ryyppy').controller('PartyAdminCtrl', PartyAdminCtrl);

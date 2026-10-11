@@ -8,7 +8,7 @@ test('requesting a party you are not a participant of renders the error page', a
 
   const partyName = `E2E Error Party ${Date.now()}`;
   await createParty(page, partyName);
-  const partyId = page.url().match(/#\/party\/(\d+)/)?.[1];
+  const partyId = page.url().match(/#!\/party\/(\d+)/)?.[1];
   expect(partyId).toBeTruthy();
 
   const outsiderContext = await browser.newContext();

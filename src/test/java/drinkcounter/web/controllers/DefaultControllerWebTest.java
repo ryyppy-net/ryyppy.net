@@ -68,7 +68,7 @@ public class DefaultControllerWebTest {
     public void rootRedirectsToTheFrontPage() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/app/index.html#/"));
+                .andExpect(redirectedUrl("/app/index.html#!/"));
     }
 
     @Test
