@@ -8,6 +8,10 @@ description: Open a pull request for the current branch. Use whenever creating a
 1. Base the PR on `main` (see CLAUDE.md). Commit and push the branch.
 2. Draft the title and description from the full diff against `main`
    (`git diff origin/main...HEAD`), not from memory of the session.
+   Keep the description concise:
+   - Lead with why the change is made: the problem or need it addresses.
+   - Then, briefly, what changes, kept high level. Leave line-by-line
+     detail to the diff.
 3. **Spawn a separate agent to review the description against the diff.**
    This step is mandatory; do not do the check yourself. Give the agent:
    - the base and head refs, so it reads the diff itself
@@ -20,7 +24,9 @@ description: Open a pull request for the current branch. Use whenever creating a
    - changes in the diff the description does not mention
      (behaviour, schema migrations, config, dependencies, both front ends);
    - anything in the diff that looks unintended (debug code, stray files,
-     unrelated edits).
+     unrelated edits);
+   - whether the description leads with why, stays concise, and keeps
+     technical detail high level.
 4. Fix the description for every mismatch the agent reports. If it flags an
    unintended change in the diff, fix the code instead, push, and repeat
    step 3 on the new diff.
