@@ -3,7 +3,7 @@
 <div class="container-fluid">
     <div class="row-fluid">
         <div class="span10 offset1">
-            <div ng-repeat="participant in participants track by participant.id" ng-include="'partials/user_button.html'"></div>
+            <drinker ng-repeat="participant in participants track by participant.id" participant="participant" on-drinks-changed="drinksChanged()"></drinker>
 
             <h2>Bileesi</h2>
 

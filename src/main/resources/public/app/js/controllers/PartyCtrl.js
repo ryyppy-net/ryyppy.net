@@ -55,10 +55,10 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
         self.endPolling();
     });
 
-    $scope.$on('drinksChanged', function () {
+    $scope.drinksChanged = function () {
         self.endPolling();
         self.startPolling();
-    });
+    };
 }
 
 PartyCtrl.$inject = ['$scope', '$routeParams', 'Poller', 'RyyppyAPI'];
