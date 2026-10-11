@@ -21,7 +21,7 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
 
         var i = 0;
         (function tick() {
-            $element.find('.bar').css('width', i + '%');
+            $($element[0]).find('.bar').css('width', i + '%');
             i++;
 
             if (i < 100) {
@@ -183,7 +183,7 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
         var series = {data: histories, color: 'rgb(0, 0, 0)'};
         series = [series];
 
-        var graphElement = $element.find('.drinker-graph');
+        var graphElement = $($element[0]).find('.drinker-graph');
 
         var graphOptions = {
             crosshair: {mode: null},

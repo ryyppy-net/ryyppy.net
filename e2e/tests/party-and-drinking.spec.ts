@@ -145,4 +145,5 @@ test('tapping the dashboard tile saves the drink and refreshes the tile under th
 
   await expect(promilleLocator).not.toHaveText(initialPromilleText ?? '');
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
+  await expect(drinkerTile.locator('.drinker-graph canvas').first()).toBeAttached();
 });
