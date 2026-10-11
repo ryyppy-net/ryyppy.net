@@ -169,3 +169,29 @@ test('kick dialog lists other participants but not the current user, and removin
   await expect(page.locator('#drinkers')).toContainText(owner.name);
   await expect(page.locator('#drinkers')).not.toContainText(guest.name);
 });
+
+test.describe('participant previews, shared owner', () => {
+  test.use({ storageState: SHARED_STORAGE_STATE });
+
+  test('a guest name containing markup shows as plain text in the Angular previews', async ({ page }) => {
+    await gotoClassicDashboard(page, sharedUser().name);
+
+    const partyName = `E2E Preview Party ${Date.now()}`;
+    await createPartyClassic(page, partyName);
+
+    const guestName = `"><img src=x onerror=window.__xss=1>'`;
+    await addGuestToParty(page, { name: guestName, sex: 'MALE', weight: '80' });
+
+    for (const path of ['/app/index.html#!/', '/app/index.html#!/party-admin/']) {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+
+      const partyTile = page.locator('.party', { has: page.getByText(partyName) });
+      const previews = partyTile.locator('li img');
+      await expect(previews).toHaveCount(2);
+      const titles = await previews.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('title')));
+      expect(titles).toContain(guestName);
+      await expect(partyTile.locator('img[src="x"]')).toHaveCount(0);
+      expect(await page.evaluate(() => (window as any).__xss)).toBeUndefined();
+    }
+  });
+});
