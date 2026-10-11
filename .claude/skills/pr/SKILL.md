@@ -27,9 +27,11 @@ description: Open a pull request for the current branch. Use whenever creating a
      unrelated edits);
    - whether the description leads with why, stays concise, and keeps
      technical detail high level.
-4. Fix the description for every mismatch the agent reports. If it flags an
-   unintended change in the diff, fix the code instead, push, and repeat
-   step 3 on the new diff.
-5. Open the PR (or update its description) only once the agent reports no
-   mismatches. Repeat step 3 whenever the description is rewritten or new
+4. Verify each issue the agent reports against the diff before acting on it:
+   confirm it is a real problem, not a misreading. Drop the ones that are not,
+   and note why. Fix the description for each confirmed mismatch. If a
+   confirmed issue is an unintended change in the diff, fix the code instead,
+   push, and repeat step 3 on the new diff.
+5. Open the PR (or update its description) only once no confirmed issues
+   remain. Repeat step 3 whenever the description is rewritten or new
    commits change what the PR does.
