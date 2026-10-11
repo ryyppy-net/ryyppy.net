@@ -16,36 +16,52 @@
         http.defaults.headers.put["Content-Type"] = "application/x-www-form-urlencoded";
 
         this.getProfile = function (callbackSuccess) {
-            http.get(this._baseUrl + "/profile").success(callbackSuccess);
+            http.get(this._baseUrl + "/profile").then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.updateProfile = function (profile, callbackSuccess) {
-            http.post(this._baseUrl + "/profile", $.param(profile)).success(callbackSuccess);
+            http.post(this._baseUrl + "/profile", $.param(profile)).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.getOwnDrinks = function (callbackSuccess) {
-            http.get(this._baseUrl + "/profile/drinks").success(callbackSuccess);
+            http.get(this._baseUrl + "/profile/drinks").then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.getParties = function (callbackSuccess) {
-            http.get(this._baseUrl + "/parties").success(callbackSuccess);
+            http.get(this._baseUrl + "/parties").then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.getParty = function (partyId, callbackSuccess) {
-            http.get(this._baseUrl + "/parties/" + partyId).success(callbackSuccess);
+            http.get(this._baseUrl + "/parties/" + partyId).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.getPartyParticipants = function (partyId, callbackSuccess) {
-            http.get(this._baseUrl + "/parties/" + partyId + "/participants").success(callbackSuccess);
+            http.get(this._baseUrl + "/parties/" + partyId + "/participants").then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.getPartyInvitations = function (partyId, callbackSuccess) {
-            http.get(this._baseUrl + "/parties/" + partyId + "/invitations").success(callbackSuccess);
+            http.get(this._baseUrl + "/parties/" + partyId + "/invitations").then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.inviteUser = function (userId, partyId, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/invitations";
-            http.post(url, $.param({ userId : userId })).success(callbackSuccess);
+            http.post(url, $.param({ userId : userId })).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         // On the party page every drinker, self included, is a party
@@ -75,37 +91,51 @@
 
         this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, $.param({ email: email })).success(callbackSuccess);
+            http.post(url, $.param({ email: email })).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.addGuestToParty = function (partyId, guest, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, $.param(guest)).success(callbackSuccess);
+            http.post(url, $.param(guest)).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.removeUser = function (partyId, participant, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
-            http.delete(url).success(callbackSuccess);
+            http.delete(url).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.removeUser = function (partyId, participant, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
-            http.delete(url).success(callbackSuccess);
+            http.delete(url).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.removeDrink = function (drinkId, callbackSuccess) {
             var url = this._baseUrl + "/profile/drinks/" + drinkId;
-            http.delete(url).success(callbackSuccess);
+            http.delete(url).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.addParty = function (partyName, callbackSuccess) {
             var url = this._baseUrl + "/parties";
-            http.post(url, $.param({ name: partyName })).success(callbackSuccess);
+            http.post(url, $.param({ name: partyName })).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
 
         this.removeParticipant = function (party, participant, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + party.id + "/participants/" + participant.id;
-            http.delete(url).success(callbackSuccess);
+            http.delete(url).then(function (response) {
+                callbackSuccess(response.data);
+            });
         };
     }
 

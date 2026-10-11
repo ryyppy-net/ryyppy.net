@@ -62,3 +62,5 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
 }
 
 PartyCtrl.$inject = ['$scope', '$routeParams', 'Poller', 'RyyppyAPI'];
+
+angular.module('ryyppy').controller('PartyCtrl', PartyCtrl);

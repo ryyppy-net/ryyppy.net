@@ -28,7 +28,7 @@ export async function registerUser(page: Page, user: TestUser): Promise<void> {
   await page.fill('#password', user.password);
   await page.click('#submitButton');
 
-  // AngularJS normalizes the URL to a trailing "#/" once it bootstraps, but
+  // AngularJS normalizes the URL to a trailing "#!/" once it bootstraps, but
   // that can lag a beat behind the initial navigation, so don't require it
   // here — the dashboard heading below is the real signal of readiness.
   await expect(page).toHaveURL(/\/app\/index\.html/);
@@ -52,7 +52,7 @@ export async function loginUser(page: Page, user: Pick<TestUser, 'email' | 'pass
   await page.fill('#password', user.password);
   await page.click('input[type="submit"]');
 
-  // AngularJS normalizes the URL to a trailing "#/" once it bootstraps, but
+  // AngularJS normalizes the URL to a trailing "#!/" once it bootstraps, but
   // that can lag a beat behind the initial navigation, so don't require it
   // here — the dashboard heading below is the real signal of readiness.
   await expect(page).toHaveURL(/\/app\/index\.html/);
@@ -61,11 +61,11 @@ export async function loginUser(page: Page, user: Pick<TestUser, 'email' | 'pass
 
 /** Creates a party via the party-admin UI and follows the redirect to its page. */
 export async function createParty(page: Page, partyName: string): Promise<void> {
-  await page.goto('/app/index.html#/party-admin/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
   await page.fill('#partyName', partyName);
   await page.click('button[type="submit"]');
 
-  await expect(page).toHaveURL(/#\/party\/\d+/);
+  await expect(page).toHaveURL(/#!\/party\/\d+/);
 }
 
 /**

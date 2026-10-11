@@ -31,3 +31,5 @@ function ProfileSettingsCtrl($scope, $location, RyyppyAPI, Notify) {
 }
 
 ProfileSettingsCtrl.$inject = ['$scope', '$location', 'RyyppyAPI', 'Notify'];
+
+angular.module('ryyppy').controller('ProfileSettingsCtrl', ProfileSettingsCtrl);

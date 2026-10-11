@@ -39,3 +39,5 @@ function GeneralPartyAdminCtrl($scope, $location, RyyppyAPI, Notify) {
 }
 
 GeneralPartyAdminCtrl.$inject = ['$scope', '$location', 'RyyppyAPI', 'Notify'];
+
+angular.module('ryyppy').controller('GeneralPartyAdminCtrl', GeneralPartyAdminCtrl);
