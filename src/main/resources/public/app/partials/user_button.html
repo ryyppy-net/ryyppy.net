@@ -28,7 +28,7 @@
 
         <p>Juoman koko on {{ $ctrl.formattedAlcoholSize() }} ja vahvuus {{ $ctrl.formattedAlcoholPercentage() }}.</p>
         <div class="progress" style="margin-left: 10px; margin-right: 10px;">
-            <div class="bar"></div>
+            <div class="bar" ng-class="{'undo-countdown': $ctrl.addingDrink}"></div>
         </div>
 
         <div class="btn" ng-click="$ctrl.editDrink()">Muokkaa</div>
@@ -43,7 +43,7 @@
                 <label for="portionSize" class="edit-drink-label">Annoskoko</label>
                 <select id="portionSize"
                         ng-model="$ctrl.selectedPortionSize"
-                        ng-options="portionSize.value as portionSize.text for portionSize in $ctrl.portionSizes"
+                        ng-options="portionSize.value as portionSize.text for portionSize in ::$ctrl.portionSizes"
                         class="edit-drink-input">
                 </select>
             </div>
@@ -52,7 +52,7 @@
                 <label for="portionAlcoholPercentage" class="edit-drink-label">Alkoholi-%</label>
                 <select id="portionAlcoholPercentage"
                         ng-model="$ctrl.selectedAlcoholPercentage"
-                        ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in $ctrl.portionAlcoholPercentages"
+                        ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in ::$ctrl.portionAlcoholPercentages"
                         class="edit-drink-input">
                 </select>
             </div>

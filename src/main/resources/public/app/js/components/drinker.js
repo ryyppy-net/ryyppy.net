@@ -19,16 +19,6 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
         self.editingDrink = false;
         self.drink = drink;
 
-        var i = 0;
-        (function tick() {
-            $($element[0]).find('.bar').css('width', i + '%');
-            i++;
-
-            if (i < 100) {
-                setTimeout(tick, 40);
-            }
-        })();
-
         self.savedDrink = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
             var message = participant.type === 'participant'
                 ? "Käyttäjälle " + participant.name + " lisättiin juoma."
