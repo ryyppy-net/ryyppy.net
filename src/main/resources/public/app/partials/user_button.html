@@ -29,7 +29,7 @@
 
             <p>Juoman koko on {{ formattedAlcoholSize() }} ja vahvuus {{ formattedAlcoholPercentage() }}.</p>
             <div class="progress" style="margin-left: 10px; margin-right: 10px;">
-                <div class="bar"></div>
+                <div class="bar" ng-class="{'undo-countdown': addingDrink}"></div>
             </div>
 
             <div class="btn" ng-click="editDrink()">Muokkaa</div>

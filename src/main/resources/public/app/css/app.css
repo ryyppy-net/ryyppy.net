@@ -143,3 +143,13 @@ label {
 p {
     line-height: 1.2em;
 }
+
+/* Runs for as long as DrinkerCtrl keeps the undo window open (5s). */
+.undo-countdown {
+    animation: undo-countdown 5s linear forwards;
+}
+
+@keyframes undo-countdown {
+    from { width: 0; }
+    to { width: 100%; }
+}
