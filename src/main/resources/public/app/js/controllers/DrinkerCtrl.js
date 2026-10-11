@@ -23,16 +23,6 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         $scope.editingDrink = false;
         $scope.drink = drink;
 
-        var i = 0;
-        (function tick() {
-            $('.bar').css('width', i + '%');
-            i++;
-
-            if (i < 100) {
-                setTimeout(tick, 40);
-            }
-        })();
-
         self.savedDrink = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
             var message = participant.type === 'participant'
                 ? "Käyttäjälle " + participant.name + " lisättiin juoma."
