@@ -1,14 +1,10 @@
-function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
+function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
     "use strict";
 
     var self = this;
 
 
-    this.drinksChanged = function (participant) {
-        $rootScope.$broadcast('drinksChanged', participant);
-    };
-
-    $scope.addDefaultDrink = function (participant) {
+    this.addDefaultDrink = function (participant) {
         Sound.playSound();
 
         var defaultDrink = {volume: '0.33', alcohol: '0.047'};
@@ -18,65 +14,64 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     // The drink is saved on the tap; the overlay then offers a 5s window to
     // undo or edit it.
     this.addDrink = function (participant, drink) {
-        $scope.showDrinkDialog = true;
-        $scope.addingDrink = true;
-        $scope.editingDrink = false;
-        $scope.drink = drink;
+        self.showDrinkDialog = true;
+        self.addingDrink = true;
+        self.editingDrink = false;
+        self.drink = drink;
 
         self.savedDrink = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
             var message = participant.type === 'participant'
                 ? "Käyttäjälle " + participant.name + " lisättiin juoma."
                 : "Sinulle lisättiin juoma.";
             self.addedNotice = Notify.success(self.getRandomSalutation(), message);
-            self.drinksChanged(participant);
+            self.onDrinksChanged({participant: participant});
             return saved;
         });
 
-        self.dismissTimeout = $timeout($scope.hideDialog, 5000);
+        self.dismissTimeout = $timeout(self.hideDialog, 5000);
     };
 
-    $scope.editDrink = function() {
+    this.editDrink = function () {
         $timeout.cancel(self.dismissTimeout);
-        $scope.editingDrink = true;
-        $scope.addingDrink = false;
+        self.editingDrink = true;
+        self.addingDrink = false;
     };
 
-    $scope.saveEditedDrink = function () {
-        var participant = $scope.participant;
-        var editedDrink = {volume: $scope.selectedPortionSize, alcohol: $scope.selectedAlcoholPercentage};
+    this.saveEditedDrink = function () {
+        var participant = self.participant;
+        var editedDrink = {volume: self.selectedPortionSize, alcohol: self.selectedAlcoholPercentage};
         self.savedDrink.then(function (saved) {
             return RyyppyAPI.changeDrink(participant, saved.id, editedDrink);
         }).then(function () {
-            self.drinksChanged(participant);
+            self.onDrinksChanged({participant: participant});
         });
-        $scope.hideDialog();
+        self.hideDialog();
     };
 
-    $scope.cancelDrink = function () {
+    this.cancelDrink = function () {
         $timeout.cancel(self.dismissTimeout);
-        var participant = $scope.participant;
+        var participant = self.participant;
         self.savedDrink.then(function (saved) {
             Notify.remove(self.addedNotice);
             return RyyppyAPI.deleteDrink(participant, saved.id);
         }).then(function () {
-            self.drinksChanged(participant);
+            self.onDrinksChanged({participant: participant});
         });
-        $scope.hideDialog();
+        self.hideDialog();
     };
 
-    $scope.hideDialog = function () {
-        $scope.showDrinkDialog = false;
-        $scope.editingDrink = false;
-        $scope.addingDrink = false;
+    this.hideDialog = function () {
+        self.showDrinkDialog = false;
+        self.editingDrink = false;
+        self.addingDrink = false;
     };
 
 
     // Initialization:
-    $scope.addDrink = this.addDrink;
-    $scope.addingDrink = false;
-    $scope.editingDrink = false;
+    this.addingDrink = false;
+    this.editingDrink = false;
 
-    $scope.portionSizes = [
+    this.portionSizes = [
         { value: '0.04', text: '4 cl' },
         { value: '0.08', text: '8 cl' },
         { value: '0.12', text: '12 cl' },
@@ -88,9 +83,9 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         { value: '0.6', text: '0.6 l' },
         { value: '1.0', text: '1.0 l' }
     ];
-    $scope.selectedPortionSize = '0.33';
+    this.selectedPortionSize = '0.33';
 
-    $scope.portionAlcoholPercentages = [
+    this.portionAlcoholPercentages = [
         { value: '0.028', text: '2.8%' },
         { value: '0.047', text: '4.7%' },
         { value: '0.052', text: '5.2%' },
@@ -106,7 +101,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         { value: '0.48', text: '48.0%' },
         { value: '0.80', text: '80.0%' }
     ];
-    $scope.selectedAlcoholPercentage = '0.047';
+    this.selectedAlcoholPercentage = '0.047';
 
     // Source: http://en.wikipedia.org/wiki/Toast_(honor)#Worldwide
     this.salutations = [
@@ -133,27 +128,27 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         return salutation;
     };
 
-    $scope.formattedAlcoholSize = function () {
-        if (typeof $scope.drink === 'undefined') {
+    this.formattedAlcoholSize = function () {
+        if (typeof self.drink === 'undefined') {
             return '';
         }
 
-        for (var i = 0; i < $scope.portionSizes.length; i++) {
-            if ($scope.portionSizes[i].value === $scope.drink.volume) {
-                return $scope.portionSizes[i].text;
+        for (var i = 0; i < self.portionSizes.length; i++) {
+            if (self.portionSizes[i].value === self.drink.volume) {
+                return self.portionSizes[i].text;
             }
         }
         return '???';
     };
 
-    $scope.formattedAlcoholPercentage = function () {
-        if (typeof $scope.drink === 'undefined') {
+    this.formattedAlcoholPercentage = function () {
+        if (typeof self.drink === 'undefined') {
             return '';
         }
 
-        for (var i = 0; i < $scope.portionAlcoholPercentages.length; i++) {
-            if ($scope.portionAlcoholPercentages[i].value === $scope.selectedAlcoholPercentage) {
-                return $scope.portionAlcoholPercentages[i].text;
+        for (var i = 0; i < self.portionAlcoholPercentages.length; i++) {
+            if (self.portionAlcoholPercentages[i].value === self.selectedAlcoholPercentage) {
+                return self.portionAlcoholPercentages[i].text;
             }
         }
         return '???';
@@ -162,7 +157,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
     function historyLoaded() {
         var histories = [];
 
-        var rows = $scope.participant.history;
+        var rows = self.participant.history;
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             if (row.length === 0) {
@@ -178,14 +173,7 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         var series = {data: histories, color: 'rgb(0, 0, 0)'};
         series = [series];
 
-        var graphElement = $('#graph' + $scope.participant.id);
-        if (typeof graphElement === 'undefined') {
-            return;
-        }
-
-        if (series === null) {
-            return;
-        }
+        var graphElement = $($element[0]).find('.drinker-graph');
 
         var graphOptions = {
             crosshair: {mode: null},
@@ -197,11 +185,24 @@ function DrinkerCtrl($scope, $rootScope, $timeout, RyyppyAPI, Sound, Notify) {
         $.plot(graphElement, series, graphOptions);
     }
 
-    $scope.$watch('participant.history', function () {
-        $timeout(historyLoaded, 0, false);
-    });
+    this.$onChanges = function (changes) {
+        if (changes.participant && changes.participant.currentValue) {
+            $timeout(historyLoaded, 0, false);
+        }
+    };
+
+    this.$onDestroy = function () {
+        $timeout.cancel(self.dismissTimeout);
+    };
 }
 
-DrinkerCtrl.$inject = ['$scope', '$rootScope', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
+DrinkerCtrl.$inject = ['$element', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
 
-angular.module('ryyppy').controller('DrinkerCtrl', DrinkerCtrl);
+angular.module('ryyppy').component('drinker', {
+    templateUrl: 'partials/user_button.html',
+    controller: DrinkerCtrl,
+    bindings: {
+        participant: '<',
+        onDrinksChanged: '&'
+    }
+});
