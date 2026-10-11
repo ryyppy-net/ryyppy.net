@@ -44,7 +44,7 @@
                     <label for="portionSize" class="edit-drink-label">Annoskoko</label>
                     <select id="portionSize"
                             ng-model="selectedPortionSize"
-                            ng-options="portionSize.value as portionSize.text for portionSize in portionSizes"
+                            ng-options="portionSize.value as portionSize.text for portionSize in ::portionSizes"
                             class="edit-drink-input">
                     </select>
                 </div>
@@ -53,7 +53,7 @@
                     <label for="portionAlcoholPercentage" class="edit-drink-label">Alkoholi-%</label>
                     <select id="portionAlcoholPercentage"
                             ng-model="selectedAlcoholPercentage"
-                            ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in portionAlcoholPercentages"
+                            ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in ::portionAlcoholPercentages"
                             class="edit-drink-input">
                     </select>
                 </div>
