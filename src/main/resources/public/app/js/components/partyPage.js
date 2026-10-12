@@ -5,13 +5,13 @@ function PartyPageCtrl($routeParams, Poller, RyyppyAPI) {
     var stopPolling = null;
 
     this.refreshParty = function () {
-        RyyppyAPI.getParty($routeParams.partyId, function (data) {
+        RyyppyAPI.getParty($routeParams.partyId).then(function (data) {
             self.party = data;
         });
     };
 
     this.refreshParticipants = function () {
-        RyyppyAPI.getPartyParticipants($routeParams.partyId, function (data) {
+        RyyppyAPI.getPartyParticipants($routeParams.partyId).then(function (data) {
             // Should this be added in backend?
             for (var i = 0; i < data.length; i++) {
                 data[i].type = 'participant';

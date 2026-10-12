@@ -8,134 +8,90 @@
      * service.
      */
     function RyyppyAPI(http, serialize) {
-        this._baseUrl = "/API/v2";
+        var baseUrl = "/API/v2";
 
         // AngularJS would prefer to use application/json but as our backend
         // doesn't support this yet, fallback type must be set.
         http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
         http.defaults.headers.put["Content-Type"] = "application/x-www-form-urlencoded";
 
-        this.getProfile = function (callbackSuccess) {
-            http.get(this._baseUrl + "/profile").then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
+        function data(response) {
+            return response.data;
+        }
 
-        this.updateProfile = function (profile, callbackSuccess) {
-            http.post(this._baseUrl + "/profile", serialize(profile)).then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.getOwnDrinks = function (callbackSuccess) {
-            http.get(this._baseUrl + "/profile/drinks").then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.getParties = function (callbackSuccess) {
-            http.get(this._baseUrl + "/parties").then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.getParty = function (partyId, callbackSuccess) {
-            http.get(this._baseUrl + "/parties/" + partyId).then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.getPartyParticipants = function (partyId, callbackSuccess) {
-            http.get(this._baseUrl + "/parties/" + partyId + "/participants").then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.getPartyInvitations = function (partyId, callbackSuccess) {
-            http.get(this._baseUrl + "/parties/" + partyId + "/invitations").then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.inviteUser = function (userId, partyId, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + partyId + "/invitations";
-            http.post(url, serialize({ userId : userId })).then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
+        function participantsUrl(partyId) {
+            return baseUrl + "/parties/" + partyId + "/participants";
+        }
 
         // On the party page every drinker, self included, is a party
         // participant; on the dashboard the only drinker is the current user.
-        this._drinksUrl = function (drinker) {
+        function drinksUrl(drinker) {
             if (drinker.type === 'participant') {
-                return this._baseUrl + "/parties/" + drinker.partyId + "/participants/" + drinker.id + "/drinks";
+                return participantsUrl(drinker.partyId) + "/" + drinker.id + "/drinks";
             }
-            return this._baseUrl + "/profile/drinks";
+            return baseUrl + "/profile/drinks";
+        }
+
+        this.getProfile = function () {
+            return http.get(baseUrl + "/profile").then(data);
+        };
+
+        this.updateProfile = function (profile) {
+            return http.post(baseUrl + "/profile", serialize(profile)).then(data);
+        };
+
+        this.getOwnDrinks = function () {
+            return http.get(baseUrl + "/profile/drinks").then(data);
+        };
+
+        this.getParties = function () {
+            return http.get(baseUrl + "/parties").then(data);
+        };
+
+        this.getParty = function (partyId) {
+            return http.get(baseUrl + "/parties/" + partyId).then(data);
+        };
+
+        this.getPartyParticipants = function (partyId) {
+            return http.get(participantsUrl(partyId)).then(data);
+        };
+
+        this.getPartyInvitations = function (partyId) {
+            return http.get(baseUrl + "/parties/" + partyId + "/invitations").then(data);
+        };
+
+        this.inviteUser = function (userId, partyId) {
+            return http.post(baseUrl + "/parties/" + partyId + "/invitations", serialize({ userId : userId })).then(data);
         };
 
         this.addDrink = function (drinker, drink) {
             var params = {volume: drink.volume, alcohol: drink.alcohol, timestamp: (new Date()).toISOString()};
-            return http.post(this._drinksUrl(drinker), serialize(params)).then(function (response) {
-                return response.data;
-            });
+            return http.post(drinksUrl(drinker), serialize(params)).then(data);
         };
 
         this.changeDrink = function (drinker, drinkId, drink) {
             var params = {volume: drink.volume, alcohol: drink.alcohol};
-            return http.put(this._drinksUrl(drinker) + "/" + drinkId, serialize(params));
+            return http.put(drinksUrl(drinker) + "/" + drinkId, serialize(params)).then(data);
         };
 
         this.deleteDrink = function (drinker, drinkId) {
-            return http.delete(this._drinksUrl(drinker) + "/" + drinkId);
+            return http.delete(drinksUrl(drinker) + "/" + drinkId).then(data);
         };
 
-        this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, serialize({ email: email })).then(function (response) {
-                callbackSuccess(response.data);
-            });
+        this.addRegisteredUserToParty = function (partyId, email) {
+            return http.post(participantsUrl(partyId), serialize({ email: email })).then(data);
         };
 
-        this.addGuestToParty = function (partyId, guest, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, serialize(guest)).then(function (response) {
-                callbackSuccess(response.data);
-            });
+        this.addGuestToParty = function (partyId, guest) {
+            return http.post(participantsUrl(partyId), serialize(guest)).then(data);
         };
 
-        this.removeUser = function (partyId, participant, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
-            http.delete(url).then(function (response) {
-                callbackSuccess(response.data);
-            });
+        this.removeParticipant = function (partyId, participant) {
+            return http.delete(participantsUrl(partyId) + "/" + participant.id).then(data);
         };
 
-        this.removeUser = function (partyId, participant, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + partyId + "/participants/" + participant.id;
-            http.delete(url).then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.removeDrink = function (drinkId, callbackSuccess) {
-            var url = this._baseUrl + "/profile/drinks/" + drinkId;
-            http.delete(url).then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.addParty = function (partyName, callbackSuccess) {
-            var url = this._baseUrl + "/parties";
-            http.post(url, serialize({ name: partyName })).then(function (response) {
-                callbackSuccess(response.data);
-            });
-        };
-
-        this.removeParticipant = function (party, participant, callbackSuccess) {
-            var url = this._baseUrl + "/parties/" + party.id + "/participants/" + participant.id;
-            http.delete(url).then(function (response) {
-                callbackSuccess(response.data);
-            });
+        this.addParty = function (partyName) {
+            return http.post(baseUrl + "/parties", serialize({ name: partyName })).then(data);
         };
     }
 

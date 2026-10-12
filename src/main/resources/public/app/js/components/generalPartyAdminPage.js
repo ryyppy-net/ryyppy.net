@@ -4,25 +4,25 @@ function GeneralPartyAdminPageCtrl($location, RyyppyAPI, Notify) {
     var self = this;
 
     this.refreshProfile = function () {
-        RyyppyAPI.getProfile(function (data) {
+        RyyppyAPI.getProfile().then(function (data) {
             self.participant = data;
         });
     };
 
     this.refreshParties = function () {
-        RyyppyAPI.getParties(function (data) {
+        RyyppyAPI.getParties().then(function (data) {
             self.parties = data;
         });
     };
 
     this.addParty = function () {
-        RyyppyAPI.addParty(self.partyName, function (party) {
+        RyyppyAPI.addParty(self.partyName).then(function (party) {
             $location.path('/party/' + party.id);
         });
     };
 
     this.removeParticipant = function (party, participant) {
-        RyyppyAPI.removeParticipant(party, participant, function (data) {
+        RyyppyAPI.removeParticipant(party.id, participant).then(function (data) {
             Notify.success("Nyt jo kotiin?", "Lähdit bileistä " + party.name + ".");
             self.refreshParties();
         });

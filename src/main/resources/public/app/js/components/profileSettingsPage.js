@@ -14,14 +14,14 @@ function ProfileSettingsPageCtrl($location, RyyppyAPI, Notify) {
         if (profile.weight == -12345)
             profile.weight = self.profile.weight;
 
-        RyyppyAPI.updateProfile(profile, function () {
+        RyyppyAPI.updateProfile(profile).then(function () {
             Notify.success("Tiedot päivitetty!", "Uudet asetukset tallennettu.");
             $location.path("/");
         });
     };
 
     this.$onInit = function () {
-        RyyppyAPI.getProfile(function (data) {
+        RyyppyAPI.getProfile().then(function (data) {
             self.profile = data;
 
             self.name = data.name;
