@@ -66,7 +66,7 @@ angular.module('ryyppy').component('partyPage', {
     template: `
 <party-menu active="party" party="$ctrl.party"></party-menu>
 
-<div class="container-fluid" ng-repeat="row in $ctrl.rows track by $index">
+<div class="container-fluid" ng-repeat="row in $ctrl.rows track by row[0].id">
     <div class="row-fluid">
         <div class="span4" ng-repeat="participant in row track by participant.id">
             <drinker participant="participant" on-drinks-changed="$ctrl.drinksChanged()"></drinker>

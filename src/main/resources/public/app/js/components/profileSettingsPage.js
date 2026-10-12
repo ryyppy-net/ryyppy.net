@@ -8,11 +8,8 @@ function ProfileSettingsPageCtrl($location, RyyppyAPI, Notify) {
             name: self.name,
             email: self.email,
             sex: self.sex,
-            weight: self.weight
+            weight: angular.isNumber(self.weight) ? self.weight : self.profile.weight
         };
-
-        if (profile.weight == -12345)
-            profile.weight = self.profile.weight;
 
         RyyppyAPI.updateProfile(profile).then(function () {
             Notify.success("Tiedot päivitetty!", "Uudet asetukset tallennettu.");
@@ -27,7 +24,7 @@ function ProfileSettingsPageCtrl($location, RyyppyAPI, Notify) {
             self.name = data.name;
             self.email = data.email;
             self.sex = data.sex;
-            self.weight = -12345;
+            self.weight = null;
         });
     };
 }
@@ -66,7 +63,7 @@ angular.module('ryyppy').component('profileSettingsPage', {
                 </div>
 
                 <div class="control-group">
-                    <label class="control-label" for="weight">Sukupuoli</label>
+                    <label class="control-label" for="sex">Sukupuoli</label>
                     <div class="controls">
                         <select id="sex" ng-model="$ctrl.sex">
                             <option value="MALE">Mies</option>
@@ -78,7 +75,7 @@ angular.module('ryyppy').component('profileSettingsPage', {
                 <div class="control-group">
                     <label class="control-label" for="weight">Paino</label>
                     <div class="controls">
-                        <input id="weight" type="password" ng-model="$ctrl.weight" />
+                        <input id="weight" type="number" ng-model="$ctrl.weight" />
                     </div>
                 </div>
 

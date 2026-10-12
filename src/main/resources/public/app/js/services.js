@@ -44,6 +44,10 @@
             return http.get(baseUrl + "/profile/drinks").then(data);
         };
 
+        this.getDrinkHistory = function () {
+            return http.get(baseUrl + "/profile/drink-history", {transformResponse: angular.identity}).then(data);
+        };
+
         this.getParties = function () {
             return http.get(baseUrl + "/parties").then(data);
         };
@@ -105,6 +109,21 @@
             if (win.RyyppySound) {
                 win.RyyppySound.play();
             }
+        };
+    }
+
+
+    /**
+     * Data the server embeds into the page on load as window.__INITIAL_<NAME>__
+     * (templates/app/index.html). Each value is handed out once, so the first
+     * load skips the request and later refreshes always hit the API.
+     */
+    function InitialData(win) {
+        this.take = function (name) {
+            var key = '__INITIAL_' + name + '__';
+            var value = win[key];
+            win[key] = null;
+            return value || null;
         };
     }
 
@@ -227,6 +246,10 @@
 
         $provide.factory('Sound', ['$window', function ($window) {
             return new SoundService($window);
+        }]);
+
+        $provide.factory('InitialData', ['$window', function ($window) {
+            return new InitialData($window);
         }]);
 
         $provide.factory('Poller', ['$timeout', '$document', function ($timeout, $document) {
