@@ -140,7 +140,7 @@
         },
         template: `
     <div class="drinker color{{ $ctrl.participant.color }}" style="position: relative;">
-        <div ng-click="$ctrl.addDefaultDrink($ctrl.participant)" class="container-fluid" style="margin-top: 10px;">
+        <div ng-click="$ctrl.addDefaultDrink($ctrl.participant)" keyboard-click role="button" tabindex="0" class="container-fluid" style="margin-top: 10px;">
             <div class="row-fluid">
                 <div class="span4" style="text-align: center;">
                     <img ng-src="{{ $ctrl.participant.profilePictureUrl }}" />
@@ -172,8 +172,8 @@
                 <div class="bar" ng-class="{'undo-countdown': $ctrl.addingDrink}"></div>
             </div>
 
-            <div class="btn" ng-click="$ctrl.editDrink()">Muokkaa</div>
-            <div class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</div>
+            <button type="button" class="btn" ng-click="$ctrl.editDrink()">Muokkaa</button>
+            <button type="button" class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</button>
         </div>
 
         <div ng-if="$ctrl.showDrinkDialog && $ctrl.editingDrink" class="drinker-overlay">
@@ -200,7 +200,7 @@
 
                 <div style="clear: both">
                     <button type="submit" class="btn btn-success">Tallenna</button>
-                    <div class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</div>
+                    <button type="button" class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</button>
                 </div>
             </form>
         </div>

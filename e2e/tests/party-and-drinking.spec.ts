@@ -110,6 +110,27 @@ test('undoing a drink right after the tap deletes the saved drink', async ({ pag
   expect(await getOwnDrinks(page)).toHaveLength(0);
 });
 
+test('a drink can be added and undone with the keyboard alone', async ({ page }) => {
+  const drinkerTile = await openOwnPartyTile(page, 'keyboard');
+  const card = drinkerTile.getByRole('button').first();
+
+  const saved = page.waitForResponse(
+    (response) => /\/drinks$/.test(response.url()) && response.request().method() === 'POST'
+  );
+  await card.focus();
+  await page.keyboard.press('Enter');
+  const { id } = (await (await saved).json()) as { id: number };
+  expect(await getOwnDrinks(page)).toHaveLength(1);
+
+  const deleted = page.waitForResponse(
+    (response) => response.url().endsWith(`/drinks/${id}`) && response.request().method() === 'DELETE'
+  );
+  await drinkerTile.getByRole('button', { name: 'Peruuta' }).focus();
+  await page.keyboard.press('Enter');
+  expect((await deleted).ok()).toBeTruthy();
+  expect(await getOwnDrinks(page)).toHaveLength(0);
+});
+
 test('the drink-added toast closes by itself', async ({ page }) => {
   const drinkerTile = await openOwnPartyTile(page, 'toast');
   await tapToDrink(page, drinkerTile);
