@@ -92,6 +92,15 @@ async function tapToDrink(page: Page, drinkerTile: Locator, drinksUrl = /\/drink
   return (await response.json()) as { id: number };
 }
 
+test('the undo and edit overlay closes by itself and keeps the drink', async ({ page }) => {
+  const drinkerTile = await openOwnPartyTile(page, 'overlay-timeout');
+  await tapToDrink(page, drinkerTile);
+  await expect(drinkerTile.locator('.drinker-overlay').first()).toBeVisible();
+
+  await expect(drinkerTile.locator('.drinker-overlay')).toHaveCount(0, { timeout: 9_000 });
+  expect(await getOwnDrinks(page)).toHaveLength(1);
+});
+
 test('undoing a drink right after the tap deletes the saved drink', async ({ page }) => {
   const drinkerTile = await openOwnPartyTile(page, 'undo');
   const saved = await tapToDrink(page, drinkerTile);
