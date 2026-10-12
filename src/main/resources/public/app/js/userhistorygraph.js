@@ -12,7 +12,15 @@ function UserHistoryGraph(user, container) {
         return d.getUTCDate() + '.' + (d.getUTCMonth() + 1) + '.' + d.getUTCFullYear();
     }
 
-    function createChart(points) {
+    function dayTicks(scale) {
+        var ticks = [];
+        for (var t = scale.min + DAY / 2; t < scale.max; t += DAY) {
+            ticks.push({value: t});
+        }
+        scale.ticks = ticks;
+    }
+
+    function createChart(points, min, max) {
         var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         that.chart = new Chart(that.canvas, {
@@ -44,9 +52,11 @@ function UserHistoryGraph(user, container) {
                 scales: {
                     x: {
                         type: 'linear',
-                        offset: true,
+                        offset: false,
+                        min: min,
+                        max: max,
+                        afterBuildTicks: dayTicks,
                         ticks: {
-                            stepSize: DAY,
                             maxRotation: 0,
                             callback: formatDate
                         }
@@ -62,23 +72,39 @@ function UserHistoryGraph(user, container) {
         var points = [];
         var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
 
+        var drinksByDay = {};
+        var first = null, last = null;
+
         for (var i = 1; i < rows.length; i++) {
             if (rows[i].length === 0) continue;
             var columns = rows[i].split(',');
-            points.push({x: Number(columns[0]) + timezoneoffset, y: Number(columns[1])});
+            var day = Number(columns[0]) + timezoneoffset;
+            drinksByDay[day] = Number(columns[1]);
+            first = first === null ? day : Math.min(first, day);
+            last = last === null ? day : Math.max(last, day);
         }
 
-        if (points.length === 0) return;
+        if (first === null) return;
 
-        if (points[points.length - 1].x - points[0].x < 30 * DAY) {
-            points.unshift({x: points[0].x - 30 * DAY, y: 0});
+        if (last - first < 30 * DAY) {
+            first -= 30 * DAY;
         }
+
+        // A point for every day, drinks or not, keeps each bar one day wide.
+        for (var x = first; x <= last; x += DAY) {
+            points.push({x: x, y: drinksByDay.hasOwnProperty(x) ? drinksByDay[x] : null});
+        }
+
+        var min = first - DAY / 2;
+        var max = last + DAY / 2;
 
         if (that.chart) {
+            that.chart.options.scales.x.min = min;
+            that.chart.options.scales.x.max = max;
             that.chart.data.datasets[0].data = points;
             that.chart.update();
         } else {
-            createChart(points);
+            createChart(points, min, max);
         }
     };
 

@@ -16,6 +16,13 @@ drinker {
     font-size: 0.8em;;
 }
 
+/* On phones Bootstrap drops the tile's side padding; the y labels keep the left edge clear. */
+@media (max-width: 767px) {
+    .drinker-graph {
+        margin-right: 10px;
+    }
+}
+
 .drinker-overlay {
     position: absolute;
     top: 0px;
