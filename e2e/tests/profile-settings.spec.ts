@@ -22,6 +22,7 @@ test('saving the profile settings with a weight replaces the stored weight', asy
   await registerUser(page, user);
 
   await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#name')).toHaveValue(user.name);
   await page.fill('#weight', '95');
   await page.click('button[type="submit"]');
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
