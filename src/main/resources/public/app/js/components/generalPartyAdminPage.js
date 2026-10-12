@@ -68,7 +68,7 @@ angular.module('ryyppy').component('generalPartyAdminPage', {
             <div ng-if="$ctrl.parties.length > 0">
                 <h2>Bileesi</h2>
 
-                <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true">
+                <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true track by party.id">
                     <div class="row-fluid">
                         <div class="span10 party color{{ ($index % 12) + 1 }}">
                             <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>

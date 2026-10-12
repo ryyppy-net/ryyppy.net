@@ -22,9 +22,9 @@ function PartyAdminPageCtrl($routeParams, $location, RyyppyAPI, Notify) {
     };
 
     this.addUser = function () {
-        if (self.selectedUserTypeId == 2)
+        if (self.selectedUserTypeId === 2)
             self._addRegisteredUser($routeParams.partyId, self.email);
-        if (self.selectedUserTypeId == 3)
+        if (self.selectedUserTypeId === 3)
             self._addGuestUser(self.name, self.sex, self.weight);
     };
 
@@ -42,7 +42,7 @@ function PartyAdminPageCtrl($routeParams, $location, RyyppyAPI, Notify) {
             Notify.success("Tervetuloa vieraalle!", "Lisätty vieras " + self.name + ".");
             self._updatePartyParticipants();
         });
-    }
+    };
 
     this.inviteUser = function (invitation) {
         self.inviting = true;
@@ -54,7 +54,7 @@ function PartyAdminPageCtrl($routeParams, $location, RyyppyAPI, Notify) {
             self._updatePartyInvitations();
             self.inviting = false;
         });
-    }
+    };
 
     this.removeUser = function (participant) {
         RyyppyAPI.removeUser($routeParams.partyId, participant, function (data) {
@@ -113,9 +113,9 @@ angular.module('ryyppy').component('partyAdminPage', {
                     </div>
                 </div>
 
-                <div class="control-group" ng-if="$ctrl.selectedUserTypeId == 1">
-                    <div ng-if="$ctrl.inviting == false">
-                        <div ng-repeat="invitation in $ctrl.invitations" ng-click="$ctrl.inviteUser(invitation)" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
+                <div class="control-group" ng-if="$ctrl.selectedUserTypeId === 1">
+                    <div ng-if="!$ctrl.inviting">
+                        <div ng-repeat="invitation in $ctrl.invitations track by invitation.id" ng-click="$ctrl.inviteUser(invitation)" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
                             <img ng-src="{{ invitation.gravatarUrl }}&size=30" />
                             {{ invitation.name }}
                         </div>
@@ -125,14 +125,14 @@ angular.module('ryyppy').component('partyAdminPage', {
                     </div>
                 </div>
 
-                <div class="control-group" ng-if="$ctrl.selectedUserTypeId == 2">
+                <div class="control-group" ng-if="$ctrl.selectedUserTypeId === 2">
                     <label class="control-label" for="email">Sähköposti</label>
                     <div class="controls">
                         <input id="email" type="email" ng-model="$ctrl.email" />
                     </div>
                 </div>
 
-                <div ng-if="$ctrl.selectedUserTypeId == 3">
+                <div ng-if="$ctrl.selectedUserTypeId === 3">
                     <div class="control-group">
                         <label class="control-label" for="name">Nimi</label>
                         <div class="controls">
@@ -141,7 +141,7 @@ angular.module('ryyppy').component('partyAdminPage', {
                     </div>
 
                     <div class="control-group">
-                        <label class="control-label" for="weight">Sukupuoli</label>
+                        <label class="control-label" for="sex">Sukupuoli</label>
                         <div class="controls">
                             <select id="sex" ng-model="$ctrl.sex">
                                 <option value="MALE">Mies</option>
@@ -153,12 +153,12 @@ angular.module('ryyppy').component('partyAdminPage', {
                     <div class="control-group">
                         <label class="control-label" for="weight">Paino</label>
                         <div class="controls">
-                            <input id="weight" type="password" ng-model="$ctrl.weight" />
+                            <input id="weight" type="number" ng-model="$ctrl.weight" />
                         </div>
                     </div>
                 </div>
 
-                <div class="control-group" ng-if="$ctrl.selectedUserTypeId != 1">
+                <div class="control-group" ng-if="$ctrl.selectedUserTypeId !== 1">
                     <div class="controls">
                         <button type="submit" class="btn btn-success">Lisää</button>
                     </div>
@@ -167,7 +167,7 @@ angular.module('ryyppy').component('partyAdminPage', {
 
             <h1>Poista bilettäjä</h1>
 
-            <div class="row-fluid" ng-repeat="participant in $ctrl.participants" style="margin-bottom: 10px;">
+            <div class="row-fluid" ng-repeat="participant in $ctrl.participants track by participant.id" style="margin-bottom: 10px;">
                 <div class="span11">{{ participant.name }}</div>
                 <div class="span1"><button ng-click="$ctrl.removeUser(participant)" class="btn btn-danger">Poista</button></div>
             </div>

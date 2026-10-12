@@ -1,6 +1,4 @@
-var drinksUrl = '/API/v2/profile/drink-history';
-
-function UserHistoryGraph(user, container) {
+function UserHistoryGraph(user, container, RyyppyAPI, InitialData) {
     var that = this;
     var DAY = 24 * 60 * 60 * 1000;
     this.user = user;
@@ -109,19 +107,16 @@ function UserHistoryGraph(user, container) {
     };
 
     // The server embeds this user's own drink-history CSV into the page
-    // on load (see app/index.jsp) so the very first update() can skip the
-    // request. Once used it's cleared so later refreshes always hit the API.
+    // on load (see templates/app/index.html) so the very first update() can
+    // skip the request.
     this.update = function () {
-        if (window.__INITIAL_DRINK_HISTORY__) {
-            var initialDrinkHistory = window.__INITIAL_DRINK_HISTORY__;
-            window.__INITIAL_DRINK_HISTORY__ = null;
+        var initialDrinkHistory = InitialData.take('DRINK_HISTORY');
+        if (initialDrinkHistory) {
             that.gotData(initialDrinkHistory);
             return;
         }
 
-        fetch(drinksUrl, {credentials: 'same-origin'})
-            .then(function (response) { return response.text(); })
-            .then(that.gotData);
+        RyyppyAPI.getDrinkHistory().then(that.gotData);
     };
 
     this.destroy = function () {
