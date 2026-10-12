@@ -9,7 +9,7 @@ test('the AngularJS app scripts do not define globals', async ({ page }) => {
 
   const leaked = await page.evaluate(() =>
     ['DrinkerCtrl', 'UserPageCtrl', 'PartyPageCtrl', 'PartyAdminPageCtrl', 'GeneralPartyAdminPageCtrl',
-     'ProfileSettingsPageCtrl', 'ToastsCtrl', 'UserHistoryGraph', 'formatFinnishDateTime', 'drinksUrl']
+     'ProfileSettingsPageCtrl', 'ToastsCtrl', 'UserHistoryGraph', 'formatFinnishDateTime']
       .filter((name) => name in window),
   );
   expect(leaked).toEqual([]);

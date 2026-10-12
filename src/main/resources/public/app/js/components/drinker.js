@@ -2,8 +2,6 @@
     'use strict';
 
     function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
-        "use strict";
-
         var self = this;
 
 
