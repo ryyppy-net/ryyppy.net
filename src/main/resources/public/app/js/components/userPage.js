@@ -1,22 +1,20 @@
 'use strict';
 
-function UserPageCtrl(Poller, RyyppyAPI) {
+function UserPageCtrl($element, $timeout, InitialData, Poller, RyyppyAPI) {
     var self = this;
     var stopPolling = null;
     var graph = null;
+    var graphTimeout = null;
 
     function applyProfile(data) {
         data.type = 'profile';
         data.color = 1;
         self.participants = [data];
 
-        setTimeout(function () {
-            var container = document.getElementById('historyGraph');
-            if (!container) {
-                return;
-            }
+        graphTimeout = $timeout(function () {
             if (!graph) {
-                graph = new UserHistoryGraph(self.participants[0], container);
+                var container = $element[0].querySelector('#historyGraph');
+                graph = new UserHistoryGraph(self.participants[0], container, RyyppyAPI, InitialData);
             }
             graph.update();
         }, 0);
@@ -24,11 +22,9 @@ function UserPageCtrl(Poller, RyyppyAPI) {
 
     this.refreshProfile = function () {
         // The server embeds the profile into the page on load (see
-        // templates/app/index.html) so the very first refresh can skip the XHR. Once
-        // used it's cleared so later polling ticks always hit the API.
-        if (window.__INITIAL_PROFILE__) {
-            var initialProfile = window.__INITIAL_PROFILE__;
-            window.__INITIAL_PROFILE__ = null;
+        // templates/app/index.html) so the very first refresh can skip the XHR.
+        var initialProfile = InitialData.take('PROFILE');
+        if (initialProfile) {
             applyProfile(initialProfile);
             return;
         }
@@ -36,11 +32,8 @@ function UserPageCtrl(Poller, RyyppyAPI) {
     };
 
     this.refreshParties = function () {
-        // See refreshProfile above - same skip-first-fetch pattern using data
-        // embedded by the server (templates/app/index.html).
-        if (window.__INITIAL_PARTIES__) {
-            var initialParties = window.__INITIAL_PARTIES__;
-            window.__INITIAL_PARTIES__ = null;
+        var initialParties = InitialData.take('PARTIES');
+        if (initialParties) {
             self.parties = initialParties;
             return;
         }
@@ -50,11 +43,8 @@ function UserPageCtrl(Poller, RyyppyAPI) {
     };
 
     this.refreshOwnDrinks = function () {
-        // See refreshProfile above - same skip-first-fetch pattern using data
-        // embedded by the server (templates/app/index.html).
-        if (window.__INITIAL_DRINKS__) {
-            var initialDrinks = window.__INITIAL_DRINKS__;
-            window.__INITIAL_DRINKS__ = null;
+        var initialDrinks = InitialData.take('DRINKS');
+        if (initialDrinks) {
             self.drinks = initialDrinks;
             return;
         }
@@ -104,13 +94,14 @@ function UserPageCtrl(Poller, RyyppyAPI) {
 
     this.$onDestroy = function () {
         self.endPolling();
+        $timeout.cancel(graphTimeout);
         if (graph) {
             graph.destroy();
         }
     };
 }
 
-UserPageCtrl.$inject = ['Poller', 'RyyppyAPI'];
+UserPageCtrl.$inject = ['$element', '$timeout', 'InitialData', 'Poller', 'RyyppyAPI'];
 
 angular.module('ryyppy').component('userPage', {
     controller: UserPageCtrl,

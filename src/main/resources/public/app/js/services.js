@@ -27,6 +27,14 @@
             });
         };
 
+        this.getDrinkHistory = function () {
+            return http.get(this._baseUrl + "/profile/drink-history", {
+                transformResponse: angular.identity
+            }).then(function (response) {
+                return response.data;
+            });
+        };
+
         this.getOwnDrinks = function (callbackSuccess) {
             http.get(this._baseUrl + "/profile/drinks").then(function (response) {
                 callbackSuccess(response.data);
@@ -154,6 +162,21 @@
 
 
     /**
+     * Data the server embeds into the page on load as window.__INITIAL_<NAME>__
+     * (templates/app/index.html). Each value is handed out once, so the first
+     * load skips the request and later refreshes always hit the API.
+     */
+    function InitialData(win) {
+        this.take = function (name) {
+            var key = '__INITIAL_' + name + '__';
+            var value = win[key];
+            win[key] = null;
+            return value || null;
+        };
+    }
+
+
+    /**
      * Poller repeats a tick function on an interval, but skips ticks (and
      * stops scheduling further ones) while the tab is in the background, per
      * the Page Visibility API. When the tab becomes visible again it ticks
@@ -271,6 +294,10 @@
 
         $provide.factory('Sound', ['$window', function ($window) {
             return new SoundService($window);
+        }]);
+
+        $provide.factory('InitialData', ['$window', function ($window) {
+            return new InitialData($window);
         }]);
 
         $provide.factory('Poller', ['$timeout', '$document', function ($timeout, $document) {
