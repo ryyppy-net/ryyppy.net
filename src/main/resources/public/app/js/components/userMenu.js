@@ -1,34 +1,36 @@
-'use strict';
+(function (angular) {
+    'use strict';
 
-angular.module('ryyppy').component('userMenu', {
-    bindings: {active: '@'},
-    template: `
-<div class="navbar hidden-phone">
-    <div class="navbar-inner">
-        <span class="brand">Ryyppy.net</span>
-        <ul class="nav">
-            <li ng-class="$ctrl.active == 'user' && 'active'"><a href="#!/">Sinä</a></li>
-            <li ng-class="$ctrl.active == 'general-party-admin' && 'active'"><a href="#!/party-admin">Bileiden hallinta</a></li>
-            <li ng-class="$ctrl.active == 'profile-settings' && 'active'"><a href="#!/profile-settings">Asetukset</a></li>
-        </ul>
-        <ul class="nav pull-right">
-            <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään">Vanha käyttöliittymä</a></li>
-            <li><a href="/logout" class="g_id_signout">Kirjaudu ulos</a></li>
-        </ul>
+    angular.module('ryyppy').component('userMenu', {
+        bindings: {active: '@'},
+        template: `
+    <div class="navbar hidden-phone">
+        <div class="navbar-inner">
+            <span class="brand">Ryyppy.net</span>
+            <ul class="nav">
+                <li ng-class="$ctrl.active == 'user' && 'active'"><a href="#!/">Sinä</a></li>
+                <li ng-class="$ctrl.active == 'general-party-admin' && 'active'"><a href="#!/party-admin">Bileiden hallinta</a></li>
+                <li ng-class="$ctrl.active == 'profile-settings' && 'active'"><a href="#!/profile-settings">Asetukset</a></li>
+            </ul>
+            <ul class="nav pull-right">
+                <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään">Vanha käyttöliittymä</a></li>
+                <li><a href="/logout" class="g_id_signout">Kirjaudu ulos</a></li>
+            </ul>
+        </div>
     </div>
-</div>
 
-<div class="mobile-navbar navbar visible-phone">
-    <div class="navbar-inner">
-        <ul class="nav">
-            <li ng-class="$ctrl.active == 'user' && 'active'"><a href="#!/"><i class="icon-home"></i></a></li>
-            <li ng-class="$ctrl.active == 'general-party-admin' && 'active'"><a href="#!/party-admin"><i class="icon-group"></i></a></li>
-            <li ng-class="$ctrl.active == 'profile-settings' && 'active'"><a href="#!/profile-settings"><i class="icon-cog"></i></a></li>
-        </ul>
-        <ul class="nav mobile-nav pull-right">
-            <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään"><i class="icon-share"></i></a></li>
-            <li><a href="/logout" class="g_id_signout"><i class="icon-signout"></i></a></li>
-        </ul>
-    </div>
-</div>`
-});
+    <div class="mobile-navbar navbar visible-phone">
+        <div class="navbar-inner">
+            <ul class="nav">
+                <li ng-class="$ctrl.active == 'user' && 'active'"><a href="#!/"><i class="icon-home"></i></a></li>
+                <li ng-class="$ctrl.active == 'general-party-admin' && 'active'"><a href="#!/party-admin"><i class="icon-group"></i></a></li>
+                <li ng-class="$ctrl.active == 'profile-settings' && 'active'"><a href="#!/profile-settings"><i class="icon-cog"></i></a></li>
+            </ul>
+            <ul class="nav mobile-nav pull-right">
+                <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään"><i class="icon-share"></i></a></li>
+                <li><a href="/logout" class="g_id_signout"><i class="icon-signout"></i></a></li>
+            </ul>
+        </div>
+    </div>`
+    });
+})(angular);
