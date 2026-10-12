@@ -173,6 +173,15 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
         return ('0' + new Date(timestamp).getUTCHours()).slice(-2);
     }
 
+    function wholeHourTicks(scale) {
+        var hour = 60 * 60 * 1000;
+        var ticks = [];
+        for (var t = Math.ceil(scale.min / hour) * hour; t <= scale.max; t += hour) {
+            ticks.push({value: t});
+        }
+        scale.ticks = ticks;
+    }
+
     this.$postLink = function () {
         var canvas = $element[0].querySelector('.drinker-graph canvas');
         var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -197,10 +206,9 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
                 scales: {
                     x: {
                         type: 'linear',
-                        ticks: {
-                            stepSize: 60 * 60 * 1000,
-                            callback: formatHour
-                        }
+                        bounds: 'data',
+                        afterBuildTicks: wholeHourTicks,
+                        ticks: {callback: formatHour}
                     },
                     y: {min: 0}
                 }
