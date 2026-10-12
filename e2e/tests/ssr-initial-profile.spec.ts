@@ -6,7 +6,7 @@ test.use({ storageState: SHARED_STORAGE_STATE });
 
 test('the dashboard does not fetch the profile, parties, own drinks, or drink-history graph data over the API on first load', async ({ page }) => {
   // DefaultController.appIndex() embeds the current user's profile, parties,
-  // own drinks, and drink-history CSV into app/index.jsp as
+  // own drinks, and drink-history CSV into templates/app/index.html as
   // window.__INITIAL_PROFILE__ / __INITIAL_PARTIES__ / __INITIAL_DRINKS__ /
   // __INITIAL_DRINK_HISTORY__, and the userPage component's
   // refreshProfile/refreshParties/refreshOwnDrinks plus
@@ -37,8 +37,8 @@ test('the dashboard does not fetch the profile, parties, own drinks, or drink-hi
   await expect(ownTile).toBeVisible();
   await expect(ownTile.locator('p', { hasText: 'Promilleja' })).toBeVisible();
 
-  // UserHistoryGraph is created via setTimeout(0) inside the userPage component's
-  // applyProfile, so wait for its flot canvas to actually render before
+  // UserHistoryGraph is created via $timeout(0) inside the userPage component's
+  // applyProfile, so wait for its canvas to actually render before
   // asserting no drink-history request fired.
   await expect(page.locator('#historyGraph canvas').first()).toBeVisible();
 
