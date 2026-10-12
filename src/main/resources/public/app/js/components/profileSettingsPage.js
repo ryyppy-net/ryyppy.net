@@ -12,14 +12,14 @@
                 weight: angular.isNumber(self.weight) ? self.weight : self.profile.weight
             };
 
-            RyyppyAPI.updateProfile(profile, function () {
+            RyyppyAPI.updateProfile(profile).then(function () {
                 Notify.success("Tiedot päivitetty!", "Uudet asetukset tallennettu.");
                 $location.path("/");
             });
         };
 
         this.$onInit = function () {
-            RyyppyAPI.getProfile(function (data) {
+            RyyppyAPI.getProfile().then(function (data) {
                 self.profile = data;
 
                 self.name = data.name;

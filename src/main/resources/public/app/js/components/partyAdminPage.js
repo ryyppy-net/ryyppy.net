@@ -5,19 +5,19 @@
         var self = this;
 
         this._updatePartyInformation = function () {
-            RyyppyAPI.getParty($routeParams.partyId, function (data) {
+            RyyppyAPI.getParty($routeParams.partyId).then(function (data) {
                 self.party = data;
             });
         };
 
         this._updatePartyParticipants = function () {
-            RyyppyAPI.getPartyParticipants($routeParams.partyId, function (data) {
+            RyyppyAPI.getPartyParticipants($routeParams.partyId).then(function (data) {
                 self.participants = data;
             });
         };
 
         this._updatePartyInvitations = function () {
-            RyyppyAPI.getPartyInvitations($routeParams.partyId, function (data) {
+            RyyppyAPI.getPartyInvitations($routeParams.partyId).then(function (data) {
                 self.invitations = data;
             });
         };
@@ -30,7 +30,7 @@
         };
 
         this._addRegisteredUser = function (partyId, email) {
-            RyyppyAPI.addRegisteredUserToParty(partyId, email, function (data) {
+            RyyppyAPI.addRegisteredUserToParty(partyId, email).then(function (data) {
                 Notify.success("Tervetuloa takaisin!", "Lisätty käyttäjä sähköpostiosoitteella " + email + ".");
                 self._updatePartyParticipants();
                 self._updatePartyInvitations();
@@ -39,7 +39,7 @@
 
         this._addGuestUser = function (name, sex, weight) {
             var guest = { name: name, sex: sex, weight: weight };
-            RyyppyAPI.addGuestToParty($routeParams.partyId, guest, function (data) {
+            RyyppyAPI.addGuestToParty($routeParams.partyId, guest).then(function (data) {
                 Notify.success("Tervetuloa vieraalle!", "Lisätty vieras " + self.name + ".");
                 self._updatePartyParticipants();
             });
@@ -48,7 +48,7 @@
         this.inviteUser = function (invitation) {
             self.inviting = true;
             self.invitedFriend = invitation;
-            RyyppyAPI.inviteUser(invitation.id, $routeParams.partyId, function () {
+            RyyppyAPI.inviteUser(invitation.id, $routeParams.partyId).then(function () {
                 self.invitedFriend = undefined;
                 Notify.success("Pitkästä aikaa!", "Lisätty käyttäjä " + invitation.name + ".");
                 self._updatePartyParticipants();
@@ -58,7 +58,7 @@
         };
 
         this.removeUser = function (participant) {
-            RyyppyAPI.removeUser($routeParams.partyId, participant, function (data) {
+            RyyppyAPI.removeParticipant($routeParams.partyId, participant).then(function (data) {
                 Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
                 // Only party members may read the party, so after leaving it there is nothing to show here.
                 if (self.profile && participant.id === self.profile.id) {
@@ -84,7 +84,7 @@
             ];
             self.selectedUserTypeId = 1;
 
-            RyyppyAPI.getProfile(function (data) {
+            RyyppyAPI.getProfile().then(function (data) {
                 self.profile = data;
             });
             self._updatePartyInformation();

@@ -29,7 +29,7 @@
                 applyProfile(initialProfile);
                 return;
             }
-            RyyppyAPI.getProfile(applyProfile);
+            RyyppyAPI.getProfile().then(applyProfile);
         };
 
         this.refreshParties = function () {
@@ -38,7 +38,7 @@
                 self.parties = initialParties;
                 return;
             }
-            RyyppyAPI.getParties(function (data) {
+            RyyppyAPI.getParties().then(function (data) {
                 self.parties = data;
             });
         };
@@ -49,7 +49,7 @@
                 self.drinks = initialDrinks;
                 return;
             }
-            RyyppyAPI.getOwnDrinks(function (data) {
+            RyyppyAPI.getOwnDrinks().then(function (data) {
                 self.drinks = data;
             });
         };
@@ -82,7 +82,7 @@
         };
 
         this.removeDrink = function (drink) {
-            RyyppyAPI.removeDrink(drink.id, function () {
+            RyyppyAPI.deleteDrink({type: 'profile'}, drink.id).then(function () {
                 self.endPolling();
                 self.startPolling();
             });
