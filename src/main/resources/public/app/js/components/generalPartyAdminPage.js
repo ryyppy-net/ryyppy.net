@@ -66,14 +66,14 @@
                     </div>
                 </form>
 
-                <div ng-show="$ctrl.parties.length > 0">
+                <div ng-if="$ctrl.parties.length > 0">
                     <h2>Bileesi</h2>
 
                     <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true track by party.id">
                         <div class="row-fluid">
                             <div class="span10 party color{{ ($index % 12) + 1 }}">
                                 <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
-                                <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
+                                <ul class="inline" ng-if="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
                                     <li ng-repeat="participantPreview in party.participants"><img ng-src="{{ participantPreview.profilePictureUrl }}&size=30" title="{{ participantPreview.name }}" /></li>
                                 </ul>
                             </div>

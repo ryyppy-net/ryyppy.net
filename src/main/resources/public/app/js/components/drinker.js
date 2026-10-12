@@ -164,7 +164,7 @@
             </div>
         </div>
 
-        <div ng-show="$ctrl.showDrinkDialog && $ctrl.addingDrink" class="drinker-overlay">
+        <div ng-if="$ctrl.showDrinkDialog && $ctrl.addingDrink" class="drinker-overlay">
             <p>Lisättiin juoma käyttäjälle {{ $ctrl.participant.name }}.</p>
 
             <p>Juoman koko on {{ $ctrl.formattedAlcoholSize() }} ja vahvuus {{ $ctrl.formattedAlcoholPercentage() }}.</p>
@@ -176,7 +176,7 @@
             <button type="button" class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</button>
         </div>
 
-        <div ng-show="$ctrl.showDrinkDialog && $ctrl.editingDrink" class="drinker-overlay">
+        <div ng-if="$ctrl.showDrinkDialog && $ctrl.editingDrink" class="drinker-overlay">
             <p>Muokkaa käyttäjän {{ $ctrl.participant.name }} juomaa</p>
 
             <form ng-submit="$ctrl.saveEditedDrink()" class="edit-drink">

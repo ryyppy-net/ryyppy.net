@@ -114,26 +114,26 @@
                         </div>
                     </div>
 
-                    <div class="control-group" ng-show="$ctrl.selectedUserTypeId === 1">
-                        <div ng-show="!$ctrl.inviting">
+                    <div class="control-group" ng-if="$ctrl.selectedUserTypeId === 1">
+                        <div ng-if="!$ctrl.inviting">
                             <div ng-repeat="invitation in $ctrl.invitations track by invitation.id" ng-click="$ctrl.inviteUser(invitation)" keyboard-click role="button" tabindex="0" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
                                 <img ng-src="{{ invitation.gravatarUrl }}&size=30" />
                                 {{ invitation.name }}
                             </div>
                         </div>
-                        <div ng-show="$ctrl.inviting">
+                        <div ng-if="$ctrl.inviting">
                             Kutsutaan ystävää {{ $ctrl.invitedFriend.name }}...
                         </div>
                     </div>
 
-                    <div class="control-group" ng-show="$ctrl.selectedUserTypeId === 2">
+                    <div class="control-group" ng-if="$ctrl.selectedUserTypeId === 2">
                         <label class="control-label" for="email">Sähköposti</label>
                         <div class="controls">
                             <input id="email" type="email" ng-model="$ctrl.email" />
                         </div>
                     </div>
 
-                    <div ng-show="$ctrl.selectedUserTypeId === 3">
+                    <div ng-if="$ctrl.selectedUserTypeId === 3">
                         <div class="control-group">
                             <label class="control-label" for="name">Nimi</label>
                             <div class="controls">
@@ -159,7 +159,7 @@
                         </div>
                     </div>
 
-                    <div class="control-group" ng-show="$ctrl.selectedUserTypeId !== 1">
+                    <div class="control-group" ng-if="$ctrl.selectedUserTypeId !== 1">
                         <div class="controls">
                             <button type="submit" class="btn btn-success">Lisää</button>
                         </div>
