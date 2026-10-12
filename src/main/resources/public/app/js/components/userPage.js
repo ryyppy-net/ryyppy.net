@@ -116,14 +116,14 @@
 
                 <h2>Bileesi</h2>
 
-                <div ng-show="$ctrl.parties.length <= 0">
+                <div ng-if="$ctrl.parties.length <= 0">
                     <p>
                         Et näytä olevan vielä missään bileissä. Voit lisätä uudet bileet
                         <a href="#!/party-admin">bileiden hallinnassa</a> tai antaa rekisteröityessäsi käyttämäsi
                         sähköpostiosoitteen kavereillesi, jotta he voivat kutsua sinut bileisiinsä.
                     </p>
                 </div>
-                <div ng-show="$ctrl.parties.length > 0">
+                <div ng-if="$ctrl.parties.length > 0">
                     <p>
                         Jos haluat muokata bileitäsi, voit tehdä sen <a href="#!/party-admin">bileiden hallinnassa</a>.
                     </p>
@@ -132,7 +132,7 @@
                         <a href="#!/party/{{ ::party.id }}">
                             <div class="party color{{ ($index % 12) + 1 }}">
                                 <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
-                                <ul class="inline" ng-show="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
+                                <ul class="inline" ng-if="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
                                     <li ng-repeat="participantPreview in party.participants"><img ng-src="{{ participantPreview.profilePictureUrl }}&size=30" title="{{ participantPreview.name }}" /></li>
                                 </ul>
                             </div>
