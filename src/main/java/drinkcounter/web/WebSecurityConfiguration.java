@@ -59,6 +59,7 @@ public class WebSecurityConfiguration {
                         "/ui/checkEmail*",
                         "/ui/timezone/*",
                         "/app/css/**",
+                        "/app/js/**",
                         "/API/passphrase/**",
                         "/oauth2/**",
                         "/api/auth/google/one-tap",
