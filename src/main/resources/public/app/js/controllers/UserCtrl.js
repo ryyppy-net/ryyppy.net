@@ -3,6 +3,7 @@
 function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
     var self = this;
     var stopPolling = null;
+    var graph = null;
     $scope.active = 'user';
 
     function applyProfile(data) {
@@ -11,9 +12,14 @@ function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
         $scope.participants = [data];
 
         setTimeout(function () {
-            var graph = new UserHistoryGraph($scope.participants[0], $("#historyGraph"));
+            var container = document.getElementById('historyGraph');
+            if (!container) {
+                return;
+            }
+            if (!graph) {
+                graph = new UserHistoryGraph($scope.participants[0], container);
+            }
             graph.update();
-            graph.render();
         }, 0);
     }
 
@@ -91,6 +97,9 @@ function UserCtrl($scope, Poller, RyyppyAPI, Notify) {
 
     $scope.$on('$destroy', function () {
         self.endPolling();
+        if (graph) {
+            graph.destroy();
+        }
     });
 
     $scope.removeDrink = function (drink) {
