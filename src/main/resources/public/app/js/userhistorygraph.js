@@ -90,8 +90,7 @@ function UserHistoryGraph(user, container) {
             first -= 30 * DAY;
         }
 
-        // Chart.js sizes bars on a linear scale by the closest pair of points,
-        // so every day gets a point and a bar is one day wide.
+        // A point for every day, drinks or not, keeps each bar one day wide.
         for (var x = first; x <= last; x += DAY) {
             points.push({x: x, y: drinksByDay.hasOwnProperty(x) ? drinksByDay[x] : null});
         }
