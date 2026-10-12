@@ -96,7 +96,7 @@ test('undoing a drink right after the tap deletes the saved drink', async ({ pag
   const drinkerTile = await openOwnPartyTile(page, 'undo');
   const saved = await tapToDrink(page, drinkerTile);
   expect(await getOwnDrinks(page)).toHaveLength(1);
-  const addedNotice = page.locator('.ui-pnotify', { hasText: 'lisättiin juoma' });
+  const addedNotice = page.locator('.toast-body', { hasText: 'lisättiin juoma' });
   await expect(addedNotice).toBeVisible();
 
   const deleted = page.waitForResponse(
@@ -108,6 +108,14 @@ test('undoing a drink right after the tap deletes the saved drink', async ({ pag
   await expect(drinkerTile.locator('.drinker-overlay').first()).toBeHidden();
   await expect(addedNotice).toBeHidden();
   expect(await getOwnDrinks(page)).toHaveLength(0);
+});
+
+test('the drink-added toast closes by itself', async ({ page }) => {
+  const drinkerTile = await openOwnPartyTile(page, 'toast');
+  await tapToDrink(page, drinkerTile);
+  const addedNotice = page.locator('.toast-body', { hasText: 'lisättiin juoma' });
+  await expect(addedNotice).toBeVisible();
+  await expect(addedNotice).toBeHidden({ timeout: 15_000 });
 });
 
 test('editing a drink right after the tap changes the saved drink', async ({ page }) => {
