@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    function DrinkerCtrl($element, $timeout, DrinkerChart, DrinkOptions, RyyppyAPI, Sound, Notify) {
+    function DrinkerCtrl($element, DrinkerChart, DrinkOptions, RyyppyAPI, Sound, Notify) {
         var self = this;
 
 
@@ -12,103 +12,26 @@
             self.addDrink(participant, defaultDrink);
         };
 
-        // The drink is saved on the tap; the overlay then offers a 5s window to
-        // undo or edit it.
+        // The drink is saved on the tap; the dialog then offers a window to undo
+        // or edit it.
         this.addDrink = function (participant, drink) {
-            self.showDrinkDialog = true;
-            self.addingDrink = true;
-            self.editingDrink = false;
-            self.drink = drink;
-
-            self.savedDrink = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
+            var added = {drink: drink};
+            added.saved = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
                 var message = participant.type === 'participant'
                     ? "Käyttäjälle " + participant.name + " lisättiin juoma."
                     : "Sinulle lisättiin juoma.";
-                self.addedNotice = Notify.success(self.getRandomSalutation(), message);
+                added.notice = Notify.success(self.getRandomSalutation(), message);
                 self.onDrinksChanged({participant: participant});
                 return saved;
             });
-
-            self.dismissTimeout = $timeout(self.hideDialog, 5000);
+            self.addedDrink = added;
         };
-
-        this.editDrink = function () {
-            $timeout.cancel(self.dismissTimeout);
-            self.editingDrink = true;
-            self.addingDrink = false;
-        };
-
-        this.saveEditedDrink = function () {
-            var participant = self.participant;
-            var editedDrink = {volume: self.selectedPortionSize, alcohol: self.selectedAlcoholPercentage};
-            self.savedDrink.then(function (saved) {
-                return RyyppyAPI.changeDrink(participant, saved.id, editedDrink);
-            }).then(function () {
-                self.onDrinksChanged({participant: participant});
-            });
-            self.hideDialog();
-        };
-
-        this.cancelDrink = function () {
-            $timeout.cancel(self.dismissTimeout);
-            var participant = self.participant;
-            self.savedDrink.then(function (saved) {
-                Notify.remove(self.addedNotice);
-                return RyyppyAPI.deleteDrink(participant, saved.id);
-            }).then(function () {
-                self.onDrinksChanged({participant: participant});
-            });
-            self.hideDialog();
-        };
-
-        this.hideDialog = function () {
-            self.showDrinkDialog = false;
-            self.editingDrink = false;
-            self.addingDrink = false;
-        };
-
-
-        // Initialization:
-        this.addingDrink = false;
-        this.editingDrink = false;
-
-        this.portionSizes = DrinkOptions.portionSizes;
-        this.selectedPortionSize = DrinkOptions.defaultPortionSize;
-
-        this.portionAlcoholPercentages = DrinkOptions.portionAlcoholPercentages;
-        this.selectedAlcoholPercentage = DrinkOptions.defaultAlcoholPercentage;
 
         this.salutations = DrinkOptions.salutations;
 
         this.getRandomSalutation = function () {
             var salutation = self.salutations[Math.floor(Math.random() * self.salutations.length)];
             return salutation;
-        };
-
-        this.formattedAlcoholSize = function () {
-            if (typeof self.drink === 'undefined') {
-                return '';
-            }
-
-            for (var i = 0; i < self.portionSizes.length; i++) {
-                if (self.portionSizes[i].value === self.drink.volume) {
-                    return self.portionSizes[i].text;
-                }
-            }
-            return '???';
-        };
-
-        this.formattedAlcoholPercentage = function () {
-            if (typeof self.drink === 'undefined') {
-                return '';
-            }
-
-            for (var i = 0; i < self.portionAlcoholPercentages.length; i++) {
-                if (self.portionAlcoholPercentages[i].value === self.selectedAlcoholPercentage) {
-                    return self.portionAlcoholPercentages[i].text;
-                }
-            }
-            return '???';
         };
 
         this.$postLink = function () {
@@ -123,14 +46,13 @@
         };
 
         this.$onDestroy = function () {
-            $timeout.cancel(self.dismissTimeout);
             if (self.chart) {
                 self.chart.destroy();
             }
         };
     }
 
-    DrinkerCtrl.$inject = ['$element', '$timeout', 'DrinkerChart', 'DrinkOptions', 'RyyppyAPI', 'Sound', 'Notify'];
+    DrinkerCtrl.$inject = ['$element', 'DrinkerChart', 'DrinkOptions', 'RyyppyAPI', 'Sound', 'Notify'];
 
     angular.module('ryyppy').component('drinker', {
         controller: DrinkerCtrl,
@@ -164,46 +86,8 @@
             </div>
         </div>
 
-        <div ng-if="$ctrl.showDrinkDialog && $ctrl.addingDrink" class="drinker-overlay">
-            <p>Lisättiin juoma käyttäjälle {{ $ctrl.participant.name }}.</p>
-
-            <p>Juoman koko on {{ $ctrl.formattedAlcoholSize() }} ja vahvuus {{ $ctrl.formattedAlcoholPercentage() }}.</p>
-            <div class="progress" style="margin-left: 10px; margin-right: 10px;">
-                <div class="bar" ng-class="{'undo-countdown': $ctrl.addingDrink}"></div>
-            </div>
-
-            <button type="button" class="btn" ng-click="$ctrl.editDrink()">Muokkaa</button>
-            <button type="button" class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</button>
-        </div>
-
-        <div ng-if="$ctrl.showDrinkDialog && $ctrl.editingDrink" class="drinker-overlay">
-            <p>Muokkaa käyttäjän {{ $ctrl.participant.name }} juomaa</p>
-
-            <form ng-submit="$ctrl.saveEditedDrink()" class="edit-drink">
-                <div style="clear: both;">
-                    <label for="portionSize" class="edit-drink-label">Annoskoko</label>
-                    <select id="portionSize"
-                            ng-model="$ctrl.selectedPortionSize"
-                            ng-options="portionSize.value as portionSize.text for portionSize in ::$ctrl.portionSizes"
-                            class="edit-drink-input">
-                    </select>
-                </div>
-
-                <div style="clear: both;">
-                    <label for="portionAlcoholPercentage" class="edit-drink-label">Alkoholi-%</label>
-                    <select id="portionAlcoholPercentage"
-                            ng-model="$ctrl.selectedAlcoholPercentage"
-                            ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in ::$ctrl.portionAlcoholPercentages"
-                            class="edit-drink-input">
-                    </select>
-                </div>
-
-                <div style="clear: both">
-                    <button type="submit" class="btn btn-success">Tallenna</button>
-                    <button type="button" class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</button>
-                </div>
-            </form>
-        </div>
+        <drink-dialog participant="$ctrl.participant" added-drink="$ctrl.addedDrink"
+                      on-drinks-changed="$ctrl.onDrinksChanged({participant: participant})"></drink-dialog>
     </div>`
     });
 })(angular);
