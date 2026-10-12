@@ -1,14 +1,14 @@
 (function (angular) {
     'use strict';
 
-    function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
+    function DrinkerCtrl($element, $timeout, DrinkerChart, DrinkOptions, RyyppyAPI, Sound, Notify) {
         var self = this;
 
 
         this.addDefaultDrink = function (participant) {
             Sound.playSound();
 
-            var defaultDrink = {volume: '0.33', alcohol: '0.047'};
+            var defaultDrink = {volume: DrinkOptions.defaultPortionSize, alcohol: DrinkOptions.defaultAlcoholPercentage};
             self.addDrink(participant, defaultDrink);
         };
 
@@ -72,57 +72,13 @@
         this.addingDrink = false;
         this.editingDrink = false;
 
-        this.portionSizes = [
-            { value: '0.04', text: '4 cl' },
-            { value: '0.08', text: '8 cl' },
-            { value: '0.12', text: '12 cl' },
-            { value: '0.16', text: '16 cl' },
-            { value: '0.2', text: '0.2 l' },
-            { value: '0.33', text: '0.33 l' },
-            { value: '0.4', text: '0.4 l' },
-            { value: '0.5', text: '0.5 l' },
-            { value: '0.6', text: '0.6 l' },
-            { value: '1.0', text: '1.0 l' }
-        ];
-        this.selectedPortionSize = '0.33';
+        this.portionSizes = DrinkOptions.portionSizes;
+        this.selectedPortionSize = DrinkOptions.defaultPortionSize;
 
-        this.portionAlcoholPercentages = [
-            { value: '0.028', text: '2.8%' },
-            { value: '0.047', text: '4.7%' },
-            { value: '0.052', text: '5.2%' },
-            { value: '0.055', text: '5.5%' },
-            { value: '0.08', text: '8.0%' },
-            { value: '0.12', text: '12.0%' },
-            { value: '0.14', text: '14.0%' },
-            { value: '0.22', text: '22.0%' },
-            { value: '0.30', text: '30.0%' },
-            { value: '0.32', text: '32.0%' },
-            { value: '0.38', text: '38.0%' },
-            { value: '0.40', text: '40.0%' },
-            { value: '0.48', text: '48.0%' },
-            { value: '0.80', text: '80.0%' }
-        ];
-        this.selectedAlcoholPercentage = '0.047';
+        this.portionAlcoholPercentages = DrinkOptions.portionAlcoholPercentages;
+        this.selectedAlcoholPercentage = DrinkOptions.defaultAlcoholPercentage;
 
-        // Source: http://en.wikipedia.org/wiki/Toast_(honor)#Worldwide
-        this.salutations = [
-            'Gëzuar!',
-            'Nazdravlje!',
-            'Наздраве!',
-            '干杯',
-            'Na zdraví!',
-            'Terviseks!',
-            'Kippis!',
-            'Hölökyn kölökyn!',
-            'Cul sec!',
-            'Saude!',
-            'Prost!',
-            '乾杯',
-            'Sláinte!',
-            'Skål!',
-            'Slàinte mhath!',
-            'Cheers!'
-        ];
+        this.salutations = DrinkOptions.salutations;
 
         this.getRandomSalutation = function () {
             var salutation = self.salutations[Math.floor(Math.random() * self.salutations.length)];
@@ -155,72 +111,14 @@
             return '???';
         };
 
-        function historyPoints() {
-            var points = [];
-            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-            var rows = (self.participant && self.participant.history) || [];
-
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                if (row.length === 0) {
-                    continue;
-                }
-                points.push({x: row.timestamp + timezoneoffset, y: row.promilles});
-            }
-            return points;
-        }
-
-        function formatHour(timestamp) {
-            return ('0' + new Date(timestamp).getUTCHours()).slice(-2);
-        }
-
-        function wholeHourTicks(scale) {
-            var hour = 60 * 60 * 1000;
-            var ticks = [];
-            for (var t = Math.ceil(scale.min / hour) * hour; t <= scale.max; t += hour) {
-                ticks.push({value: t});
-            }
-            scale.ticks = ticks;
-        }
-
         this.$postLink = function () {
             var canvas = $element[0].querySelector('.drinker-graph canvas');
-            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-            self.chart = new Chart(canvas, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        data: historyPoints(),
-                        borderColor: 'rgb(0, 0, 0)',
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        pointHitRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: reducedMotion ? false : {},
-                    events: [],
-                    plugins: {legend: {display: false}, tooltip: {enabled: false}},
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            bounds: 'data',
-                            afterBuildTicks: wholeHourTicks,
-                            ticks: {callback: formatHour}
-                        },
-                        y: {min: 0}
-                    }
-                }
-            });
+            self.chart = new DrinkerChart(canvas, self.participant);
         };
 
         this.$onChanges = function (changes) {
             if (changes.participant && changes.participant.currentValue && self.chart) {
-                self.chart.data.datasets[0].data = historyPoints();
-                self.chart.update();
+                self.chart.update(self.participant);
             }
         };
 
@@ -232,7 +130,7 @@
         };
     }
 
-    DrinkerCtrl.$inject = ['$element', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
+    DrinkerCtrl.$inject = ['$element', '$timeout', 'DrinkerChart', 'DrinkOptions', 'RyyppyAPI', 'Sound', 'Notify'];
 
     angular.module('ryyppy').component('drinker', {
         controller: DrinkerCtrl,
