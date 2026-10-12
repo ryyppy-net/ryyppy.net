@@ -305,5 +305,5 @@ angular.module('ryyppy').component('drinker', {
             </div>
         </form>
     </div>
-</div>`
+</div>`
 });

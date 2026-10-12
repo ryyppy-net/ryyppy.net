@@ -24,7 +24,7 @@ function UserPageCtrl(Poller, RyyppyAPI) {
 
     this.refreshProfile = function () {
         // The server embeds the profile into the page on load (see
-        // app/index.jsp) so the very first refresh can skip the XHR. Once
+        // templates/app/index.html) so the very first refresh can skip the XHR. Once
         // used it's cleared so later polling ticks always hit the API.
         if (window.__INITIAL_PROFILE__) {
             var initialProfile = window.__INITIAL_PROFILE__;
@@ -37,7 +37,7 @@ function UserPageCtrl(Poller, RyyppyAPI) {
 
     this.refreshParties = function () {
         // See refreshProfile above - same skip-first-fetch pattern using data
-        // embedded by the server (app/index.jsp).
+        // embedded by the server (templates/app/index.html).
         if (window.__INITIAL_PARTIES__) {
             var initialParties = window.__INITIAL_PARTIES__;
             window.__INITIAL_PARTIES__ = null;
@@ -51,7 +51,7 @@ function UserPageCtrl(Poller, RyyppyAPI) {
 
     this.refreshOwnDrinks = function () {
         // See refreshProfile above - same skip-first-fetch pattern using data
-        // embedded by the server (app/index.jsp).
+        // embedded by the server (templates/app/index.html).
         if (window.__INITIAL_DRINKS__) {
             var initialDrinks = window.__INITIAL_DRINKS__;
             window.__INITIAL_DRINKS__ = null;
