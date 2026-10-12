@@ -115,7 +115,7 @@ angular.module('ryyppy').component('partyAdminPage', {
 
                 <div class="control-group" ng-show="$ctrl.selectedUserTypeId == 1">
                     <div ng-show="$ctrl.inviting == false">
-                        <div ng-repeat="invitation in $ctrl.invitations" ng-click="$ctrl.inviteUser(invitation)" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
+                        <div ng-repeat="invitation in $ctrl.invitations" ng-click="$ctrl.inviteUser(invitation)" keyboard-click role="button" tabindex="0" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
                             <img ng-src="{{ invitation.gravatarUrl }}&size=30" />
                             {{ invitation.name }}
                         </div>
