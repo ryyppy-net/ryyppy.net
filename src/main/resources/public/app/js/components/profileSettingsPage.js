@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    function ProfileSettingsPageCtrl($location, RyyppyAPI, Notify) {
+    function ProfileSettingsPageCtrl($location, ProfileStore, Notify) {
         var self = this;
 
         this.updateProfile = function () {
@@ -12,14 +12,15 @@
                 weight: angular.isNumber(self.weight) ? self.weight : self.profile.weight
             };
 
-            RyyppyAPI.updateProfile(profile).then(function () {
+            ProfileStore.save(profile).then(function () {
                 Notify.success("Tiedot päivitetty!", "Uudet asetukset tallennettu.");
                 $location.path("/");
             });
         };
 
+        // Copied once, so a later refresh of the store cannot overwrite what is typed.
         this.$onInit = function () {
-            RyyppyAPI.getProfile().then(function (data) {
+            ProfileStore.profile.load().then(function (data) {
                 self.profile = data;
 
                 self.name = data.name;
@@ -30,7 +31,7 @@
         };
     }
 
-    ProfileSettingsPageCtrl.$inject = ['$location', 'RyyppyAPI', 'Notify'];
+    ProfileSettingsPageCtrl.$inject = ['$location', 'ProfileStore', 'Notify'];
 
     angular.module('ryyppy').component('profileSettingsPage', {
         controller: ProfileSettingsPageCtrl,

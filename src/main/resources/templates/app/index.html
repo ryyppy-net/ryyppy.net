@@ -22,8 +22,8 @@
 
     <!--
         The current user's profile, parties, own drinks, and drink-history
-        graph data (DefaultController.appIndex()), so userPage and the
-        promille history graph it renders can skip their first API fetch.
+        graph data (DefaultController.appIndex()), which seed the AngularJS
+        stores (app/js/stores.js) so no page has to fetch them on load.
         Written with [(...)] (unescaped inlining), not [[...]]: each value is
         already JavaScript-escaped by JavaScriptUtils.javaScriptEscape() in
         the controller and gets substituted into a single-quoted JS string
@@ -43,6 +43,7 @@
     <script src="/webjars/chart.js/4.5.0/dist/chart.umd.min.js"></script>
     <script th:src="@{/app/js/app.js}"></script>
     <script th:src="@{/app/js/services.js}"></script>
+    <script th:src="@{/app/js/stores.js}"></script>
     <th:block th:replace="~{fragments/sounds :: player}" />
 
 

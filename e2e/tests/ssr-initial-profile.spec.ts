@@ -1,20 +1,17 @@
 import { test, expect } from './fixtures';
 import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
 
-// Read-only: asserts which requests the dashboard does *not* make.
+// Read-only: asserts which requests the AngularJS app does *not* make.
 test.use({ storageState: SHARED_STORAGE_STATE });
 
-test('the dashboard does not fetch the profile, parties, own drinks, or drink-history graph data over the API on first load', async ({ page }) => {
+test('the app does not fetch the profile, parties, own drinks, or drink-history graph data over the API after load', async ({ page }) => {
   // DefaultController.appIndex() embeds the current user's profile, parties,
   // own drinks, and drink-history CSV into templates/app/index.html as
   // window.__INITIAL_PROFILE__ / __INITIAL_PARTIES__ / __INITIAL_DRINKS__ /
-  // __INITIAL_DRINK_HISTORY__, and the userPage component's
-  // refreshProfile/refreshParties/refreshOwnDrinks plus
-  // UserHistoryGraph.update() (the promille-history bar chart) consume them
-  // instead of calling GET /API/v2/profile, /API/v2/parties,
-  // /API/v2/profile/drinks, /API/v2/profile/drink-history on their first
-  // tick. This asserts those first XHR round-trips are actually gone, not
-  // just that the UI still renders correctly (which it would either way).
+  // __INITIAL_DRINK_HISTORY__, which seed the stores in app/js/stores.js.
+  // Neither the dashboard nor the pages opened after it should call
+  // GET /API/v2/profile, /API/v2/parties, /API/v2/profile/drinks or
+  // /API/v2/profile/drink-history, since the stores already hold that data.
   const skippableRequests: string[] = [];
   page.on('request', (request) => {
     const url = request.url();
@@ -30,27 +27,24 @@ test('the dashboard does not fetch the profile, parties, own drinks, or drink-hi
   const user = sharedUser();
   await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
-  // Wait for the dashboard heading, i.e. for the userPage component's first
-  // refreshProfile()/refreshParties()/refreshOwnDrinks() tick to have run.
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   const ownTile = page.locator('.drinker', { has: page.getByText(user.name) });
   await expect(ownTile).toBeVisible();
   await expect(ownTile.locator('p', { hasText: 'Promilleja' })).toBeVisible();
 
-  // UserHistoryGraph is created via $timeout(0) inside the userPage component's
-  // applyProfile, so wait for its canvas to actually render before
-  // asserting no drink-history request fired.
+  // The history graph is drawn in a $timeout after the dashboard renders,
+  // so wait for its canvas before asserting no drink-history request fired.
   await expect(page.locator('#historyGraph canvas').first()).toBeVisible();
 
-  expect(skippableRequests).toEqual([]);
+  // Pages opened after the dashboard read the same stores.
+  await page.locator('.navbar.hidden-phone a', { hasText: 'Asetukset' }).click();
+  await expect(page.locator('#name')).toHaveValue(user.name);
 
-  // Each window.__INITIAL_*__ blob is consumed-and-cleared on first use so
-  // later polling/refresh ticks fall back to the real API as before.
-  const initialDataAfterLoad = await page.evaluate(() => ({
-    profile: (window as any).__INITIAL_PROFILE__,
-    parties: (window as any).__INITIAL_PARTIES__,
-    drinks: (window as any).__INITIAL_DRINKS__,
-    drinkHistory: (window as any).__INITIAL_DRINK_HISTORY__,
-  }));
-  expect(initialDataAfterLoad).toEqual({ profile: null, parties: null, drinks: null, drinkHistory: null });
+  await page.locator('.navbar.hidden-phone a', { hasText: 'Bileiden hallinta' }).click();
+  await expect(page.locator('h1', { hasText: 'Lisää uudet bileet' })).toBeVisible();
+
+  await page.locator('.navbar.hidden-phone a', { hasText: 'Sinä' }).click();
+  await expect(ownTile).toBeVisible();
+
+  expect(skippableRequests).toEqual([]);
 });

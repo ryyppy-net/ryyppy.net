@@ -1,10 +1,9 @@
 (function (angular) {
     'use strict';
 
-    function UserHistoryGraph(user, container, RyyppyAPI, InitialData) {
+    function UserHistoryGraph(container) {
         var that = this;
         var DAY = 24 * 60 * 60 * 1000;
-        this.user = user;
         this.chart = null;
         this.canvas = container.querySelector('canvas');
 
@@ -107,19 +106,6 @@
             } else {
                 createChart(points, min, max);
             }
-        };
-
-        // The server embeds this user's own drink-history CSV into the page
-        // on load (see templates/app/index.html) so the very first update() can
-        // skip the request.
-        this.update = function () {
-            var initialDrinkHistory = InitialData.take('DRINK_HISTORY');
-            if (initialDrinkHistory) {
-                that.gotData(initialDrinkHistory);
-                return;
-            }
-
-            RyyppyAPI.getDrinkHistory().then(that.gotData);
         };
 
         this.destroy = function () {

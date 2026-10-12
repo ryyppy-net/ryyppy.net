@@ -1,72 +1,55 @@
 (function (angular) {
     'use strict';
 
-    function PartyAdminPageCtrl($routeParams, $location, RyyppyAPI, Notify) {
+    function PartyAdminPageCtrl($routeParams, $location, PartyStore, ProfileStore, Notify) {
         var self = this;
+        var partyId = $routeParams.partyId;
+        var releases = [];
 
-        this._updatePartyInformation = function () {
-            RyyppyAPI.getParty($routeParams.partyId).then(function (data) {
-                self.party = data;
-            });
-        };
-
-        this._updatePartyParticipants = function () {
-            RyyppyAPI.getPartyParticipants($routeParams.partyId).then(function (data) {
-                self.participants = data;
-            });
-        };
-
-        this._updatePartyInvitations = function () {
-            RyyppyAPI.getPartyInvitations($routeParams.partyId).then(function (data) {
-                self.invitations = data;
-            });
-        };
+        this.store = PartyStore.get(partyId);
 
         this.addUser = function () {
             if (self.selectedUserTypeId === 2)
-                self._addRegisteredUser($routeParams.partyId, self.email);
+                self._addRegisteredUser(self.email);
             if (self.selectedUserTypeId === 3)
                 self._addGuestUser(self.name, self.sex, self.weight);
         };
 
-        this._addRegisteredUser = function (partyId, email) {
-            RyyppyAPI.addRegisteredUserToParty(partyId, email).then(function (data) {
+        this._addRegisteredUser = function (email) {
+            PartyStore.addRegisteredUser(partyId, email).then(function () {
                 Notify.success("Tervetuloa takaisin!", "Lisätty käyttäjä sähköpostiosoitteella " + email + ".");
-                self._updatePartyParticipants();
-                self._updatePartyInvitations();
             });
         };
 
         this._addGuestUser = function (name, sex, weight) {
             var guest = { name: name, sex: sex, weight: weight };
-            RyyppyAPI.addGuestToParty($routeParams.partyId, guest).then(function (data) {
+            PartyStore.addGuest(partyId, guest).then(function () {
                 Notify.success("Tervetuloa vieraalle!", "Lisätty vieras " + self.name + ".");
-                self._updatePartyParticipants();
             });
         };
 
         this.inviteUser = function (invitation) {
             self.inviting = true;
             self.invitedFriend = invitation;
-            RyyppyAPI.inviteUser(invitation.id, $routeParams.partyId).then(function () {
+            PartyStore.invite(partyId, invitation.id).then(function () {
                 self.invitedFriend = undefined;
                 Notify.success("Pitkästä aikaa!", "Lisätty käyttäjä " + invitation.name + ".");
-                self._updatePartyParticipants();
-                self._updatePartyInvitations();
                 self.inviting = false;
             });
         };
 
         this.removeUser = function (participant) {
-            RyyppyAPI.removeParticipant($routeParams.partyId, participant).then(function (data) {
-                Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
-                // Only party members may read the party, so after leaving it there is nothing to show here.
-                if (self.profile && participant.id === self.profile.id) {
+            var profile = ProfileStore.profile.data;
+            if (profile && participant.id === profile.id) {
+                PartyStore.leave(partyId, participant).then(function () {
+                    Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
+                    // Only party members may read the party, so after leaving it there is nothing to show here.
                     $location.path('/party-admin/');
-                    return;
-                }
-                self._updatePartyParticipants();
-                self._updatePartyInvitations();
+                });
+                return;
+            }
+            PartyStore.removeParticipant(partyId, participant).then(function () {
+                Notify.success("ULOS!", "Heitettiin " + participant.name + " pihalle.");
             });
         };
 
@@ -84,21 +67,27 @@
             ];
             self.selectedUserTypeId = 1;
 
-            RyyppyAPI.getProfile().then(function (data) {
-                self.profile = data;
+            ProfileStore.profile.load();
+            releases = [
+                self.store.party.use(),
+                self.store.participants.use(),
+                self.store.invitations.use()
+            ];
+        };
+
+        this.$onDestroy = function () {
+            releases.forEach(function (release) {
+                release();
             });
-            self._updatePartyInformation();
-            self._updatePartyParticipants();
-            self._updatePartyInvitations();
         };
     }
 
-    PartyAdminPageCtrl.$inject = ['$routeParams', '$location', 'RyyppyAPI', 'Notify'];
+    PartyAdminPageCtrl.$inject = ['$routeParams', '$location', 'PartyStore', 'ProfileStore', 'Notify'];
 
     angular.module('ryyppy').component('partyAdminPage', {
         controller: PartyAdminPageCtrl,
         template: `
-    <party-menu active="admin" party="$ctrl.party"></party-menu>
+    <party-menu active="admin" party="$ctrl.store.party.data"></party-menu>
 
     <div class="container-fluid">
         <div class="row-fluid">
@@ -116,7 +105,7 @@
 
                     <div class="control-group" ng-if="$ctrl.selectedUserTypeId === 1">
                         <div ng-if="!$ctrl.inviting">
-                            <div ng-repeat="invitation in $ctrl.invitations track by invitation.id" ng-click="$ctrl.inviteUser(invitation)" keyboard-click role="button" tabindex="0" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
+                            <div ng-repeat="invitation in $ctrl.store.invitations.data track by invitation.id" ng-click="$ctrl.inviteUser(invitation)" keyboard-click role="button" tabindex="0" class="party color{{ ($index % 12) + 1 }}" style="float: left; width: 200px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; margin: 10px;">
                                 <img ng-src="{{ invitation.gravatarUrl }}&size=30" />
                                 {{ invitation.name }}
                             </div>
@@ -168,7 +157,7 @@
 
                 <h1>Poista bilettäjä</h1>
 
-                <div class="row-fluid" ng-repeat="participant in $ctrl.participants track by participant.id" style="margin-bottom: 10px;">
+                <div class="row-fluid" ng-repeat="participant in $ctrl.store.participants.data track by participant.id" style="margin-bottom: 10px;">
                     <div class="span11">{{ participant.name }}</div>
                     <div class="span1"><button ng-click="$ctrl.removeUser(participant)" class="btn btn-danger">Poista</button></div>
                 </div>

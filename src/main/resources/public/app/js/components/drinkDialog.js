@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    function DrinkDialogCtrl($timeout, DrinkOptions, Notify, RyyppyAPI) {
+    function DrinkDialogCtrl($timeout, DrinkOptions, Drinks, Notify) {
         var self = this;
 
         this.portionSizes = DrinkOptions.portionSizes;
@@ -38,9 +38,7 @@
             var added = self.addedDrink;
             var editedDrink = {volume: self.selectedPortionSize, alcohol: self.selectedAlcoholPercentage};
             added.saved.then(function (saved) {
-                return RyyppyAPI.changeDrink(participant, saved.id, editedDrink);
-            }).then(function () {
-                self.onDrinksChanged({participant: participant});
+                return Drinks.change(participant, saved.id, editedDrink);
             });
             self.hideDialog();
         };
@@ -51,9 +49,7 @@
             var added = self.addedDrink;
             added.saved.then(function (saved) {
                 Notify.remove(added.notice);
-                return RyyppyAPI.deleteDrink(participant, saved.id);
-            }).then(function () {
-                self.onDrinksChanged({participant: participant});
+                return Drinks.remove(participant, saved.id);
             });
             self.hideDialog();
         };
@@ -95,14 +91,13 @@
         };
     }
 
-    DrinkDialogCtrl.$inject = ['$timeout', 'DrinkOptions', 'Notify', 'RyyppyAPI'];
+    DrinkDialogCtrl.$inject = ['$timeout', 'DrinkOptions', 'Drinks', 'Notify'];
 
     angular.module('ryyppy').component('drinkDialog', {
         controller: DrinkDialogCtrl,
         bindings: {
             participant: '<',
-            addedDrink: '<',
-            onDrinksChanged: '&'
+            addedDrink: '<'
         },
         template: `
         <div ng-if="$ctrl.showDrinkDialog && $ctrl.addingDrink" class="drinker-overlay">

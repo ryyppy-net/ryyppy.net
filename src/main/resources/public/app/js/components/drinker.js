@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    function DrinkerCtrl($element, DrinkerChart, DrinkOptions, RyyppyAPI, Sound, Notify) {
+    function DrinkerCtrl($element, DrinkerChart, DrinkOptions, Drinks, Sound, Notify) {
         var self = this;
 
 
@@ -16,12 +16,11 @@
         // or edit it.
         this.addDrink = function (participant, drink) {
             var added = {drink: drink};
-            added.saved = RyyppyAPI.addDrink(participant, drink).then(function (saved) {
+            added.saved = Drinks.add(participant, drink).then(function (saved) {
                 var message = participant.type === 'participant'
                     ? "Käyttäjälle " + participant.name + " lisättiin juoma."
                     : "Sinulle lisättiin juoma.";
                 added.notice = Notify.success(self.getRandomSalutation(), message);
-                self.onDrinksChanged({participant: participant});
                 return saved;
             });
             self.addedDrink = added;
@@ -52,13 +51,12 @@
         };
     }
 
-    DrinkerCtrl.$inject = ['$element', 'DrinkerChart', 'DrinkOptions', 'RyyppyAPI', 'Sound', 'Notify'];
+    DrinkerCtrl.$inject = ['$element', 'DrinkerChart', 'DrinkOptions', 'Drinks', 'Sound', 'Notify'];
 
     angular.module('ryyppy').component('drinker', {
         controller: DrinkerCtrl,
         bindings: {
-            participant: '<',
-            onDrinksChanged: '&'
+            participant: '<'
         },
         template: `
     <div class="drinker color{{ $ctrl.participant.color }}" style="position: relative;">
@@ -86,8 +84,7 @@
             </div>
         </div>
 
-        <drink-dialog participant="$ctrl.participant" added-drink="$ctrl.addedDrink"
-                      on-drinks-changed="$ctrl.onDrinksChanged({participant: participant})"></drink-dialog>
+        <drink-dialog participant="$ctrl.participant" added-drink="$ctrl.addedDrink"></drink-dialog>
     </div>`
     });
 })(angular);
