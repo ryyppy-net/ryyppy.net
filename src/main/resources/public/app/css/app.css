@@ -80,20 +80,6 @@ label {
     background-color: #505050;
 }
 
-.ui-pnotify-icon {
-    display: none;
-}
-
-.ui-pnotify-title {
-    font-size: 1.0em;
-    line-height: 1.2em;
-    margin-bottom: 1.0em;
-}
-
-.ui-pnotify-text {
-    font-size: 0.8em;
-}
-
 .color1 { background-color: #65E6A4; }
 .color2 { background-color: #65A8E6; }
 .color3 { background-color: #68E665; }
@@ -156,4 +142,142 @@ p {
 @keyframes undo-countdown {
     from { width: 0; }
     to { width: 100%; }
+}
+
+.toast-list {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 9999;
+    width: 300px;
+    max-width: calc(100vw - 30px);
+}
+
+.toast-slot {
+    display: grid;
+    grid-template-rows: 1fr;
+}
+
+.toast-item {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.toast-body {
+    position: relative;
+    margin-bottom: 10px;
+    padding: 10px 30px 14px 12px;
+    border-radius: 4px;
+    background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
+    color: #3c763d;
+}
+
+.toast-title {
+    font-size: 1.0em;
+    line-height: 1.2em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+}
+
+.toast-text {
+    font-size: 0.8em;
+}
+
+.toast-close {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 1.4em;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.toast-timer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: 100%;
+    background-color: #3c763d;
+    opacity: 0.5;
+    transform-origin: left;
+    animation: toast-countdown 8s linear forwards;
+}
+
+.toast-item:hover .toast-timer {
+    animation-play-state: paused;
+}
+
+@keyframes toast-countdown {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+.toast-slot.ng-enter,
+.toast-slot.ng-leave {
+    transition: grid-template-rows 0.3s ease;
+}
+
+.toast-slot.ng-enter .toast-item,
+.toast-slot.ng-leave .toast-item {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toast-slot.ng-enter,
+.toast-slot.ng-leave.ng-leave-active {
+    grid-template-rows: 0fr;
+}
+
+.toast-slot.ng-enter .toast-item {
+    transform: translateX(110%);
+}
+
+.toast-slot.ng-enter.ng-enter-active {
+    grid-template-rows: 1fr;
+}
+
+.toast-slot.ng-enter.ng-enter-active .toast-item {
+    transform: translateX(0);
+}
+
+.toast-slot.ng-leave.ng-leave-active .toast-item {
+    transform: translateX(110%);
+}
+
+.toast-slot.toast-withdrawn.ng-leave.ng-leave-active .toast-item {
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-slot.ng-enter,
+    .toast-slot.ng-enter.ng-enter-active,
+    .toast-slot.ng-leave,
+    .toast-slot.ng-leave.ng-leave-active {
+        grid-template-rows: 1fr;
+        transition: opacity 0.3s ease;
+    }
+
+    .toast-slot.ng-enter .toast-item,
+    .toast-slot.ng-leave .toast-item,
+    .toast-slot.ng-leave.ng-leave-active .toast-item,
+    .toast-slot.toast-withdrawn.ng-leave.ng-leave-active .toast-item {
+        transform: none;
+        opacity: 1;
+        transition: none;
+    }
+
+    .toast-slot.ng-enter,
+    .toast-slot.ng-leave.ng-leave-active {
+        opacity: 0;
+    }
+
+    .toast-slot.ng-enter.ng-enter-active,
+    .toast-slot.ng-leave {
+        opacity: 1;
+    }
 }

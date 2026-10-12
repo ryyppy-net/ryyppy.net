@@ -198,11 +198,6 @@
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
-            <artifactId>pnotify</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
             <artifactId>flot</artifactId>
             <version>0.7</version>
         </dependency>
@@ -219,6 +214,11 @@
         <dependency>
             <groupId>org.webjars.npm</groupId>
             <artifactId>angular-route</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>angular-animate</artifactId>
             <version>1.8.3</version>
         </dependency>
         <dependency>

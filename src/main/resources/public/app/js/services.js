@@ -202,19 +202,60 @@
     }
 
 
-    function NotificationService() {
-        $.pnotify.defaults.pnotify_history = false;
+    function NotificationService($timeout) {
+        var DISPLAY_MS = 8000;
+        var nextId = 1;
+        var timers = {};
+        var self = this;
+
+        this.toasts = [];
 
         this.success = function (title, text) {
-            return $.pnotify({
-                title: title,
-                text: text,
-                type: 'success'
-            });
+            var toast = {id: nextId++, title: title, text: text};
+            self.toasts.push(toast);
+            timers[toast.id] = {remaining: DISPLAY_MS};
+            self.resume(toast);
+            return toast;
         };
 
-        this.remove = function (notice) {
-            notice.pnotify_remove();
+        // Withdraws a toast whose subject is gone, e.g. an undone drink.
+        this.remove = function (toast) {
+            toast.withdrawn = true;
+            self.dismiss(toast);
+        };
+
+        this.dismiss = function (toast) {
+            var timer = timers[toast.id];
+            if (timer) {
+                $timeout.cancel(timer.handle);
+                delete timers[toast.id];
+            }
+            // Next tick, so the withdrawn class is rendered before ng-leave starts.
+            $timeout(function () {
+                var index = self.toasts.indexOf(toast);
+                if (index >= 0) {
+                    self.toasts.splice(index, 1);
+                }
+            }, 0);
+        };
+
+        this.pause = function (toast) {
+            var timer = timers[toast.id];
+            if (timer && timer.handle) {
+                $timeout.cancel(timer.handle);
+                timer.handle = null;
+                timer.remaining -= Date.now() - timer.startedAt;
+            }
+        };
+
+        this.resume = function (toast) {
+            var timer = timers[toast.id];
+            if (timer && !timer.handle) {
+                timer.startedAt = Date.now();
+                timer.handle = $timeout(function () {
+                    self.dismiss(toast);
+                }, timer.remaining);
+            }
         };
     }
 
@@ -236,9 +277,9 @@
             return new Poller($timeout, $document);
         }]);
 
-        $provide.factory('Notify', function () {
-            return new NotificationService();
-        });
+        $provide.factory('Notify', ['$timeout', function ($timeout) {
+            return new NotificationService($timeout);
+        }]);
     });
 })(angular);
 

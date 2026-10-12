@@ -9,7 +9,6 @@
     <link rel="stylesheet" th:href="@{/static/css/fonts.css}"/>
     <link rel="stylesheet" href="/static/vendor/bootstrap/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/static/vendor/font-awesome/font-awesome.css"/>
-    <link rel="stylesheet" href="/webjars/pnotify/1.2.0/jquery.pnotify.default.css"/>
     <link rel="stylesheet" th:href="@{/app/css/app.css}"/>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +18,7 @@
 </head>
 <body>
     <div ng-view></div>
+    <toasts th:attr="close-label=#{toast.close}"></toasts>
 
     <!--
         Pre-populate $templateCache with every route's template (loaded from
@@ -48,6 +48,7 @@
 
     <script src="/webjars/angular/1.8.3/angular.min.js"></script>
     <script src="/webjars/angular-route/1.8.3/angular-route.min.js"></script>
+    <script src="/webjars/angular-animate/1.8.3/angular-animate.min.js"></script>
     <script src="/webjars/chart.js/4.5.0/dist/chart.umd.min.js"></script>
     <script th:src="@{/app/js/app.js}"></script>
     <script th:src="@{/app/js/services.js}"></script>
@@ -57,6 +58,7 @@
     <script th:src="@{/app/js/controllers/UserCtrl.js}"></script>
     <script th:src="@{/app/js/controllers/ProfileSettingsCtrl.js}"></script>
     <script th:src="@{/app/js/components/drinker.js}"></script>
+    <script th:src="@{/app/js/components/toasts.js}"></script>
     <script th:src="@{/app/js/controllers/PartyCtrl.js}"></script>
     <script th:src="@{/app/js/controllers/GeneralPartyAdminCtrl.js}"></script>
     <script th:src="@{/app/js/controllers/PartyAdminCtrl.js}"></script>
@@ -67,7 +69,6 @@
     <script th:src="@{/app/js/directives.js}"></script>
 
     <script src="/webjars/jquery/1.8.3/jquery.min.js"></script>
-    <script src="/webjars/pnotify/1.2.0/jquery.pnotify.js"></script>
 
     <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.min.js"></script>
     <script type="text/javascript" src="/webjars/flot/0.7/jquery.flot.crosshair.min.js"></script>

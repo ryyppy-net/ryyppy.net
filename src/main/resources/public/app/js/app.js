@@ -1,7 +1,7 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
-angular.module('ryyppy', ['ngRoute', 'ryyppy.filters', 'ryyppy.services', 'ryyppy.directives']).
+angular.module('ryyppy', ['ngRoute', 'ngAnimate', 'ryyppy.filters', 'ryyppy.services', 'ryyppy.directives']).
   config(['$compileProvider', '$httpProvider', function($compileProvider, $httpProvider) {
     $compileProvider.debugInfoEnabled(false);
     $httpProvider.useApplyAsync(true);
