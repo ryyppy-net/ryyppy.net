@@ -234,10 +234,76 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
 DrinkerCtrl.$inject = ['$element', '$timeout', 'RyyppyAPI', 'Sound', 'Notify'];
 
 angular.module('ryyppy').component('drinker', {
-    templateUrl: 'partials/user_button.html',
     controller: DrinkerCtrl,
     bindings: {
         participant: '<',
         onDrinksChanged: '&'
-    }
+    },
+    template: `
+<div class="drinker color{{ $ctrl.participant.color }}" style="position: relative;">
+    <div ng-click="$ctrl.addDefaultDrink($ctrl.participant)" class="container-fluid" style="margin-top: 10px;">
+        <div class="row-fluid">
+            <div class="span4" style="text-align: center;">
+                <img ng-src="{{ $ctrl.participant.profilePictureUrl }}" />
+                <p>{{ $ctrl.participant.name }}</p>
+            </div>
+
+            <div class="span8">
+                <div class="row-fluid">
+                    <div class="span12">
+                        <div class="drinker-graph" style="height: 100px;"><canvas></canvas></div>
+                    </div>
+                </div>
+
+                <div class="row-fluid">
+                    <div class="span12" style="text-align: center;">
+                        <p>Juomia: {{ $ctrl.participant.totalDrinks }} kpl</p>
+                        <p>Promilleja:  {{ $ctrl.participant.promilles | number: 2 }}&permil;</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="$ctrl.showDrinkDialog && $ctrl.addingDrink" class="drinker-overlay">
+        <p>Lisättiin juoma käyttäjälle {{ $ctrl.participant.name }}.</p>
+
+        <p>Juoman koko on {{ $ctrl.formattedAlcoholSize() }} ja vahvuus {{ $ctrl.formattedAlcoholPercentage() }}.</p>
+        <div class="progress" style="margin-left: 10px; margin-right: 10px;">
+            <div class="bar" ng-class="{'undo-countdown': $ctrl.addingDrink}"></div>
+        </div>
+
+        <div class="btn" ng-click="$ctrl.editDrink()">Muokkaa</div>
+        <div class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</div>
+    </div>
+
+    <div ng-show="$ctrl.showDrinkDialog && $ctrl.editingDrink" class="drinker-overlay">
+        <p>Muokkaa käyttäjän {{ $ctrl.participant.name }} juomaa</p>
+
+        <form ng-submit="$ctrl.saveEditedDrink()" class="edit-drink">
+            <div style="clear: both;">
+                <label for="portionSize" class="edit-drink-label">Annoskoko</label>
+                <select id="portionSize"
+                        ng-model="$ctrl.selectedPortionSize"
+                        ng-options="portionSize.value as portionSize.text for portionSize in ::$ctrl.portionSizes"
+                        class="edit-drink-input">
+                </select>
+            </div>
+
+            <div style="clear: both;">
+                <label for="portionAlcoholPercentage" class="edit-drink-label">Alkoholi-%</label>
+                <select id="portionAlcoholPercentage"
+                        ng-model="$ctrl.selectedAlcoholPercentage"
+                        ng-options="portionAlcoholPercentage.value as portionAlcoholPercentage.text for portionAlcoholPercentage in ::$ctrl.portionAlcoholPercentages"
+                        class="edit-drink-input">
+                </select>
+            </div>
+
+            <div style="clear: both">
+                <button type="submit" class="btn btn-success">Tallenna</button>
+                <div class="btn btn-danger" ng-click="$ctrl.cancelDrink()">Peruuta</div>
+            </div>
+        </form>
+    </div>
+</div>`
 });

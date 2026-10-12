@@ -1,13 +1,12 @@
-"use strict";
+'use strict';
 
-function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
+function PartyPageCtrl($routeParams, Poller, RyyppyAPI) {
     var self = this;
     var stopPolling = null;
 
-
     this.refreshParty = function () {
         RyyppyAPI.getParty($routeParams.partyId, function (data) {
-            $scope.party = data;
+            self.party = data;
         });
     };
 
@@ -30,7 +29,7 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
                     cols[j] = data[i * 3 + j];
                 }
             }
-            $scope.rows = rows;
+            self.rows = rows;
         });
     };
 
@@ -45,22 +44,33 @@ function PartyCtrl($scope, $routeParams, Poller, RyyppyAPI) {
         }
     };
 
-
-    // Initialization:
-    $scope.active = "party";
-    this.refreshParty();
-
-    self.startPolling();
-    $scope.$on('$destroy', function () {
-        self.endPolling();
-    });
-
-    $scope.drinksChanged = function () {
+    this.drinksChanged = function () {
         self.endPolling();
         self.startPolling();
     };
+
+    this.$onInit = function () {
+        self.refreshParty();
+        self.startPolling();
+    };
+
+    this.$onDestroy = function () {
+        self.endPolling();
+    };
 }
 
-PartyCtrl.$inject = ['$scope', '$routeParams', 'Poller', 'RyyppyAPI'];
+PartyPageCtrl.$inject = ['$routeParams', 'Poller', 'RyyppyAPI'];
 
-angular.module('ryyppy').controller('PartyCtrl', PartyCtrl);
+angular.module('ryyppy').component('partyPage', {
+    controller: PartyPageCtrl,
+    template: `
+<party-menu active="party" party="$ctrl.party"></party-menu>
+
+<div class="container-fluid" ng-repeat="row in $ctrl.rows track by $index">
+    <div class="row-fluid">
+        <div class="span4" ng-repeat="participant in row track by participant.id">
+            <drinker participant="participant" on-drinks-changed="$ctrl.drinksChanged()"></drinker>
+        </div>
+    </div>
+</div>`
+});

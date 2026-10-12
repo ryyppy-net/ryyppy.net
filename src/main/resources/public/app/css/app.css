@@ -104,6 +104,11 @@ label {
 .color15 { background-color: #E6A465; }
 .color16 { background-color: #E665A8; }
 
+/* Component elements are inline by default; the pages and Bootstrap's .visible-phone need them as blocks. */
+[ng-view] > *, user-menu, party-menu {
+    display: block;
+}
+
 .mobile-navbar {
     font-size: 0.75em;
     margin-left: -20px;

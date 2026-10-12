@@ -7,10 +7,10 @@ angular.module('ryyppy', ['ngRoute', 'ngAnimate', 'ryyppy.filters', 'ryyppy.serv
     $httpProvider.useApplyAsync(true);
   }]).
   config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/', {templateUrl: 'partials/user.html', controller: 'UserCtrl'});
-    $routeProvider.when('/profile-settings', {templateUrl: 'partials/profile_settings.html', controller: 'ProfileSettingsCtrl'});
-    $routeProvider.when('/party/:partyId', {templateUrl: 'partials/party.html', controller: 'PartyCtrl'});
-    $routeProvider.when('/party-admin/', {templateUrl: 'partials/party_admin_general.html', controller: 'GeneralPartyAdminCtrl'});
-    $routeProvider.when('/party-admin/:partyId', {templateUrl: 'partials/party_admin.html', controller: 'PartyAdminCtrl'});
+    $routeProvider.when('/', {template: '<user-page></user-page>'});
+    $routeProvider.when('/profile-settings', {template: '<profile-settings-page></profile-settings-page>'});
+    $routeProvider.when('/party/:partyId', {template: '<party-page></party-page>'});
+    $routeProvider.when('/party-admin/', {template: '<general-party-admin-page></general-party-admin-page>'});
+    $routeProvider.when('/party-admin/:partyId', {template: '<party-admin-page></party-admin-page>'});
     $routeProvider.otherwise({redirectTo: '/'});
   }]);
