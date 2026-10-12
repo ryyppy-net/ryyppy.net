@@ -57,7 +57,7 @@ test('a user can create a party, appear as a participant, and logging a drink up
 
   await waitForSoundsReady(page);
 
-  // PartyCtrl marks every drinker here, self included, as a party participant.
+  // The partyPage component marks every drinker here, self included, as a party participant.
   await tapToDrink(page, drinkerTile, /\/participants\/\d+\/drinks$/);
 
   expect(await page.evaluate(() => (window as any).__playedSounds__ as number)).toBeGreaterThan(0);

@@ -60,7 +60,6 @@ public class WebSecurityConfiguration {
                         "/ui/timezone/*",
                         "/app/css/**",
                         "/app/js/**",
-                        "/app/partials/**",
                         "/sw.js",
                         "/apple-touch-icon.png",
                         "/apple-touch-icon-precomposed.png",

@@ -8,7 +8,7 @@ test('the dashboard does not fetch the profile, parties, own drinks, or drink-hi
   // DefaultController.appIndex() embeds the current user's profile, parties,
   // own drinks, and drink-history CSV into app/index.jsp as
   // window.__INITIAL_PROFILE__ / __INITIAL_PARTIES__ / __INITIAL_DRINKS__ /
-  // __INITIAL_DRINK_HISTORY__, and UserCtrl's
+  // __INITIAL_DRINK_HISTORY__, and the userPage component's
   // refreshProfile/refreshParties/refreshOwnDrinks plus
   // UserHistoryGraph.update() (the promille-history bar chart) consume them
   // instead of calling GET /API/v2/profile, /API/v2/parties,
@@ -30,14 +30,14 @@ test('the dashboard does not fetch the profile, parties, own drinks, or drink-hi
   const user = sharedUser();
   await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
-  // Wait for the dashboard heading, i.e. for UserCtrl's first
+  // Wait for the dashboard heading, i.e. for the userPage component's first
   // refreshProfile()/refreshParties()/refreshOwnDrinks() tick to have run.
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   const ownTile = page.locator('.drinker', { has: page.getByText(user.name) });
   await expect(ownTile).toBeVisible();
   await expect(ownTile.locator('p', { hasText: 'Promilleja' })).toBeVisible();
 
-  // UserHistoryGraph is created via setTimeout(0) inside UserCtrl's
+  // UserHistoryGraph is created via setTimeout(0) inside the userPage component's
   // applyProfile, so wait for its flot canvas to actually render before
   // asserting no drink-history request fired.
   await expect(page.locator('#historyGraph canvas').first()).toBeVisible();

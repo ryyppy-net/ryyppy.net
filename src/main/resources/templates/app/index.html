@@ -21,17 +21,8 @@
     <toasts th:attr="close-label=#{toast.close}"></toasts>
 
     <!--
-        Pre-populate $templateCache with every route's template (loaded from
-        app/partials/ by DefaultController.appIndex()) so Angular never
-        fetches one over XHR. Written with th:utext (unescaped): trusted
-        server-side markup, not user input - th:text/[[...]] would escape it
-        to visible &lt;div&gt; markup instead of rendering it.
-    -->
-    <script type="text/ng-template" th:each="template : ${templates}" th:id="${template.key}" th:utext="${template.value}"></script>
-
-    <!--
         The current user's profile, parties, own drinks, and drink-history
-        graph data (DefaultController.appIndex()), so UserCtrl and the
+        graph data (DefaultController.appIndex()), so userPage and the
         promille history graph it renders can skip their first API fetch.
         Written with [(...)] (unescaped inlining), not [[...]]: each value is
         already JavaScript-escaped by JavaScriptUtils.javaScriptEscape() in
@@ -55,13 +46,15 @@
     <th:block th:replace="~{fragments/sounds :: player}" />
 
 
-    <script th:src="@{/app/js/controllers/UserCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/ProfileSettingsCtrl.js}"></script>
+    <script th:src="@{/app/js/components/userMenu.js}"></script>
+    <script th:src="@{/app/js/components/partyMenu.js}"></script>
+    <script th:src="@{/app/js/components/userPage.js}"></script>
+    <script th:src="@{/app/js/components/profileSettingsPage.js}"></script>
     <script th:src="@{/app/js/components/drinker.js}"></script>
     <script th:src="@{/app/js/components/toasts.js}"></script>
-    <script th:src="@{/app/js/controllers/PartyCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/GeneralPartyAdminCtrl.js}"></script>
-    <script th:src="@{/app/js/controllers/PartyAdminCtrl.js}"></script>
+    <script th:src="@{/app/js/components/partyPage.js}"></script>
+    <script th:src="@{/app/js/components/generalPartyAdminPage.js}"></script>
+    <script th:src="@{/app/js/components/partyAdminPage.js}"></script>
 
     <script th:src="@{/app/js/userhistorygraph.js}"></script>
 
