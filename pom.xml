@@ -221,6 +221,11 @@
             <artifactId>angular-route</artifactId>
             <version>1.8.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>chart.js</artifactId>
+            <version>4.5.0</version>
+        </dependency>
 
         <!-- Database driver -->
         <dependency>

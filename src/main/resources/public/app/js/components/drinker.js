@@ -154,45 +154,72 @@ function DrinkerCtrl($element, $timeout, RyyppyAPI, Sound, Notify) {
         return '???';
     };
 
-    function historyLoaded() {
-        var histories = [];
+    function historyPoints() {
+        var points = [];
+        var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+        var rows = (self.participant && self.participant.history) || [];
 
-        var rows = self.participant.history;
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
             if (row.length === 0) {
                 continue;
             }
-
-            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-
-            var history = [row.timestamp + timezoneoffset, row.promilles];
-            histories.push(history);
+            points.push({x: row.timestamp + timezoneoffset, y: row.promilles});
         }
-
-        var series = {data: histories, color: 'rgb(0, 0, 0)'};
-        series = [series];
-
-        var graphElement = $($element[0]).find('.drinker-graph');
-
-        var graphOptions = {
-            crosshair: {mode: null},
-            yaxis: {min: 0},
-            xaxis: {mode: "time", timeformat: "%H", show:true}
-        };
-
-        graphElement.show();
-        $.plot(graphElement, series, graphOptions);
+        return points;
     }
 
+    function formatHour(timestamp) {
+        return ('0' + new Date(timestamp).getUTCHours()).slice(-2);
+    }
+
+    this.$postLink = function () {
+        var canvas = $element[0].querySelector('.drinker-graph canvas');
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        self.chart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    data: historyPoints(),
+                    borderColor: 'rgb(0, 0, 0)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHitRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: reducedMotion ? false : {},
+                events: [],
+                plugins: {legend: {display: false}, tooltip: {enabled: false}},
+                scales: {
+                    x: {
+                        type: 'linear',
+                        ticks: {
+                            stepSize: 60 * 60 * 1000,
+                            callback: formatHour
+                        }
+                    },
+                    y: {min: 0}
+                }
+            }
+        });
+    };
+
     this.$onChanges = function (changes) {
-        if (changes.participant && changes.participant.currentValue) {
-            $timeout(historyLoaded, 0, false);
+        if (changes.participant && changes.participant.currentValue && self.chart) {
+            self.chart.data.datasets[0].data = historyPoints();
+            self.chart.update();
         }
     };
 
     this.$onDestroy = function () {
         $timeout.cancel(self.dismissTimeout);
+        if (self.chart) {
+            self.chart.destroy();
+        }
     };
 }
 
