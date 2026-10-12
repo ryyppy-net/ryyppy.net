@@ -136,7 +136,7 @@ angular.module('ryyppy').component('userPage', {
                     Jos haluat muokata bileitäsi, voit tehdä sen <a href="#!/party-admin">bileiden hallinnassa</a>.
                 </p>
 
-                <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true">
+                <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true track by party.id">
                     <a href="#!/party/{{ ::party.id }}">
                         <div class="party color{{ ($index % 12) + 1 }}">
                             <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
@@ -158,7 +158,7 @@ angular.module('ryyppy').component('userPage', {
 
             <h2>5 viimeisintä juomaa</h2>
 
-            <div class="row-fluid" ng-repeat="drink in $ctrl.drinks | orderBy:$ctrl.drinkSort:true | limitTo:5" style="margin-top: 10px;">
+            <div class="row-fluid" ng-repeat="drink in $ctrl.drinks | orderBy:$ctrl.drinkSort:true | limitTo:5 track by drink.id" style="margin-top: 10px;">
                 <div class="span11">{{ drink.timestamp | formatISODateTime }} (Annoksia: {{ drink.amountOfShots | roundAmountOfShots }})</div>
                 <div class="span1"><button ng-click="$ctrl.removeDrink(drink)" class="btn btn-danger">Poista</button></div>
             </div>
