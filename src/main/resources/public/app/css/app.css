@@ -104,6 +104,11 @@ label {
 .color15 { background-color: #E6A465; }
 .color16 { background-color: #E665A8; }
 
+/* Bootstrap's .visible-phone takes its display from these hosts. */
+user-menu, party-menu {
+    display: block;
+}
+
 .mobile-navbar {
     font-size: 0.75em;
     margin-left: -20px;
