@@ -16,6 +16,15 @@ drinker {
     font-size: 0.8em;;
 }
 
+/* Chart.js sizes the canvas from this container, so the container must not take its size from the canvas. */
+.drinker-graph {
+    position: relative;
+}
+
+.drinker-graph canvas {
+    max-width: 100%;
+}
+
 /* On phones Bootstrap drops the tile's side padding; the y labels keep the left edge clear. */
 @media (max-width: 767px) {
     .drinker-graph {
