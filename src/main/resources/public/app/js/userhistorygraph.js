@@ -1,35 +1,91 @@
 var drinksUrl = '/API/v2/profile/drink-history';
 
-function UserHistoryGraph(user, element) {
+function UserHistoryGraph(user, container) {
     var that = this;
-    this.series = [];
-    this.element = element;
-    this.options = {
-        crosshair: {mode: "x"},
-        grid: {hoverable: true, autoHighlight: false},
-        yaxis: {min: 0, show:true},
-        xaxis: {mode: "time", timeformat: "%y-%0m-%0d", minTickSize: [1, "day"], show:true},
-        lines: {show: false},
-        points: {show: false},
-        bars: {show: true, barWidth: 24 * 60 * 60 * 1000, align: "center"}
-    };
-    this.updateLegendTimeout = null;
-    this.latestPosition = null;
-    this.plot = null;
+    var DAY = 24 * 60 * 60 * 1000;
     this.user = user;
+    this.chart = null;
+    this.canvas = container.querySelector('canvas');
 
-    this.element.bind("plothover",  function (event, pos, item) {
-        that.latestPosition = pos;
-        if (!that.updateLegendTimeout)
-            that.updateLegendTimeout = setTimeout(function() {that.updateLegend();}, 50);
-    });
+    function formatDate(timestamp) {
+        var d = new Date(timestamp);
+        return d.getUTCDate() + '.' + (d.getUTCMonth() + 1) + '.' + d.getUTCFullYear();
+    }
 
-    this.update = function() {
-        this.render();
+    function createChart(points) {
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // The server embeds this user's own drink-history CSV into the page
-        // on load (see app/index.jsp) so the very first update() can skip the
-        // XHR. Once used it's cleared so later refreshes always hit the API.
+        that.chart = new Chart(that.canvas, {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: points,
+                    backgroundColor: 'rgb(0, 0, 0)',
+                    categoryPercentage: 1,
+                    barPercentage: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: reducedMotion ? false : {},
+                interaction: {mode: 'index', intersect: false},
+                plugins: {
+                    legend: {display: false},
+                    tooltip: {
+                        callbacks: {
+                            title: function () { return ''; },
+                            label: function (context) {
+                                return formatDate(context.parsed.x) + ': ' + Math.round(context.parsed.y) + ' annosta';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        offset: true,
+                        ticks: {
+                            stepSize: DAY,
+                            maxRotation: 0,
+                            callback: formatDate
+                        }
+                    },
+                    y: {min: 0}
+                }
+            }
+        });
+    }
+
+    this.gotData = function (data) {
+        var rows = data.split('\n');
+        var points = [];
+        var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+
+        for (var i = 1; i < rows.length; i++) {
+            if (rows[i].length === 0) continue;
+            var columns = rows[i].split(',');
+            points.push({x: Number(columns[0]) + timezoneoffset, y: Number(columns[1])});
+        }
+
+        if (points.length === 0) return;
+
+        if (points[points.length - 1].x - points[0].x < 30 * DAY) {
+            points.unshift({x: points[0].x - 30 * DAY, y: 0});
+        }
+
+        if (that.chart) {
+            that.chart.data.datasets[0].data = points;
+            that.chart.update();
+        } else {
+            createChart(points);
+        }
+    };
+
+    // The server embeds this user's own drink-history CSV into the page
+    // on load (see app/index.jsp) so the very first update() can skip the
+    // request. Once used it's cleared so later refreshes always hit the API.
+    this.update = function () {
         if (window.__INITIAL_DRINK_HISTORY__) {
             var initialDrinkHistory = window.__INITIAL_DRINK_HISTORY__;
             window.__INITIAL_DRINK_HISTORY__ = null;
@@ -37,86 +93,15 @@ function UserHistoryGraph(user, element) {
             return;
         }
 
-        $.get(drinksUrl.replace('_userid_', this.user.id), function(data) {that.gotData(data);} );
-    }
+        fetch(drinksUrl, {credentials: 'same-origin'})
+            .then(function (response) { return response.text(); })
+            .then(that.gotData);
+    };
 
-    this.render = function() {
-        if (this.series == null)
-            return;
-
-        this.plot = $.plot(this.element, this.series, this.options);
-    }
-
-    this.gotData = function(data) {
-        var rows = data.split('\n');
-        var histories = [];
-
-        for (var i = 1; i < rows.length; i++) {
-            var row = rows[i];
-            if (row.length == 0) continue;
-            var columns = row.split(',');
-
-            var timestamp = Number(columns[0]);
-            var drinks = Number(columns[1]);
-
-            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-            timestamp = timestamp + timezoneoffset;
-            if (drinks == 0) drinks = -0.1;
-            var history = [timestamp, drinks];
-            histories.push(history);
+    this.destroy = function () {
+        if (that.chart) {
+            that.chart.destroy();
+            that.chart = null;
         }
-
-        if (histories[histories.length - 1][0] - histories[0][0] < 30 * 24 * 60 * 60 * 1000) {
-            histories.splice(0, 0, [histories[0][0] - 30 * 24 * 60 * 60 * 1000, -0.1]);
-        }
-
-        var newname = '66.66.6666 = 66 ' + 'portions';
-        this.series = [{color:"rgb(0, 0, 0)", label: newname, data: histories}];
-
-        $("#"+ this.element.attr('id') +" .legendLabel").each(function () {
-            // fix the widths so they don't jump around
-            $(this).css('width', $(this).width());
-        });
-        this.render();
-
-        if (this.latestPosition == null) {
-            this.latestPosition = {x: Number(histories[histories.length - 1][0]), y: 1};
-            this.updateLegend();
-        }
-    }
-
-    this.updateLegend = function() {
-        this.updateLegendTimeout = null;
-
-        var pos = this.latestPosition;
-
-        var axes = this.plot.getAxes();
-        if (pos.x < axes.xaxis.min || pos.x > axes.xaxis.max ||
-            pos.y < axes.yaxis.min || pos.y > axes.yaxis.max)
-            return;
-
-        var i, j, dataset = this.plot.getData();
-        for (i = 0; i < dataset.length; ++i) {
-            var series = dataset[i];
-
-            // find the nearest points, x-wise
-            var found = false;
-            for (j = 0; j < series.data.length; ++j) {
-                if (parseInt(series.data[j][0], 0) + 12 * 60 * 60 * 1000 > pos.x && parseInt(series.data[j][0], 0) - 12 * 60 * 60 * 1000 <= pos.x) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-                var d = new Date(pos.x + 12 * 60 * 60 * 1000);
-                var s = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
-                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s + ": " + Math.round(series.data[j][1]) + ' annosta');
-            } else {
-                var d2 = new Date(pos.x + 12 * 60 * 60 * 1000);
-                var s2 = d2.getDate() + "." + (d2.getMonth() + 1) + "." + d2.getFullYear();
-                $("#"+ this.element.attr('id') +" .legendLabel").eq(i).text(s2 + ": 0 " + ' annosta');
-            }
-        }
-    }
+    };
 }
