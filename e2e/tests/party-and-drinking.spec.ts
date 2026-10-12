@@ -123,7 +123,7 @@ test('editing a drink right after the tap changes the saved drink', async ({ pag
   const saved = await tapToDrink(page, drinkerTile);
 
   await drinkerTile.locator('.drinker-overlay').first().getByText('Muokkaa').click();
-  const editOverlay = drinkerTile.locator('.drinker-overlay').nth(1);
+  const editOverlay = drinkerTile.locator('.drinker-overlay').filter({ has: page.locator('#portionSize') });
   await editOverlay.locator('#portionSize').selectOption({ label: '1.0 l' });
 
   const changed = page.waitForResponse(
