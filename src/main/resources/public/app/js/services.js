@@ -7,7 +7,7 @@
      * RyyppyAPI is used to handle all API operations. It depends on Angular $http
      * service.
      */
-    function RyyppyAPI(http) {
+    function RyyppyAPI(http, serialize) {
         this._baseUrl = "/API/v2";
 
         // AngularJS would prefer to use application/json but as our backend
@@ -22,7 +22,7 @@
         };
 
         this.updateProfile = function (profile, callbackSuccess) {
-            http.post(this._baseUrl + "/profile", $.param(profile)).then(function (response) {
+            http.post(this._baseUrl + "/profile", serialize(profile)).then(function (response) {
                 callbackSuccess(response.data);
             });
         };
@@ -59,7 +59,7 @@
 
         this.inviteUser = function (userId, partyId, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/invitations";
-            http.post(url, $.param({ userId : userId })).then(function (response) {
+            http.post(url, serialize({ userId : userId })).then(function (response) {
                 callbackSuccess(response.data);
             });
         };
@@ -75,14 +75,14 @@
 
         this.addDrink = function (drinker, drink) {
             var params = {volume: drink.volume, alcohol: drink.alcohol, timestamp: (new Date()).toISOString()};
-            return http.post(this._drinksUrl(drinker), $.param(params)).then(function (response) {
+            return http.post(this._drinksUrl(drinker), serialize(params)).then(function (response) {
                 return response.data;
             });
         };
 
         this.changeDrink = function (drinker, drinkId, drink) {
             var params = {volume: drink.volume, alcohol: drink.alcohol};
-            return http.put(this._drinksUrl(drinker) + "/" + drinkId, $.param(params));
+            return http.put(this._drinksUrl(drinker) + "/" + drinkId, serialize(params));
         };
 
         this.deleteDrink = function (drinker, drinkId) {
@@ -91,14 +91,14 @@
 
         this.addRegisteredUserToParty = function (partyId, email, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, $.param({ email: email })).then(function (response) {
+            http.post(url, serialize({ email: email })).then(function (response) {
                 callbackSuccess(response.data);
             });
         };
 
         this.addGuestToParty = function (partyId, guest, callbackSuccess) {
             var url = this._baseUrl + "/parties/" + partyId + "/participants";
-            http.post(url, $.param(guest)).then(function (response) {
+            http.post(url, serialize(guest)).then(function (response) {
                 callbackSuccess(response.data);
             });
         };
@@ -126,7 +126,7 @@
 
         this.addParty = function (partyName, callbackSuccess) {
             var url = this._baseUrl + "/parties";
-            http.post(url, $.param({ name: partyName })).then(function (response) {
+            http.post(url, serialize({ name: partyName })).then(function (response) {
                 callbackSuccess(response.data);
             });
         };
@@ -224,8 +224,8 @@
      * other services can depend on it.
      */
     angular.module('ryyppy.services', [], function ($provide) {
-        $provide.factory('RyyppyAPI', ['$http', function ($http) {
-            return new RyyppyAPI($http);
+        $provide.factory('RyyppyAPI', ['$http', '$httpParamSerializerJQLike', function ($http, $httpParamSerializerJQLike) {
+            return new RyyppyAPI($http, $httpParamSerializerJQLike);
         }]);
 
         $provide.factory('Sound', ['$window', function ($window) {
