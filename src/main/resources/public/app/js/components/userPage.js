@@ -119,9 +119,13 @@
 
                 <h2>5 viimeisintä juomaa</h2>
 
-                <div class="row-fluid" ng-repeat="drink in $ctrl.drinks.data | orderBy:$ctrl.drinkSort:true | limitTo:5 track by drink.id" style="margin-top: 10px;">
-                    <div class="span11">{{ drink.timestamp | formatISODateTime }} (Annoksia: {{ drink.amountOfShots | roundAmountOfShots }})</div>
-                    <div class="span1"><button ng-click="$ctrl.removeDrink(drink)" class="btn btn-danger">Poista</button></div>
+                <div class="drink-slot" ng-repeat="drink in $ctrl.drinks.data | orderBy:$ctrl.drinkSort:true | limitTo:5 track by drink.id">
+                    <div class="drink-item">
+                        <div class="row-fluid" style="margin-top: 10px;">
+                            <div class="span11">{{ drink.timestamp | formatISODateTime }} (Annoksia: {{ drink.amountOfShots | roundAmountOfShots }})</div>
+                            <div class="span1"><button ng-click="$ctrl.removeDrink(drink)" class="btn btn-danger">Poista</button></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

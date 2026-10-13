@@ -302,3 +302,37 @@ p {
         opacity: 1;
     }
 }
+
+.drink-slot {
+    display: grid;
+    grid-template-rows: 1fr;
+}
+
+.drink-item {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.drink-slot.ng-leave {
+    transition: grid-template-rows 0.3s ease 0.15s;
+}
+
+.drink-slot.ng-leave .drink-item {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.drink-slot.ng-leave.ng-leave-active {
+    grid-template-rows: 0fr;
+}
+
+.drink-slot.ng-leave.ng-leave-active .drink-item {
+    transform: translateX(-30px);
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .drink-slot.ng-leave,
+    .drink-slot.ng-leave .drink-item {
+        transition: none;
+    }
+}
