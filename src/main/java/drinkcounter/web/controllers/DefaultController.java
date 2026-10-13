@@ -42,8 +42,8 @@ public class DefaultController {
 
     @GetMapping("/app/index.html")
     public String appIndex(@LoggedInUser User user, Model model) {
-        // Dashboard data userPage (and its promille history graph) would
-        // otherwise fetch over the API right after load - see templates/app/index.html.
+        // Seeds the AngularJS stores, which would otherwise fetch this over the
+        // API right after load - see templates/app/index.html.
         model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialProfile(user))));
         model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
         model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialDrinks(user))));

@@ -115,25 +115,22 @@
 
     /**
      * Data the server embeds into the page on load as window.__INITIAL_<NAME>__
-     * (templates/app/index.html). Each value is handed out once, so the first
-     * load skips the request and later refreshes always hit the API.
+     * (templates/app/index.html), which seeds the stores in stores.js.
      */
     function InitialData(win) {
-        this.take = function (name) {
-            var key = '__INITIAL_' + name + '__';
-            var value = win[key];
-            win[key] = null;
-            return value || null;
+        this.get = function (name) {
+            var value = win['__INITIAL_' + name + '__'];
+            return value === undefined ? null : value;
         };
     }
 
 
     /**
-     * Poller repeats a tick function on an interval, but skips ticks (and
-     * stops scheduling further ones) while the tab is in the background, per
-     * the Page Visibility API. When the tab becomes visible again it ticks
-     * immediately and resumes the interval, so background tabs don't keep
-     * polling the backend.
+     * Poller repeats a tick function on an interval, first after one interval,
+     * but skips ticks (and stops scheduling further ones) while the tab is in
+     * the background, per the Page Visibility API. When the tab becomes
+     * visible again it ticks immediately and resumes the interval, so
+     * background tabs don't keep polling the backend.
      */
     function Poller($timeout, $document) {
         this.start = function (tick, intervalMs) {
@@ -166,7 +163,7 @@
 
             doc.addEventListener('visibilitychange', onVisibilityChange);
             if (!doc.hidden) {
-                resume();
+                scheduleNext();
             }
 
             return function stop() {

@@ -1,70 +1,41 @@
 (function (angular) {
     'use strict';
 
-    function UserPageCtrl($element, $timeout, InitialData, Poller, RyyppyAPI, UserHistoryGraph) {
+    function UserPageCtrl($element, $timeout, Drinks, OwnDrinksStore, PartiesStore, ProfileStore, UserHistoryGraph) {
         var self = this;
-        var stopPolling = null;
+        var releases = [];
+        var shownProfile = null;
+        var shownHistory = null;
         var graph = null;
         var graphTimeout = null;
 
-        function applyProfile(data) {
-            data.type = 'profile';
-            data.color = 1;
-            self.participants = [data];
+        this.parties = PartiesStore.parties;
+        this.drinks = OwnDrinksStore.drinks;
+        this.participants = [];
 
+        function drawHistory(csv) {
+            $timeout.cancel(graphTimeout);
             graphTimeout = $timeout(function () {
                 if (!graph) {
-                    var container = $element[0].querySelector('#historyGraph');
-                    graph = new UserHistoryGraph(self.participants[0], container, RyyppyAPI, InitialData);
+                    graph = new UserHistoryGraph($element[0].querySelector('#historyGraph'));
                 }
-                graph.update();
-            }, 0);
+                graph.gotData(csv);
+            }, 0, false);
         }
 
-        this.refreshProfile = function () {
-            // The server embeds the profile into the page on load (see
-            // templates/app/index.html) so the very first refresh can skip the XHR.
-            var initialProfile = InitialData.take('PROFILE');
-            if (initialProfile) {
-                applyProfile(initialProfile);
-                return;
+        this.$doCheck = function () {
+            var profile = ProfileStore.profile.data;
+            if (profile !== shownProfile) {
+                shownProfile = profile;
+                self.participants = profile ? [angular.extend({type: 'profile', color: 1}, profile)] : [];
             }
-            RyyppyAPI.getProfile().then(applyProfile);
-        };
 
-        this.refreshParties = function () {
-            var initialParties = InitialData.take('PARTIES');
-            if (initialParties) {
-                self.parties = initialParties;
-                return;
-            }
-            RyyppyAPI.getParties().then(function (data) {
-                self.parties = data;
-            });
-        };
-
-        this.refreshOwnDrinks = function () {
-            var initialDrinks = InitialData.take('DRINKS');
-            if (initialDrinks) {
-                self.drinks = initialDrinks;
-                return;
-            }
-            RyyppyAPI.getOwnDrinks().then(function (data) {
-                self.drinks = data;
-            });
-        };
-
-        this.startPolling = function () {
-            stopPolling = Poller.start(function () {
-                self.refreshProfile();
-                self.refreshOwnDrinks();
-            }, 60000);
-        };
-
-        this.endPolling = function () {
-            if (stopPolling) {
-                stopPolling();
-                stopPolling = null;
+            var history = OwnDrinksStore.history.data;
+            if (history !== shownHistory) {
+                shownHistory = history;
+                if (history !== null) {
+                    drawHistory(history);
+                }
             }
         };
 
@@ -76,25 +47,23 @@
             return new Date(drink.timestamp).getTime();
         };
 
-        this.drinksChanged = function () {
-            self.endPolling();
-            self.startPolling();
-        };
-
         this.removeDrink = function (drink) {
-            RyyppyAPI.deleteDrink({type: 'profile'}, drink.id).then(function () {
-                self.endPolling();
-                self.startPolling();
-            });
+            Drinks.remove({type: 'profile'}, drink.id);
         };
 
         this.$onInit = function () {
-            self.refreshParties();
-            self.startPolling();
+            releases = [
+                ProfileStore.profile.use(),
+                OwnDrinksStore.drinks.use(),
+                OwnDrinksStore.history.use(),
+                PartiesStore.parties.use()
+            ];
         };
 
         this.$onDestroy = function () {
-            self.endPolling();
+            releases.forEach(function (release) {
+                release();
+            });
             $timeout.cancel(graphTimeout);
             if (graph) {
                 graph.destroy();
@@ -102,7 +71,7 @@
         };
     }
 
-    UserPageCtrl.$inject = ['$element', '$timeout', 'InitialData', 'Poller', 'RyyppyAPI', 'UserHistoryGraph'];
+    UserPageCtrl.$inject = ['$element', '$timeout', 'Drinks', 'OwnDrinksStore', 'PartiesStore', 'ProfileStore', 'UserHistoryGraph'];
 
     angular.module('ryyppy').component('userPage', {
         controller: UserPageCtrl,
@@ -112,23 +81,23 @@
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span10 offset1">
-                <drinker ng-repeat="participant in $ctrl.participants track by participant.id" participant="participant" on-drinks-changed="$ctrl.drinksChanged()"></drinker>
+                <drinker ng-repeat="participant in $ctrl.participants track by participant.id" participant="participant"></drinker>
 
                 <h2>Bileesi</h2>
 
-                <div ng-if="$ctrl.parties.length <= 0">
+                <div ng-if="$ctrl.parties.data.length <= 0">
                     <p>
                         Et näytä olevan vielä missään bileissä. Voit lisätä uudet bileet
                         <a href="#!/party-admin">bileiden hallinnassa</a> tai antaa rekisteröityessäsi käyttämäsi
                         sähköpostiosoitteen kavereillesi, jotta he voivat kutsua sinut bileisiinsä.
                     </p>
                 </div>
-                <div ng-if="$ctrl.parties.length > 0">
+                <div ng-if="$ctrl.parties.data.length > 0">
                     <p>
                         Jos haluat muokata bileitäsi, voit tehdä sen <a href="#!/party-admin">bileiden hallinnassa</a>.
                     </p>
 
-                    <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true track by party.id">
+                    <div ng-repeat="party in $ctrl.parties.data | orderBy:$ctrl.partySort:true track by party.id">
                         <a href="#!/party/{{ ::party.id }}">
                             <div class="party color{{ ($index % 12) + 1 }}">
                                 <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
@@ -150,7 +119,7 @@
 
                 <h2>5 viimeisintä juomaa</h2>
 
-                <div class="row-fluid" ng-repeat="drink in $ctrl.drinks | orderBy:$ctrl.drinkSort:true | limitTo:5 track by drink.id" style="margin-top: 10px;">
+                <div class="row-fluid" ng-repeat="drink in $ctrl.drinks.data | orderBy:$ctrl.drinkSort:true | limitTo:5 track by drink.id" style="margin-top: 10px;">
                     <div class="span11">{{ drink.timestamp | formatISODateTime }} (Annoksia: {{ drink.amountOfShots | roundAmountOfShots }})</div>
                     <div class="span1"><button ng-click="$ctrl.removeDrink(drink)" class="btn btn-danger">Poista</button></div>
                 </div>

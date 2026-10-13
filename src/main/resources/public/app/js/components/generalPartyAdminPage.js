@@ -1,31 +1,22 @@
 (function (angular) {
     'use strict';
 
-    function GeneralPartyAdminPageCtrl($location, RyyppyAPI, Notify) {
+    function GeneralPartyAdminPageCtrl($location, PartiesStore, PartyStore, ProfileStore, Notify) {
         var self = this;
+        var releaseParties = null;
 
-        this.refreshProfile = function () {
-            RyyppyAPI.getProfile().then(function (data) {
-                self.participant = data;
-            });
-        };
-
-        this.refreshParties = function () {
-            RyyppyAPI.getParties().then(function (data) {
-                self.parties = data;
-            });
-        };
+        this.parties = PartiesStore.parties;
+        this.profile = ProfileStore.profile;
 
         this.addParty = function () {
-            RyyppyAPI.addParty(self.partyName).then(function (party) {
+            PartiesStore.addParty(self.partyName).then(function (party) {
                 $location.path('/party/' + party.id);
             });
         };
 
-        this.removeParticipant = function (party, participant) {
-            RyyppyAPI.removeParticipant(party.id, participant).then(function (data) {
+        this.leaveParty = function (party) {
+            PartyStore.leave(party.id, self.profile.data).then(function () {
                 Notify.success("Nyt jo kotiin?", "Lähdit bileistä " + party.name + ".");
-                self.refreshParties();
             });
         };
 
@@ -34,12 +25,16 @@
         };
 
         this.$onInit = function () {
-            self.refreshProfile();
-            self.refreshParties();
+            self.profile.load();
+            releaseParties = PartiesStore.parties.use();
+        };
+
+        this.$onDestroy = function () {
+            releaseParties();
         };
     }
 
-    GeneralPartyAdminPageCtrl.$inject = ['$location', 'RyyppyAPI', 'Notify'];
+    GeneralPartyAdminPageCtrl.$inject = ['$location', 'PartiesStore', 'PartyStore', 'ProfileStore', 'Notify'];
 
     angular.module('ryyppy').component('generalPartyAdminPage', {
         controller: GeneralPartyAdminPageCtrl,
@@ -66,10 +61,10 @@
                     </div>
                 </form>
 
-                <div ng-if="$ctrl.parties.length > 0">
+                <div ng-if="$ctrl.parties.data.length > 0">
                     <h2>Bileesi</h2>
 
-                    <div ng-repeat="party in $ctrl.parties | orderBy:$ctrl.partySort:true track by party.id">
+                    <div ng-repeat="party in $ctrl.parties.data | orderBy:$ctrl.partySort:true track by party.id">
                         <div class="row-fluid">
                             <div class="span10 party color{{ ($index % 12) + 1 }}">
                                 <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
@@ -78,7 +73,7 @@
                                 </ul>
                             </div>
                             <div class="span2">
-                                <button ng-click="$ctrl.removeParticipant(party, $ctrl.participant)" class="btn btn-danger">Poistu bileistä</button>
+                                <button ng-click="$ctrl.leaveParty(party)" class="btn btn-danger">Poistu bileistä</button>
                             </div>
                         </div>
                     </div>
