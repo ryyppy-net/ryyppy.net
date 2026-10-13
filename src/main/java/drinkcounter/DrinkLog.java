@@ -92,7 +92,11 @@ public class DrinkLog {
     @Transactional
     public void undo(int userId, int drinkId) {
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
-        Drink drink = findDrinkOf(user, drinkId);
+        // removeDrink loads the user's drinks anyway, so look the drink up among them.
+        Drink drink = user.getDrinks().stream()
+                .filter(d -> d.getId() == drinkId)
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + userId));
         user.removeDrink(drink);
         drinkRepository.delete(drink);
         log.info("{} has removed a drink {}", user, drink.getTimeStamp());
