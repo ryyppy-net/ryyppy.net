@@ -237,7 +237,7 @@
      * Adds, changes and removes drinks, refreshing every store the drink
      * shows up in.
      */
-    function Drinks(RyyppyAPI, ProfileStore, OwnDrinksStore, PartyStore) {
+    function Drinks($q, RyyppyAPI, ProfileStore, OwnDrinksStore, PartyStore) {
         function isOwn(drinker) {
             var profile = ProfileStore.profile.data;
             return drinker.type !== 'participant' || !profile || drinker.id === profile.id;
@@ -268,10 +268,21 @@
             });
         };
 
+        // The drink leaves the own drinks list at once; a failed request
+        // refetches it back.
         this.remove = function (drinker, drinkId) {
+            var drinks = OwnDrinksStore.drinks;
+            if (isOwn(drinker) && drinks.data) {
+                drinks.data = drinks.data.filter(function (drink) {
+                    return drink.id !== drinkId;
+                });
+            }
             return RyyppyAPI.deleteDrink(drinker, drinkId).then(function (data) {
                 changed(drinker);
                 return data;
+            }, function (error) {
+                changed(drinker);
+                return $q.reject(error);
             });
         };
     }
@@ -283,5 +294,5 @@
         .service('PartyStore', ['$q', 'Resource', 'RyyppyAPI', 'PartiesStore', PartyStore])
         .service('ProfileStore', ['Resource', 'RyyppyAPI', 'InitialData', 'PartyStore', ProfileStore])
         .service('OwnDrinksStore', ['Resource', 'RyyppyAPI', 'InitialData', OwnDrinksStore])
-        .service('Drinks', ['RyyppyAPI', 'ProfileStore', 'OwnDrinksStore', 'PartyStore', Drinks]);
+        .service('Drinks', ['$q', 'RyyppyAPI', 'ProfileStore', 'OwnDrinksStore', 'PartyStore', Drinks]);
 })(angular);
