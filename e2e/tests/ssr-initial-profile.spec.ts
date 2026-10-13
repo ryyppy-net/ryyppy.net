@@ -48,3 +48,24 @@ test('the app does not fetch the profile, parties, own drinks, or drink-history 
 
   expect(skippableRequests).toEqual([]);
 });
+
+test('profile settings opened after the profile poll interval use the stored profile instead of fetching it', async ({ page }) => {
+  const profileRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.method() === 'GET' && /\/API\/v2\/profile(\?|$)/.test(request.url())) {
+      profileRequests.push(request.url());
+    }
+  });
+
+  const user = sharedUser();
+  await page.clock.install();
+  // The party list page does not poll the profile, so it ages in the store.
+  await page.goto('/app/index.html#!/party-admin', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('h1', { hasText: 'Lisää uudet bileet' })).toBeVisible();
+  await page.clock.fastForward('02:00');
+
+  await page.locator('.navbar.hidden-phone a', { hasText: 'Asetukset' }).click();
+  await expect(page.locator('#name')).toHaveValue(user.name);
+
+  expect(profileRequests).toEqual([]);
+});

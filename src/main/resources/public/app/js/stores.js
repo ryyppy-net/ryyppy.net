@@ -50,11 +50,15 @@
             };
 
             function isCurrent() {
-                return fetchedAt !== null && !stale && !(pollMs && Date.now() - fetchedAt >= pollMs);
+                return fetchedAt !== null && !stale;
+            }
+
+            function isPollDue() {
+                return pollMs && fetchedAt !== null && Date.now() - fetchedAt >= pollMs;
             }
 
             // Resolves with the data, fetching it only when what is held is
-            // missing, invalidated, or older than a poll interval.
+            // missing or invalidated, whatever its age.
             this.load = function () {
                 if (pending) {
                     return pending;
@@ -66,7 +70,11 @@
             this.use = function () {
                 var released = false;
                 users++;
-                self.load();
+                if (!pending && isPollDue()) {
+                    self.refresh();
+                } else {
+                    self.load();
+                }
                 if (users === 1 && pollMs) {
                     stopPolling = Poller.start(self.refresh, pollMs);
                 }
