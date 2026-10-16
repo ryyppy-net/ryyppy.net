@@ -100,6 +100,7 @@ public class PartyApiControllerWebTest {
         when(userAccounts.get(3)).thenReturn(outsider);
         when(partyRoster.get(1)).thenReturn(party);
         when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(1, 2)).thenReturn(1L);
 
         Drink saved = new Drink();
         saved.setId(7);

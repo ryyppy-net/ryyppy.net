@@ -7,6 +7,7 @@ import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
+import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
@@ -32,13 +33,15 @@ public class PartyApiController {
     private final InvitationSuggestions invitationSuggestions;
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
+    private final PartyAccess partyAccess;
 
     public PartyApiController(PartyRoster partyRoster, InvitationSuggestions invitationSuggestions,
-            DrinkLog drinkLog, UserAccounts userAccounts) {
+            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess) {
         this.partyRoster = partyRoster;
         this.invitationSuggestions = invitationSuggestions;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
+        this.partyAccess = partyAccess;
     }
 
     @GetMapping
@@ -121,7 +124,8 @@ public class PartyApiController {
     @GetMapping("{partyId}/participants/{participantId}")
     @PartyMember
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
-        return ParticipantDTO.fromUser(requireParticipant(partyId, participantId));
+        requireParticipant(partyId, participantId);
+        return ParticipantDTO.fromUser(userAccounts.get(participantId));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
@@ -161,13 +165,10 @@ public class PartyApiController {
         drinkLog.undo(participantId, drinkId);
     }
 
-    private User requireParticipant(Integer partyId, Integer participantId) {
-        Party party = partyRoster.get(partyId);
-        User participant = userAccounts.get(participantId);
-        if(!party.getParticipants().contains(participant)){
-            throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participant.getId(), party.getId()));
+    private void requireParticipant(Integer partyId, Integer participantId) {
+        if(!partyAccess.isMember(partyId, participantId)){
+            throw new RuntimeException(MessageFormat.format("Participant {0} doesn''t belong to party {1}", participantId, partyId));
         }
-        return participant;
     }
 
     @GetMapping("{partyId}/invitations")
