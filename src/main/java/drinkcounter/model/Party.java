@@ -1,12 +1,13 @@
 package drinkcounter.model;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OrderBy;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -16,7 +17,7 @@ import org.hibernate.type.SqlTypes;
  */
 @Entity
 public class Party extends AbstractEntity{
-    private List<User> participants;
+    private Set<User> participants;
     private String name;
     private Instant startTime;
 
@@ -44,14 +45,15 @@ public class Party extends AbstractEntity{
             joinColumns={@JoinColumn(name="party_id")}
             ,inverseJoinColumns={@JoinColumn(name="participant_id")}
             )
-    public List<User> getParticipants() {
+    @OrderBy("id")
+    public Set<User> getParticipants() {
         if(participants == null){
-            participants =  new ArrayList<User>();
+            participants =  new LinkedHashSet<User>();
         }
         return participants;
     }
 
-    public void setParticipants(List<User> participants) {
+    public void setParticipants(Set<User> participants) {
         this.participants = participants;
     }
 
