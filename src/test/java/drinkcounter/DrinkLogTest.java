@@ -84,6 +84,19 @@ public class DrinkLogTest {
     }
 
     @Test
+    public void undoRemovesDrinkAndPromilles() {
+        int drinkId = drinkLog.record(1, new Date());
+        Drink drink = user.getDrinks().get(0);
+        assertTrue(user.getPromilles() > 0);
+
+        drinkLog.undo(1, drinkId);
+
+        assertTrue(user.getDrinks().isEmpty());
+        assertEquals(0f, user.getPromilles());
+        verify(drinkRepository).delete(drink);
+    }
+
+    @Test
     public void undoRejectsAnotherUsersDrink() {
         Drink othersDrink = othersDrink();
 
