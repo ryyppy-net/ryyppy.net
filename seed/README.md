@@ -20,7 +20,7 @@ Variables:
 
 | Variable   | Default | Meaning |
 |------------|---------|---------|
-| `scale`    | `1`     | Multiplies the ordinary users and parties. `0.01` gives a small set for E2E runs; the special cases below are always full size. Below `0.005` there are too few users to fill the huge party. |
+| `scale`    | `1`     | Multiplies the ordinary users and parties. `0.01` gives a small set for E2E runs; the special cases below stay full size down to `0.005`; below that there are too few users to fill the huge party. |
 | `timezone` | `UTC`   | Zone the app's JVM runs in. Timestamps are stored without a zone, in the JVM's default zone, so pass e.g. `-v timezone=Europe/Helsinki` if that is where your JVM runs. |
 
 The script refuses to run on a database that already has seed users. To seed again,
