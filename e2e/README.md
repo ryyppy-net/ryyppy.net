@@ -14,6 +14,8 @@ The app (and its Postgres via Docker Compose) needs to be reachable at
 
 - Start it yourself first: `mvn spring-boot:run` (from the repo root), or
 - Let Playwright start it for you (default behavior — see `playwright.config.ts`).
+  It starts the app with the `seed` profile at `scale=0.01`, which fills an empty
+  database with fake data first (see [Seed data](../docs/seed-data.md)).
 
 ## Running
 

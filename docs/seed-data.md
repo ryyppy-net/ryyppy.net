@@ -23,7 +23,7 @@ Size it with the `scale` placeholder, which multiplies the ordinary users and pa
 SPRING_FLYWAY_PLACEHOLDERS_SCALE=0.01 mvn spring-boot:run -Dspring-boot.run.profiles=seed
 ```
 
-`0.01` suits E2E runs. The special cases below stay full size down to `0.005`; below
+The E2E suite starts the app at `0.01` (`e2e/playwright.config.ts`). The special cases below stay full size down to `0.005`; below
 that there are too few users to fill the huge party.
 
 Seeding adds about 40 s to the first start at `scale=1` and about 6 s at

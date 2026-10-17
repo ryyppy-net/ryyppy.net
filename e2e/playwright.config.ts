@@ -35,11 +35,13 @@ export default defineConfig({
     },
   ],
 
-  // SKIP_WEBSERVER=1 runs against an app that is already started.
+  // SKIP_WEBSERVER=1 runs against an app that is already started. The started app
+  // seeds an empty database with fake data, so the tests run among other users' rows.
   webServer: process.env.SKIP_WEBSERVER
     ? undefined
     : {
-        command: 'mvn -f .. spring-boot:run',
+        command: 'mvn -f .. spring-boot:run -Dspring-boot.run.profiles=seed',
+        env: { SPRING_FLYWAY_PLACEHOLDERS_SCALE: '0.01' },
         url: BASE_URL,
         reuseExistingServer: true,
         timeout: 180_000,

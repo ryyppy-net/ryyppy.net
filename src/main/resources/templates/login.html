@@ -21,7 +21,7 @@
         <div id="logoContainer">
             <img id="logo" th:src="@{/static/images/logo_ryyppy.png}" alt="Ryyppy.net" title="Ryyppy.net" />
 
-            <p class="totalDrinkCount" th:text="#{login.already_n_drinks(${totalDrinkCount})}">0 drinks served!</p>
+            <p class="totalDrinkCount" th:data-count="${totalDrinkCount}" th:text="#{login.already_n_drinks(${totalDrinkCount})}">0 drinks served!</p>
         </div>
 
         <div class="login">
