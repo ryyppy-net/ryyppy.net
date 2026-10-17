@@ -20,7 +20,7 @@ Requirements:
 2. Open browser at `localhost:8080`
 3. Make changes to resources or compile Java code. Browser should automatically refresh with changes.
 
-To fill the local database with a large set of fake data, see [seed/README.md](seed/README.md).
+To fill the local database with a large set of fake data, see [Seed data](docs/seed-data.md).
 
 ### Google OAuth2 Configuration
 To enable Google login, set the Google OAuth2 credentials as environment variables:

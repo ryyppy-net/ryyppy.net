@@ -1,0 +1,7 @@
+spring:
+  flyway:
+    # db/seed holds an afterMigrate callback that fills an empty database with fake data.
+    locations: classpath:db/migration,classpath:db/seed
+    placeholders:
+      # Multiplies the ordinary users and parties; 0.01 suits E2E runs.
+      scale: 1
