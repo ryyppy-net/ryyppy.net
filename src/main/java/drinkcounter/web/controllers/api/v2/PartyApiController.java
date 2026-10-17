@@ -45,9 +45,11 @@ public class PartyApiController {
         this.partyAccess = partyAccess;
     }
 
+    /** The user's parties; {@code limit} keeps only that many of the newest, newest first. */
     @GetMapping
-    public List<PartyDTO> getParties(@LoggedInUser User user){
-        List<Party> parties = user.getParties();
+    public List<PartyDTO> getParties(@LoggedInUser User user,
+            @RequestParam(value="limit", required=false) Integer limit){
+        List<Party> parties = limit == null ? user.getParties() : partyRoster.newestOf(user.getId(), Math.max(1, limit));
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);

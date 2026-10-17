@@ -102,10 +102,33 @@
     }
 
 
+    var PARTIES_PER_PAGE = 20;
+
+    /**
+     * The user's newest parties. One more than is shown is fetched, so that
+     * hasMore() knows whether showMore() would reveal any; DefaultController
+     * embeds the first page the same way.
+     */
     function PartiesStore(Resource, RyyppyAPI, InitialData) {
         var self = this;
+        var shown = PARTIES_PER_PAGE;
 
-        this.parties = new Resource(RyyppyAPI.getParties, {initial: InitialData.get('PARTIES')});
+        this.parties = new Resource(function () {
+            return RyyppyAPI.getParties(shown + 1);
+        }, {initial: InitialData.get('PARTIES')});
+
+        this.shown = function () {
+            return shown;
+        };
+
+        this.hasMore = function () {
+            return self.parties.data !== null && self.parties.data.length > shown;
+        };
+
+        this.showMore = function () {
+            shown += PARTIES_PER_PAGE;
+            return self.parties.refresh();
+        };
 
         this.addParty = function (name) {
             return RyyppyAPI.addParty(name).then(function (party) {

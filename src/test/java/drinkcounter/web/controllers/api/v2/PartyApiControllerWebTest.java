@@ -130,6 +130,17 @@ public class PartyApiControllerWebTest {
     }
 
     @Test
+    public void limitListsTheNewestPartiesFromTheRoster() throws Exception {
+        when(partyRoster.newestOf(signedIn.getId(), 21)).thenReturn(List.of(party));
+
+        mvc.perform(get(PARTIES).param("limit", "21"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].participants.length()").value(2));
+    }
+
+    @Test
     public void startedPartyIsLinkedToTheSignedInUser() throws Exception {
         Party started = new Party();
         started.setId(5);

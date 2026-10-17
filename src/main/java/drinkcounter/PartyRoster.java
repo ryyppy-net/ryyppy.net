@@ -8,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+import org.springframework.data.domain.Limit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,11 @@ public class PartyRoster {
 
     public Party get(int partyId) {
         return partyRepository.findById(partyId).orElseThrow(EntityNotFoundException::new);
+    }
+
+    /** The user's {@code count} newest parties by start time, newest first. */
+    public List<Party> newestOf(int userId, int count) {
+        return partyRepository.findNewestOfParticipant(userId, Limit.of(count));
     }
 
     public List<User> members(int partyId) {

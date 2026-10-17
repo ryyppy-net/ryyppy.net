@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers;
 
+import drinkcounter.PartyRoster;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
@@ -30,11 +31,15 @@ public class DefaultController {
     public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#!/";
     // The user page lists this many of the newest drinks; RyyppyAPI.getOwnDrinks asks for the same.
     private static final int RECENT_DRINKS = 5;
+    // PartiesStore first shows 20 parties and asks for one more to know whether to offer the rest.
+    private static final int INITIAL_PARTIES = 21;
 
     private final ObjectMapper objectMapper;
+    private final PartyRoster partyRoster;
 
-    public DefaultController(ObjectMapper objectMapper) {
+    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster) {
         this.objectMapper = objectMapper;
+        this.partyRoster = partyRoster;
     }
 
     @GetMapping
@@ -60,7 +65,7 @@ public class DefaultController {
     }
 
     private List<PartyDTO> loadInitialParties(User user) {
-        List<Party> parties = user.getParties();
+        List<Party> parties = partyRoster.newestOf(user.getId(), INITIAL_PARTIES);
         List<PartyDTO> partyDTOs = new ArrayList<>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
