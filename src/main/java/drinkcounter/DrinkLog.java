@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -23,8 +25,15 @@ public class DrinkLog {
     private static final Logger log = LoggerFactory.getLogger(DrinkLog.class);
     private static final DateTimeFormatter LOCAL_TIME_FORMAT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
+    // The login page shows the total; counting every drink on each view reads the whole table.
+    private static final Duration TOTAL_MAX_AGE = Duration.ofMinutes(1);
+
     private final DrinkRepository drinkRepository;
     private final UserRepository userRepository;
+
+    private Clock clock = Clock.systemUTC();
+    private volatile Instant totalCountedAt = Instant.EPOCH;
+    private volatile long total;
 
     public DrinkLog(DrinkRepository drinkRepository, UserRepository userRepository) {
         this.drinkRepository = drinkRepository;
@@ -107,8 +116,14 @@ public class DrinkLog {
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), grams);
     }
 
+    /** All drinks ever recorded, counted at most once a minute. */
     public long total() {
-        return drinkRepository.count();
+        Instant now = clock.instant();
+        if (Duration.between(totalCountedAt, now).compareTo(TOTAL_MAX_AGE) >= 0) {
+            total = drinkRepository.count();
+            totalCountedAt = now;
+        }
+        return total;
     }
 
     /** Looks in the user's own drinks, which the PromilleTracker recalculation loads anyway. */

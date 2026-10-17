@@ -5,12 +5,15 @@ import drinkcounter.repository.UserRepository;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -110,5 +114,20 @@ public class DrinkLogTest {
         drink.setDrinker(other);
         when(drinkRepository.findById(99)).thenReturn(Optional.of(drink));
         return drink;
+    }
+
+    @Test
+    public void totalIsCountedAtMostOnceAMinute() {
+        Instant start = Instant.parse("2024-03-05T12:00:00Z");
+        ReflectionTestUtils.setField(drinkLog, "clock", Clock.fixed(start, ZoneOffset.UTC));
+        when(drinkRepository.count()).thenReturn(10L, 11L);
+
+        assertEquals(10L, drinkLog.total());
+        ReflectionTestUtils.setField(drinkLog, "clock", Clock.fixed(start.plusSeconds(59), ZoneOffset.UTC));
+        assertEquals(10L, drinkLog.total());
+        verify(drinkRepository, times(1)).count();
+
+        ReflectionTestUtils.setField(drinkLog, "clock", Clock.fixed(start.plusSeconds(60), ZoneOffset.UTC));
+        assertEquals(11L, drinkLog.total());
     }
 }
