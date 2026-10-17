@@ -30,6 +30,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import org.hibernate.annotations.BatchSize;
 
 /**
  *
@@ -173,7 +174,9 @@ public class User extends AbstractEntity{
     /**
      * @return the drinks
      */
+    // A party's participant list reads the drinks of every participant.
     @OneToMany(mappedBy="drinker")
+    @BatchSize(size = 100)
     @OrderBy("timeStamp asc")
     public List<Drink> getDrinks() {
         return drinks;
