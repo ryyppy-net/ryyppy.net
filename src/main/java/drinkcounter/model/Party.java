@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OrderBy;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -40,7 +41,9 @@ public class Party extends AbstractEntity{
         this.name = name;
     }
 
+    // A user's party list shows the participants of every party.
     @ManyToMany
+    @BatchSize(size = 100)
     @JoinTable(name="participants", 
             joinColumns={@JoinColumn(name="party_id")}
             ,inverseJoinColumns={@JoinColumn(name="participant_id")}
