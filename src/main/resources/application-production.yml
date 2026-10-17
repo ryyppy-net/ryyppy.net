@@ -31,6 +31,28 @@ spring:
 server:
   forward-headers-strategy: framework
 
+# The ingesting host of the ryyppy.net source in Better Stack. process-aot only
+# builds the exporters if the endpoints are set when it runs.
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: https://s2800235.us-west-2a.betterstackdata.com/v1/traces
+          compression: gzip
+          headers:
+            Authorization: Bearer ${BETTERSTACK_SOURCE_TOKEN:}
+    logging:
+      export:
+        otlp:
+          endpoint: https://s2800235.us-west-2a.betterstackdata.com/v1/logs
+          compression: gzip
+          headers:
+            Authorization: Bearer ${BETTERSTACK_SOURCE_TOKEN:}
+
 # ryyppy.net is the domain actually registered in Google Cloud Console for
 # Google sign-in; every environment's login page points there (see
 # GlobalControllerAdvice#oneTapLoginUri).

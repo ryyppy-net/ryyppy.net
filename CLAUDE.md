@@ -73,6 +73,9 @@ args; omit them locally and it is skipped. Two invariants:
 - A drink is saved on that click. The overlay that follows offers undo and edit
   for 5s, which delete or change the saved drink, in both front ends.
 - Use constructor injection in new code.
+- Traces and logs go to Better Stack over OTLP (`telemetry/`, `application-production.yml`),
+  authorized by `BETTERSTACK_SOURCE_TOKEN`. Nothing may send on a timer, metrics included:
+  any outbound traffic keeps Railway from sleeping the service.
 
 ## Comments
 
