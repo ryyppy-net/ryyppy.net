@@ -8,7 +8,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,9 +38,13 @@ public class InvitationSuggestions {
         q.setFirstResult(0);
         q.setMaxResults(amount);
         List<Object[]> results = q.getResultList();
+        List<Integer> ids = results.stream().map(tuple -> (Integer) tuple[0]).toList();
+        Map<Integer, User> usersById = new HashMap<>();
+        userRepository.findAllById(ids).forEach(user -> usersById.put(user.getId(), user));
         List<Friend> friends = new ArrayList<Friend>();
-        for (Object[] tuple : results) {
-            User user = userRepository.findById((Integer)tuple[0]).orElseThrow(EntityNotFoundException::new);
+        for (Integer id : ids) {
+            User user = usersById.get(id);
+            if (user == null) throw new EntityNotFoundException();
             friends.add(new Friend(user.getId(), user.getName(), GravatarUrls.forUser(user)));
         }
         return friends;
