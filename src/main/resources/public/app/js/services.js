@@ -41,7 +41,8 @@
         };
 
         this.getOwnDrinks = function () {
-            return http.get(baseUrl + "/profile/drinks").then(data);
+            // The user page lists the five newest; DefaultController embeds the same five.
+            return http.get(baseUrl + "/profile/drinks", {params: {latest: 5}}).then(data);
         };
 
         this.getDrinkHistory = function () {

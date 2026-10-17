@@ -169,6 +169,25 @@ public class ProfileApiControllerWebTest {
     }
 
     @Test
+    public void latestKeepsOnlyTheNewestDrinksOldestFirst() throws Exception {
+        for (int id = 1; id <= 3; id++) {
+            Drink drink = new Drink();
+            drink.setId(id);
+            drink.setTimeStamp(Instant.parse("2024-03-05T13:00:00Z").plusSeconds(id * 60L));
+            user.drink(drink);
+        }
+
+        mvc.perform(get("/API/v2/profile/drinks").param("latest", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(2))
+                .andExpect(jsonPath("$[1].id").value(3));
+
+        mvc.perform(get("/API/v2/profile/drinks").param("latest", "10"))
+                .andExpect(jsonPath("$.length()").value(3));
+    }
+
+    @Test
     @WithAnonymousUser
     public void anonymousRequestIsSentToTheLoginPage() throws Exception {
         mvc.perform(post("/API/v2/profile/drinks"))
