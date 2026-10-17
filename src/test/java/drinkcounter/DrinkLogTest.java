@@ -68,7 +68,6 @@ public class DrinkLogTest {
     public void correctAlcoholUpdatesDrinkAndPromilles() {
         int drinkId = drinkLog.record(1, new Date());
         Drink drink = user.getDrinks().get(0);
-        when(drinkRepository.findById(drinkId)).thenReturn(Optional.of(drink));
         float promillesBefore = user.getPromilles();
 
         drinkLog.correctAlcohol(1, drinkId, drink.getAlcohol() * 2);
@@ -81,6 +80,18 @@ public class DrinkLogTest {
         Drink othersDrink = othersDrink();
 
         assertThrows(EntityNotFoundException.class, () -> drinkLog.correctAlcohol(1, othersDrink.getId(), 1f));
+    }
+
+    @Test
+    public void undoDeletesTheUsersDrinkFoundInTheirDrinkList() {
+        int drinkId = drinkLog.record(1, new Date());
+        Drink drink = user.getDrinks().get(0);
+
+        drinkLog.undo(1, drinkId);
+
+        assertTrue(user.getDrinks().isEmpty());
+        verify(drinkRepository).delete(drink);
+        verify(drinkRepository, never()).findById(any());
     }
 
     @Test

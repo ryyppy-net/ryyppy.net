@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Objects;
 
 @Service
 public class DrinkLog {
@@ -110,11 +111,11 @@ public class DrinkLog {
         return drinkRepository.count();
     }
 
+    /** Looks in the user's own drinks, which the PromilleTracker recalculation loads anyway. */
     private Drink findDrinkOf(User user, int drinkId) {
-        Drink drink = drinkRepository.findById(drinkId).orElseThrow(EntityNotFoundException::new);
-        if (drink.getDrinker() == null || !user.getId().equals(drink.getDrinker().getId())) {
-            throw new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId());
-        }
-        return drink;
+        return user.getDrinks().stream()
+                .filter(drink -> Objects.equals(drink.getId(), drinkId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId()));
     }
 }
