@@ -18,6 +18,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +51,7 @@ public class PartyApiController {
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
-            List<User> participants = party.getParticipants();
+            Set<User> participants = party.getParticipants();
             for (User participant : participants) {
                 partyDTO.addParticipant(ParticipantPreviewDTO.fromUser(participant));
             }
@@ -77,7 +78,7 @@ public class PartyApiController {
     @PartyMember
     public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
         Party party = partyRoster.get(partyId);
-        List<User> participants = party.getParticipants();
+        Set<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (User participant : participants) {
             ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);

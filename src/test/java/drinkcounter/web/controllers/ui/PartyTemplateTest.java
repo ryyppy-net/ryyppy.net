@@ -12,9 +12,9 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,7 +85,7 @@ class PartyTemplateTest {
         party.setName("Kickable Party");
         User owner = user(1, "Isäntä");
         User guest = user(2, "Vieras Ville");
-        party.setParticipants(List.of(owner, guest));
+        party.setParticipants(Set.of(owner, guest));
 
         String html = render(party, owner);
 
@@ -100,7 +100,7 @@ class PartyTemplateTest {
         party.setName("Kickable Party");
         User owner = user(1, "Isäntä");
         User guest = user(2, "Vieras Ville");
-        party.setParticipants(List.of(owner, guest));
+        party.setParticipants(Set.of(owner, guest));
 
         String html = render(party, owner);
 
@@ -115,7 +115,7 @@ class PartyTemplateTest {
         party.setId(9);
         party.setName("Solo Party");
         User owner = user(1, "Yksin");
-        party.setParticipants(List.of(owner));
+        party.setParticipants(Set.of(owner));
 
         String html = render(party, owner);
 

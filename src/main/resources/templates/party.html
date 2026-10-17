@@ -171,8 +171,8 @@
             the message/EL/message concatenation out of an attribute value.
         -->
         <div id="kickDrinkerDialog" class="popupDialog" th:title="#{party.remove_drinker}">
-            <p th:if="${#lists.size(party.participants) < 2}" th:text="#{party.no_users}">No partiers</p>
-            <ul th:unless="${#lists.size(party.participants) < 2}">
+            <p th:if="${party.participants.size() < 2}" th:text="#{party.no_users}">No partiers</p>
+            <ul th:unless="${party.participants.size() < 2}">
                 <li th:each="participant : ${party.participants}" th:if="${participant.id != user.id}">
                     <a href="#" class="kickParticipant" th:text="${participant.name}"
                        th:data-user-id="${participant.id}"
