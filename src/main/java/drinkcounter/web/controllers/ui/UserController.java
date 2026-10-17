@@ -46,6 +46,7 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @RequestMapping("ui")
 public class UserController {
     private static final int PARTIES_PER_PAGE = 20;
+    private static final int MAX_PARTIES_SHOWN = 100_000;
 
     private final DrinkLog drinkLog;
     private final PartyAccess partyAccess;
@@ -166,7 +167,7 @@ public class UserController {
     @RequestMapping("/user")
     public ModelAndView userPage(@LoggedInUser User user,
             @RequestParam(value="parties", defaultValue=""+PARTIES_PER_PAGE) int shownParties){
-        int shown = Math.max(PARTIES_PER_PAGE, shownParties);
+        int shown = Math.max(PARTIES_PER_PAGE, Math.min(shownParties, MAX_PARTIES_SHOWN));
         List<Party> parties = partyRoster.newestOf(user.getId(), shown + 1);
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
