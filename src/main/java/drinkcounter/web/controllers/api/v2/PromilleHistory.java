@@ -7,8 +7,8 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.model.User;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -16,42 +16,31 @@ import java.util.List;
  * @author thardas
  */
 public class PromilleHistory {
+    // In promilles: above float rounding, far below what a chart can show.
+    private static final float BEND_TOLERANCE = 0.00001f;
+
     public static List<HistoryPoint> forUser(User user) {
         int intervalMs = 60 * 1000;
         Instant now = Instant.now();
         Instant start = now.minus(Duration.ofMinutes(300));
 
         List<Float> history = user.getPromillesAtInterval(Date.from(start), Date.from(now), intervalMs);
-        List<HistoryPoint> slopes = new LinkedList<HistoryPoint>();
+        List<HistoryPoint> slopes = new ArrayList<HistoryPoint>();
 
-        double lastSlope = Double.MAX_VALUE;
-        Long lastX = null;
-        Float lastY = null;
-        long lastInserted = 0;
-
-        Long x = start.toEpochMilli();
-        for (Float y : history) {
-            double slope = y / (x / 31536000000L);
-            if (Math.abs(slope - lastSlope) >= 0.000000001) {
-                if (lastX != null && lastY != null && lastInserted != lastX) {
-                    HistoryPoint point = new HistoryPoint();
-                    point.setTimestamp(lastX);
-                    point.setPromilles(lastY);
-                    slopes.add(point);
-                }
-                
+        // Promilles fall in straight lines between drinks and the charts draw straight
+        // lines between points, so only the minutes where the line bends are sent.
+        long x = start.toEpochMilli();
+        for (int i = 0; i < history.size(); i++, x += intervalMs) {
+            boolean bends = i == 0 || i == history.size() - 1
+                    || Math.abs(history.get(i + 1) - 2 * history.get(i) + history.get(i - 1)) > BEND_TOLERANCE;
+            if (bends) {
                 HistoryPoint point = new HistoryPoint();
                 point.setTimestamp(x);
-                point.setPromilles(y);
+                point.setPromilles(history.get(i));
                 slopes.add(point);
-                lastInserted = x;
             }
-            lastSlope = slope;
-            lastX = x;
-            lastY = y;
-            x += intervalMs;
         }
-        
+
         HistoryPoint point = new HistoryPoint();
         point.setTimestamp(Instant.now().toEpochMilli());
         point.setPromilles(user.getPromilles());
