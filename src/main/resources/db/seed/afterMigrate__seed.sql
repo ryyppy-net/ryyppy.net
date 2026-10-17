@@ -84,29 +84,28 @@ begin
 
     -- Parties ---------------------------------------------------------------
 
-    -- localtimestamp is in the app JVM's zone: the JDBC driver sets the session
-    -- time zone to it, and the app stores timestamps in that zone.
+    -- The app stores timestamps as UTC, whatever the session's time zone is.
 
     -- 2-20 participants, most parties at the small end, about 8 on average.
     create temp table seed_party on commit drop as
     select nextval('party_seq') as id,
-           localtimestamp - random() * interval '5 years' as start_time,
+           (now() at time zone 'UTC') - random() * interval '5 years' as start_time,
            2 + floor(power(random(), 2) * 19)::int as size,
            'background' as kind
     from generate_series(1, round(40000 * ${scale})::int);
 
     insert into seed_party
-    select nextval('party_seq'), localtimestamp - random() * interval '6 hours',
+    select nextval('party_seq'), (now() at time zone 'UTC') - random() * interval '6 hours',
            2 + floor(power(random(), 2) * 19)::int, 'active'
     from generate_series(1, 20);
 
     insert into seed_party
-    select nextval('party_seq'), localtimestamp - random() * interval '5 years',
+    select nextval('party_seq'), (now() at time zone 'UTC') - random() * interval '5 years',
            2 + floor(power(random(), 2) * 19)::int, 'regular'
     from generate_series(1, 1000);
 
     insert into seed_party
-    select nextval('party_seq'), localtimestamp - interval '4 hours', 499, 'huge';
+    select nextval('party_seq'), (now() at time zone 'UTC') - interval '4 hours', 499, 'huge';
 
     insert into party (id, name, start_time)
     select p.id,
@@ -181,7 +180,7 @@ begin
     select v_long_drinker,
            s.evening + interval '1 minute' * sum(15 + random() * 45) over (partition by s.k order by i),
            nm.portion[1 + floor(random() * cardinality(nm.portion))::int]
-    from (select k, date_trunc('day', localtimestamp - random() * interval '5 years')
+    from (select k, date_trunc('day', (now() at time zone 'UTC') - random() * interval '5 years')
                     + interval '18 hours' + random() * interval '4 hours' as evening
           from generate_series(1, 1500) k) s
     cross join generate_series(1, 10) i
@@ -189,7 +188,7 @@ begin
 
     insert into drink (id, alcohol, time_stamp, drinker_id)
     select nextval('drink_seq'), alcohol, time_stamp, drinker_id
-    from (select * from seed_drink where time_stamp <= localtimestamp order by time_stamp) d;
+    from (select * from seed_drink where time_stamp <= (now() at time zone 'UTC') order by time_stamp) d;
 
     analyze users;
     analyze party;
