@@ -63,9 +63,10 @@ public class PromilleHistoryTest {
         user.setId(2);
         user.setWeight(70);
         user.setSex(User.Sex.FEMALE);
-        for (int minutesAgo : new int[] {290, 250, 245, 120, 119, 30}) {
+        // Sober again well before the drinks two hours ago; some drinks fall mid-minute.
+        for (int secondsAgo : new int[] {290 * 60, 250 * 60 + 30, 120 * 60 + 30, 119 * 60, 30 * 60 + 15}) {
             Drink drink = new Drink();
-            drink.setTimeStamp(Instant.now().minus(Duration.ofMinutes(minutesAgo)));
+            drink.setTimeStamp(Instant.now().minusSeconds(secondsAgo));
             user.drink(drink);
         }
 
