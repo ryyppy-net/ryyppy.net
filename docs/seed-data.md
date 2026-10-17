@@ -30,10 +30,9 @@ Seeding adds about 40 s to the first start at `scale=1` and about 6 s at
 `scale=0.01`. A start on an already seeded database costs one lookup.
 
 To seed again, drop the database (`docker compose -f docker/docker-compose.yml down -v`
-removes the volume, with all local data) and start with the profile. Users, parties
-and participants come out identical on every run. Drink timestamps are relative to
-the current time, and drinks that would fall in the future are dropped, so the drink
-rows vary slightly between runs.
+removes the volume, with all local data) and start with the profile. Apart from
+timestamps, which are relative to when it runs, the data is the same on every run;
+drinks that would fall in the future are dropped, so the drink rows vary slightly.
 
 ## What it creates
 
