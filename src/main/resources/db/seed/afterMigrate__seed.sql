@@ -63,7 +63,7 @@ begin
            case when u.kind < 0.3 then 'OPENID' else 'PASSWORD' end,
            case when u.kind >= 0.1 and u.kind < 0.3 then 'seed-openid-' || u.n end,
            case when u.kind >= 0.3 then nm.password_hash end,
-           case when random() < 0.05 then gen_random_uuid()::text end
+           case when random() < 0.05 then md5(random()::text)::uuid::text end
     from seed_user u, seed_names nm
     order by u.id;
 
