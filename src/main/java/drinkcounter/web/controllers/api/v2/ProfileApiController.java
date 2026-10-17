@@ -9,6 +9,7 @@ import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
+import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.DrinksPerDayCsv;
 import java.io.IOException;
@@ -76,9 +77,12 @@ public class ProfileApiController {
         return DrinkDTO.fromDrink(drinkLog.record(userId, time, (float)alcoholAmount));
     }
 
+    /** The user's drinks, oldest first; {@code latest} keeps only that many of the newest. */
     @GetMapping("drinks")
-    public List<DrinkDTO> getDrinks(@LoggedInUser User user){
-        return user.getDrinks().stream().map(DrinkDTO::fromDrink).toList();
+    public List<DrinkDTO> getDrinks(@LoggedInUser User user,
+            @RequestParam(value="latest", required=false) Integer latest){
+        List<Drink> drinks = latest == null ? user.getDrinks() : user.latestDrinks(latest);
+        return drinks.stream().map(DrinkDTO::fromDrink).toList();
     }
 
     @PutMapping("drinks/{drinkId}")

@@ -28,6 +28,8 @@ import java.util.List;
 public class DefaultController {
 
     public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#!/";
+    // The user page lists this many of the newest drinks; RyyppyAPI.getOwnDrinks asks for the same.
+    private static final int RECENT_DRINKS = 5;
 
     private final ObjectMapper objectMapper;
 
@@ -71,7 +73,7 @@ public class DefaultController {
     }
 
     private List<DrinkDTO> loadInitialDrinks(User user) {
-        List<Drink> drinks = user.getDrinks();
+        List<Drink> drinks = user.latestDrinks(RECENT_DRINKS);
         List<DrinkDTO> drinkDTOs = new ArrayList<>();
         for (Drink drink : drinks) {
             DrinkDTO drinkDTO = new DrinkDTO();

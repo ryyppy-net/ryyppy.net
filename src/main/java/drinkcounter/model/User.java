@@ -191,6 +191,12 @@ public class User extends AbstractEntity{
         this.drinks = drinks;
     }
 
+    /** The newest {@code count} drinks, oldest first. */
+    public List<Drink> latestDrinks(int count) {
+        int kept = Math.max(0, Math.min(count, drinks.size()));
+        return drinks.subList(drinks.size() - kept, drinks.size());
+    }
+
     public String getEmail() {
         return this.email;
     }
