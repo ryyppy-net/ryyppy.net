@@ -2,6 +2,7 @@ package drinkcounter.web.controllers.ui;
 
 import drinkcounter.DrinkLog;
 import drinkcounter.repository.PartyRepository;
+import drinkcounter.PartyRoster;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -58,6 +59,9 @@ public class UserControllerWebTest {
     @Autowired
     private PartyRepository partyRepository;
 
+    @Autowired
+    private PartyRoster partyRoster;
+
     private User user;
 
     @BeforeEach
@@ -71,13 +75,35 @@ public class UserControllerWebTest {
     public void userPageShowsTheSignedInUserWithPartiesNewestFirst() throws Exception {
         Party older = party("2024-01-01T00:00:00Z");
         Party newer = party("2024-02-01T00:00:00Z");
-        user.setParties(new ArrayList<>(List.of(older, newer)));
+        when(partyRoster.newestOf(42, 21)).thenReturn(List.of(newer, older));
 
         mvc.perform(get("/ui/user"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("user"))
                 .andExpect(model().attribute("user", user))
-                .andExpect(model().attribute("parties", List.of(newer, older)));
+                .andExpect(model().attribute("parties", List.of(newer, older)))
+                .andExpect(model().attributeDoesNotExist("morePartiesShown"));
+    }
+
+    @Test
+    public void userPageShowsTwentyPartiesAndLinksToTwentyMore() throws Exception {
+        List<Party> newest = new ArrayList<>();
+        for (int i = 0; i < 21; i++) {
+            newest.add(party("2024-01-01T00:00:00Z"));
+        }
+        when(partyRoster.newestOf(42, 21)).thenReturn(newest);
+
+        mvc.perform(get("/ui/user"))
+                .andExpect(model().attribute("parties", newest.subList(0, 20)))
+                .andExpect(model().attribute("morePartiesShown", 40));
+    }
+
+    @Test
+    public void userPageShowsAsManyPartiesAsAsked() throws Exception {
+        mvc.perform(get("/ui/user").param("parties", "40"))
+                .andExpect(status().isOk());
+
+        verify(partyRoster).newestOf(42, 41);
     }
 
     @Test

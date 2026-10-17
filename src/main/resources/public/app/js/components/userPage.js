@@ -10,6 +10,9 @@
         var graphTimeout = null;
 
         this.parties = PartiesStore.parties;
+        this.partiesShown = PartiesStore.shown;
+        this.hasMoreParties = PartiesStore.hasMore;
+        this.showMoreParties = PartiesStore.showMore;
         this.drinks = OwnDrinksStore.drinks;
         this.participants = [];
 
@@ -97,7 +100,7 @@
                         Jos haluat muokata bileitäsi, voit tehdä sen <a href="#!/party-admin">bileiden hallinnassa</a>.
                     </p>
 
-                    <div ng-repeat="party in $ctrl.parties.data | orderBy:$ctrl.partySort:true track by party.id">
+                    <div ng-repeat="party in $ctrl.parties.data | orderBy:[$ctrl.partySort, 'id']:true | limitTo:$ctrl.partiesShown() track by party.id">
                         <a href="#!/party/{{ ::party.id }}">
                             <div class="party color{{ ($index % 12) + 1 }}">
                                 <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
@@ -107,6 +110,7 @@
                             </div>
                         </a>
                     </div>
+                    <button id="morePartiesButton" class="btn" ng-if="$ctrl.hasMoreParties()" ng-click="$ctrl.showMoreParties()">Näytä lisää bileitä</button>
                 </div>
 
                 <h2>Historia</h2>

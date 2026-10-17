@@ -6,6 +6,9 @@
         var releaseParties = null;
 
         this.parties = PartiesStore.parties;
+        this.partiesShown = PartiesStore.shown;
+        this.hasMoreParties = PartiesStore.hasMore;
+        this.showMoreParties = PartiesStore.showMore;
         this.profile = ProfileStore.profile;
 
         this.addParty = function () {
@@ -64,7 +67,7 @@
                 <div ng-if="$ctrl.parties.data.length > 0">
                     <h2>Bileesi</h2>
 
-                    <div ng-repeat="party in $ctrl.parties.data | orderBy:$ctrl.partySort:true track by party.id">
+                    <div ng-repeat="party in $ctrl.parties.data | orderBy:[$ctrl.partySort, 'id']:true | limitTo:$ctrl.partiesShown() track by party.id">
                         <div class="row-fluid">
                             <div class="span10 party color{{ ($index % 12) + 1 }}">
                                 <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
@@ -77,6 +80,7 @@
                             </div>
                         </div>
                     </div>
+                    <button id="morePartiesButton" class="btn" ng-if="$ctrl.hasMoreParties()" ng-click="$ctrl.showMoreParties()">Näytä lisää bileitä</button>
                 </div>
             </div>
         </div>

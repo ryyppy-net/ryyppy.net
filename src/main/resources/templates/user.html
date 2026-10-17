@@ -217,6 +217,7 @@
                     </a>
                 </div>
             </div>
+            <a id="morePartiesLink" th:if="${morePartiesShown}" th:href="@{user(parties=${morePartiesShown})}" th:text="#{user.more_parties}">Show more parties</a>
         </div>
 
         <div class="header headerMargin">

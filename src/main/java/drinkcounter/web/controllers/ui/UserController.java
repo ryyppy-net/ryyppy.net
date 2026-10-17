@@ -16,8 +16,8 @@ import drinkcounter.authentication.OwnUserOrPartyMate;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Party;
-import java.util.Comparator;
-import java.util.stream.Collectors;
+import drinkcounter.PartyRoster;
+import java.util.List;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -45,12 +45,16 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @Controller
 @RequestMapping("ui")
 public class UserController {
+    private static final int PARTIES_PER_PAGE = 20;
+    private static final int MAX_PARTIES_SHOWN = 100_000;
+
     private final DrinkLog drinkLog;
     private final PartyAccess partyAccess;
     private final UserAccounts userAccounts;
     private final PassphraseLogin passphraseLogin;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final PartyRoster partyRoster;
 
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
@@ -60,13 +64,15 @@ public class UserController {
             UserAccounts userAccounts,
             PassphraseLogin passphraseLogin,
             UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            PartyRoster partyRoster) {
         this.drinkLog = drinkLog;
         this.partyAccess = partyAccess;
         this.userAccounts = userAccounts;
         this.passphraseLogin = passphraseLogin;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.partyRoster = partyRoster;
     }
 
     @RequestMapping("/newuser")
@@ -159,15 +165,18 @@ public class UserController {
     }
 
     @RequestMapping("/user")
-    public ModelAndView userPage(@LoggedInUser User user){
+    public ModelAndView userPage(@LoggedInUser User user,
+            @RequestParam(value="parties", defaultValue=""+PARTIES_PER_PAGE) int shownParties){
+        int shown = Math.max(PARTIES_PER_PAGE, Math.min(shownParties, MAX_PARTIES_SHOWN));
+        List<Party> parties = partyRoster.newestOf(user.getId(), shown + 1);
         ModelAndView mav = new ModelAndView();
         mav.setViewName("user");
         mav.addObject("user", user);
-        mav.addObject("parties", user.getParties().stream()
-            .sorted(Comparator.comparing(Party::getStartTime).reversed())
-            .collect(Collectors.toList())
-        );
-        
+        mav.addObject("parties", parties.subList(0, Math.min(shown, parties.size())));
+        if (parties.size() > shown) {
+            mav.addObject("morePartiesShown", shown + PARTIES_PER_PAGE);
+        }
+
         return mav;
     }
     

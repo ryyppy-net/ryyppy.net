@@ -49,8 +49,8 @@
             return http.get(baseUrl + "/profile/drink-history", {transformResponse: angular.identity}).then(data);
         };
 
-        this.getParties = function () {
-            return http.get(baseUrl + "/parties").then(data);
+        this.getParties = function (limit) {
+            return http.get(baseUrl + "/parties", {params: {limit: limit}}).then(data);
         };
 
         this.getParty = function (partyId) {
