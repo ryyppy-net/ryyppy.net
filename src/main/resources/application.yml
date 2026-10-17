@@ -12,6 +12,8 @@ spring:
     properties:
       hibernate:
         jdbc:
+          # The timestamp columns hold no zone; store and read them as UTC wherever the JVM runs.
+          time_zone: UTC
           lob:
             # Skip Hibernate's Connection.createClob() capability probe at
             # startup. CockroachDB (used in production on Railway) doesn't
