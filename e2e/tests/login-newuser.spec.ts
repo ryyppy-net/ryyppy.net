@@ -8,9 +8,11 @@ test('L1: /ui/login renders logo, credential fields, drink counter, registration
   await expect(page.locator('#username')).toBeVisible();
   await expect(page.locator('#password')).toBeVisible();
 
-  // totalDrinkCount is the page's only model attribute; a conversion that
-  // drops it would leave the counter rendering blank or "0 juomaa" verbatim.
-  await expect(page.locator('.totalDrinkCount')).toHaveText(/Jo \d+ juomaa juotu!/);
+  // totalDrinkCount is the page's only model attribute. The text groups its
+  // digits by locale, so the unformatted count is read from data-count.
+  const counter = page.locator('.totalDrinkCount');
+  await expect(counter).toHaveAttribute('data-count', /^\d+$/);
+  await expect(counter).toContainText('juomaa juotu!');
 
   await expect(page.locator('a[href="newuser"]')).toBeVisible();
   await expect(page.locator('a[href="/ui/privacy"]')).toBeVisible();

@@ -24,6 +24,8 @@ mvn spring-boot:run          # starts PostgreSQL via docker/docker-compose.yml, 
 mvn test                     # unit tests
 mvn test -Dtest=ClassName    # single test class
 docker build -t ryyppynet .  # container image (see Container image)
+mvn spring-boot:run -Dspring-boot.run.profiles=seed
+                             # seeds an empty database with fake data (see docs/seed-data.md)
 ```
 
 `main` is the default and only long-lived branch; base every PR on it. Merge PRs with
