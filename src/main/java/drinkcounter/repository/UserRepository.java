@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserRepository extends CrudRepository<User, Integer> {
 
     /**
-     * Joins the caller's transaction but starts none, so the signed-in user loaded for every
-     * page is a single database round trip rather than BEGIN, SELECT and COMMIT.
+     * The signed-in user is loaded for most pages; outside a caller's transaction this is one
+     * database round trip.
      */
     @Override
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
