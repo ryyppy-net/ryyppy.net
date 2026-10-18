@@ -11,6 +11,8 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.xml.JacksonXmlHttpMessageConverter;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -140,6 +142,11 @@ public class WebConfiguration implements WebMvcConfigurer {
                 new FilterRegistrationBean<>(new AppVersionFilter(gitProperties));
         registration.addUrlPatterns("/API/*", "/api/*");
         return registration;
+    }
+
+    @Bean(DispatcherServlet.FLASH_MAP_MANAGER_BEAN_NAME)
+    public FlashMapManager flashMapManager() {
+        return new NoFlashMapManager();
     }
 
     @Bean
