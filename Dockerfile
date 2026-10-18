@@ -29,8 +29,9 @@ COPY --from=builder /builder/extracted/application/ ./
 COPY --chmod=0755 checkpoint.sh ./
 ADD https://repo1.maven.org/maven2/io/opentelemetry/javaagent/opentelemetry-javaagent/2.32.0/opentelemetry-javaagent-2.32.0.jar opentelemetry-javaagent.jar
 
-# Railway's OTLP receiver accepts traces only.
-ENV OTEL_METRICS_EXPORTER=none OTEL_LOGS_EXPORTER=none
+# Railway's OTLP receiver accepts traces only. Debug logs the agent's
+# configuration, export attempts and every span.
+ENV OTEL_METRICS_EXPORTER=none OTEL_LOGS_EXPORTER=none OTEL_JAVAAGENT_DEBUG=true
 
 # Railway injects service variables for any ARG declared in the stage using
 # them. These land in the image history: `docker history` reveals the password.
