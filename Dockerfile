@@ -27,19 +27,30 @@ COPY --from=builder /builder/extracted/spring-boot-loader/ ./
 COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
 COPY --from=builder /builder/extracted/application/ ./
 COPY --chmod=0755 checkpoint.sh ./
+ADD https://repo1.maven.org/maven2/io/opentelemetry/javaagent/opentelemetry-javaagent/2.32.0/opentelemetry-javaagent-2.32.0.jar opentelemetry-javaagent.jar
+
+# Railway's OTLP receiver accepts traces only. Debug logs the agent's
+# configuration, export attempts and every span.
+ENV OTEL_METRICS_EXPORTER=none OTEL_LOGS_EXPORTER=none OTEL_JAVAAGENT_DEBUG=true
 
 # Railway injects service variables for any ARG declared in the stage using
 # them. These land in the image history: `docker history` reveals the password.
-# Only secrets need declaring - the rest of the production configuration lives
-# in application-production.yml.
+# Only secrets and the OpenTelemetry exporter settings Railway provides need
+# declaring - the rest of the production configuration lives in
+# application-production.yml.
 ARG SPRING_DATASOURCE_URL
 ARG SPRING_DATASOURCE_USERNAME
 ARG SPRING_DATASOURCE_PASSWORD
 ARG GOOGLE_CLIENT_SECRET
 ARG AUTH_RELAY_SECRET
+ARG OTEL_EXPORTER_OTLP_ENDPOINT
+ARG OTEL_EXPORTER_OTLP_PROTOCOL
+ARG OTEL_EXPORTER_OTLP_HEADERS
+ARG OTEL_SERVICE_NAME
+ARG OTEL_SERVICE_VERSION
 
 RUN ./checkpoint.sh
 
 # Railway starts a fresh container on every wake from serverless sleep, so the
 # restore runs on each wake and not only on deploy.
-ENTRYPOINT ["/bin/sh", "-c", "if [ -s crac/core.img ]; then exec java -XX:CRaCRestoreFrom=crac; fi; exec java -Dspring.aot.enabled=true -Dspring.profiles.active=production -jar application.jar"]
+ENTRYPOINT ["/bin/sh", "-c", "if [ -s crac/core.img ]; then exec java -XX:CRaCRestoreFrom=crac; fi; exec java -javaagent:opentelemetry-javaagent.jar -Dspring.aot.enabled=true -Dspring.profiles.active=production -jar application.jar"]

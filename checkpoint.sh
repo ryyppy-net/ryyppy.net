@@ -12,8 +12,10 @@ rm -rf "$CHECKPOINT"
 
 # Railway builds and runs on separate hosts, so the JVM is held to the x86-64
 # baseline every host has. A checkpoint freezes resolved property values, and
-# production configuration lives in application-production.yml.
+# production configuration lives in application-production.yml. The
+# OpenTelemetry agent attaches here and its exporter settings are frozen too.
 java -XX:CRaCEngine=warp \
+    -javaagent:opentelemetry-javaagent.jar \
     -XX:CPUFeatures=generic \
     -XX:CRaCCheckpointTo="$CHECKPOINT" \
     -Dspring.aot.enabled=true \
@@ -40,6 +42,8 @@ wait "$APP" 2>/dev/null || true
 # and a failed boot both exit non-zero; the image on disk is the only result.
 if [ -s "$CHECKPOINT/core.img" ]; then
     echo "CRaC checkpoint written ($(du -sh "$CHECKPOINT" | cut -f1))"
+    # The agent's configuration is frozen into the checkpoint, so show what it read.
+    grep -E 'otel\.javaagent.*(INFO|WARN|ERROR)|OpenTelemetry set to|xport|Exception|ndpoint' "$LOG" | head -200 || true
 else
     rm -rf "$CHECKPOINT"
     echo "WARNING: no CRaC checkpoint written; the image will boot normally" >&2
