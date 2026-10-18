@@ -43,7 +43,7 @@ wait "$APP" 2>/dev/null || true
 if [ -s "$CHECKPOINT/core.img" ]; then
     echo "CRaC checkpoint written ($(du -sh "$CHECKPOINT" | cut -f1))"
     # The agent's configuration is frozen into the checkpoint, so show what it read.
-    grep -E 'otel\.javaagent.*(INFO|WARN|ERROR)|OpenTelemetry set to|xport' "$LOG" | head -200 || true
+    grep -E 'otel\.javaagent.*(INFO|WARN|ERROR)|OpenTelemetry set to|xport|Exception|ndpoint' "$LOG" | head -200 || true
 else
     rm -rf "$CHECKPOINT"
     echo "WARNING: no CRaC checkpoint written; the image will boot normally" >&2
