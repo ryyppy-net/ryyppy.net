@@ -69,6 +69,24 @@ class RequestSessionCacheTest {
     }
 
     @Test
+    void sessionIdChangedDuringTheRequestIsSavedUnderTheNewId() throws Exception {
+        String[] newId = new String[1];
+        HttpServlet login = new HttpServlet() {
+            @Override
+            protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+                request.getSession();
+                newId[0] = request.changeSessionId();
+                response.flushBuffer();
+            }
+        };
+
+        run(new RequestSessionCache.Scope(), new SessionRepositoryFilter<>(cached(store)), login);
+
+        assertNull(store.findById(session.getId()));
+        assertEquals("hello", store.findById(newId[0]).getAttribute("greeting"));
+    }
+
+    @Test
     void invalidatedSessionIsNotServedFromTheCache() throws Exception {
         SessionRepository<MapSession> repository = cached(store);
         HttpServlet logout = new HttpServlet() {

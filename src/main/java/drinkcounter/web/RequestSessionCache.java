@@ -14,10 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Wraps the session repository so that a request reads each session from the database at most
- * once. Spring Session saves the session when the response is committed and again when the
- * request ends, and looks it up by id before each save; on a page that commits its response
- * while rendering, that second lookup would read the session again.
+ * Within one request, serves a session already read or saved from memory, so a page that commits
+ * its response while rendering reads its session from the database once.
  */
 class RequestSessionCache implements MethodInterceptor {
 
