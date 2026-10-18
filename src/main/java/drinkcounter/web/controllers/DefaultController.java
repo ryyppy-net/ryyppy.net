@@ -65,7 +65,7 @@ public class DefaultController {
     }
 
     private List<PartyDTO> loadInitialParties(User user) {
-        List<Party> parties = partyRoster.newestOf(user.getId(), INITIAL_PARTIES);
+        List<Party> parties = partyRoster.newestWithParticipantsOf(user.getId(), INITIAL_PARTIES);
         List<PartyDTO> partyDTOs = new ArrayList<>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
