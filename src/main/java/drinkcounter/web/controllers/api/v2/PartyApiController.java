@@ -49,7 +49,7 @@ public class PartyApiController {
     @GetMapping
     public List<PartyDTO> getParties(@LoggedInUser User user,
             @RequestParam(value="limit", required=false) Integer limit){
-        List<Party> parties = limit == null ? user.getParties() : partyRoster.newestOf(user.getId(), Math.max(1, limit));
+        List<Party> parties = limit == null ? user.getParties() : partyRoster.newestWithParticipantsOf(user.getId(), Math.max(1, limit));
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);

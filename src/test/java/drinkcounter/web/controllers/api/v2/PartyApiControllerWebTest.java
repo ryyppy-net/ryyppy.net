@@ -131,7 +131,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void limitListsTheNewestPartiesFromTheRoster() throws Exception {
-        when(partyRoster.newestOf(signedIn.getId(), 21)).thenReturn(List.of(party));
+        when(partyRoster.newestWithParticipantsOf(signedIn.getId(), 21)).thenReturn(List.of(party));
 
         mvc.perform(get(PARTIES).param("limit", "21"))
                 .andExpect(status().isOk())

@@ -19,4 +19,11 @@ public interface PartyRepository extends CrudRepository<Party, Integer> {
 
     @Query("select p from Party p join p.participants u where u.id = :userId order by p.startTime desc, p.id desc")
     List<Party> findNewestOfParticipant(@Param("userId") int userId, Limit limit);
+
+    @Query("""
+            select p from Party p left join fetch p.participants
+            where p.id in (select p2.id from Party p2 join p2.participants u where u.id = :userId
+                           order by p2.startTime desc, p2.id desc limit :count)
+            order by p.startTime desc, p.id desc""")
+    List<Party> findNewestOfParticipantWithParticipants(@Param("userId") int userId, @Param("count") int count);
 }

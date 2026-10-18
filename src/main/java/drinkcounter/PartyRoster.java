@@ -51,6 +51,11 @@ public class PartyRoster {
         return partyRepository.findNewestOfParticipant(userId, Limit.of(count));
     }
 
+    /** As {@link #newestOf}, with each party's participants loaded in the same query. */
+    public List<Party> newestWithParticipantsOf(int userId, int count) {
+        return partyRepository.findNewestOfParticipantWithParticipants(userId, count);
+    }
+
     public List<User> members(int partyId) {
         return new LinkedList<User>(get(partyId).getParticipants());
     }
