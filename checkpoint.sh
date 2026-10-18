@@ -13,9 +13,12 @@ rm -rf "$CHECKPOINT"
 # Railway builds and runs on separate hosts, so the JVM is held to the x86-64
 # baseline every host has. A checkpoint freezes resolved property values, and
 # production configuration lives in application-production.yml.
+# Hikari's liveness ping costs a database round trip; skip it for connections used
+# within the pool's 10 s idle timeout. The entry point's cold boot sets the same.
 java -XX:CRaCEngine=warp \
     -XX:CPUFeatures=generic \
     -XX:CRaCCheckpointTo="$CHECKPOINT" \
+    -Dcom.zaxxer.hikari.aliveBypassWindowMs=10000 \
     -Dspring.aot.enabled=true \
     -Dspring.profiles.active=production \
     -jar application.jar > "$LOG" 2>&1 &
