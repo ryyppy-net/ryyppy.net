@@ -1,8 +1,7 @@
 package drinkcounter.web.controllers;
 
 import drinkcounter.PartyRoster;
-import drinkcounter.UserAccounts;
-import drinkcounter.authentication.LoggedInUserId;
+import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -37,12 +36,10 @@ public class DefaultController {
 
     private final ObjectMapper objectMapper;
     private final PartyRoster partyRoster;
-    private final UserAccounts userAccounts;
 
-    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster, UserAccounts userAccounts) {
+    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster) {
         this.objectMapper = objectMapper;
         this.partyRoster = partyRoster;
-        this.userAccounts = userAccounts;
     }
 
     @GetMapping
@@ -51,9 +48,7 @@ public class DefaultController {
     }
 
     @GetMapping("/app/index.html")
-    public String appIndex(@LoggedInUserId int userId, Model model) {
-        // Every part of the page reads the user's drinks.
-        User user = userAccounts.getWithDrinks(userId);
+    public String appIndex(@LoggedInUser User user, Model model) {
         // Seeds the AngularJS stores, which would otherwise fetch this over the
         // API right after load - see templates/app/index.html.
         model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialProfile(user))));
