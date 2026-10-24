@@ -40,6 +40,10 @@ public class UserAccounts {
         return userRepository.findById(userId).orElse(null);
     }
 
+    public User getWithDrinks(int userId) {
+        return userRepository.findWithDrinksById(userId).orElse(null);
+    }
+
     @Transactional
     public void delete(int userId) {
         User user = get(userId);
