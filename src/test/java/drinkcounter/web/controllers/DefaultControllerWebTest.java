@@ -42,7 +42,7 @@ public class DefaultControllerWebTest {
         user.setId(42);
         user.setName("Ville");
         user.setParties(new ArrayList<>());
-        when(userAccounts.getWithDrinks(42)).thenReturn(user);
+        when(userAccounts.get(42)).thenReturn(user);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class DefaultControllerWebTest {
                 .andExpect(model().attribute("initialDrinks", containsString("2024-03-05T13:37:42.123Z")))
                 .andExpect(model().attribute("initialDrinkHistory", containsString("Time")));
 
-        verify(userAccounts).getWithDrinks(42);
+        verify(userAccounts).get(42);
     }
 
     @Test
@@ -77,6 +77,6 @@ public class DefaultControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 
-        verify(userAccounts, never()).getWithDrinks(anyInt());
+        verify(userAccounts, never()).get(anyInt());
     }
 }
