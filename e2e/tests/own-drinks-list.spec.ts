@@ -22,11 +22,11 @@ test('the dashboard lists the five newest own drinks and refills the list after 
   await expect(slots).toHaveCount(5);
   await expect(slots.filter({ hasText: '(Annoksia: 1)' })).toHaveCount(5);
 
-  const refetched = page.waitForResponse(
-    (response) => response.request().method() === 'GET' && /\/API\/v2\/profile\/drinks\?latest=5$/.test(response.url()),
+  const deleted = page.waitForResponse(
+    (response) => response.request().method() === 'DELETE' && /\/API\/v2\/profile\/drinks\/\d+$/.test(response.url()),
   );
   await slots.first().getByRole('button', { name: 'Poista' }).click();
-  expect((await refetched).ok()).toBeTruthy();
+  expect((await deleted).ok()).toBeTruthy();
 
   await expect(slots).toHaveCount(5);
   await expect(slots.filter({ hasText: '(Annoksia: 1)' })).toHaveCount(4);

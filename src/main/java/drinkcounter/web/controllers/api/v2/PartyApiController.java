@@ -9,6 +9,7 @@ import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
+import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -133,7 +134,7 @@ public class PartyApiController {
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
     @PartyMember
-    public DrinkDTO drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+    public ParticipantDrinksDTO drink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
@@ -146,26 +147,29 @@ public class PartyApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        return DrinkDTO.fromDrink(drinkLog.record(participantId, time, alcoholAmount));
+        Drink drink = drinkLog.record(participantId, time, alcoholAmount);
+        return ParticipantDrinksDTO.of(drink, userAccounts.get(participantId));
     }
 
     @PutMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
     @PartyMember
-    public void changeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+    public ParticipantDrinksDTO changeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
             @RequestParam("alcohol") Float alcoholPercentage){
         requireParticipant(partyId, participantId);
-        drinkLog.correctAlcohol(participantId, drinkId,
+        Drink drink = drinkLog.correctAlcohol(participantId, drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
+        return ParticipantDrinksDTO.of(drink, userAccounts.get(participantId));
     }
 
     @DeleteMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
     @PartyMember
-    public void removeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
+    public ParticipantDrinksDTO removeDrink(@PathVariable Integer partyId, @PathVariable Integer participantId,
             @PathVariable Integer drinkId){
         requireParticipant(partyId, participantId);
         drinkLog.undo(participantId, drinkId);
+        return ParticipantDrinksDTO.of(null, userAccounts.get(participantId));
     }
 
     private void requireParticipant(Integer partyId, Integer participantId) {

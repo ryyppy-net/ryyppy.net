@@ -109,11 +109,12 @@ public class DrinkLog {
     }
 
     @Transactional
-    public void correctAlcohol(int userId, int drinkId, float grams) {
+    public Drink correctAlcohol(int userId, int drinkId, float grams) {
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = findDrinkOf(user, drinkId);
         user.changeDrinkAlcohol(drink, grams);
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), grams);
+        return drink;
     }
 
     /** All drinks ever recorded, counted at most once a minute. */

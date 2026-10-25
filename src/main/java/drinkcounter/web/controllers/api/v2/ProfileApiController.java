@@ -8,7 +8,6 @@ import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
-import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.util.DrinksPerDayCsv;
@@ -62,7 +61,7 @@ public class ProfileApiController {
     }
 
     @PostMapping("drinks")
-    public DrinkDTO drink(@LoggedInUserId int userId,
+    public OwnDrinksDTO drink(@LoggedInUser User user,
             @RequestParam(value="volume", required=false) Float volume,
             @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
             @RequestParam(value="timestamp", required=false) String timestamp){
@@ -74,7 +73,8 @@ public class ProfileApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        return DrinkDTO.fromDrink(drinkLog.record(userId, time, (float)alcoholAmount));
+        Drink drink = drinkLog.record(user.getId(), time, (float)alcoholAmount);
+        return OwnDrinksDTO.of(drink, user, clock);
     }
 
     /** The user's drinks, oldest first; {@code latest} keeps only that many of the newest. */
@@ -86,16 +86,18 @@ public class ProfileApiController {
     }
 
     @PutMapping("drinks/{drinkId}")
-    public void changeDrink(@LoggedInUserId int userId, @PathVariable Integer drinkId,
+    public OwnDrinksDTO changeDrink(@LoggedInUser User user, @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
             @RequestParam("alcohol") Float alcoholPercentage){
-        drinkLog.correctAlcohol(userId, drinkId,
+        Drink drink = drinkLog.correctAlcohol(user.getId(), drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
+        return OwnDrinksDTO.of(drink, user, clock);
     }
 
     @DeleteMapping("drinks/{drinkId}")
-    public void deleteDrink(@LoggedInUserId int userId, @PathVariable Integer drinkId){
-        drinkLog.undo(userId, drinkId);
+    public OwnDrinksDTO deleteDrink(@LoggedInUser User user, @PathVariable Integer drinkId){
+        drinkLog.undo(user.getId(), drinkId);
+        return OwnDrinksDTO.of(null, user, clock);
     }
 
     @GetMapping("drink-history")
