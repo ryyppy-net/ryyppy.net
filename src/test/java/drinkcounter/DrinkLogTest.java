@@ -102,7 +102,7 @@ public class DrinkLogTest {
     }
 
     private Drink usersDrink() {
-        int drinkId = drinkLog.record(1, new Date());
+        drinkLog.record(1, new Date());
         return user.getDrinks().get(0);
     }
 
