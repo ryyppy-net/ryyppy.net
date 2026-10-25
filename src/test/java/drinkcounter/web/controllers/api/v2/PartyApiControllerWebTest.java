@@ -195,8 +195,10 @@ public class PartyApiControllerWebTest {
     public void drinkReturnsTheSavedDrink() throws Exception {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(7))
-                .andExpect(jsonPath("$.timestamp").value("2024-03-05T13:37:42.123Z"));
+                .andExpect(jsonPath("$.drink.id").value(7))
+                .andExpect(jsonPath("$.drink.timestamp").value("2024-03-05T13:37:42.123Z"))
+                .andExpect(jsonPath("$.participant.id").value(2))
+                .andExpect(jsonPath("$.participant.history").isArray());
     }
 
     @Test
@@ -210,7 +212,8 @@ public class PartyApiControllerWebTest {
     @Test
     public void changeDrinkUpdatesAlcoholOfParticipantsDrink() throws Exception {
         mvc.perform(put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.participant.id").value(2));
 
         verify(drinkLog).correctAlcohol(eq(2), eq(7), any(Float.class));
     }
@@ -227,7 +230,9 @@ public class PartyApiControllerWebTest {
     @Test
     public void removeDrinkRemovesParticipantsDrink() throws Exception {
         mvc.perform(delete(PARTIES + "/1/participants/2/drinks/7"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.drink").doesNotExist())
+                .andExpect(jsonPath("$.participant.id").value(2));
 
         verify(drinkLog).undo(2, 7);
     }

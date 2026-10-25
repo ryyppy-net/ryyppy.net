@@ -18,7 +18,7 @@ test("an outsider is forbidden from another user's party API and changes nothing
     const p = `${PARTIES}/${party.id}`;
     await owner.post(`${p}/participants`, { form: { name: 'Guest', sex: 'MALE', weight: '80' } });
     const guest = (await (await owner.get(`${p}/participants`)).json()).find((u: any) => u.name === 'Guest');
-    const drink = await (await owner.post(`${p}/participants/${guest.id}/drinks`)).json();
+    const drink = (await (await owner.post(`${p}/participants/${guest.id}/drinks`)).json()).drink;
     const outsiderId = (await (await outsider.get('/API/v2/profile')).json()).id;
     const participantsBefore = await (await owner.get(`${p}/participants`)).json();
 

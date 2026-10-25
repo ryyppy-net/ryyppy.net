@@ -89,7 +89,7 @@ async function tapToDrink(page: Page, drinkerTile: Locator, drinksUrl = /\/drink
   await drinkerTile.locator('.container-fluid').first().click();
   const response = await saved;
   expect(response.ok()).toBeTruthy();
-  return (await response.json()) as { id: number };
+  return ((await response.json()) as { drink: { id: number } }).drink;
 }
 
 test('the undo and edit overlay closes by itself and keeps the drink', async ({ page }) => {
@@ -128,7 +128,7 @@ test('a drink can be added and undone with the keyboard alone', async ({ page })
   );
   await card.focus();
   await page.keyboard.press('Enter');
-  const { id } = (await (await saved).json()) as { id: number };
+  const { id } = ((await (await saved).json()) as { drink: { id: number } }).drink;
   expect(await getOwnDrinks(page)).toHaveLength(1);
 
   const deleted = page.waitForResponse(

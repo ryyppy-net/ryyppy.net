@@ -29,6 +29,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -116,9 +117,26 @@ public class ProfileApiControllerWebTest {
     public void drinkIsAddedForTheSignedInUser() throws Exception {
         mvc.perform(post("/API/v2/profile/drinks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(7));
+                .andExpect(jsonPath("$.drink.id").value(7));
 
         verify(drinkLog).record(eq(42), any(), any());
+    }
+
+    @Test
+    public void addedDrinkComesBackWithWhatTheDashboardShows() throws Exception {
+        Drink earlier = new Drink();
+        earlier.setId(6);
+        earlier.setTimeStamp(Instant.parse("2024-03-05T12:00:00Z"));
+        user.drink(earlier);
+
+        mvc.perform(post("/API/v2/profile/drinks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.profile.id").value(42))
+                .andExpect(jsonPath("$.profile.totalDrinks").exists())
+                .andExpect(jsonPath("$.profile.history").isArray())
+                .andExpect(jsonPath("$.latestDrinks.length()").value(1))
+                .andExpect(jsonPath("$.latestDrinks[0].id").value(6))
+                .andExpect(jsonPath("$.drinkHistory").value(startsWith("Time,Drinks")));
     }
 
     @Test
@@ -140,8 +158,15 @@ public class ProfileApiControllerWebTest {
 
     @Test
     public void changeDrinkUpdatesAlcoholOfOwnDrink() throws Exception {
+        Drink changed = new Drink();
+        changed.setId(7);
+        changed.setTimeStamp(Instant.parse("2024-03-05T13:37:42Z"));
+        when(drinkLog.correctAlcohol(eq(42), eq(7), any(Float.class))).thenReturn(changed);
+
         mvc.perform(put("/API/v2/profile/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.drink.id").value(7))
+                .andExpect(jsonPath("$.profile.id").value(42));
 
         verify(drinkLog).correctAlcohol(eq(42), eq(7), any(Float.class));
     }
@@ -149,7 +174,10 @@ public class ProfileApiControllerWebTest {
     @Test
     public void drinkIsDeletedOnlyFromTheSignedInUser() throws Exception {
         mvc.perform(delete("/API/v2/profile/drinks/7"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.drink").doesNotExist())
+                .andExpect(jsonPath("$.profile.id").value(42))
+                .andExpect(jsonPath("$.latestDrinks").isArray());
 
         verify(drinkLog).undo(42, 7);
     }
