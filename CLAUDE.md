@@ -57,9 +57,9 @@ args; omit them locally and it is skipped. Two invariants:
 
 ## Things that are easy to get wrong
 
-- `PromilleTracker.getInstance()` is a static singleton outside Spring that keeps
-  an in-memory `AlcoholCalculator` per user id. Change drinks through `User.drink()` /
-  `User.removeDrink()` so it stays in sync.
+- Promilles are computed on each request from the user's last 7 days of drinks:
+  `Promilles.of(...)` gives a `BloodAlcohol` that the DTOs read. Pass a whole party
+  to `Promilles.of(Collection)` so it reads every participant's drinks in one query.
 - Google sign-in only works on the hub domain registered with Google
   (`GOOGLE_AUTH_HUB_URL`, `https://ryyppy.net` in production). Other environments,
   such as PR previews, reach it through `authentication/relay/`, signed with

@@ -1,13 +1,12 @@
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.PromilleTracker;
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,11 +17,6 @@ public class PromilleHistoryTest {
 
     private static final long WINDOW_MILLIS = Duration.ofMinutes(300).toMillis();
     private static final long TOLERANCE_MILLIS = 5000;
-
-    @BeforeEach
-    public void setUp() {
-        PromilleTracker.getInstance().reset();
-    }
 
     @Test
     public void forUserCoversLast300MinutesAtOneMinuteResolution() {
@@ -36,7 +30,8 @@ public class PromilleHistoryTest {
         user.drink(drink);
 
         long before = System.currentTimeMillis();
-        List<HistoryPoint> slopes = PromilleHistory.forUser(user);
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), Instant.now());
+        List<HistoryPoint> slopes = PromilleHistory.of(bloodAlcohol);
         long after = System.currentTimeMillis();
 
         assertFalse(slopes.isEmpty());
@@ -48,7 +43,7 @@ public class PromilleHistoryTest {
         HistoryPoint last = slopes.get(slopes.size() - 1);
         assertTrue(last.getTimestamp() >= before - TOLERANCE_MILLIS && last.getTimestamp() <= after + TOLERANCE_MILLIS,
                 "last point should be ~now, was " + last.getTimestamp());
-        assertEquals(user.getPromilles(), (float) last.getPromilles(), 0.01f);
+        assertEquals(bloodAlcohol.promilles(), (float) last.getPromilles(), 0.01f);
 
         long previousTimestamp = firstTimestamp;
         for (HistoryPoint point : slopes) {
@@ -70,9 +65,10 @@ public class PromilleHistoryTest {
             user.drink(drink);
         }
 
-        List<HistoryPoint> points = PromilleHistory.forUser(user);
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), Instant.now());
+        List<HistoryPoint> points = PromilleHistory.of(bloodAlcohol);
         long start = points.get(0).getTimestamp();
-        List<Float> everyMinute = user.getPromillesAtInterval(
+        List<Float> everyMinute = bloodAlcohol.promillesAtInterval(
                 new Date(start), new Date(start + WINDOW_MILLIS), 60_000);
 
         assertTrue(points.size() < everyMinute.size() / 5, "only bends are sent, got " + points.size());

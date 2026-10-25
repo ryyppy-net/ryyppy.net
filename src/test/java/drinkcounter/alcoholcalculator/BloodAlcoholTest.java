@@ -1,7 +1,7 @@
-package drinkcounter.model;
+package drinkcounter.alcoholcalculator;
 
-import drinkcounter.PromilleTracker;
-import drinkcounter.alcoholcalculator.AlcoholCalculator;
+import drinkcounter.model.Drink;
+import drinkcounter.model.User;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserTest {
+public class BloodAlcoholTest {
     private User man80 = new User();
     private User man110 = new User();
     private User woman60 = new User();
@@ -35,8 +35,6 @@ public class UserTest {
         woman90.setWeight(90);
         woman90.setSex(User.Sex.FEMALE);
         woman90.setId(4);
-
-        PromilleTracker.getInstance().reset();
     }
 
     // Basic tests
@@ -46,7 +44,7 @@ public class UserTest {
         user.setId(5);
         Drink drink = new Drink();
         user.drink(drink);
-        assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, user.getBloodAlcoholGrams(), 0.1f);
+        assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, bloodAlcohol(user).grams(), 0.1f);
     }
 
     // DRINK COURSES:
@@ -65,25 +63,25 @@ public class UserTest {
     @Test
     public void testPromilles_man80_drinkCourse1() {
         drinkCourse1(man80);
-        assertEquals(MAN_80_DRINK_COURSE_1, man80.getPromilles(), TOLERANCE);
+        assertEquals(MAN_80_DRINK_COURSE_1, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_man110_drinkCourse1() {
         drinkCourse1(man110);
-        assertEquals(MAN_110_DRINK_COURSE_1, man110.getPromilles(), TOLERANCE);
+        assertEquals(MAN_110_DRINK_COURSE_1, bloodAlcohol(man110).promilles(), TOLERANCE);
     }
 
     @Test
     public void testPromilles_woman60_drinkCourse1() {
         drinkCourse1(woman60);
-        assertEquals(WOMAN_60_DRINK_COURSE_1, woman60.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_60_DRINK_COURSE_1, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_woman90_drinkCourse1() {
         drinkCourse1(woman90);
-        assertEquals(WOMAN_90_DRINK_COURSE_1, woman90.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_90_DRINK_COURSE_1, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }
 
     // Drink course 2:
@@ -100,25 +98,25 @@ public class UserTest {
     @Test
     public void testPromilles_man80_drinkCourse2() {
         drinkCourse2(man80);
-        assertEquals(MAN_80_DRINK_COURSE_2, man80.getPromilles(), TOLERANCE);
+        assertEquals(MAN_80_DRINK_COURSE_2, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_man110_drinkCourse2() {
         drinkCourse2(man110);
-        assertEquals(MAN_110_DRINK_COURSE_2, man110.getPromilles(), TOLERANCE);
+        assertEquals(MAN_110_DRINK_COURSE_2, bloodAlcohol(man110).promilles(), TOLERANCE);
     }
 
     @Test
     public void testPromilles_woman60_drinkCourse2() {
         drinkCourse2(woman60);
-        assertEquals(WOMAN_60_DRINK_COURSE_2, woman60.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_60_DRINK_COURSE_2, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_woman90_drinkCourse2() {
         drinkCourse2(woman90);
-        assertEquals(WOMAN_90_DRINK_COURSE_2, woman90.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_90_DRINK_COURSE_2, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }
 
     // Drink course 3:
@@ -135,25 +133,25 @@ public class UserTest {
     @Test
     public void testPromilles_man80_drinkCourse3() {
         drinkCourse3(man80);
-        assertEquals(MAN_80_DRINK_COURSE_3, man80.getPromilles(), TOLERANCE);
+        assertEquals(MAN_80_DRINK_COURSE_3, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_man110_drinkCourse3() {
         drinkCourse3(man110);
-        assertEquals(MAN_110_DRINK_COURSE_3, man110.getPromilles(), TOLERANCE);
+        assertEquals(MAN_110_DRINK_COURSE_3, bloodAlcohol(man110).promilles(), TOLERANCE);
     }
 
     @Test
     public void testPromilles_woman60_drinkCourse3() {
         drinkCourse3(woman60);
-        assertEquals(WOMAN_60_DRINK_COURSE_3, woman60.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_60_DRINK_COURSE_3, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_woman90_drinkCourse3() {
         drinkCourse3(woman90);
-        assertEquals(WOMAN_90_DRINK_COURSE_3, woman90.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_90_DRINK_COURSE_3, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }  
     
     // Drink course 4:
@@ -170,25 +168,25 @@ public class UserTest {
     @Test
     public void testPromilles_man80_drinkCourse4() {
         drinkCourse4(man80);
-        assertEquals(MAN_80_DRINK_COURSE_4, man80.getPromilles(), TOLERANCE);
+        assertEquals(MAN_80_DRINK_COURSE_4, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_man110_drinkCourse4() {
         drinkCourse4(man110);
-        assertEquals(MAN_110_DRINK_COURSE_4, man110.getPromilles(), TOLERANCE);
+        assertEquals(MAN_110_DRINK_COURSE_4, bloodAlcohol(man110).promilles(), TOLERANCE);
     }
 
     @Test
     public void testPromilles_woman60_drinkCourse4() {
         drinkCourse4(woman60);
-        assertEquals(WOMAN_60_DRINK_COURSE_4, woman60.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_60_DRINK_COURSE_4, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_woman90_drinkCourse4() {
         drinkCourse4(woman90);
-        assertEquals(WOMAN_90_DRINK_COURSE_4, woman90.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_90_DRINK_COURSE_4, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }
     
     // Drink course 5:
@@ -205,28 +203,32 @@ public class UserTest {
     @Test
     public void testPromilles_man80_drinkCourse5() {
         drinkCourse5(man80);
-        assertEquals(MAN_80_DRINK_COURSE_5, man80.getPromilles(), TOLERANCE);
+        assertEquals(MAN_80_DRINK_COURSE_5, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_man110_drinkCourse5() {
         drinkCourse5(man110);
-        assertEquals(MAN_110_DRINK_COURSE_5, man110.getPromilles(), TOLERANCE);
+        assertEquals(MAN_110_DRINK_COURSE_5, bloodAlcohol(man110).promilles(), TOLERANCE);
     }
 
     @Test
     public void testPromilles_woman60_drinkCourse5() {
         drinkCourse5(woman60);
-        assertEquals(WOMAN_60_DRINK_COURSE_5, woman60.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_60_DRINK_COURSE_5, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
     
     @Test
     public void testPromilles_woman90_drinkCourse5() {
         drinkCourse5(woman90);
-        assertEquals(WOMAN_90_DRINK_COURSE_5, woman90.getPromilles(), TOLERANCE);
+        assertEquals(WOMAN_90_DRINK_COURSE_5, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }
     
     // Helper functions
+    private static BloodAlcohol bloodAlcohol(User user) {
+        return new BloodAlcohol(user, user.getDrinks(), Instant.now());
+    }
+
     public void drinkXDrinksNMinutesAgo(User user, int drinks, int minutes) {
         for (int i = 0; i < drinks; i++) {
             Drink drink = new Drink();
@@ -256,8 +258,8 @@ public class UserTest {
         Instant now = Instant.now();
         Instant end = now.plus(Duration.ofHours(24));
 
-        List<Float> user1promilles = user.getPromillesAtInterval(Date.from(now), Date.from(end), 10000);
-        List<Float> user2promilles = user2.getPromillesAtInterval(Date.from(now), Date.from(end), 10000);
+        List<Float> user1promilles = bloodAlcohol(user).promillesAtInterval(Date.from(now), Date.from(end), 10000);
+        List<Float> user2promilles = bloodAlcohol(user2).promillesAtInterval(Date.from(now), Date.from(end), 10000);
 
         int len1 = user1promilles.size();
 
@@ -266,5 +268,34 @@ public class UserTest {
             float p2 = user2promilles.get(i);
             assertEquals(p1, p2, 0.01);
         }
+    }
+
+    @Test
+    public void drinksSinceSoberCountsOnlyTheCurrentSession() {
+        Instant now = Instant.now();
+        User user = new User();
+        user.setWeight(80);
+        drinkAt(user, now.minus(Duration.ofHours(30)));
+        drinkAt(user, now.minus(Duration.ofHours(30)));
+        drinkAt(user, now.minus(Duration.ofHours(2)));
+        drinkAt(user, now.minus(Duration.ofHours(1)));
+
+        assertEquals(2, new BloodAlcohol(user, user.getDrinks(), now).drinksSinceSober());
+    }
+
+    @Test
+    public void withoutDrinksTheUserIsSober() {
+        User user = new User();
+
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(user, List.of(), Instant.now());
+
+        assertEquals(0f, bloodAlcohol.promilles());
+        assertEquals(0, bloodAlcohol.drinksSinceSober());
+    }
+
+    private static void drinkAt(User user, Instant timeStamp) {
+        Drink drink = new Drink();
+        drink.setTimeStamp(timeStamp);
+        user.drink(drink);
     }
 }

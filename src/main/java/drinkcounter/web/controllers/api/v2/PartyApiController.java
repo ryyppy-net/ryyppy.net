@@ -3,8 +3,10 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
+import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.authentication.PartyAccess;
@@ -19,6 +21,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +39,16 @@ public class PartyApiController {
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
     private final PartyAccess partyAccess;
+    private final Promilles promilles;
 
     public PartyApiController(PartyRoster partyRoster, InvitationSuggestions invitationSuggestions,
-            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess) {
+            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess, Promilles promilles) {
         this.partyRoster = partyRoster;
         this.invitationSuggestions = invitationSuggestions;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
         this.partyAccess = partyAccess;
+        this.promilles = promilles;
     }
 
     /** The user's parties; {@code limit} keeps only that many of the newest, newest first. */
@@ -82,11 +87,13 @@ public class PartyApiController {
     public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
         Party party = partyRoster.get(partyId);
         Set<User> participants = party.getParticipants();
+        Map<Integer, BloodAlcohol> bloodAlcohol = promilles.of(participants);
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (User participant : participants) {
-            ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
+            BloodAlcohol participantBloodAlcohol = bloodAlcohol.get(participant.getId());
+            ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant, participantBloodAlcohol);
             
-            List<HistoryPoint> history = PromilleHistory.forUser(participant);
+            List<HistoryPoint> history = PromilleHistory.of(participantBloodAlcohol);
             participantDTO.setHistory(history);
             
             participantDTOs.add(participantDTO);
@@ -129,7 +136,8 @@ public class PartyApiController {
     @PartyMember
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         requireParticipant(partyId, participantId);
-        return ParticipantDTO.fromUser(userAccounts.get(participantId));
+        User participant = userAccounts.get(participantId);
+        return ParticipantDTO.fromUser(participant, promilles.of(participant));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
@@ -148,7 +156,7 @@ public class PartyApiController {
             time = Date.from(Instant.parse(timestamp));
         }
         Drink drink = drinkLog.record(participantId, time, alcoholAmount);
-        return ParticipantDrinksDTO.of(drink, userAccounts.get(participantId));
+        return participantDrinks(drink, participantId);
     }
 
     @PutMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
@@ -160,7 +168,7 @@ public class PartyApiController {
         requireParticipant(partyId, participantId);
         Drink drink = drinkLog.correctAlcohol(participantId, drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
-        return ParticipantDrinksDTO.of(drink, userAccounts.get(participantId));
+        return participantDrinks(drink, participantId);
     }
 
     @DeleteMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
@@ -169,7 +177,12 @@ public class PartyApiController {
             @PathVariable Integer drinkId){
         requireParticipant(partyId, participantId);
         drinkLog.undo(participantId, drinkId);
-        return ParticipantDrinksDTO.of(null, userAccounts.get(participantId));
+        return participantDrinks(null, participantId);
+    }
+
+    private ParticipantDrinksDTO participantDrinks(Drink drink, int participantId) {
+        User participant = userAccounts.get(participantId);
+        return ParticipantDrinksDTO.of(drink, participant, promilles.of(participant));
     }
 
     private void requireParticipant(Integer partyId, Integer participantId) {

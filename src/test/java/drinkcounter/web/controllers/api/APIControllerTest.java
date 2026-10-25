@@ -1,13 +1,14 @@
 package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvReader;
-import drinkcounter.PromilleTracker;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
+import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import drinkcounter.repository.DrinkRepository;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
@@ -31,6 +32,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,15 +42,15 @@ public class APIControllerTest {
     private APIController controller;
     private UserAccounts userAccounts;
     private HttpSession session;
+    private DrinkRepository drinkRepository;
 
     @BeforeEach
     public void setUp() {
-        PromilleTracker.getInstance().reset();
-
         userAccounts = mock(UserAccounts.class);
         session = mock(HttpSession.class);
+        drinkRepository = mock(DrinkRepository.class);
         controller = new APIController(mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
-                mock(PassphraseLogin.class));
+                mock(PassphraseLogin.class), new Promilles(drinkRepository));
     }
 
     private TimeZone originalDefaultTimeZone;
@@ -172,6 +175,7 @@ public class APIControllerTest {
         user.drink(drink);
 
         when(userAccounts.get(1)).thenReturn(user);
+        when(drinkRepository.findByDrinkersSince(eq(List.of(1)), any())).thenReturn(user.getDrinks());
 
         long before = System.currentTimeMillis();
         ResponseEntity<byte[]> response = controller.showHistory(1);

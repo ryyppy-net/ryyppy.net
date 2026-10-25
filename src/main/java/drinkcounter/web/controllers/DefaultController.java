@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers;
 
 import drinkcounter.PartyRoster;
+import drinkcounter.Promilles;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
@@ -28,10 +29,12 @@ public class DefaultController {
 
     private final ObjectMapper objectMapper;
     private final PartyRoster partyRoster;
+    private final Promilles promilles;
 
-    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster) {
+    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster, Promilles promilles) {
         this.objectMapper = objectMapper;
         this.partyRoster = partyRoster;
+        this.promilles = promilles;
     }
 
     @GetMapping
@@ -43,7 +46,7 @@ public class DefaultController {
     public String appIndex(@LoggedInUser User user, Model model) {
         // Seeds the AngularJS stores, which would otherwise fetch this over the
         // API right after load - see templates/app/index.html.
-        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(user))));
+        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(user, promilles.of(user)))));
         model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
         model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.latestDrinks(user))));
         model.addAttribute("initialDrinkHistory", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinkHistory(user, Clock.systemUTC()))));

@@ -4,7 +4,7 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
-import drinkcounter.model.User;
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,12 +19,12 @@ public class PromilleHistory {
     // In promilles: above float rounding, far below what a chart can show.
     private static final float BEND_TOLERANCE = 0.00001f;
 
-    public static List<HistoryPoint> forUser(User user) {
+    public static List<HistoryPoint> of(BloodAlcohol bloodAlcohol) {
         int intervalMs = 60 * 1000;
         Instant now = Instant.now();
         Instant start = now.minus(Duration.ofMinutes(300));
 
-        List<Float> history = user.getPromillesAtInterval(Date.from(start), Date.from(now), intervalMs);
+        List<Float> history = bloodAlcohol.promillesAtInterval(Date.from(start), Date.from(now), intervalMs);
         List<HistoryPoint> slopes = new ArrayList<HistoryPoint>();
 
         // Promilles fall in straight lines between drinks and the charts draw straight
@@ -43,7 +43,7 @@ public class PromilleHistory {
 
         HistoryPoint point = new HistoryPoint();
         point.setTimestamp(Instant.now().toEpochMilli());
-        point.setPromilles(user.getPromilles());
+        point.setPromilles(bloodAlcohol.promilles());
         slopes.add(point);
         return slopes;
     }

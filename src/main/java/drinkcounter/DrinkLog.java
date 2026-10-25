@@ -112,7 +112,7 @@ public class DrinkLog {
     public Drink correctAlcohol(int userId, int drinkId, float grams) {
         User user = userRepository.findById(userId).orElseThrow(EntityNotFoundException::new);
         Drink drink = findDrinkOf(user, drinkId);
-        user.changeDrinkAlcohol(drink, grams);
+        drink.setAlcohol(grams);
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), grams);
         return drink;
     }
@@ -127,11 +127,9 @@ public class DrinkLog {
         return total;
     }
 
-    /** Looks in the user's own drinks, which the PromilleTracker recalculation loads anyway. */
     private Drink findDrinkOf(User user, int drinkId) {
-        return user.getDrinks().stream()
-                .filter(drink -> Objects.equals(drink.getId(), drinkId))
-                .findFirst()
+        return drinkRepository.findById(drinkId)
+                .filter(drink -> Objects.equals(drink.getDrinker().getId(), user.getId()))
                 .orElseThrow(() -> new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId()));
     }
 }
