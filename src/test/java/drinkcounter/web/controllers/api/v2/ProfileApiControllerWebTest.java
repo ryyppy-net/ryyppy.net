@@ -1,6 +1,5 @@
 package drinkcounter.web.controllers.api.v2;
 
-import com.csvreader.CsvReader;
 import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -8,31 +7,18 @@ import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
 import jakarta.servlet.ServletException;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,8 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithDrinkcounterUser(userId = 42)
 public class ProfileApiControllerWebTest {
 
-    private static final String DRINK_HISTORY = "/API/v2/profile/drink-history";
-
     @Autowired
     private MockMvc mvc;
 
@@ -68,11 +52,7 @@ public class ProfileApiControllerWebTest {
     @Autowired
     private UserAccounts userAccounts;
 
-    @Autowired
-    private ProfileApiController controller;
-
     private User user;
-    private TimeZone originalDefaultTimeZone;
 
     @BeforeEach
     public void setUp() {
@@ -84,14 +64,6 @@ public class ProfileApiControllerWebTest {
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42Z"));
         when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
-    }
-
-    @AfterEach
-    public void restoreClockAndTimeZone() {
-        ReflectionTestUtils.setField(controller, "clock", Clock.systemUTC());
-        if (originalDefaultTimeZone != null) {
-            TimeZone.setDefault(originalDefaultTimeZone);
-        }
     }
 
     @Test
@@ -134,9 +106,9 @@ public class ProfileApiControllerWebTest {
                 .andExpect(jsonPath("$.profile.id").value(42))
                 .andExpect(jsonPath("$.profile.totalDrinks").exists())
                 .andExpect(jsonPath("$.profile.history").isArray())
-                .andExpect(jsonPath("$.latestDrinks.length()").value(1))
-                .andExpect(jsonPath("$.latestDrinks[0].id").value(6))
-                .andExpect(jsonPath("$.drinkHistory").value(startsWith("Time,Drinks")));
+                .andExpect(jsonPath("$.drink.timestamp").value("2024-03-05T13:37:42Z"))
+                .andExpect(jsonPath("$.latestDrinks").doesNotExist())
+                .andExpect(jsonPath("$.drinkHistory").doesNotExist());
     }
 
     @Test
@@ -176,8 +148,7 @@ public class ProfileApiControllerWebTest {
         mvc.perform(delete("/API/v2/profile/drinks/7"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.drink").doesNotExist())
-                .andExpect(jsonPath("$.profile.id").value(42))
-                .andExpect(jsonPath("$.latestDrinks").isArray());
+                .andExpect(jsonPath("$.profile.id").value(42));
 
         verify(drinkLog).undo(42, 7);
     }
@@ -197,7 +168,7 @@ public class ProfileApiControllerWebTest {
     }
 
     @Test
-    public void latestKeepsOnlyTheNewestDrinksOldestFirst() throws Exception {
+    public void sinceKeepsOnlyDrinksAtOrAfterItOldestFirst() throws Exception {
         for (int id = 1; id <= 3; id++) {
             Drink drink = new Drink();
             drink.setId(id);
@@ -205,14 +176,20 @@ public class ProfileApiControllerWebTest {
             user.drink(drink);
         }
 
-        mvc.perform(get("/API/v2/profile/drinks").param("latest", "2"))
+        mvc.perform(get("/API/v2/profile/drinks").param("since", "2024-03-05T13:02:00Z"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(2))
                 .andExpect(jsonPath("$[1].id").value(3));
 
-        mvc.perform(get("/API/v2/profile/drinks").param("latest", "10"))
-                .andExpect(jsonPath("$.length()").value(3));
+        mvc.perform(get("/API/v2/profile/drinks").param("since", "2024-03-05T14:00:00Z"))
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    public void malformedSinceIsRejectedWithBadRequest() throws Exception {
+        mvc.perform(get("/API/v2/profile/drinks").param("since", "yesterday"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -234,92 +211,5 @@ public class ProfileApiControllerWebTest {
 
         verifyNoInteractions(drinkLog);
         verify(userAccounts, never()).get(anyInt());
-    }
-
-    // The history buckets by UTC day, so its "Time" column must be midnight UTC, not
-    // midnight in the server's default zone.
-    @Test
-    public void drinkHistoryTimeColumnIsMidnightUtcNotServerZone() throws Exception {
-        originalDefaultTimeZone = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
-
-        Drink drink = new Drink();
-        drink.setTimeStamp(Instant.parse("2024-03-06T01:00:00Z"));
-        user.drink(drink);
-
-        long millis = findMillisForUtcDay(drinkHistoryCsv(), "2024-03-06");
-
-        assertEquals(Instant.parse("2024-03-06T00:00:00Z").toEpochMilli(), millis,
-                "Time column should be midnight 2024-03-06 UTC, not midnight in the server's zone (America/Los_Angeles)");
-    }
-
-    @Test
-    public void drinkHistoryTodayBucketIsTheUtcDate() throws Exception {
-        originalDefaultTimeZone = TimeZone.getDefault();
-        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"));
-        // 2024-03-06T02:00:00Z is still 2024-03-05 in America/Los_Angeles.
-        ReflectionTestUtils.setField(controller, "clock",
-                Clock.fixed(Instant.parse("2024-03-06T02:00:00Z"), ZoneOffset.UTC));
-
-        Map<String, Integer> countsByDay = parseTimeCountCsv(drinkHistoryCsv());
-
-        assertTrue(countsByDay.containsKey("2024-03-06"),
-                "today's bucket should be 2024-03-06 (UTC date), not 2024-03-05 (server's America/Los_Angeles date)");
-    }
-
-    @Test
-    public void getDrinkHistoryBucketsDrinksByUtcDay() throws Exception {
-        Drink drink1 = new Drink();
-        drink1.setTimeStamp(Instant.parse("2024-03-05T10:00:00.000Z"));
-        Drink drink2 = new Drink();
-        drink2.setTimeStamp(Instant.parse("2024-03-06T10:00:00.000Z"));
-        user.drink(drink1);
-        user.drink(drink2);
-
-        Map<String, Integer> countsByDay = parseTimeCountCsv(drinkHistoryCsv());
-
-        assertEquals(1, countsByDay.getOrDefault("2024-03-05", 0));
-        assertEquals(1, countsByDay.getOrDefault("2024-03-06", 0));
-        String today = LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
-        assertTrue(countsByDay.containsKey(today), "should always include today's bucket");
-    }
-
-    private byte[] drinkHistoryCsv() throws Exception {
-        return mvc.perform(get(DRINK_HISTORY))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsByteArray();
-    }
-
-    private long findMillisForUtcDay(byte[] csv, String targetDay) throws Exception {
-        CsvReader reader = new CsvReader(new ByteArrayInputStream(csv), StandardCharsets.UTF_8);
-        reader.readHeaders();
-        long result = -1;
-        while (reader.readRecord()) {
-            long millis = Long.parseLong(reader.get(0));
-            String dayUtc = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toString();
-            if (dayUtc.equals(targetDay)) {
-                result = millis;
-            }
-        }
-        reader.close();
-        if (result == -1) {
-            throw new AssertionError("No row found for UTC day " + targetDay);
-        }
-        return result;
-    }
-
-    private Map<String, Integer> parseTimeCountCsv(byte[] csv) throws Exception {
-        Map<String, Integer> result = new HashMap<>();
-        CsvReader reader = new CsvReader(new ByteArrayInputStream(csv), StandardCharsets.UTF_8);
-        reader.readHeaders();
-        while (reader.readRecord()) {
-            long millis = Long.parseLong(reader.get(0));
-            int count = Integer.parseInt(reader.get(1));
-            String day = Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate()
-                    .format(DateTimeFormatter.ISO_LOCAL_DATE);
-            result.put(day, count);
-        }
-        reader.close();
-        return result;
     }
 }

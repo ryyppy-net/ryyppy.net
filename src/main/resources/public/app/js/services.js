@@ -40,13 +40,9 @@
             return http.post(baseUrl + "/profile", serialize(profile)).then(data);
         };
 
-        this.getOwnDrinks = function () {
-            // The user page lists the five newest; OwnDrinksView embeds and returns the same five.
-            return http.get(baseUrl + "/profile/drinks", {params: {latest: 5}}).then(data);
-        };
-
-        this.getDrinkHistory = function () {
-            return http.get(baseUrl + "/profile/drink-history", {transformResponse: angular.identity}).then(data);
+        // All own drinks, or with `since` (an ISO timestamp) those at or after it; oldest first.
+        this.getOwnDrinks = function (since) {
+            return http.get(baseUrl + "/profile/drinks", {params: {since: since}}).then(data);
         };
 
         this.getParties = function (limit) {
