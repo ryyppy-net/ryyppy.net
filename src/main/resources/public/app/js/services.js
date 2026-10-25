@@ -40,9 +40,9 @@
             return http.post(baseUrl + "/profile", serialize(profile)).then(data);
         };
 
-        // All own drinks, or with `since` (an ISO timestamp) those at or after it; oldest first.
-        this.getOwnDrinks = function (since) {
-            return http.get(baseUrl + "/profile/drinks", {params: {since: since}}).then(data);
+        // All own drinks, oldest first.
+        this.getOwnDrinks = function () {
+            return http.get(baseUrl + "/profile/drinks").then(data);
         };
 
         this.getParties = function (limit) {

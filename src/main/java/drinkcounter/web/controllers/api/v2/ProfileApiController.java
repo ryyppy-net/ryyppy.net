@@ -70,15 +70,10 @@ public class ProfileApiController {
         return OwnDrinksDTO.of(drink, promilles.of(user));
     }
 
-    /** The user's drinks, oldest first; {@code since} keeps only those at or after that instant. */
+    /** The user's drinks, oldest first. */
     @GetMapping("drinks")
-    public List<DrinkDTO> getDrinks(@LoggedInUser User user,
-            @RequestParam(value="since", required=false) String since){
-        Instant from = since == null ? Instant.MIN : Instant.parse(since);
-        return user.getDrinks().stream()
-                .filter(drink -> !drink.getTimeStamp().isBefore(from))
-                .map(DrinkDTO::fromDrink)
-                .toList();
+    public List<DrinkDTO> getDrinks(@LoggedInUser User user){
+        return OwnDrinksView.drinks(user);
     }
 
     @PutMapping("drinks/{drinkId}")

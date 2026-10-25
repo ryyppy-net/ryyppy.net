@@ -168,31 +168,6 @@ public class ProfileApiControllerWebTest {
     }
 
     @Test
-    public void sinceKeepsOnlyDrinksAtOrAfterItOldestFirst() throws Exception {
-        for (int id = 1; id <= 3; id++) {
-            Drink drink = new Drink();
-            drink.setId(id);
-            drink.setTimeStamp(Instant.parse("2024-03-05T13:00:00Z").plusSeconds(id * 60L));
-            user.drink(drink);
-        }
-
-        mvc.perform(get("/API/v2/profile/drinks").param("since", "2024-03-05T13:02:00Z"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].id").value(2))
-                .andExpect(jsonPath("$[1].id").value(3));
-
-        mvc.perform(get("/API/v2/profile/drinks").param("since", "2024-03-05T14:00:00Z"))
-                .andExpect(jsonPath("$.length()").value(0));
-    }
-
-    @Test
-    public void malformedSinceIsRejectedWithBadRequest() throws Exception {
-        mvc.perform(get("/API/v2/profile/drinks").param("since", "yesterday"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     @WithAnonymousUser
     public void anonymousRequestIsSentToTheLoginPage() throws Exception {
         mvc.perform(post("/API/v2/profile/drinks"))

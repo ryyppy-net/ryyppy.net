@@ -80,7 +80,7 @@ test('tapping and undoing a drink redraws the graph with only the write requests
   expect(describe(requests)).toEqual(['POST /API/v{id}/profile/drinks', 'DELETE /API/v{id}/profile/drinks/{id}']);
 });
 
-test('a drink added elsewhere reaches the graph on the next poll, which fetches only the newest drinks', async ({ page }) => {
+test('drinks added and old drinks removed elsewhere reach the graph on the next poll', async ({ page }) => {
   await registerUser(page, makeTestUser('history-poll'));
   for (let hoursAgo = 6; hoursAgo >= 1; hoursAgo--) {
     await addDrinkAt(page, Date.now() - hoursAgo * 3_600_000);
@@ -89,11 +89,13 @@ test('a drink added elsewhere reaches the graph on the next poll, which fetches 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect.poll(() => graphedDrinks(page)).toBe(6);
 
-  const polled = page.waitForRequest((request) => request.method() === 'GET' && /\/API\/v2\/profile\/drinks\?/.test(request.url()));
+  const [oldest, secondOldest] = (await (await page.request.get('/API/v2/profile/drinks')).json()) as { id: number }[];
+  for (const drink of [oldest, secondOldest]) {
+    expect((await page.request.delete(`/API/v2/profile/drinks/${drink.id}`)).ok()).toBeTruthy();
+  }
   await addDrinkAt(page, Date.now());
   await page.clock.fastForward('01:01');
 
-  expect(new URL((await polled).url()).searchParams.get('since')).toBeTruthy();
-  await expect.poll(() => graphedDrinks(page)).toBe(7);
+  await expect.poll(() => graphedDrinks(page)).toBe(5);
   await expect(page.locator('.drink-slot')).toHaveCount(5);
 });

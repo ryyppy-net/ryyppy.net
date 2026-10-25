@@ -326,16 +326,8 @@
     }
 
 
-    // A poll refetches the drinks from the fifth newest held on, so drinks
-    // added elsewhere, and changes and removals among the newest, show up.
-    var POLLED_DRINKS = 5;
-
-    function drinkTime(drink) {
-        return Date.parse(drink.timestamp);
-    }
-
     function byTime(a, b) {
-        return drinkTime(a) - drinkTime(b) || a.id - b.id;
+        return Date.parse(a.timestamp) - Date.parse(b.timestamp) || a.id - b.id;
     }
 
     /**
@@ -346,35 +338,7 @@
     function OwnDrinksStore(Resource, RyyppyAPI, InitialData) {
         var self = this;
 
-        function pollSince() {
-            var held = self.drinks.data;
-            return held && held.length >= POLLED_DRINKS ? held[held.length - POLLED_DRINKS].timestamp : undefined;
-        }
-
-        function fetchDrinks() {
-            var since = pollSince();
-            return RyyppyAPI.getOwnDrinks(since).then(function (drinks) {
-                return {since: since, drinks: drinks};
-            });
-        }
-
-        function keepOlderThanFetched(fetched) {
-            var held = self.drinks.data;
-            if (fetched.since === undefined || !held) {
-                return fetched.drinks;
-            }
-            var from = Date.parse(fetched.since);
-            var fetchedIds = {};
-            fetched.drinks.forEach(function (drink) {
-                fetchedIds[drink.id] = true;
-            });
-            return held.filter(function (drink) {
-                return drinkTime(drink) < from && !fetchedIds[drink.id];
-            }).concat(fetched.drinks).sort(byTime);
-        }
-
-        this.drinks = new Resource(fetchDrinks,
-            {pollMs: POLL_MS, initial: InitialData.get('DRINKS'), merge: keepOlderThanFetched});
+        this.drinks = new Resource(RyyppyAPI.getOwnDrinks, {pollMs: POLL_MS, initial: InitialData.get('DRINKS')});
 
         // A new array each time, so components comparing by reference see the change.
         this.put = function (drink, ticket) {
