@@ -4,8 +4,10 @@ import com.csvreader.CsvWriter;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
+import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
 import drinkcounter.authentication.PartyMember;
@@ -65,21 +67,23 @@ public class APIController {
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
     private final PassphraseLogin passphraseLogin;
+    private final Promilles promilles;
 
     private Clock clock = Clock.systemUTC();
 
     public APIController(PartyRoster partyRoster,
-            DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin) {
+            DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin, Promilles promilles) {
         this.partyRoster = partyRoster;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
         this.passphraseLogin = passphraseLogin;
+        this.promilles = promilles;
     }
 
     @PartyMember
     @GetMapping(value = "/parties/{partyId}", produces = XML)
     public String party(@PathVariable int partyId) {
-        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), partyRoster.members(partyId), clock));
+        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), promilles.of(partyRoster.members(partyId)), clock));
     }
 
     @OwnUser
@@ -124,7 +128,7 @@ public class APIController {
     @OwnUserOrPartyMate
     @GetMapping(value = "/users/{userId}", produces = XML)
     public String user(@PathVariable int userId) {
-        return xml(ClassicUserDTO.fromUser(userAccounts.get(userId), clock));
+        return xml(ClassicUserDTO.fromUser(promilles.of(userAccounts.get(userId)), clock));
     }
 
     @OwnUser
@@ -220,10 +224,10 @@ public class APIController {
 
     private List<String[]> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;
-        Instant now = Instant.now();
-        Instant start = now.minus(Duration.ofMinutes(300));
+        BloodAlcohol bloodAlcohol = promilles.of(user);
+        Instant start = bloodAlcohol.now().minus(Duration.ofMinutes(300));
 
-        List<Float> history = user.getPromillesAtInterval(Date.from(start), Date.from(now), intervalMs);
+        List<Float> history = bloodAlcohol.promillesAt(start, bloodAlcohol.now(), Duration.ofMillis(intervalMs));
         List<String[]> slopes = new LinkedList<String[]>();
 
         double lastSlope = Double.MAX_VALUE;
@@ -246,7 +250,7 @@ public class APIController {
             lastY = y;
             x += intervalMs;
         }
-        slopes.add(getCsvValues(Instant.now().toEpochMilli(), user.getPromilles(), user, getId));
+        slopes.add(getCsvValues(bloodAlcohol.now().toEpochMilli(), bloodAlcohol.promilles(), user, getId));
         return slopes;
     }
 
@@ -300,7 +304,7 @@ public class APIController {
         // I've had it with this motherfucking XML in this motherfucking Java
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{user.getName(), Double.toString(user.getPromilles())});
+        csvWriter.writeRecord(new String[]{user.getName(), Double.toString(promilles.of(user).promilles())});
         csvWriter.close();
 
         return baos.toString();

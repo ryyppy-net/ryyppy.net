@@ -1,13 +1,10 @@
 (function (angular) {
     'use strict';
 
-    function UserPageCtrl($element, $timeout, Drinks, OwnDrinksStore, PartiesStore, ProfileStore, UserHistoryGraph) {
+    function UserPageCtrl(Drinks, OwnDrinksStore, PartiesStore, ProfileStore) {
         var self = this;
         var releases = [];
         var shownProfile = null;
-        var shownHistory = null;
-        var graph = null;
-        var graphTimeout = null;
 
         this.parties = PartiesStore.parties;
         this.partiesShown = PartiesStore.shown;
@@ -16,29 +13,11 @@
         this.drinks = OwnDrinksStore.drinks;
         this.participants = [];
 
-        function drawHistory(csv) {
-            $timeout.cancel(graphTimeout);
-            graphTimeout = $timeout(function () {
-                if (!graph) {
-                    graph = new UserHistoryGraph($element[0].querySelector('#historyGraph'));
-                }
-                graph.gotData(csv);
-            }, 0, false);
-        }
-
         this.$doCheck = function () {
             var profile = ProfileStore.profile.data;
             if (profile !== shownProfile) {
                 shownProfile = profile;
                 self.participants = profile ? [angular.extend({type: 'profile', color: 1}, profile)] : [];
-            }
-
-            var history = OwnDrinksStore.history.data;
-            if (history !== shownHistory) {
-                shownHistory = history;
-                if (history !== null) {
-                    drawHistory(history);
-                }
             }
         };
 
@@ -58,7 +37,6 @@
             releases = [
                 ProfileStore.profile.use(),
                 OwnDrinksStore.drinks.use(),
-                OwnDrinksStore.history.use(),
                 PartiesStore.parties.use()
             ];
         };
@@ -67,14 +45,10 @@
             releases.forEach(function (release) {
                 release();
             });
-            $timeout.cancel(graphTimeout);
-            if (graph) {
-                graph.destroy();
-            }
         };
     }
 
-    UserPageCtrl.$inject = ['$element', '$timeout', 'Drinks', 'OwnDrinksStore', 'PartiesStore', 'ProfileStore', 'UserHistoryGraph'];
+    UserPageCtrl.$inject = ['Drinks', 'OwnDrinksStore', 'PartiesStore', 'ProfileStore'];
 
     angular.module('ryyppy').component('userPage', {
         controller: UserPageCtrl,
@@ -115,11 +89,7 @@
 
                 <h2>Historia</h2>
 
-                <div class="historyGraphContainer">
-                    <div id="historyGraph">
-                        <canvas></canvas>
-                    </div>
-                </div>
+                <drink-history-graph drinks="$ctrl.drinks.data"></drink-history-graph>
 
                 <h2>5 viimeisintä juomaa</h2>
 

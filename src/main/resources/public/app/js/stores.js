@@ -9,7 +9,8 @@
      * One piece of server data shared by every component that shows it.
      * Components read `data` and keep it current with use(); writes call
      * invalidate(), which refetches now if the data is shown and on the next
-     * use() otherwise, or set() with data the write's response carried.
+     * use() otherwise, set() with data the write's response carried, or
+     * update() to apply the write to the held data.
      *
      * Every request that can change a resource's data takes a ticket from
      * Resource.ticket() when it is sent, and a resource keeps only data from
@@ -66,6 +67,16 @@
             // Data from a write's response; `ticket` is the one the write took when it was sent.
             this.set = function (data, ticket) {
                 accept(ticket, data);
+            };
+
+            // Replaces the held data with change(data); `ticket` is the one the write took when it was sent.
+            this.update = function (change, ticket) {
+                if (self.data === null) {
+                    self.invalidate();
+                    return;
+                }
+                self.data = change(self.data);
+                held = Math.max(held, ticket);
             };
 
             this.heldTicket = function () {
@@ -315,17 +326,44 @@
     }
 
 
-    /** The signed-in user's own drinks and per-day drink history. */
+    function byTime(a, b) {
+        return Date.parse(a.timestamp) - Date.parse(b.timestamp) || a.id - b.id;
+    }
+
+    /**
+     * Every one of the signed-in user's own drinks, oldest first. The
+     * dashboard lists the newest and graphs them all per day; writes change
+     * the held array instead of refetching it.
+     */
     function OwnDrinksStore(Resource, RyyppyAPI, InitialData) {
+        var self = this;
+
         this.drinks = new Resource(RyyppyAPI.getOwnDrinks, {pollMs: POLL_MS, initial: InitialData.get('DRINKS')});
-        this.history = new Resource(RyyppyAPI.getDrinkHistory, {initial: InitialData.get('DRINK_HISTORY')});
+
+        // A new array each time, so components comparing by reference see the change.
+        this.put = function (drink, ticket) {
+            self.drinks.update(function (drinks) {
+                return drinks.filter(function (held) {
+                    return held.id !== drink.id;
+                }).concat([drink]).sort(byTime);
+            }, ticket);
+        };
+
+        this.remove = function (drinkId, ticket) {
+            self.drinks.update(function (drinks) {
+                return drinks.filter(function (held) {
+                    return held.id !== drinkId;
+                });
+            }, ticket);
+        };
     }
 
 
     /**
      * Adds, changes and removes drinks. Each write's response carries what
      * the page it was made on shows of the drinker, which goes straight into
-     * the stores; what other pages show of them is refetched when next shown.
+     * the stores, and an own drink is applied to the own drinks held; what
+     * other pages show of the drinker is refetched when next shown.
      */
     function Drinks($q, Resource, RyyppyAPI, ProfileStore, OwnDrinksStore, PartyStore) {
         function isOwn(drinker) {
@@ -334,18 +372,17 @@
         }
 
         function applied(drinker, ticket, response) {
+            if (isOwn(drinker) && response.drink) {
+                OwnDrinksStore.put(response.drink, ticket);
+            }
             if (drinker.type === 'participant') {
                 PartyStore.setParticipant(drinker.partyId, response.participant, ticket);
                 if (isOwn(drinker)) {
                     ProfileStore.profile.invalidate();
-                    OwnDrinksStore.drinks.invalidate();
-                    OwnDrinksStore.history.invalidate();
                     PartyStore.invalidateAllParticipants(drinker.partyId);
                 }
             } else {
                 ProfileStore.profile.set(response.profile, ticket);
-                OwnDrinksStore.drinks.set(response.latestDrinks, ticket);
-                OwnDrinksStore.history.set(response.drinkHistory, ticket);
                 PartyStore.invalidateAllParticipants();
             }
         }
@@ -354,7 +391,6 @@
             if (isOwn(drinker)) {
                 ProfileStore.profile.invalidate();
                 OwnDrinksStore.drinks.invalidate();
-                OwnDrinksStore.history.invalidate();
                 PartyStore.invalidateAllParticipants();
             } else {
                 PartyStore.get(drinker.partyId).participants.invalidate();
@@ -378,15 +414,12 @@
             });
         };
 
-        // The drink leaves the own drinks list at once; a failed request
-        // refetches it back.
+        // The drink leaves the own drinks at once; a failed request refetches
+        // it back.
         this.remove = function (drinker, drinkId) {
             var ticket = Resource.ticket();
-            var drinks = OwnDrinksStore.drinks;
-            if (isOwn(drinker) && drinks.data) {
-                drinks.data = drinks.data.filter(function (drink) {
-                    return drink.id !== drinkId;
-                });
+            if (isOwn(drinker)) {
+                OwnDrinksStore.remove(drinkId, ticket);
             }
             return RyyppyAPI.deleteDrink(drinker, drinkId).then(function (response) {
                 applied(drinker, ticket, response);

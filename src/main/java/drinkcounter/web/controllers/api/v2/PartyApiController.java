@@ -3,8 +3,10 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
+import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.authentication.PartyAccess;
@@ -36,14 +38,16 @@ public class PartyApiController {
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
     private final PartyAccess partyAccess;
+    private final Promilles promilles;
 
     public PartyApiController(PartyRoster partyRoster, InvitationSuggestions invitationSuggestions,
-            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess) {
+            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess, Promilles promilles) {
         this.partyRoster = partyRoster;
         this.invitationSuggestions = invitationSuggestions;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
         this.partyAccess = partyAccess;
+        this.promilles = promilles;
     }
 
     /** The user's parties; {@code limit} keeps only that many of the newest, newest first. */
@@ -83,10 +87,10 @@ public class PartyApiController {
         Party party = partyRoster.get(partyId);
         Set<User> participants = party.getParticipants();
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
-        for (User participant : participants) {
+        for (BloodAlcohol participant : promilles.of(participants)) {
             ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
             
-            List<HistoryPoint> history = PromilleHistory.forUser(participant);
+            List<HistoryPoint> history = PromilleHistory.of(participant);
             participantDTO.setHistory(history);
             
             participantDTOs.add(participantDTO);
@@ -129,7 +133,7 @@ public class PartyApiController {
     @PartyMember
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         requireParticipant(partyId, participantId);
-        return ParticipantDTO.fromUser(userAccounts.get(participantId));
+        return ParticipantDTO.fromUser(promilles.of(userAccounts.get(participantId)));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
@@ -148,7 +152,7 @@ public class PartyApiController {
             time = Date.from(Instant.parse(timestamp));
         }
         Drink drink = drinkLog.record(participantId, time, alcoholAmount);
-        return ParticipantDrinksDTO.of(drink, userAccounts.get(participantId));
+        return participantDrinks(drink, participantId);
     }
 
     @PutMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
@@ -160,7 +164,7 @@ public class PartyApiController {
         requireParticipant(partyId, participantId);
         Drink drink = drinkLog.correctAlcohol(participantId, drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
-        return ParticipantDrinksDTO.of(drink, userAccounts.get(participantId));
+        return participantDrinks(drink, participantId);
     }
 
     @DeleteMapping("{partyId}/participants/{participantId}/drinks/{drinkId}")
@@ -169,7 +173,11 @@ public class PartyApiController {
             @PathVariable Integer drinkId){
         requireParticipant(partyId, participantId);
         drinkLog.undo(participantId, drinkId);
-        return ParticipantDrinksDTO.of(null, userAccounts.get(participantId));
+        return participantDrinks(null, participantId);
+    }
+
+    private ParticipantDrinksDTO participantDrinks(Drink drink, int participantId) {
+        return ParticipantDrinksDTO.of(drink, promilles.of(userAccounts.get(participantId)));
     }
 
     private void requireParticipant(Integer partyId, Integer participantId) {

@@ -5,20 +5,15 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.DrinkLog;
+import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
-import drinkcounter.util.DrinksPerDayCsv;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.Clock;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,19 +27,17 @@ public class ProfileApiController {
 
     private final DrinkLog drinkLog;
     private final UserAccounts userAccounts;
+    private final Promilles promilles;
 
-    private Clock clock = Clock.systemUTC();
-
-    public ProfileApiController(DrinkLog drinkLog, UserAccounts userAccounts) {
+    public ProfileApiController(DrinkLog drinkLog, UserAccounts userAccounts, Promilles promilles) {
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
+        this.promilles = promilles;
     }
 
     @GetMapping
     public UserDTO getUser(@LoggedInUser User user) {
-        UserDTO userDTO = UserDTO.fromUser(user);
-        userDTO.setHistory(PromilleHistory.forUser(user));
-        return userDTO;
+        return OwnDrinksView.profile(promilles.of(user));
     }
 
     @PostMapping
@@ -74,15 +67,13 @@ public class ProfileApiController {
             time = Date.from(Instant.parse(timestamp));
         }
         Drink drink = drinkLog.record(user.getId(), time, (float)alcoholAmount);
-        return OwnDrinksDTO.of(drink, user, clock);
+        return OwnDrinksDTO.of(drink, promilles.of(user));
     }
 
-    /** The user's drinks, oldest first; {@code latest} keeps only that many of the newest. */
+    /** The user's drinks, oldest first. */
     @GetMapping("drinks")
-    public List<DrinkDTO> getDrinks(@LoggedInUser User user,
-            @RequestParam(value="latest", required=false) Integer latest){
-        List<Drink> drinks = latest == null ? user.getDrinks() : user.latestDrinks(latest);
-        return drinks.stream().map(DrinkDTO::fromDrink).toList();
+    public List<DrinkDTO> getDrinks(@LoggedInUser User user){
+        return OwnDrinksView.drinks(user);
     }
 
     @PutMapping("drinks/{drinkId}")
@@ -91,22 +82,13 @@ public class ProfileApiController {
             @RequestParam("alcohol") Float alcoholPercentage){
         Drink drink = drinkLog.correctAlcohol(user.getId(), drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
-        return OwnDrinksDTO.of(drink, user, clock);
+        return OwnDrinksDTO.of(drink, promilles.of(user));
     }
 
     @DeleteMapping("drinks/{drinkId}")
     public OwnDrinksDTO deleteDrink(@LoggedInUser User user, @PathVariable Integer drinkId){
         drinkLog.undo(user.getId(), drinkId);
-        return OwnDrinksDTO.of(null, user, clock);
-    }
-
-    @GetMapping("drink-history")
-    public ResponseEntity<byte[]> getDrinkHistory(@LoggedInUser User user) throws IOException{
-        String csv = DrinksPerDayCsv.build(user.getDrinks(), clock);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "text/plain;charset=utf-8");
-        return new ResponseEntity<byte[]>(csv.getBytes(StandardCharsets.UTF_8), headers, HttpStatus.OK);
+        return OwnDrinksDTO.of(null, promilles.of(user));
     }
 
     @ExceptionHandler(DateTimeParseException.class)

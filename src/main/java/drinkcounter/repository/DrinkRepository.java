@@ -4,6 +4,8 @@ import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import org.springframework.data.repository.CrudRepository;
 
+import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,4 +14,6 @@ import java.util.List;
  */
 public interface DrinkRepository extends CrudRepository<Drink, Integer> {
     List<Drink> findByDrinker(User drinker);
+
+    List<Drink> findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(Collection<Integer> drinkerIds, Instant since);
 }

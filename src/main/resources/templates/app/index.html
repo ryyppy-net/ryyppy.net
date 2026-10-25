@@ -21,9 +21,9 @@
     <toasts th:attr="close-label=#{toast.close}"></toasts>
 
     <!--
-        The current user's profile, parties, own drinks, and drink-history
-        graph data (DefaultController.appIndex()), which seed the AngularJS
-        stores (app/js/stores.js) so no page has to fetch them on load.
+        The current user's profile, parties and own drinks
+        (DefaultController.appIndex()), which seed the AngularJS stores
+        (app/js/stores.js) so no page has to fetch them on load.
         Written with [(...)] (unescaped inlining), not [[...]]: each value is
         already JavaScript-escaped by JavaScriptUtils.javaScriptEscape() in
         the controller and gets substituted into a single-quoted JS string
@@ -34,7 +34,6 @@
         window.__INITIAL_PROFILE__ = JSON.parse('[(${initialProfile})]');
         window.__INITIAL_PARTIES__ = JSON.parse('[(${initialParties})]');
         window.__INITIAL_DRINKS__ = JSON.parse('[(${initialDrinks})]');
-        window.__INITIAL_DRINK_HISTORY__ = JSON.parse('[(${initialDrinkHistory})]');
     </script>
 
     <script src="/webjars/angular/1.8.3/angular.min.js"></script>
@@ -57,8 +56,8 @@
     <script th:src="@{/app/js/components/partyPage.js}"></script>
     <script th:src="@{/app/js/components/generalPartyAdminPage.js}"></script>
     <script th:src="@{/app/js/components/partyAdminPage.js}"></script>
+    <script th:src="@{/app/js/components/drinkHistoryGraph.js}"></script>
 
-    <script th:src="@{/app/js/userhistorygraph.js}"></script>
     <script th:src="@{/app/js/drinkerchart.js}"></script>
     <script th:src="@{/app/js/drinkoptions.js}"></script>
 

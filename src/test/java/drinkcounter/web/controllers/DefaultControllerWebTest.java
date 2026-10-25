@@ -57,8 +57,7 @@ public class DefaultControllerWebTest {
                 .andExpect(view().name("app/index"))
                 .andExpect(model().attribute("initialProfile", containsString("Ville")))
                 .andExpect(model().attribute("initialParties", "[]"))
-                .andExpect(model().attribute("initialDrinks", containsString("2024-03-05T13:37:42.123Z")))
-                .andExpect(model().attribute("initialDrinkHistory", containsString("Time")));
+                .andExpect(model().attribute("initialDrinks", containsString("2024-03-05T13:37:42.123Z")));
 
         verify(userAccounts).get(42);
     }

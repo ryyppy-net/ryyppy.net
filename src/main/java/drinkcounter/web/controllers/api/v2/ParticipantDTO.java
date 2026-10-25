@@ -4,6 +4,7 @@
  */
 package drinkcounter.web.controllers.api.v2;
 
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.User;
 import drinkcounter.model.User.Sex;
 import java.util.List;
@@ -77,13 +78,14 @@ public class ParticipantDTO {
         this.history = history;
     }
 
-    public static ParticipantDTO fromUser(User user){
+    public static ParticipantDTO fromUser(BloodAlcohol bloodAlcohol){
+        User user = bloodAlcohol.user();
         ParticipantDTO participant = new ParticipantDTO();
         participant.setId(user.getId());
         participant.setName(user.getName());
-        participant.setPromilles(user.getPromilles());
+        participant.setPromilles(bloodAlcohol.promilles());
         participant.setSex(user.getSex());
-        participant.setTotalDrinks(user.getTotalDrinks());
+        participant.setTotalDrinks(bloodAlcohol.drinksSinceSober());
         participant.setProfilePictureUrl(GravatarUrls.forUser(user));
         return participant;
     }
