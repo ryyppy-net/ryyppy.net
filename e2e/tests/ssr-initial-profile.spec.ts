@@ -4,20 +4,18 @@ import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
 // Read-only: asserts which requests the AngularJS app does *not* make.
 test.use({ storageState: SHARED_STORAGE_STATE });
 
-test('the app does not fetch the profile, parties, own drinks, or drink-history graph data over the API after load', async ({ page }) => {
-  // DefaultController.appIndex() embeds the current user's profile, parties,
-  // own drinks, and drink-history CSV into templates/app/index.html as
-  // window.__INITIAL_PROFILE__ / __INITIAL_PARTIES__ / __INITIAL_DRINKS__ /
-  // __INITIAL_DRINK_HISTORY__, which seed the stores in app/js/stores.js.
-  // Neither the dashboard nor the pages opened after it should call
-  // GET /API/v2/profile, /API/v2/parties, /API/v2/profile/drinks or
-  // /API/v2/profile/drink-history, since the stores already hold that data.
+test('the app does not fetch the profile, parties, or own drinks over the API after load', async ({ page }) => {
+  // DefaultController.appIndex() embeds the current user's profile, parties
+  // and own drinks into templates/app/index.html as window.__INITIAL_PROFILE__ /
+  // __INITIAL_PARTIES__ / __INITIAL_DRINKS__, which seed the stores in
+  // app/js/stores.js. Neither the dashboard nor the pages opened after it
+  // should call GET /API/v2/profile, /API/v2/parties or /API/v2/profile/drinks,
+  // since the stores already hold that data.
   const skippableRequests: string[] = [];
   page.on('request', (request) => {
     const url = request.url();
     if (request.method() !== 'GET') return;
-    if (/\/API\/v2\/profile\/drink-history(\?|$)/.test(url)
-        || /\/API\/v2\/profile\/drinks(\?|$)/.test(url)
+    if (/\/API\/v2\/profile\/drinks(\?|$)/.test(url)
         || /\/API\/v2\/profile(\?|$)/.test(url)
         || /\/API\/v2\/parties(\?|$)/.test(url)) {
       skippableRequests.push(url);
@@ -32,8 +30,6 @@ test('the app does not fetch the profile, parties, own drinks, or drink-history 
   await expect(ownTile).toBeVisible();
   await expect(ownTile.locator('p', { hasText: 'Promilleja' })).toBeVisible();
 
-  // The history graph is drawn in a $timeout after the dashboard renders,
-  // so wait for its canvas before asserting no drink-history request fired.
   await expect(page.locator('#historyGraph canvas').first()).toBeVisible();
 
   // Pages opened after the dashboard read the same stores.
