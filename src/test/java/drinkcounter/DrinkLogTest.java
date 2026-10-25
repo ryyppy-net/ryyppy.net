@@ -83,13 +83,14 @@ public class DrinkLogTest {
     }
 
     @Test
-    public void undoDeletesTheUsersDrink() {
+    public void undoDeletesTheUsersDrinkFoundInTheirDrinkList() {
         Drink drink = usersDrink();
 
         drinkLog.undo(1, drink.getId());
 
         assertTrue(user.getDrinks().isEmpty());
         verify(drinkRepository).delete(drink);
+        verify(drinkRepository, never()).findById(any());
     }
 
     @Test
@@ -102,9 +103,7 @@ public class DrinkLogTest {
 
     private Drink usersDrink() {
         int drinkId = drinkLog.record(1, new Date());
-        Drink drink = user.getDrinks().get(0);
-        when(drinkRepository.findById(drinkId)).thenReturn(Optional.of(drink));
-        return drink;
+        return user.getDrinks().get(0);
     }
 
     private Drink othersDrink() {

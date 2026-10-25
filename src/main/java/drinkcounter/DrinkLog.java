@@ -127,9 +127,11 @@ public class DrinkLog {
         return total;
     }
 
+    /** Looks in the user's own drinks, which the own-drink responses read anyway. */
     private Drink findDrinkOf(User user, int drinkId) {
-        return drinkRepository.findById(drinkId)
-                .filter(drink -> Objects.equals(drink.getDrinker().getId(), user.getId()))
+        return user.getDrinks().stream()
+                .filter(drink -> Objects.equals(drink.getId(), drinkId))
+                .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId()));
     }
 }

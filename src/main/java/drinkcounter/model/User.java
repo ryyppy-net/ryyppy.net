@@ -26,7 +26,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.BatchSize;
 
 /**
@@ -182,10 +181,7 @@ public class User extends AbstractEntity{
     }
     
     public void removeDrink(Drink drink) {
-        // An unloaded drink list stays unloaded; it reads the drinks left once used.
-        if (Hibernate.isInitialized(drinks)) {
-            drinks.remove(drink);
-        }
+        getDrinks().remove(drink);
     }
 
     public String getPassword() {
