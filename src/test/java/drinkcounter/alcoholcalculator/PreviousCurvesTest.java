@@ -177,8 +177,11 @@ public class PreviousCurvesTest {
     public void aSessionLongerThanAWeekIsCutShort(Scenario scenario) {
         BloodAlcohol lastWeek = promilles(scenario).of(scenario.user());
 
-        assertTrue(lastWeek.promilles() <= scenario.promilles(), lastWeek.promilles() + " > " + scenario.promilles());
-        assertArrayEquals(scenario.chart(), chart(new BloodAlcohol(scenario.user(), scenario.drinks(), NOW), scenario));
+        assertTrue(lastWeek.promilles() < scenario.promilles(), lastWeek.promilles() + " >= " + scenario.promilles());
+        float[] chart = chart(lastWeek, scenario);
+        for (int minute = 0; minute < chart.length; minute++) {
+            assertTrue(chart[minute] < scenario.chart()[minute], "minute " + minute);
+        }
     }
 
     @Test
