@@ -298,4 +298,117 @@ public class BloodAlcoholTest {
         drink.setTimeStamp(timeStamp);
         user.drink(drink);
     }
+
+    // An 80 kg man burns 8 g an hour and his promilles are grams / (0.75 * 80) = grams / 60.
+    private static final Instant NOW = Instant.parse("2026-10-25T21:00:00Z");
+    private static final float EXACT = 0.0001f;
+
+    @Test
+    public void aDrinkBurnsOffAtOneGramPerTenKilosAnHour() {
+        BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofHours(-1)));
+
+        assertEquals(4f, bloodAlcohol.grams(), EXACT);
+        assertEquals(4f / 60, bloodAlcohol.promilles(), EXACT);
+    }
+
+    @Test
+    public void burningIsSteadyThroughTheHour() {
+        assertEquals(8f, man80(drink(12, Duration.ofMinutes(-30))).grams(), EXACT);
+    }
+
+    @Test
+    public void aBurntOffDrinkLeavesNothing() {
+        assertEquals(0f, man80(drink(12, Duration.ofHours(-2))).grams(), EXACT);
+    }
+
+    @Test
+    public void drinksAddUp() {
+        // 12 g burn to 4 g by the second drink, which brings it to 16 g, an hour before now.
+        BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofHours(-2)), drink(12, Duration.ofHours(-1)));
+
+        assertEquals(8f, bloodAlcohol.grams(), EXACT);
+    }
+
+    @Test
+    public void soberTimeIsNotCreditedToTheNextDrink() {
+        BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofHours(-10)), drink(12, Duration.ofHours(-1)));
+
+        assertEquals(4f, bloodAlcohol.grams(), EXACT);
+    }
+
+    @Test
+    public void aHeavierDrinkerBurnsFasterAndHasMoreBodyWater() {
+        User man100 = user(100, User.Sex.MALE);
+
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(man100, List.of(drink(12, Duration.ofHours(-1))), NOW);
+
+        assertEquals(2f, bloodAlcohol.grams(), EXACT);
+        assertEquals(2f / 75, bloodAlcohol.promilles(), EXACT);
+    }
+
+    @Test
+    public void aWomanBurnsAtTheSameRateButHasLessBodyWater() {
+        User woman80 = user(80, User.Sex.FEMALE);
+
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(woman80, List.of(drink(12, Duration.ofHours(-1))), NOW);
+
+        assertEquals(4f, bloodAlcohol.grams(), EXACT);
+        assertEquals(4f / (0.66f * 80), bloodAlcohol.promilles(), EXACT);
+    }
+
+    @Test
+    public void theCurveJumpsAtADrinkAndFallsInAStraightLine() {
+        BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofHours(-1)));
+
+        List<Float> curve = bloodAlcohol.promillesAtInterval(
+                Date.from(NOW.minus(Duration.ofHours(2))), Date.from(NOW.plus(Duration.ofHours(1))), 30 * 60_000);
+
+        List<Float> expected = List.of(0f, 0f, 12f / 60, 8f / 60, 4f / 60, 0f, 0f);
+        assertEquals(expected.size(), curve.size());
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i), curve.get(i), EXACT, "point " + i);
+        }
+    }
+
+    @Test
+    public void aDrinkTimedInTheFutureCountsFromItsTime() {
+        BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofMinutes(30)));
+
+        assertEquals(0f, bloodAlcohol.grams(), EXACT);
+        List<Float> anHourFromNow = bloodAlcohol.promillesAtInterval(
+                Date.from(NOW.plus(Duration.ofHours(1))), Date.from(NOW.plus(Duration.ofHours(1))), 1);
+        assertEquals(8f / 60, anHourFromNow.get(0), EXACT);
+    }
+
+    @Test
+    public void drinksSinceSoberCountsStandardDrinksOfTheCurrentSession() {
+        BloodAlcohol bloodAlcohol = man80(
+                drink(12, Duration.ofHours(-20)), drink(12, Duration.ofHours(-20)),
+                drink(12, Duration.ofMinutes(-60)), drink(6, Duration.ofMinutes(-50)), drink(6, Duration.ofMinutes(-40)));
+
+        assertEquals(2, bloodAlcohol.drinksSinceSober());
+    }
+
+    @Test
+    public void drinksSinceSoberIsZeroOnceSober() {
+        assertEquals(0, man80(drink(12, Duration.ofHours(-5))).drinksSinceSober());
+    }
+
+    private static BloodAlcohol man80(Drink... drinks) {
+        return new BloodAlcohol(user(80, User.Sex.MALE), List.of(drinks), NOW);
+    }
+
+    private static User user(float weight, User.Sex sex) {
+        User user = new User();
+        user.setWeight(weight);
+        user.setSex(sex);
+        return user;
+    }
+
+    private static Drink drink(float grams, Duration fromNow) {
+        Drink drink = new Drink();
+        drink.setAlcohol(grams);
+        drink.setTimeStamp(NOW.plus(fromNow));
+        return drink;
+    }
 }
