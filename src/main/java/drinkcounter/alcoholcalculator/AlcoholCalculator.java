@@ -18,7 +18,7 @@ public class AlcoholCalculator {
     public static final float ALCOHOL_DENSITY = 789f;
     
     // The rate at which alcohol is burned per millisecond
-    private double burnRate;
+    private final double burnRate;
     
     // The amount of a single dosage of alcohol
     public final static double STANDARD_DRINK_ALCOHOL_GRAMS = 12;
@@ -26,20 +26,8 @@ public class AlcoholCalculator {
     private final List<ShotFunction> functions = new LinkedList<ShotFunction>();
 
     public AlcoholCalculator(float weight) {
-        setWeight(weight);
-    }
-    
-    public void setWeight(float weight) {
-        synchronized(this) {
-            // Typical male burns one gram of alcohol for every 10 kilograms of weight in an hour.
-            burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
-        }
-    }
-    
-    public void reset() {
-        synchronized(this) {
-            functions.clear();
-        }
+        // Typical male burns one gram of alcohol for every 10 kilograms of weight in an hour.
+        burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
     }
     
     /**
@@ -48,24 +36,20 @@ public class AlcoholCalculator {
      * @return grams of alcohol in blood at given time
      */
     public float getAlcoholAmountAt(Date time) {
-        synchronized(this) {
-            return (float)calculate(time);
-        }
+        return (float)calculate(time);
     }
     
     public void calculateDrink(Drink drink) {
-        synchronized(this) {
-            double currentAlcohol = calculate(Date.from(drink.getTimeStamp()));
+        double currentAlcohol = calculate(Date.from(drink.getTimeStamp()));
 
-            // If there is still alcohol to burn, then the last function will be "disabled" with a cutter
-            int size = functions.size();
-            if (currentAlcohol > 0 && size > 0) {
-                functions.get(size - 1).setCutter(currentAlcohol);
-            }
-
-            ShotFunction newFunction = new ShotFunction(Date.from(drink.getTimeStamp()), burnRate, currentAlcohol + drink.getAlcohol());
-            functions.add(newFunction);
+        // If there is still alcohol to burn, then the last function will be "disabled" with a cutter
+        int size = functions.size();
+        if (currentAlcohol > 0 && size > 0) {
+            functions.get(size - 1).setCutter(currentAlcohol);
         }
+
+        ShotFunction newFunction = new ShotFunction(Date.from(drink.getTimeStamp()), burnRate, currentAlcohol + drink.getAlcohol());
+        functions.add(newFunction);
     }
     
     // best function name ever

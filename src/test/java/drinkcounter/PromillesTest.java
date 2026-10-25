@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -39,7 +38,7 @@ public class PromillesTest {
     public void setUp() {
         drinkRepository = mock(DrinkRepository.class);
         // Answers as the query does: the given drinkers' drinks after the cutoff, oldest first.
-        when(drinkRepository.findByDrinkersSince(any(), any())).thenAnswer(invocation -> {
+        when(drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(any(), any())).thenAnswer(invocation -> {
             Collection<Integer> ids = invocation.getArgument(0);
             Instant since = invocation.getArgument(1);
             return stored.stream()
@@ -58,7 +57,7 @@ public class PromillesTest {
 
         promilles.of(user);
 
-        verify(drinkRepository).findByDrinkersSince(List.of(1), NOW.minus(Duration.ofDays(7)));
+        verify(drinkRepository).findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(List.of(1), NOW.minus(Duration.ofDays(7)));
     }
 
     @Test
@@ -89,22 +88,22 @@ public class PromillesTest {
         drink(man100, 12, Duration.ofHours(-1));
         drink(man100, 12, Duration.ofMinutes(-30));
 
-        Map<Integer, BloodAlcohol> bloodAlcohol = promilles.of(List.of(man80, man100, sober));
+        List<BloodAlcohol> bloodAlcohol = promilles.of(List.of(man80, man100, sober));
 
-        verify(drinkRepository, times(1)).findByDrinkersSince(any(), any());
-        assertEquals(4f, bloodAlcohol.get(1).grams(), EXACT);
-        assertEquals(1, bloodAlcohol.get(1).drinksSinceSober());
+        verify(drinkRepository, times(1)).findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(any(), any());
+        assertEquals(4f, bloodAlcohol.get(0).grams(), EXACT);
+        assertEquals(1, bloodAlcohol.get(0).drinksSinceSober());
         // 100 kg burns 10 g an hour: 12 g burn to 7 g by the second drink, 19 g burn to 14 g by now.
-        assertEquals(14f, bloodAlcohol.get(2).grams(), EXACT);
-        assertEquals(2, bloodAlcohol.get(2).drinksSinceSober());
-        assertEquals(0f, bloodAlcohol.get(3).grams(), EXACT);
-        assertEquals(0, bloodAlcohol.get(3).drinksSinceSober());
+        assertEquals(14f, bloodAlcohol.get(1).grams(), EXACT);
+        assertEquals(2, bloodAlcohol.get(1).drinksSinceSober());
+        assertEquals(0f, bloodAlcohol.get(2).grams(), EXACT);
+        assertEquals(0, bloodAlcohol.get(2).drinksSinceSober());
     }
 
     @Test
     public void aPartyWithoutMembersReadsNothing() {
         assertTrue(promilles.of(List.of()).isEmpty());
-        verify(drinkRepository, never()).findByDrinkersSince(any(), any());
+        verify(drinkRepository, never()).findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(any(), any());
     }
 
     private void drink(User user, float grams, Duration fromNow) {

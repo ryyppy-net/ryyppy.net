@@ -2,16 +2,19 @@ package drinkcounter.alcoholcalculator;
 
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * A user's blood alcohol at a moment, worked out from their drinks before it.
  */
 public class BloodAlcohol {
+
+    private static final Duration SOBER_STEP = Duration.ofMinutes(15);
+    private static final int SOBER_STEPS = (int) (Duration.ofDays(7).toMinutes() / SOBER_STEP.toMinutes());
 
     private final User user;
     private final List<Drink> drinks;
@@ -29,56 +32,46 @@ public class BloodAlcohol {
         }
     }
 
+    public User user() {
+        return user;
+    }
+
+    public Instant now() {
+        return now;
+    }
+
     public float promilles() {
         return toPromilles(grams());
     }
 
     /** Grams of alcohol in the blood. */
     public float grams() {
-        return calculator.getAlcoholAmountAt(Date.from(now));
+        return gramsAt(now);
     }
 
-    public List<Float> promillesAtInterval(Date start, Date end, int intervalMs) {
+    public List<Float> promillesAt(Instant start, Instant end, Duration step) {
         List<Float> list = new ArrayList<Float>();
-        for (long i = start.getTime(); i <= end.getTime(); i += intervalMs) {
-            list.add(toPromilles(calculator.getAlcoholAmountAt(new Date(i))));
+        for (Instant t = start; !t.isAfter(end); t = t.plus(step)) {
+            list.add(toPromilles(gramsAt(t)));
         }
         return list;
     }
 
-    /** Standard drinks taken since the user was last sober. */
+    /** Standard drinks taken since the user was last sober, which is looked for in 15-minute steps. */
     public int drinksSinceSober() {
-        if (drinks.isEmpty()) return 0;
-        return drinksSince(lastSober());
-    }
-
-    /** Accurate to 15 minutes. */
-    private Date lastSober() {
-        final int maxMinutes = 10080;
-        final int interval = 15;
-
-        long time = now.toEpochMilli();
-
-        for (int i = 0; i < maxMinutes; i += interval) {
-            float a = calculator.getAlcoholAmountAt(new Date(time));
-            if (a < 0.01) {
-                break;
-            }
-            time -= interval * 60 * 1000;
+        Instant sober = now;
+        for (int step = 0; step < SOBER_STEPS && gramsAt(sober) >= 0.01; step++) {
+            sober = sober.minus(SOBER_STEP);
         }
-        return new Date(time);
-    }
-
-    private int drinksSince(Date date) {
         float shots = 0f;
-        ListIterator<Drink> iterator = drinks.listIterator(drinks.size());
-        while (iterator.hasPrevious()) {
-            Drink drink = iterator.previous();
-            if (drink.getTimeStamp().isBefore(date.toInstant()))
-                break;
-            shots += drink.getAmountOfShots();
+        for (int i = drinks.size() - 1; i >= 0 && !drinks.get(i).getTimeStamp().isBefore(sober); i--) {
+            shots += drinks.get(i).getAmountOfShots();
         }
         return Math.round(shots);
+    }
+
+    private float gramsAt(Instant time) {
+        return calculator.getAlcoholAmountAt(Date.from(time));
     }
 
     private float toPromilles(float grams) {

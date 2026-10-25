@@ -8,7 +8,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,21 +31,18 @@ public class Promilles {
     }
 
     public BloodAlcohol of(User user) {
-        return of(List.of(user)).get(user.getId());
+        return of(List.of(user)).get(0);
     }
 
-    /** Keyed by user id; reads the drinks of all the users at once. */
-    public Map<Integer, BloodAlcohol> of(Collection<User> users) {
-        if (users.isEmpty()) return Map.of();
+    /** In the users' order; reads the drinks of all the users at once. */
+    public List<BloodAlcohol> of(Collection<User> users) {
+        if (users.isEmpty()) return List.of();
         Instant now = clock.instant();
         List<Integer> ids = users.stream().map(User::getId).toList();
-        Map<Integer, List<Drink>> drinksByUser = drinkRepository.findByDrinkersSince(ids, now.minus(LOOKBACK)).stream()
+        Map<Integer, List<Drink>> drinksByUser = drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(ids, now.minus(LOOKBACK)).stream()
                 .collect(Collectors.groupingBy(drink -> drink.getDrinker().getId()));
-
-        Map<Integer, BloodAlcohol> result = new HashMap<>();
-        for (User user : users) {
-            result.put(user.getId(), new BloodAlcohol(user, drinksByUser.getOrDefault(user.getId(), List.of()), now));
-        }
-        return result;
+        return users.stream()
+                .map(user -> new BloodAlcohol(user, drinksByUser.getOrDefault(user.getId(), List.of()), now))
+                .toList();
     }
 }

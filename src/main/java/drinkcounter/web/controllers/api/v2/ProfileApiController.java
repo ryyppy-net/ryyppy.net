@@ -45,7 +45,7 @@ public class ProfileApiController {
 
     @GetMapping
     public UserDTO getUser(@LoggedInUser User user) {
-        return OwnDrinksView.profile(user, promilles.of(user));
+        return OwnDrinksView.profile(promilles.of(user));
     }
 
     @PostMapping
@@ -75,7 +75,7 @@ public class ProfileApiController {
             time = Date.from(Instant.parse(timestamp));
         }
         Drink drink = drinkLog.record(user.getId(), time, (float)alcoholAmount);
-        return OwnDrinksDTO.of(drink, user, promilles.of(user), clock);
+        return OwnDrinksDTO.of(drink, promilles.of(user), clock);
     }
 
     /** The user's drinks, oldest first; {@code latest} keeps only that many of the newest. */
@@ -92,13 +92,13 @@ public class ProfileApiController {
             @RequestParam("alcohol") Float alcoholPercentage){
         Drink drink = drinkLog.correctAlcohol(user.getId(), drinkId,
                 AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
-        return OwnDrinksDTO.of(drink, user, promilles.of(user), clock);
+        return OwnDrinksDTO.of(drink, promilles.of(user), clock);
     }
 
     @DeleteMapping("drinks/{drinkId}")
     public OwnDrinksDTO deleteDrink(@LoggedInUser User user, @PathVariable Integer drinkId){
         drinkLog.undo(user.getId(), drinkId);
-        return OwnDrinksDTO.of(null, user, promilles.of(user), clock);
+        return OwnDrinksDTO.of(null, promilles.of(user), clock);
     }
 
     @GetMapping("drink-history")

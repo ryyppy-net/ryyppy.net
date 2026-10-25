@@ -175,7 +175,7 @@ public class APIControllerTest {
         user.drink(drink);
 
         when(userAccounts.get(1)).thenReturn(user);
-        when(drinkRepository.findByDrinkersSince(eq(List.of(1)), any())).thenReturn(user.getDrinks());
+        when(drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(eq(List.of(1)), any())).thenReturn(user.getDrinks());
 
         long before = System.currentTimeMillis();
         ResponseEntity<byte[]> response = controller.showHistory(1);

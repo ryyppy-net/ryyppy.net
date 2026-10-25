@@ -46,7 +46,7 @@ public class DefaultController {
     public String appIndex(@LoggedInUser User user, Model model) {
         // Seeds the AngularJS stores, which would otherwise fetch this over the
         // API right after load - see templates/app/index.html.
-        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(user, promilles.of(user)))));
+        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(promilles.of(user)))));
         model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
         model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.latestDrinks(user))));
         model.addAttribute("initialDrinkHistory", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinkHistory(user, Clock.systemUTC()))));

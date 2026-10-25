@@ -4,7 +4,6 @@ import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -258,8 +257,8 @@ public class BloodAlcoholTest {
         Instant now = Instant.now();
         Instant end = now.plus(Duration.ofHours(24));
 
-        List<Float> user1promilles = bloodAlcohol(user).promillesAtInterval(Date.from(now), Date.from(end), 10000);
-        List<Float> user2promilles = bloodAlcohol(user2).promillesAtInterval(Date.from(now), Date.from(end), 10000);
+        List<Float> user1promilles = bloodAlcohol(user).promillesAt(now, end, Duration.ofSeconds(10));
+        List<Float> user2promilles = bloodAlcohol(user2).promillesAt(now, end, Duration.ofSeconds(10));
 
         int len1 = user1promilles.size();
 
@@ -360,8 +359,8 @@ public class BloodAlcoholTest {
     public void theCurveJumpsAtADrinkAndFallsInAStraightLine() {
         BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofHours(-1)));
 
-        List<Float> curve = bloodAlcohol.promillesAtInterval(
-                Date.from(NOW.minus(Duration.ofHours(2))), Date.from(NOW.plus(Duration.ofHours(1))), 30 * 60_000);
+        List<Float> curve = bloodAlcohol.promillesAt(
+                NOW.minus(Duration.ofHours(2)), NOW.plus(Duration.ofHours(1)), Duration.ofMinutes(30));
 
         List<Float> expected = List.of(0f, 0f, 12f / 60, 8f / 60, 4f / 60, 0f, 0f);
         assertEquals(expected.size(), curve.size());
@@ -375,8 +374,8 @@ public class BloodAlcoholTest {
         BloodAlcohol bloodAlcohol = man80(drink(12, Duration.ofMinutes(30)));
 
         assertEquals(0f, bloodAlcohol.grams(), EXACT);
-        List<Float> anHourFromNow = bloodAlcohol.promillesAtInterval(
-                Date.from(NOW.plus(Duration.ofHours(1))), Date.from(NOW.plus(Duration.ofHours(1))), 1);
+        List<Float> anHourFromNow = bloodAlcohol.promillesAt(
+                NOW.plus(Duration.ofHours(1)), NOW.plus(Duration.ofHours(1)), Duration.ofMillis(1));
         assertEquals(8f / 60, anHourFromNow.get(0), EXACT);
     }
 

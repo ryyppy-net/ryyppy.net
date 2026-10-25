@@ -5,7 +5,6 @@ import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -68,8 +67,8 @@ public class PromilleHistoryTest {
         BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), Instant.now());
         List<HistoryPoint> points = PromilleHistory.of(bloodAlcohol);
         long start = points.get(0).getTimestamp();
-        List<Float> everyMinute = bloodAlcohol.promillesAtInterval(
-                new Date(start), new Date(start + WINDOW_MILLIS), 60_000);
+        List<Float> everyMinute = bloodAlcohol.promillesAt(
+                Instant.ofEpochMilli(start), Instant.ofEpochMilli(start + WINDOW_MILLIS), Duration.ofMinutes(1));
 
         assertTrue(points.size() < everyMinute.size() / 5, "only bends are sent, got " + points.size());
         int segment = 0;

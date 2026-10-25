@@ -83,8 +83,7 @@ public class APIController {
     @PartyMember
     @GetMapping(value = "/parties/{partyId}", produces = XML)
     public String party(@PathVariable int partyId) {
-        List<User> members = partyRoster.members(partyId);
-        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), members, promilles.of(members), clock));
+        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), promilles.of(partyRoster.members(partyId)), clock));
     }
 
     @OwnUser
@@ -129,8 +128,7 @@ public class APIController {
     @OwnUserOrPartyMate
     @GetMapping(value = "/users/{userId}", produces = XML)
     public String user(@PathVariable int userId) {
-        User user = userAccounts.get(userId);
-        return xml(ClassicUserDTO.fromUser(user, promilles.of(user), clock));
+        return xml(ClassicUserDTO.fromUser(promilles.of(userAccounts.get(userId)), clock));
     }
 
     @OwnUser
@@ -226,11 +224,10 @@ public class APIController {
 
     private List<String[]> getSlopes(User user, boolean getId) {
         int intervalMs = 60 * 1000;
-        Instant now = Instant.now();
-        Instant start = now.minus(Duration.ofMinutes(300));
-
         BloodAlcohol bloodAlcohol = promilles.of(user);
-        List<Float> history = bloodAlcohol.promillesAtInterval(Date.from(start), Date.from(now), intervalMs);
+        Instant start = bloodAlcohol.now().minus(Duration.ofMinutes(300));
+
+        List<Float> history = bloodAlcohol.promillesAt(start, bloodAlcohol.now(), Duration.ofMillis(intervalMs));
         List<String[]> slopes = new LinkedList<String[]>();
 
         double lastSlope = Double.MAX_VALUE;
@@ -253,7 +250,7 @@ public class APIController {
             lastY = y;
             x += intervalMs;
         }
-        slopes.add(getCsvValues(Instant.now().toEpochMilli(), bloodAlcohol.promilles(), user, getId));
+        slopes.add(getCsvValues(bloodAlcohol.now().toEpochMilli(), bloodAlcohol.promilles(), user, getId));
         return slopes;
     }
 

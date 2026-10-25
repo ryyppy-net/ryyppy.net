@@ -96,7 +96,8 @@ public class UserDTO {
         this.history = history;
     }
     
-    public static UserDTO fromUser(User user, BloodAlcohol bloodAlcohol){
+    public static UserDTO fromUser(BloodAlcohol bloodAlcohol){
+        User user = bloodAlcohol.user();
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setName(user.getName());

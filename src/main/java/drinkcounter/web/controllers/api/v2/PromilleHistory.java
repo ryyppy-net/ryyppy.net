@@ -8,7 +8,6 @@ import drinkcounter.alcoholcalculator.BloodAlcohol;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,10 +20,9 @@ public class PromilleHistory {
 
     public static List<HistoryPoint> of(BloodAlcohol bloodAlcohol) {
         int intervalMs = 60 * 1000;
-        Instant now = Instant.now();
-        Instant start = now.minus(Duration.ofMinutes(300));
+        Instant start = bloodAlcohol.now().minus(Duration.ofMinutes(300));
 
-        List<Float> history = bloodAlcohol.promillesAtInterval(Date.from(start), Date.from(now), intervalMs);
+        List<Float> history = bloodAlcohol.promillesAt(start, bloodAlcohol.now(), Duration.ofMillis(intervalMs));
         List<HistoryPoint> slopes = new ArrayList<HistoryPoint>();
 
         // Promilles fall in straight lines between drinks and the charts draw straight
@@ -40,11 +38,6 @@ public class PromilleHistory {
                 slopes.add(point);
             }
         }
-
-        HistoryPoint point = new HistoryPoint();
-        point.setTimestamp(Instant.now().toEpochMilli());
-        point.setPromilles(bloodAlcohol.promilles());
-        slopes.add(point);
         return slopes;
     }
 }

@@ -20,8 +20,8 @@ public final class OwnDrinksView {
     private OwnDrinksView() {
     }
 
-    public static UserDTO profile(User user, BloodAlcohol bloodAlcohol) {
-        UserDTO userDTO = UserDTO.fromUser(user, bloodAlcohol);
+    public static UserDTO profile(BloodAlcohol bloodAlcohol) {
+        UserDTO userDTO = UserDTO.fromUser(bloodAlcohol);
         userDTO.setHistory(PromilleHistory.of(bloodAlcohol));
         return userDTO;
     }

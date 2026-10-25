@@ -15,7 +15,7 @@ public class ParticipantDTOTest {
         user.setSex(User.Sex.MALE);
         user.setWeight(66);
         user.setEmail("matti.meikalainen@example.org");
-        ParticipantDTO participant = ParticipantDTO.fromUser(user, new BloodAlcohol(user, List.of(), Instant.now()));
+        ParticipantDTO participant = ParticipantDTO.fromUser(new BloodAlcohol(user, List.of(), Instant.now()));
         assertEquals("https://www.gravatar.com/avatar/56f4f87e829c34b149d35e0e1a2ff08d.jpg?d=wavatar", participant.getProfilePictureUrl());
     }
 }

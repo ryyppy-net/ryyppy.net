@@ -13,7 +13,8 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "user")
 public record ClassicUserDTO(int id, String name, float alcoholInPromilles, int totalDrinks, long idle) {
 
-    public static ClassicUserDTO fromUser(User user, BloodAlcohol bloodAlcohol, Clock clock) {
+    public static ClassicUserDTO fromUser(BloodAlcohol bloodAlcohol, Clock clock) {
+        User user = bloodAlcohol.user();
         List<Drink> drinks = user.getDrinks();
         long idleSeconds = 0;
         if (!drinks.isEmpty()) {

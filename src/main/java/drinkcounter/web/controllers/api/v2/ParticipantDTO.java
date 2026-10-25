@@ -78,7 +78,8 @@ public class ParticipantDTO {
         this.history = history;
     }
 
-    public static ParticipantDTO fromUser(User user, BloodAlcohol bloodAlcohol){
+    public static ParticipantDTO fromUser(BloodAlcohol bloodAlcohol){
+        User user = bloodAlcohol.user();
         ParticipantDTO participant = new ParticipantDTO();
         participant.setId(user.getId());
         participant.setName(user.getName());

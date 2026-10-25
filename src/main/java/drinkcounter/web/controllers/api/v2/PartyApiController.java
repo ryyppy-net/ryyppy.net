@@ -21,7 +21,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -87,13 +86,11 @@ public class PartyApiController {
     public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
         Party party = partyRoster.get(partyId);
         Set<User> participants = party.getParticipants();
-        Map<Integer, BloodAlcohol> bloodAlcohol = promilles.of(participants);
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
-        for (User participant : participants) {
-            BloodAlcohol participantBloodAlcohol = bloodAlcohol.get(participant.getId());
-            ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant, participantBloodAlcohol);
+        for (BloodAlcohol participant : promilles.of(participants)) {
+            ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
             
-            List<HistoryPoint> history = PromilleHistory.of(participantBloodAlcohol);
+            List<HistoryPoint> history = PromilleHistory.of(participant);
             participantDTO.setHistory(history);
             
             participantDTOs.add(participantDTO);
@@ -136,8 +133,7 @@ public class PartyApiController {
     @PartyMember
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         requireParticipant(partyId, participantId);
-        User participant = userAccounts.get(participantId);
-        return ParticipantDTO.fromUser(participant, promilles.of(participant));
+        return ParticipantDTO.fromUser(promilles.of(userAccounts.get(participantId)));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
@@ -181,8 +177,7 @@ public class PartyApiController {
     }
 
     private ParticipantDrinksDTO participantDrinks(Drink drink, int participantId) {
-        User participant = userAccounts.get(participantId);
-        return ParticipantDrinksDTO.of(drink, participant, promilles.of(participant));
+        return ParticipantDrinksDTO.of(drink, promilles.of(userAccounts.get(participantId)));
     }
 
     private void requireParticipant(Integer partyId, Integer participantId) {
