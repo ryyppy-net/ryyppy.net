@@ -4,10 +4,12 @@ import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
+import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
+import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.PartyRepository;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,12 +28,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
-@Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class})
+@Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class})
 @MockitoBean(types = {
         PartyRoster.class,
         InvitationSuggestions.class,
         DrinkLog.class,
         PartyRepository.class,
+        DrinkRepository.class,
         UserAccounts.class,
         PassphraseLogin.class,
         GoogleIdentityLinkingService.class,

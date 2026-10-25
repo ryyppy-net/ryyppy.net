@@ -17,11 +17,8 @@
 
 package drinkcounter.model;
 
-import drinkcounter.PromilleTracker;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.ListIterator;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,7 +26,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.BatchSize;
 
 /**
@@ -106,7 +102,6 @@ public class User extends AbstractEntity{
     }
 
     public void drink(Drink drink){
-        PromilleTracker.getInstance().drinkAdded(this, drink);
         getDrinks().add(drink);
         drink.setDrinker(this);
     }
@@ -132,35 +127,15 @@ public class User extends AbstractEntity{
      */
     public void setWeight(float weightInKilos) {
         this.weight = weightInKilos;
-        PromilleTracker.getInstance().initializeUser(this);
     }
 
     public void setSex(Sex sex) {
         this.sex = sex;
-        PromilleTracker.getInstance().initializeUser(this);
     }
 
     @Enumerated(EnumType.STRING)
     public Sex getSex() {
         return sex;
-    }
-
-    /**
-     *
-     * @param date, the date to count the drinks after
-     * @return the amount of shots (alkoholiannoksia)
-     */
-    public int drinksSince(Date date){
-        float shots = 0f;
-        // iterate from last to first
-        ListIterator<Drink> iterator = drinks.listIterator(drinks.size());
-        while(iterator.hasPrevious()){
-            Drink drink = iterator.previous();
-            if (drink.getTimeStamp().isBefore(date.toInstant()))
-                break;
-            shots += drink.getAmountOfShots();
-        }
-        return Math.round(shots);
     }
 
     public boolean isGuest() {
@@ -174,7 +149,7 @@ public class User extends AbstractEntity{
     /**
      * @return the drinks
      */
-    // A party's participant list reads the drinks of every participant.
+    // The classic party view reads the drinks of every participant.
     @OneToMany(mappedBy="drinker")
     @BatchSize(size = 100)
     @OrderBy("timeStamp asc")
@@ -207,31 +182,6 @@ public class User extends AbstractEntity{
     
     public void removeDrink(Drink drink) {
         getDrinks().remove(drink);
-        PromilleTracker.getInstance().drinkRemoved(this, drink);
-    }
-
-    public void changeDrinkAlcohol(Drink drink, float alcohol) {
-        drink.setAlcohol(alcohol);
-        PromilleTracker.getInstance().drinkChanged(this, drink);
-    }
-
-    @Transient
-    public float getPromilles() {
-        return PromilleTracker.getInstance().getPromilles(this);
-    }
-
-    @Transient
-    public int getTotalDrinks() {
-        return PromilleTracker.getInstance().getTotalDrinks(this);
-    }
-
-    public List<Float> getPromillesAtInterval(Date startTime, Date endTime, int intervalMs) {
-        return PromilleTracker.getInstance().getPromillesAtInterval(this, startTime, endTime, intervalMs);
-    }
-
-    @Transient
-    public float getBloodAlcoholGrams() {
-        return PromilleTracker.getInstance().getBloodAlcoholGrams(this);
     }
 
     public String getPassword() {

@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers.api.v2;
 
+import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.User;
 import drinkcounter.util.DrinksPerDayCsv;
 import java.io.IOException;
@@ -19,9 +20,9 @@ public final class OwnDrinksView {
     private OwnDrinksView() {
     }
 
-    public static UserDTO profile(User user) {
-        UserDTO userDTO = UserDTO.fromUser(user);
-        userDTO.setHistory(PromilleHistory.forUser(user));
+    public static UserDTO profile(BloodAlcohol bloodAlcohol) {
+        UserDTO userDTO = UserDTO.fromUser(bloodAlcohol);
+        userDTO.setHistory(PromilleHistory.of(bloodAlcohol));
         return userDTO;
     }
 

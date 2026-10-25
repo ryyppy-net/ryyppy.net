@@ -34,8 +34,6 @@ public class DrinkLogTest {
 
     @BeforeEach
     public void setUp() {
-        PromilleTracker.getInstance().reset();
-
         userRepository = mock(UserRepository.class);
         drinkRepository = mock(DrinkRepository.class);
         AtomicInteger nextDrinkId = new AtomicInteger(1);
@@ -69,14 +67,12 @@ public class DrinkLogTest {
     }
 
     @Test
-    public void correctAlcoholUpdatesDrinkAndPromilles() {
-        int drinkId = drinkLog.record(1, new Date());
-        Drink drink = user.getDrinks().get(0);
-        float promillesBefore = user.getPromilles();
+    public void correctAlcoholUpdatesTheUsersDrink() {
+        Drink drink = usersDrink();
 
-        drinkLog.correctAlcohol(1, drinkId, drink.getAlcohol() * 2);
+        drinkLog.correctAlcohol(1, drink.getId(), 30f);
 
-        assertTrue(user.getPromilles() > promillesBefore);
+        assertEquals(30f, drink.getAlcohol());
     }
 
     @Test
@@ -88,10 +84,9 @@ public class DrinkLogTest {
 
     @Test
     public void undoDeletesTheUsersDrinkFoundInTheirDrinkList() {
-        int drinkId = drinkLog.record(1, new Date());
-        Drink drink = user.getDrinks().get(0);
+        Drink drink = usersDrink();
 
-        drinkLog.undo(1, drinkId);
+        drinkLog.undo(1, drink.getId());
 
         assertTrue(user.getDrinks().isEmpty());
         verify(drinkRepository).delete(drink);
@@ -104,6 +99,11 @@ public class DrinkLogTest {
 
         assertThrows(EntityNotFoundException.class, () -> drinkLog.undo(1, othersDrink.getId()));
         verify(drinkRepository, never()).delete(any(Drink.class));
+    }
+
+    private Drink usersDrink() {
+        drinkLog.record(1, new Date());
+        return user.getDrinks().get(0);
     }
 
     private Drink othersDrink() {
