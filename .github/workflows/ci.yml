@@ -31,6 +31,9 @@ jobs:
             maven-${{ github.job }}-
             maven-
 
+      - name: Check formatting
+        run: mvn -B spotless:check
+
       - name: Run unit tests
         run: mvn -B test
 

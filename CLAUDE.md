@@ -23,6 +23,7 @@ An endpoint you add or change must enforce them, in both front ends.
 mvn spring-boot:run          # starts PostgreSQL via docker/docker-compose.yml, then the app on :8080
 mvn test                     # unit tests
 mvn test -Dtest=ClassName    # single test class
+mvn spotless:apply           # formats Java sources; CI runs spotless:check
 docker build -t ryyppynet .  # container image (see Container image)
 mvn spring-boot:run -Dspring-boot.run.profiles=seed
                              # seeds an empty database with fake data (see docs/seed-data.md)
@@ -73,6 +74,9 @@ args; omit them locally and it is skipped. Two invariants:
 - A drink is saved on that click. The overlay that follows offers undo and edit
   for 5s, which delete or change the saved drink, in both front ends.
 - Use constructor injection in new code.
+- Error Prone runs inside javac on every compile and fails the build on its
+  ERROR-level checks. It needs the `--add-exports` in `.mvn/jvm.config`, so any
+  build that runs Maven (including the Dockerfile) must have that file.
 
 ## Comments
 

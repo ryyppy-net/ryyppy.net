@@ -3,6 +3,7 @@
 FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
+COPY .mvn .mvn
 COPY src src
 # This stage never has .git in its build context (see .dockerignore), so
 # git-commit-id-maven-plugin (pom.xml) has nothing to read here - write the
