@@ -1,11 +1,12 @@
 package drinkcounter.web.controllers.api.v2;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.User;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ParticipantDTOTest {
     @Test
@@ -16,6 +17,8 @@ public class ParticipantDTOTest {
         user.setWeight(66);
         user.setEmail("matti.meikalainen@example.org");
         ParticipantDTO participant = ParticipantDTO.fromUser(new BloodAlcohol(user, List.of(), Instant.now()));
-        assertEquals("https://www.gravatar.com/avatar/56f4f87e829c34b149d35e0e1a2ff08d.jpg?d=wavatar", participant.getProfilePictureUrl());
+        assertEquals(
+                "https://www.gravatar.com/avatar/56f4f87e829c34b149d35e0e1a2ff08d.jpg?d=wavatar",
+                participant.getProfilePictureUrl());
     }
 }

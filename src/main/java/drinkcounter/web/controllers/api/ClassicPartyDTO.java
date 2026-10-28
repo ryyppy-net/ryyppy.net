@@ -15,11 +15,16 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public record ClassicPartyDTO(
         int id,
         String name,
+
         @JacksonXmlElementWrapper(localName = "users") @JacksonXmlProperty(localName = "user")
         List<ClassicUserDTO> users) {
 
     public static ClassicPartyDTO fromParty(Party party, List<BloodAlcohol> participants, Clock clock) {
-        return new ClassicPartyDTO(party.getId(), party.getName(),
-                participants.stream().map(participant -> ClassicUserDTO.fromUser(participant, clock)).toList());
+        return new ClassicPartyDTO(
+                party.getId(),
+                party.getName(),
+                participants.stream()
+                        .map(participant -> ClassicUserDTO.fromUser(participant, clock))
+                        .toList());
     }
 }

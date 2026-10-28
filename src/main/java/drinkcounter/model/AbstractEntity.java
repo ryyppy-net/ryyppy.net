@@ -4,23 +4,23 @@
  */
 
 package drinkcounter.model;
-import java.io.Serializable;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import java.io.Serializable;
 
 /**
  *
  * @author Toni
  */
-
 @MappedSuperclass
 public abstract class AbstractEntity implements Serializable {
     private Integer id;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     public Integer getId() {
         return id;
     }

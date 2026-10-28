@@ -13,5 +13,4 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("#userId == principal.userId")
-public @interface OwnUser {
-}
+public @interface OwnUser {}

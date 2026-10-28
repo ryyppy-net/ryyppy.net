@@ -11,19 +11,19 @@ package drinkcounter.web.controllers.api.v2;
 public class HistoryPoint {
     private long timestamp;
     private double promilles;
-    
+
     public long getTimestamp() {
         return timestamp;
     }
-    
+
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-    
+
     public double getPromilles() {
         return promilles;
     }
-    
+
     public void setPromilles(double promilles) {
         this.promilles = promilles;
     }

@@ -1,13 +1,14 @@
 package drinkcounter.alcoholcalculator;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class BloodAlcoholTest {
     private User man80 = new User();
@@ -18,7 +19,7 @@ public class BloodAlcoholTest {
     private static final float TOLERANCE = 0.05f;
 
     @BeforeEach
-    public void setUp () {
+    public void setUp() {
         man80.setWeight(80);
         man80.setSex(User.Sex.MALE);
         man80.setId(1);
@@ -43,11 +44,14 @@ public class BloodAlcoholTest {
         user.setId(5);
         Drink drink = new Drink();
         user.drink(drink);
-        assertEquals((float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS, bloodAlcohol(user).grams(), 0.1f);
+        assertEquals(
+                (float) AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS,
+                bloodAlcohol(user).grams(),
+                0.1f);
     }
 
     // DRINK COURSES:
-    
+
     // Drink course 1:
     // - One beer (0.33 ml, 4.7%) 30 minutes ago
     private static final float MAN_80_DRINK_COURSE_1 = 0.1f;
@@ -58,13 +62,13 @@ public class BloodAlcoholTest {
     public void drinkCourse1(User user) {
         drinkXDrinksNMinutesAgo(user, 1, 30);
     }
-    
+
     @Test
     public void testPromilles_man80_drinkCourse1() {
         drinkCourse1(man80);
         assertEquals(MAN_80_DRINK_COURSE_1, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_man110_drinkCourse1() {
         drinkCourse1(man110);
@@ -76,7 +80,7 @@ public class BloodAlcoholTest {
         drinkCourse1(woman60);
         assertEquals(WOMAN_60_DRINK_COURSE_1, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_woman90_drinkCourse1() {
         drinkCourse1(woman90);
@@ -89,17 +93,17 @@ public class BloodAlcoholTest {
     private static final float MAN_110_DRINK_COURSE_2 = 0.3f;
     private static final float WOMAN_60_DRINK_COURSE_2 = 0.8f;
     private static final float WOMAN_90_DRINK_COURSE_2 = 0.5f;
-    
+
     public void drinkCourse2(User user) {
         drinkXDrinksNMinutesAgo(user, 3, 60);
     }
-    
+
     @Test
     public void testPromilles_man80_drinkCourse2() {
         drinkCourse2(man80);
         assertEquals(MAN_80_DRINK_COURSE_2, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_man110_drinkCourse2() {
         drinkCourse2(man110);
@@ -111,7 +115,7 @@ public class BloodAlcoholTest {
         drinkCourse2(woman60);
         assertEquals(WOMAN_60_DRINK_COURSE_2, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_woman90_drinkCourse2() {
         drinkCourse2(woman90);
@@ -124,17 +128,17 @@ public class BloodAlcoholTest {
     private static final float MAN_110_DRINK_COURSE_3 = 0.5f;
     private static final float WOMAN_60_DRINK_COURSE_3 = 1.4f;
     private static final float WOMAN_90_DRINK_COURSE_3 = 0.8f;
-    
+
     public void drinkCourse3(User user) {
         drinkXDrinksNMinutesAgo(user, 6, 180);
     }
-    
+
     @Test
     public void testPromilles_man80_drinkCourse3() {
         drinkCourse3(man80);
         assertEquals(MAN_80_DRINK_COURSE_3, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_man110_drinkCourse3() {
         drinkCourse3(man110);
@@ -146,13 +150,13 @@ public class BloodAlcoholTest {
         drinkCourse3(woman60);
         assertEquals(WOMAN_60_DRINK_COURSE_3, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_woman90_drinkCourse3() {
         drinkCourse3(woman90);
         assertEquals(WOMAN_90_DRINK_COURSE_3, bloodAlcohol(woman90).promilles(), TOLERANCE);
-    }  
-    
+    }
+
     // Drink course 4:
     // - 24 beers (0.33 ml, 4.7%) 8 hours ago
     private static final float MAN_80_DRINK_COURSE_4 = 3.7f;
@@ -169,7 +173,7 @@ public class BloodAlcoholTest {
         drinkCourse4(man80);
         assertEquals(MAN_80_DRINK_COURSE_4, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_man110_drinkCourse4() {
         drinkCourse4(man110);
@@ -181,13 +185,13 @@ public class BloodAlcoholTest {
         drinkCourse4(woman60);
         assertEquals(WOMAN_60_DRINK_COURSE_4, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_woman90_drinkCourse4() {
         drinkCourse4(woman90);
         assertEquals(WOMAN_90_DRINK_COURSE_4, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }
-    
+
     // Drink course 5:
     // - 24 beers (0.33 ml, 4.7%) 16 hours ago
     private static final float MAN_80_DRINK_COURSE_5 = 2.7f;
@@ -204,7 +208,7 @@ public class BloodAlcoholTest {
         drinkCourse5(man80);
         assertEquals(MAN_80_DRINK_COURSE_5, bloodAlcohol(man80).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_man110_drinkCourse5() {
         drinkCourse5(man110);
@@ -216,13 +220,13 @@ public class BloodAlcoholTest {
         drinkCourse5(woman60);
         assertEquals(WOMAN_60_DRINK_COURSE_5, bloodAlcohol(woman60).promilles(), TOLERANCE);
     }
-    
+
     @Test
     public void testPromilles_woman90_drinkCourse5() {
         drinkCourse5(woman90);
         assertEquals(WOMAN_90_DRINK_COURSE_5, bloodAlcohol(woman90).promilles(), TOLERANCE);
     }
-    
+
     // Helper functions
     private static BloodAlcohol bloodAlcohol(User user) {
         return new BloodAlcohol(user, user.getDrinks(), Instant.now());
@@ -382,8 +386,11 @@ public class BloodAlcoholTest {
     @Test
     public void drinksSinceSoberCountsStandardDrinksOfTheCurrentSession() {
         BloodAlcohol bloodAlcohol = man80(
-                drink(12, Duration.ofHours(-20)), drink(12, Duration.ofHours(-20)),
-                drink(12, Duration.ofMinutes(-60)), drink(6, Duration.ofMinutes(-50)), drink(6, Duration.ofMinutes(-40)));
+                drink(12, Duration.ofHours(-20)),
+                drink(12, Duration.ofHours(-20)),
+                drink(12, Duration.ofMinutes(-60)),
+                drink(6, Duration.ofMinutes(-50)),
+                drink(6, Duration.ofMinutes(-40)));
 
         assertEquals(2, bloodAlcohol.drinksSinceSober());
     }

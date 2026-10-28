@@ -1,8 +1,8 @@
 package drinkcounter.web;
 
+import drinkcounter.DrinkLog;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
-import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
@@ -29,17 +29,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
 @Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class})
-@MockitoBean(types = {
-        PartyRoster.class,
-        InvitationSuggestions.class,
-        DrinkLog.class,
-        PartyRepository.class,
-        DrinkRepository.class,
-        UserAccounts.class,
-        PassphraseLogin.class,
-        GoogleIdentityLinkingService.class,
-        AuthRelayTokenService.class
-})
+@MockitoBean(
+        types = {
+            PartyRoster.class,
+            InvitationSuggestions.class,
+            DrinkLog.class,
+            PartyRepository.class,
+            DrinkRepository.class,
+            UserAccounts.class,
+            PassphraseLogin.class,
+            GoogleIdentityLinkingService.class,
+            AuthRelayTokenService.class
+        })
 @MockitoBean(name = "oauth2LoginCustomizer", types = Customizer.class)
-public @interface ControllerWebTest {
-}
+public @interface ControllerWebTest {}

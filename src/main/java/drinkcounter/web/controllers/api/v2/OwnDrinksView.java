@@ -10,8 +10,7 @@ import java.util.List;
  */
 public final class OwnDrinksView {
 
-    private OwnDrinksView() {
-    }
+    private OwnDrinksView() {}
 
     public static UserDTO profile(BloodAlcohol bloodAlcohol) {
         UserDTO userDTO = UserDTO.fromUser(bloodAlcohol);

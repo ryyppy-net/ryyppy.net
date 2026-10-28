@@ -1,15 +1,35 @@
 package drinkcounter.web.controllers.api.v2;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import drinkcounter.DrinkLog;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
-import drinkcounter.DrinkLog;
-import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.web.ControllerWebTest;
 import jakarta.servlet.ServletException;
 import java.time.Instant;
@@ -26,26 +46,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Drives PartyApiController through MockMvc and the app's security filter chain, so the
@@ -157,7 +157,8 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void invitationSuggestionsAreForTheSignedInUser() throws Exception {
-        when(invitationSuggestions.forParty(42, 1, 10)).thenReturn(List.of(new Friend(9, "Ville", "ville@example.com")));
+        when(invitationSuggestions.forParty(42, 1, 10))
+                .thenReturn(List.of(new Friend(9, "Ville", "ville@example.com")));
 
         mvc.perform(get(PARTIES + "/1/invitations"))
                 .andExpect(status().isOk())
@@ -177,8 +178,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void drinkDefaultsToNowWhenTimestampMissing() throws Exception {
-        mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
-                .andExpect(status().isOk());
+        mvc.perform(post(PARTIES + "/1/participants/2/drinks")).andExpect(status().isOk());
 
         verify(drinkLog).record(eq(2), eq((Date) null), any(Float.class));
     }
@@ -203,15 +203,17 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void getParticipantRejectsNonParticipantNamingBoth() {
-        ServletException ex = assertThrows(ServletException.class,
-                () -> mvc.perform(get(PARTIES + "/1/participants/3")));
+        ServletException ex =
+                assertThrows(ServletException.class, () -> mvc.perform(get(PARTIES + "/1/participants/3")));
 
         assertEquals("Participant 3 doesn't belong to party 1", ex.getCause().getMessage());
     }
 
     @Test
     public void changeDrinkUpdatesAlcoholOfParticipantsDrink() throws Exception {
-        mvc.perform(put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
+        mvc.perform(put(PARTIES + "/1/participants/2/drinks/7")
+                        .param("volume", "0.5")
+                        .param("alcohol", "0.05"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.participant.id").value(2));
 
@@ -220,8 +222,11 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void changeDrinkRejectsNonParticipant() {
-        ServletException ex = assertThrows(ServletException.class, () -> mvc.perform(
-                put(PARTIES + "/1/participants/3/drinks/7").param("volume", "0.5").param("alcohol", "0.05")));
+        ServletException ex = assertThrows(
+                ServletException.class,
+                () -> mvc.perform(put(PARTIES + "/1/participants/3/drinks/7")
+                        .param("volume", "0.5")
+                        .param("alcohol", "0.05")));
         assertEquals("Participant 3 doesn't belong to party 1", ex.getCause().getMessage());
 
         verify(drinkLog, never()).correctAlcohol(anyInt(), anyInt(), any(Float.class));
@@ -275,7 +280,10 @@ public class PartyApiControllerWebTest {
             return guest;
         });
 
-        mvc.perform(post(PARTIES + "/1/participants").param("name", "Vieras").param("sex", "FEMALE").param("weight", "60"))
+        mvc.perform(post(PARTIES + "/1/participants")
+                        .param("name", "Vieras")
+                        .param("sex", "FEMALE")
+                        .param("weight", "60"))
                 .andExpect(status().isOk());
 
         verify(partyRoster).join(1, 8);
@@ -293,16 +301,14 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void memberRemovesAParticipant() throws Exception {
-        mvc.perform(delete(PARTIES + "/1/participants/2"))
-                .andExpect(status().isOk());
+        mvc.perform(delete(PARTIES + "/1/participants/2")).andExpect(status().isOk());
 
         verify(partyRoster).leave(1, 2);
     }
 
     @Test
     public void memberInvitesAnyUser() throws Exception {
-        mvc.perform(post(PARTIES + "/1/invitations").param("userId", "3"))
-                .andExpect(status().isOk());
+        mvc.perform(post(PARTIES + "/1/invitations").param("userId", "3")).andExpect(status().isOk());
 
         verify(partyRoster).join(1, 3);
     }
@@ -311,12 +317,23 @@ public class PartyApiControllerWebTest {
         return Stream.of(
                 Arguments.of("get party", get(PARTIES + "/1")),
                 Arguments.of("get participants", get(PARTIES + "/1/participants")),
-                Arguments.of("add guest", post(PARTIES + "/1/participants").param("name", "Vieras").param("sex", "MALE").param("weight", "80")),
-                Arguments.of("add participant by email", post(PARTIES + "/1/participants").param("email", "user@example.com")),
+                Arguments.of(
+                        "add guest",
+                        post(PARTIES + "/1/participants")
+                                .param("name", "Vieras")
+                                .param("sex", "MALE")
+                                .param("weight", "80")),
+                Arguments.of(
+                        "add participant by email",
+                        post(PARTIES + "/1/participants").param("email", "user@example.com")),
                 Arguments.of("remove participant", delete(PARTIES + "/1/participants/2")),
                 Arguments.of("get participant", get(PARTIES + "/1/participants/2")),
                 Arguments.of("add drink", post(PARTIES + "/1/participants/2/drinks")),
-                Arguments.of("change drink", put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05")),
+                Arguments.of(
+                        "change drink",
+                        put(PARTIES + "/1/participants/2/drinks/7")
+                                .param("volume", "0.5")
+                                .param("alcohol", "0.05")),
                 Arguments.of("remove drink", delete(PARTIES + "/1/participants/2/drinks/7")),
                 Arguments.of("suggest invitations", get(PARTIES + "/1/invitations")),
                 Arguments.of("invite", post(PARTIES + "/1/invitations").param("userId", "42")));
@@ -324,7 +341,8 @@ public class PartyApiControllerWebTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("partyRequests")
-    public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request) throws Exception {
+    public void outsiderIsForbiddenAndChangesNothing(String name, MockHttpServletRequestBuilder request)
+            throws Exception {
         when(partyRepository.countUserParticipations(1, 42)).thenReturn(0L);
 
         mvc.perform(request).andExpect(status().isForbidden());
@@ -337,9 +355,7 @@ public class PartyApiControllerWebTest {
     @Test
     @WithAnonymousUser
     public void anonymousPartyRequestIsSentToTheLoginPage() throws Exception {
-        mvc.perform(get(PARTIES + "/1"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ui/login"));
+        mvc.perform(get(PARTIES + "/1")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/ui/login"));
 
         verifyNoInteractions(partyRoster, invitationSuggestions, drinkLog);
     }
@@ -347,9 +363,7 @@ public class PartyApiControllerWebTest {
     @Test
     @WithAnonymousUser
     public void anonymousRequestIsSentToTheLoginPage() throws Exception {
-        mvc.perform(get(PARTIES))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ui/login"));
+        mvc.perform(get(PARTIES)).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/ui/login"));
 
         verifyNoInteractions(partyRoster, invitationSuggestions, drinkLog);
         verify(userAccounts, never()).get(anyInt());

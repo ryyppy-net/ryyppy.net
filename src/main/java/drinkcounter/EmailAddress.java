@@ -6,8 +6,7 @@ public final class EmailAddress {
 
     private static final Pattern FORMAT = Pattern.compile("^(.+)@(.+)\\.(.+)$", Pattern.CASE_INSENSITIVE);
 
-    private EmailAddress() {
-    }
+    private EmailAddress() {}
 
     public static boolean isValid(String email) {
         if (email == null || email.length() == 0) return false;

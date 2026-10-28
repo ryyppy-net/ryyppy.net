@@ -1,7 +1,6 @@
 package drinkcounter.authentication.relay;
 
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -12,8 +11,7 @@ import java.net.URISyntaxException;
  */
 public final class Origins {
 
-    private Origins() {
-    }
+    private Origins() {}
 
     public static String of(HttpServletRequest request) {
         return build(request.getScheme(), request.getServerName(), request.getServerPort());
@@ -41,9 +39,8 @@ public final class Origins {
     }
 
     private static String build(String scheme, String host, int port) {
-        boolean defaultPort = port == -1
-                || ("http".equals(scheme) && port == 80)
-                || ("https".equals(scheme) && port == 443);
+        boolean defaultPort =
+                port == -1 || ("http".equals(scheme) && port == 80) || ("https".equals(scheme) && port == 443);
         return defaultPort ? scheme + "://" + host : scheme + "://" + host + ":" + port;
     }
 }

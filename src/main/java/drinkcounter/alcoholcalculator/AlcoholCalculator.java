@@ -11,34 +11,34 @@ import java.util.List;
  * @author murgo
  */
 public class AlcoholCalculator {
-    
+
     /**
      * Gram's per litre
      */
     public static final float ALCOHOL_DENSITY = 789f;
-    
+
     // The rate at which alcohol is burned per millisecond
     private final double burnRate;
-    
+
     // The amount of a single dosage of alcohol
-    public final static double STANDARD_DRINK_ALCOHOL_GRAMS = 12;
+    public static final double STANDARD_DRINK_ALCOHOL_GRAMS = 12;
 
     private final List<ShotFunction> functions = new LinkedList<ShotFunction>();
 
     public AlcoholCalculator(float weight) {
         // Typical male burns one gram of alcohol for every 10 kilograms of weight in an hour.
-        burnRate = -((double)weight / 10.0 / 60 / 60 / 1000);
+        burnRate = -((double) weight / 10.0 / 60 / 60 / 1000);
     }
-    
+
     /**
-     * 
+     *
      * @param time
      * @return grams of alcohol in blood at given time
      */
     public float getAlcoholAmountAt(Date time) {
-        return (float)calculate(time);
+        return (float) calculate(time);
     }
-    
+
     public void calculateDrink(Drink drink) {
         double currentAlcohol = calculate(Date.from(drink.getTimeStamp()));
 
@@ -48,28 +48,27 @@ public class AlcoholCalculator {
             functions.get(size - 1).setCutter(currentAlcohol);
         }
 
-        ShotFunction newFunction = new ShotFunction(Date.from(drink.getTimeStamp()), burnRate, currentAlcohol + drink.getAlcohol());
+        ShotFunction newFunction =
+                new ShotFunction(Date.from(drink.getTimeStamp()), burnRate, currentAlcohol + drink.getAlcohol());
         functions.add(newFunction);
     }
-    
+
     // best function name ever
-    private double calculate(Date time)
-    {
+    private double calculate(Date time) {
         double alcohol = 0;
-        
-        for (ShotFunction shotFunction : functions)
-        {
+
+        for (ShotFunction shotFunction : functions) {
             alcohol = shotFunction.calc(time);
 
-            // If the function returned a positive value then we can stop, because the functions don't overlap (due to cutters)
-            if (alcohol > 0)
-                return alcohol;
+            // If the function returned a positive value then we can stop, because the functions don't overlap (due to
+            // cutters)
+            if (alcohol > 0) return alcohol;
         }
 
         return alcohol;
     }
-    
-    public static float getAlcoholAmount(float volume, float alcoholPercentage){
-        return volume*alcoholPercentage*ALCOHOL_DENSITY;
+
+    public static float getAlcoholAmount(float volume, float alcoholPercentage) {
+        return volume * alcoholPercentage * ALCOHOL_DENSITY;
     }
 }

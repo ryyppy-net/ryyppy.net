@@ -1,5 +1,9 @@
 package drinkcounter.web.controllers.api.v2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -7,10 +11,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PromilleHistoryTest {
 
@@ -36,11 +36,13 @@ public class PromilleHistoryTest {
         assertFalse(slopes.isEmpty());
 
         long firstTimestamp = slopes.get(0).getTimestamp();
-        assertTrue(Math.abs(firstTimestamp - (before - WINDOW_MILLIS)) < TOLERANCE_MILLIS,
+        assertTrue(
+                Math.abs(firstTimestamp - (before - WINDOW_MILLIS)) < TOLERANCE_MILLIS,
                 "first point should be ~300 minutes before now, was " + firstTimestamp);
 
         HistoryPoint last = slopes.get(slopes.size() - 1);
-        assertTrue(last.getTimestamp() >= before - TOLERANCE_MILLIS && last.getTimestamp() <= after + TOLERANCE_MILLIS,
+        assertTrue(
+                last.getTimestamp() >= before - TOLERANCE_MILLIS && last.getTimestamp() <= after + TOLERANCE_MILLIS,
                 "last point should be ~now, was " + last.getTimestamp());
         assertEquals(bloodAlcohol.promilles(), (float) last.getPromilles(), 0.01f);
 
@@ -79,8 +81,10 @@ public class PromilleHistoryTest {
             }
             HistoryPoint from = points.get(segment);
             HistoryPoint to = points.get(segment + 1);
-            double drawn = from.getPromilles() + (to.getPromilles() - from.getPromilles())
-                    * (x - from.getTimestamp()) / (double) (to.getTimestamp() - from.getTimestamp());
+            double drawn = from.getPromilles()
+                    + (to.getPromilles() - from.getPromilles())
+                            * (x - from.getTimestamp())
+                            / (double) (to.getTimestamp() - from.getTimestamp());
             assertEquals(everyMinute.get(minute), drawn, 0.001, "minute " + minute);
         }
     }

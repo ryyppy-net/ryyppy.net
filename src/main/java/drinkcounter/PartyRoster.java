@@ -8,9 +8,9 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
-import org.springframework.data.domain.Limit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ public class PartyRoster {
 
     @Transactional
     public Party start(String partyName) {
-        if(partyName == null || partyName.isBlank()) {
+        if (partyName == null || partyName.isBlank()) {
             throw new IllegalArgumentException("Party name cannot be empty");
         }
 

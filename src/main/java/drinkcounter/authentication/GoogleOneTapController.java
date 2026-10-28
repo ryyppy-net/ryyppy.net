@@ -8,6 +8,9 @@ import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.authentication.relay.Origins;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +19,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 
 /**
  * Handles Google One Tap sign-in by verifying the credential token and either establishing a
@@ -47,9 +46,7 @@ public class GoogleOneTapController {
     }
 
     @PostMapping("/api/auth/google/one-tap")
-    public String handleOneTapCallback(
-            @RequestParam("credential") String credential,
-            HttpServletRequest request) {
+    public String handleOneTapCallback(@RequestParam("credential") String credential, HttpServletRequest request) {
 
         if (credential == null || credential.isEmpty()) {
             log.warn("One Tap callback received without credential");
@@ -67,7 +64,7 @@ public class GoogleOneTapController {
 
         // Verify the token
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
-                new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                        new NetHttpTransport(), GsonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(clientId))
                 .build();
 
@@ -105,13 +102,16 @@ public class GoogleOneTapController {
 
         if (crossEnvironment) {
             if (!relayTokenService.isEnabled()) {
-                log.error("One Tap credential POSTed cross-origin (referer={}) but AUTH_RELAY_SECRET is not configured", refererOrigin);
+                log.error(
+                        "One Tap credential POSTed cross-origin (referer={}) but AUTH_RELAY_SECRET is not configured",
+                        refererOrigin);
                 return "redirect:/ui/login?error=relay_not_configured";
             }
 
             String token = relayTokenService.mint(sub, email, name, refererOrigin);
             log.info("One Tap: relaying verified Google identity to {}", refererOrigin);
-            return "redirect:" + refererOrigin + "/api/auth/relay/complete?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+            return "redirect:" + refererOrigin + "/api/auth/relay/complete?token="
+                    + URLEncoder.encode(token, StandardCharsets.UTF_8);
         }
 
         User user = identityLinkingService.findOrCreateUser(sub, email, name, givenName, familyName);

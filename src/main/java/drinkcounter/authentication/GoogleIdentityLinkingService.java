@@ -4,6 +4,8 @@ import drinkcounter.UserAccounts;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,9 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Shared by every Google sign-in path (direct One Tap, the relay handoff, and OAuth2 login) so
@@ -38,7 +37,11 @@ public class GoogleIdentityLinkingService {
     public User findOrCreateUser(String googleSub, String email, String name, String givenName, String familyName) {
         User user = userAccounts.byOpenId(googleSub);
         if (user != null) {
-            log.info("Existing user logged in via Google: email={}, userId={}, googleId={}", email, user.getId(), googleSub);
+            log.info(
+                    "Existing user logged in via Google: email={}, userId={}, googleId={}",
+                    email,
+                    user.getId(),
+                    googleSub);
             return user;
         }
 
@@ -46,7 +49,11 @@ public class GoogleIdentityLinkingService {
         if (user != null) {
             user.setOpenId(googleSub);
             userAccounts.update(user);
-            log.info("Linked Google account to existing user: email={}, userId={}, googleId={}", email, user.getId(), googleSub);
+            log.info(
+                    "Linked Google account to existing user: email={}, userId={}, googleId={}",
+                    email,
+                    user.getId(),
+                    googleSub);
             return user;
         }
 
@@ -79,10 +86,12 @@ public class GoogleIdentityLinkingService {
         DrinkcounterUserDetails userDetails = new DrinkcounterUserDetails(
                 email,
                 "", // No password for OAuth users
-                true, true, true, true,
+                true,
+                true,
+                true,
+                true,
                 authorities,
-                userId
-        );
+                userId);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
@@ -90,8 +99,6 @@ public class GoogleIdentityLinkingService {
 
         HttpSession session = request.getSession(true);
         session.setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                SecurityContextHolder.getContext()
-        );
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 }

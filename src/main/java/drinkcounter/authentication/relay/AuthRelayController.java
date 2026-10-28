@@ -3,15 +3,14 @@ package drinkcounter.authentication.relay;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Endpoints for the cross-environment Google sign-in relay.
@@ -54,7 +53,8 @@ public class AuthRelayController {
     @GetMapping("/api/auth/relay/redirect")
     public String redirect(HttpServletRequest request) {
         if (!tokenService.isEnabled() || hubUrl == null || hubUrl.isBlank()) {
-            log.error("Google sign-in relay was requested but GOOGLE_AUTH_HUB_URL/AUTH_RELAY_SECRET are not configured");
+            log.error(
+                    "Google sign-in relay was requested but GOOGLE_AUTH_HUB_URL/AUTH_RELAY_SECRET are not configured");
             return "redirect:/ui/login?error=relay_not_configured";
         }
 
@@ -71,9 +71,7 @@ public class AuthRelayController {
 
     @GetMapping("/api/auth/relay/start")
     public String start(
-            @RequestParam("return_to") String returnTo,
-            @RequestParam("sig") String sig,
-            HttpServletRequest request) {
+            @RequestParam("return_to") String returnTo, @RequestParam("sig") String sig, HttpServletRequest request) {
 
         if (!tokenService.verifyOriginSignature(returnTo, sig)) {
             log.warn("Auth relay start rejected: invalid signature for return_to={}", returnTo);

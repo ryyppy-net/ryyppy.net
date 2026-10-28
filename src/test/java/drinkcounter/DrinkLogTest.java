@@ -1,9 +1,19 @@
 package drinkcounter;
 
-import drinkcounter.repository.DrinkRepository;
-import drinkcounter.repository.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import drinkcounter.repository.DrinkRepository;
+import drinkcounter.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Clock;
 import java.time.Instant;
@@ -14,16 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class DrinkLogTest {
 
@@ -57,7 +57,8 @@ public class DrinkLogTest {
         drinkLog.recordAt(1, "05.03.2024 13:37", -120);
 
         assertEquals(1, user.getDrinks().size());
-        assertEquals(Instant.parse("2024-03-05T11:37:00Z"), user.getDrinks().get(0).getTimeStamp());
+        assertEquals(
+                Instant.parse("2024-03-05T11:37:00Z"), user.getDrinks().get(0).getTimeStamp());
     }
 
     @Test

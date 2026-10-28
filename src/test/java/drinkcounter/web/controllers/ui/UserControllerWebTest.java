@@ -1,13 +1,29 @@
 package drinkcounter.web.controllers.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 import drinkcounter.DrinkLog;
-import drinkcounter.repository.PartyRepository;
 import drinkcounter.PartyRoster;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.repository.PartyRepository;
+import drinkcounter.web.ControllerWebTest;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,22 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import drinkcounter.web.ControllerWebTest;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
  * Drives the signed-in user handlers of UserController through MockMvc and the app's
@@ -100,8 +100,7 @@ public class UserControllerWebTest {
 
     @Test
     public void userPageShowsAsManyPartiesAsAsked() throws Exception {
-        mvc.perform(get("/ui/user").param("parties", "40"))
-                .andExpect(status().isOk());
+        mvc.perform(get("/ui/user").param("parties", "40")).andExpect(status().isOk());
 
         verify(partyRoster).newestOf(42, 41);
     }
@@ -129,9 +128,7 @@ public class UserControllerWebTest {
     @WithAnonymousUser
     public void anonymousRequestsAreSentToTheLoginPage() throws Exception {
         for (String path : List.of("/ui/user", "/ui/passphrase", "/ui/passphrase-generate")) {
-            mvc.perform(get(path))
-                    .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/ui/login"));
+            mvc.perform(get(path)).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/ui/login"));
         }
 
         verify(userAccounts, never()).get(42);
@@ -142,9 +139,7 @@ public class UserControllerWebTest {
     public void modifyUserChangesTheSignedInUser() throws Exception {
         user.setEmail("me@example.com");
 
-        mvc.perform(modifyUser(42))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("user"));
+        mvc.perform(modifyUser(42)).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("user"));
 
         verify(userAccounts).update(user);
         assertEquals("New name", user.getName());
@@ -163,9 +158,7 @@ public class UserControllerWebTest {
 
     @Test
     public void addDrinkToDateAddsADrinkForTheSignedInUser() throws Exception {
-        mvc.perform(addDrinkToDate(42))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("user"));
+        mvc.perform(addDrinkToDate(42)).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("user"));
 
         verify(drinkLog).recordAt(42, DATE, 0.0);
     }
@@ -179,12 +172,10 @@ public class UserControllerWebTest {
     }
 
     @Test
-    public void addDrinkToDateAddsADrinkForAPartyMate()throws Exception {
+    public void addDrinkToDateAddsADrinkForAPartyMate() throws Exception {
         when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
-        mvc.perform(addDrinkToDate(7))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("user"));
+        mvc.perform(addDrinkToDate(7)).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("user"));
 
         verify(partyRepository).countSharedParties(42, 7);
         verify(drinkLog).recordAt(7, DATE, 0.0);
@@ -200,9 +191,7 @@ public class UserControllerWebTest {
 
     @Test
     public void removeDrinkRemovesADrinkOfTheSignedInUser() throws Exception {
-        mvc.perform(removeDrink(42))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("user"));
+        mvc.perform(removeDrink(42)).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("user"));
 
         verify(drinkLog).undo(42, 5);
     }
@@ -252,9 +241,7 @@ public class UserControllerWebTest {
     @WithAnonymousUser
     public void anonymousRequestsToTheUserActionsAreSentToTheLoginPage() throws Exception {
         for (var request : List.of(modifyUser(42), addDrinkToDate(42), removeDrink(42), getUserByEmail(3))) {
-            mvc.perform(request)
-                    .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/ui/login"));
+            mvc.perform(request).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/ui/login"));
         }
 
         verifyNoInteractions(drinkLog);
@@ -271,21 +258,15 @@ public class UserControllerWebTest {
     }
 
     private MockHttpServletRequestBuilder addDrinkToDate(Object userId) {
-        return post("/ui/addDrinkToDate")
-                .param("userId", userId.toString())
-                .param("date", DATE);
+        return post("/ui/addDrinkToDate").param("userId", userId.toString()).param("date", DATE);
     }
 
     private MockHttpServletRequestBuilder removeDrink(Object userId) {
-        return get("/ui/removeDrink")
-                .param("userId", userId.toString())
-                .param("drinkId", "5");
+        return get("/ui/removeDrink").param("userId", userId.toString()).param("drinkId", "5");
     }
 
     private MockHttpServletRequestBuilder getUserByEmail(Object partyId) {
-        return get("/ui/getUserByEmail")
-                .param("partyId", partyId.toString())
-                .param("email", "friend@example.com");
+        return get("/ui/getUserByEmail").param("partyId", partyId.toString()).param("email", "friend@example.com");
     }
 
     private Party party(String start) {

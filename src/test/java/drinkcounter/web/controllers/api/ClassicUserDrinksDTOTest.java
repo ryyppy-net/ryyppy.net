@@ -1,12 +1,12 @@
 package drinkcounter.web.controllers.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import tools.jackson.dataformat.xml.XmlMapper;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClassicUserDrinksDTOTest {
 
@@ -24,8 +24,10 @@ public class ClassicUserDrinksDTOTest {
 
         String out = xml.writeValueAsString(ClassicUserDrinksDTO.fromUser(user));
 
-        assertEquals("<user><id>1</id><drinks><count>1</count><drink><id>7</id><timestamp>"
-                + timeStamp.toEpochMilli() + "</timestamp></drink></drinks></user>", out);
+        assertEquals(
+                "<user><id>1</id><drinks><count>1</count><drink><id>7</id><timestamp>" + timeStamp.toEpochMilli()
+                        + "</timestamp></drink></drinks></user>",
+                out);
     }
 
     @Test

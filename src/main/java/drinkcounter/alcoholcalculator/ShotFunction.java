@@ -12,31 +12,31 @@ public class ShotFunction {
     private double cutter;
     private long timeTaken;
 
-    public ShotFunction(Date timeTaken, double burnRate, double startAlcoholAmount)
-    {
+    public ShotFunction(Date timeTaken, double burnRate, double startAlcoholAmount) {
         this.burnRate = burnRate;
         this.startAlcoholAmount = startAlcoholAmount;
         this.timeTaken = timeTaken.getTime();
     }
 
-    public double getCutter() { return cutter; }
-    public void setCutter(double c) { cutter = c; }
+    public double getCutter() {
+        return cutter;
+    }
 
-    public double calc(long milliseconds)
-    {
-        double result = (burnRate * (double)(milliseconds - timeTaken)) + startAlcoholAmount ;
+    public void setCutter(double c) {
+        cutter = c;
+    }
 
-        if (result > startAlcoholAmount)
-            return 0;
+    public double calc(long milliseconds) {
+        double result = (burnRate * (double) (milliseconds - timeTaken)) + startAlcoholAmount;
 
-        if (result <= cutter)
-            return 0;
+        if (result > startAlcoholAmount) return 0;
+
+        if (result <= cutter) return 0;
 
         return result;
     }
 
-    public double calc(Date t)
-    {
+    public double calc(Date t) {
         return calc(t.getTime());
     }
 }

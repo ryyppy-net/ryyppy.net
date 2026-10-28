@@ -1,11 +1,11 @@
 package drinkcounter.authentication.relay;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 public class AuthRelayTokenServiceTest {
 
@@ -16,8 +16,7 @@ public class AuthRelayTokenServiceTest {
         AuthRelayTokenService tokenService = withSecret(null);
 
         assertFalse(tokenService.isEnabled());
-        assertThrows(IllegalStateException.class,
-                () -> tokenService.mint("sub", "a@b.com", "A B", ORIGIN));
+        assertThrows(IllegalStateException.class, () -> tokenService.mint("sub", "a@b.com", "A B", ORIGIN));
     }
 
     @Test
@@ -38,8 +37,7 @@ public class AuthRelayTokenServiceTest {
         AuthRelayTokenService tokenService = withSecret("test-secret");
         String token = tokenService.mint("google-sub", "user@example.com", "User Name", ORIGIN);
 
-        assertThrows(AuthRelayException.class,
-                () -> tokenService.verify(token, "https://attacker.up.railway.app"));
+        assertThrows(AuthRelayException.class, () -> tokenService.verify(token, "https://attacker.up.railway.app"));
     }
 
     @Test

@@ -1,13 +1,37 @@
 package drinkcounter.web.controllers.api;
 
-import drinkcounter.PartyRoster;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.addDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.addGuest;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.drinksPerDay;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.editDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.linkUser;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.partyXml;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseAddDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseInfo;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseUndoDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.removeDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.showDrinks;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.showHistory;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.userXml;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+
 import drinkcounter.DrinkLog;
-import drinkcounter.repository.PartyRepository;
+import drinkcounter.PartyRoster;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.web.ControllerWebTest;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import java.util.Date;
@@ -23,30 +47,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import static drinkcounter.web.controllers.api.ClassicApiRequests.addDrink;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.addGuest;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.drinksPerDay;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.editDrink;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.linkUser;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseAddDrink;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseInfo;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.passphraseUndoDrink;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.partyXml;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.removeDrink;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.showDrinks;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.showHistory;
-import static drinkcounter.web.controllers.api.ClassicApiRequests.userXml;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 /**
  * Drives the classic /API controller, used by the jQuery UI, through MockMvc and the app's
@@ -108,7 +108,7 @@ public class APIControllerWebTest {
         switch (rule) {
             case PARTY_MEMBER -> verify(partyRepository).countUserParticipations(PARTY, SIGNED_IN);
             case OWN_USER_OR_PARTY_MATE -> verify(partyRepository).countSharedParties(SIGNED_IN, OTHER_USER);
-            case OWN_USER -> { }
+            case OWN_USER -> {}
         }
         verifyNoMoreInteractions(partyRoster, drinkLog);
         verifyNoInteractions(userAccounts, passphraseLogin);
@@ -158,7 +158,8 @@ public class APIControllerWebTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("ownOnlyRequests")
-    public void partyMateIsForbiddenFromTheFullDrinkLog(String name, MockHttpServletRequestBuilder request) throws Exception {
+    public void partyMateIsForbiddenFromTheFullDrinkLog(String name, MockHttpServletRequestBuilder request)
+            throws Exception {
         when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isForbidden());
@@ -268,8 +269,7 @@ public class APIControllerWebTest {
     public void memberLinksAUserToTheParty() throws Exception {
         when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
 
-        mvc.perform(linkUser(PARTY, OTHER_USER))
-                .andExpect(status().isOk());
+        mvc.perform(linkUser(PARTY, OTHER_USER)).andExpect(status().isOk());
 
         verify(partyRoster).join(PARTY, OTHER_USER);
     }
@@ -299,5 +299,9 @@ public class APIControllerWebTest {
         return user;
     }
 
-    private enum Rule { PARTY_MEMBER, OWN_USER, OWN_USER_OR_PARTY_MATE }
+    private enum Rule {
+        PARTY_MEMBER,
+        OWN_USER,
+        OWN_USER_OR_PARTY_MATE
+    }
 }

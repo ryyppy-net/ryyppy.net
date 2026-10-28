@@ -1,5 +1,10 @@
 package drinkcounter.web.controllers.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -8,12 +13,6 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
-
-import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Renders the Thymeleaf templates directly (no full Spring context, no
@@ -54,24 +53,32 @@ class LegalControllerTest {
     void privacyTemplateRendersThroughMasterLayoutWithoutUnresolvedExpressions() {
         String html = render("privacy");
 
-        assertTrue(html.contains("<title>Tietosuojaseloste - Ryyppy.net</title>"), "title from the page wasn't projected into the master layout's <head>");
+        assertTrue(
+                html.contains("<title>Tietosuojaseloste - Ryyppy.net</title>"),
+                "title from the page wasn't projected into the master layout's <head>");
         assertTrue(html.contains("Tietosuojaseloste"), "page body content missing");
         assertTrue(html.contains("href=\"/static/css/login.css\""), "page-specific stylesheet from customHead missing");
         assertTrue(html.contains("href=\"/static/css/style.css\""), "shared stylesheet from the master layout missing");
         assertTrue(html.contains("src=\"/static/images/logo_ryyppy.png\""), "logo image missing");
         assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
-        assertFalse(html.contains("customHead") , "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
+        assertFalse(
+                html.contains("customHead"),
+                "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
     }
 
     @Test
     void termsTemplateRendersThroughMasterLayoutWithoutUnresolvedExpressions() {
         String html = render("terms");
 
-        assertTrue(html.contains("<title>Käyttöehdot - Ryyppy.net</title>"), "title from the page wasn't projected into the master layout's <head>");
+        assertTrue(
+                html.contains("<title>Käyttöehdot - Ryyppy.net</title>"),
+                "title from the page wasn't projected into the master layout's <head>");
         assertTrue(html.contains("Käyttöehdot"), "page body content missing");
         assertTrue(html.contains("href=\"/static/css/login.css\""), "page-specific stylesheet from customHead missing");
         assertTrue(html.contains("href=\"/static/css/style.css\""), "shared stylesheet from the master layout missing");
         assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
-        assertFalse(html.contains("customHead") , "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
+        assertFalse(
+                html.contains("customHead"),
+                "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
     }
 }

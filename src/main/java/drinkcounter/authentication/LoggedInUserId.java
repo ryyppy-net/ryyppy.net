@@ -15,5 +15,4 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @AuthenticationPrincipal(expression = "userId")
-public @interface LoggedInUserId {
-}
+public @interface LoggedInUserId {}

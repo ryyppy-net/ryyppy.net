@@ -17,12 +17,11 @@ public record ClassicUserDrinksDTO(int id, DrinksDTO drinks) {
 
     public record DrinksDTO(
             int count,
-            @JacksonXmlElementWrapper(useWrapping = false) @JacksonXmlProperty(localName = "drink")
-            List<DrinkDTO> drink) {
-    }
 
-    public record DrinkDTO(int id, long timestamp) {
-    }
+            @JacksonXmlElementWrapper(useWrapping = false) @JacksonXmlProperty(localName = "drink")
+            List<DrinkDTO> drink) {}
+
+    public record DrinkDTO(int id, long timestamp) {}
 
     public static ClassicUserDrinksDTO fromUser(User user) {
         List<Drink> drinks = user.getDrinks();

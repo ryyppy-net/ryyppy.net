@@ -1,5 +1,11 @@
 package drinkcounter.web.controllers.ui;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -9,13 +15,6 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Renders login.html directly (no full Spring context, no datasource), the
@@ -67,16 +66,31 @@ class LoginTemplateTest {
     void hubEnvironmentRendersGsiWidgetNotRelayLink() {
         String html = render(defaultModel(), Map.of());
 
-        assertTrue(html.contains("<title>Ryyppy.net</title>"), "title from the page wasn't projected into the master layout's <head>");
-        assertTrue(html.contains("id=\"g_id_onload\""), "GSI One Tap widget should render when isHubEnvironment is true");
-        assertTrue(html.contains("data-client_id=\"test-client-id.apps.googleusercontent.com\""), "data-client_id missing from GSI widget");
-        assertTrue(html.contains("data-login_uri=\"https://ryyppy.net/api/auth/google/one-tap\""), "data-login_uri missing from GSI widget");
-        assertTrue(html.contains("data-auto_select=\"true\""), "data-auto_select should render as the bare string true when ?logout is absent");
-        assertTrue(html.contains("data-use_fedcm_for_prompt=\"false\""), "data-use_fedcm_for_prompt should render as the bare string false");
-        assertFalse(html.contains("/api/auth/relay/redirect"), "the non-hub relay link should not render alongside the GSI widget");
+        assertTrue(
+                html.contains("<title>Ryyppy.net</title>"),
+                "title from the page wasn't projected into the master layout's <head>");
+        assertTrue(
+                html.contains("id=\"g_id_onload\""), "GSI One Tap widget should render when isHubEnvironment is true");
+        assertTrue(
+                html.contains("data-client_id=\"test-client-id.apps.googleusercontent.com\""),
+                "data-client_id missing from GSI widget");
+        assertTrue(
+                html.contains("data-login_uri=\"https://ryyppy.net/api/auth/google/one-tap\""),
+                "data-login_uri missing from GSI widget");
+        assertTrue(
+                html.contains("data-auto_select=\"true\""),
+                "data-auto_select should render as the bare string true when ?logout is absent");
+        assertTrue(
+                html.contains("data-use_fedcm_for_prompt=\"false\""),
+                "data-use_fedcm_for_prompt should render as the bare string false");
+        assertFalse(
+                html.contains("/api/auth/relay/redirect"),
+                "the non-hub relay link should not render alongside the GSI widget");
 
         assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
-        assertFalse(html.contains("customHead"), "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
+        assertFalse(
+                html.contains("customHead"),
+                "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
     }
 
     @Test
@@ -86,8 +100,12 @@ class LoginTemplateTest {
 
         String html = render(model, Map.of());
 
-        assertTrue(html.contains("href=\"/api/auth/relay/redirect\""), "the relay link should render when isHubEnvironment is false");
-        assertFalse(html.contains("id=\"g_id_onload\""), "the GSI One Tap widget should not render on a non-hub environment");
+        assertTrue(
+                html.contains("href=\"/api/auth/relay/redirect\""),
+                "the relay link should render when isHubEnvironment is false");
+        assertFalse(
+                html.contains("id=\"g_id_onload\""),
+                "the GSI One Tap widget should not render on a non-hub environment");
     }
 
     @Test
@@ -98,14 +116,18 @@ class LoginTemplateTest {
         String html = render(model, Map.of());
 
         assertFalse(html.contains("id=\"g_id_onload\""), "no GSI widget should render when googleAuthEnabled is false");
-        assertFalse(html.contains("/api/auth/relay/redirect"), "no relay link should render when googleAuthEnabled is false");
+        assertFalse(
+                html.contains("/api/auth/relay/redirect"),
+                "no relay link should render when googleAuthEnabled is false");
     }
 
     @Test
     void drinkCounterArgumentRendersAsRealNumberNotDroppedSilently() {
         String html = render(defaultModel(), Map.of());
 
-        assertTrue(html.contains("42 juomaa juotu"), "login.already_n_drinks argument was dropped - expected the drink count substituted into the message");
+        assertTrue(
+                html.contains("42 juomaa juotu"),
+                "login.already_n_drinks argument was dropped - expected the drink count substituted into the message");
     }
 
     @Test
@@ -127,6 +149,8 @@ class LoginTemplateTest {
     void logoutParamDisablesAutoSelect() {
         String html = render(defaultModel(), Map.of("logout", ""));
 
-        assertTrue(html.contains("data-auto_select=\"false\""), "data-auto_select should be false when ?logout is present");
+        assertTrue(
+                html.contains("data-auto_select=\"false\""),
+                "data-auto_select should be false when ?logout is present");
     }
 }

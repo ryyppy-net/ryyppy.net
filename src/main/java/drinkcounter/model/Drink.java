@@ -1,13 +1,13 @@
 package drinkcounter.model;
 
 import drinkcounter.alcoholcalculator.AlcoholCalculator;
-import java.time.Instant;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Transient;
+import java.time.Instant;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -17,19 +17,21 @@ import org.hibernate.type.SqlTypes;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name="Drink.findByDrinker", query="SELECT d FROM Drink d WHERE d.drinker = ?1 ORDER BY d.timeStamp DESC")
+    @NamedQuery(
+            name = "Drink.findByDrinker",
+            query = "SELECT d FROM Drink d WHERE d.drinker = ?1 ORDER BY d.timeStamp DESC")
 })
 public class Drink extends AbstractEntity {
 
     private User drinker;
     private Instant timeStamp;
-    private float alcohol = (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
+    private float alcohol = (float) AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
 
     public Drink() {
         timeStamp = Instant.now();
     }
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     public User getDrinker() {
         return drinker;
     }
@@ -65,6 +67,6 @@ public class Drink extends AbstractEntity {
 
     @Transient
     public float getAmountOfShots() {
-        return alcohol / (float)AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
+        return alcohol / (float) AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
     }
 }

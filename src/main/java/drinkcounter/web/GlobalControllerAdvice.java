@@ -2,6 +2,7 @@ package drinkcounter.web;
 
 import drinkcounter.authentication.relay.Origins;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
@@ -10,8 +11,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
-import java.util.List;
 
 /**
  * Global controller advice that makes configuration properties available to all views.
@@ -125,9 +124,7 @@ public class GlobalControllerAdvice {
      */
     @ModelAttribute("oneTapLoginUri")
     public String oneTapLoginUri(HttpServletRequest request) {
-        String base = (hubUrl != null && !hubUrl.isBlank())
-                ? hubUrl.replaceAll("/+$", "")
-                : Origins.of(request);
+        String base = (hubUrl != null && !hubUrl.isBlank()) ? hubUrl.replaceAll("/+$", "") : Origins.of(request);
         return base + "/api/auth/google/one-tap";
     }
 
@@ -205,9 +202,9 @@ public class GlobalControllerAdvice {
 
         String upper = value.toUpperCase();
         // Check for common placeholder values
-        return !upper.contains("REPLACE") &&
-               !upper.contains("CHANGEME") &&
-               !upper.contains("TODO") &&
-               !upper.equals("XXX");
+        return !upper.contains("REPLACE")
+                && !upper.contains("CHANGEME")
+                && !upper.contains("TODO")
+                && !upper.equals("XXX");
     }
 }

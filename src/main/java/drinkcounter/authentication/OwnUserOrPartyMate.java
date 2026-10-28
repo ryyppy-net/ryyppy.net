@@ -14,5 +14,4 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("#userId == principal.userId or @partyAccess.isPartyMate(principal.userId, #userId)")
-public @interface OwnUserOrPartyMate {
-}
+public @interface OwnUserOrPartyMate {}

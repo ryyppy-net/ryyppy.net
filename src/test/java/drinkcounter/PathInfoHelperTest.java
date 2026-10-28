@@ -5,9 +5,10 @@
 
 package drinkcounter;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import drinkcounter.util.PathInfoHelper;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -16,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PathInfoHelperTest {
 
     @Test
-    public void testSplit(){
+    public void testSplit() {
         String pathInfo = "/bileet/add-drink";
         String[] split = PathInfoHelper.splitPathInfo(pathInfo);
-        String[] expected = new String[]{"bileet", "add-drink"};
+        String[] expected = new String[] {"bileet", "add-drink"};
         assertArrayEquals(expected, split);
     }
 }

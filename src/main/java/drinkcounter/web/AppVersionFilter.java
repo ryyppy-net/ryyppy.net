@@ -5,9 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.boot.info.GitProperties;
-
 import java.io.IOException;
+import org.springframework.boot.info.GitProperties;
 
 /**
  * Stamps API responses with the running commit hash, so sw.js can tell when

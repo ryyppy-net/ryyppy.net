@@ -38,7 +38,7 @@ public class ParticipantPreviewDTO {
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
-    
+
     public static ParticipantPreviewDTO fromUser(User user) {
         ParticipantPreviewDTO participant = new ParticipantPreviewDTO();
         participant.setName(user.getName());

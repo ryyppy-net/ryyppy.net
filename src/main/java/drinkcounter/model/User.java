@@ -17,8 +17,6 @@
 
 package drinkcounter.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,6 +24,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import org.hibernate.annotations.BatchSize;
 
 /**
@@ -33,17 +33,21 @@ import org.hibernate.annotations.BatchSize;
  * @author Toni, Lauri
  */
 @Entity
-@Table(name="Users")
-public class User extends AbstractEntity{
+@Table(name = "Users")
+public class User extends AbstractEntity {
     public enum Sex {
-        MALE(0.75f), FEMALE(0.66f);
+        MALE(0.75f),
+        FEMALE(0.66f);
         public final float factor;
-        Sex(float factor){
+
+        Sex(float factor) {
             this.factor = factor;
         }
     }
+
     public enum AuthMethod {
-        OPENID, PASSWORD
+        OPENID,
+        PASSWORD
     }
 
     private String email;
@@ -53,7 +57,7 @@ public class User extends AbstractEntity{
     private Sex sex = Sex.MALE;
     private List<Drink> drinks = new ArrayList<>();
     private String passphrase;
-    
+
     // authentication attributes
     private String openId;
     private AuthMethod authMethod = AuthMethod.OPENID;
@@ -63,7 +67,7 @@ public class User extends AbstractEntity{
      * This user is a guest in the system, can be removed after sober
      */
     private boolean guest;
-    
+
     public String getName() {
         return name;
     }
@@ -82,7 +86,7 @@ public class User extends AbstractEntity{
 
     @Enumerated(EnumType.STRING)
     public AuthMethod getAuthMethod() {
-        if(authMethod == null){
+        if (authMethod == null) {
             authMethod = AuthMethod.OPENID;
         }
         return authMethod;
@@ -92,7 +96,7 @@ public class User extends AbstractEntity{
         this.authMethod = authMethod;
     }
 
-    @ManyToMany(mappedBy="participants")
+    @ManyToMany(mappedBy = "participants")
     public List<Party> getParties() {
         return parties;
     }
@@ -101,7 +105,7 @@ public class User extends AbstractEntity{
         this.parties = parties;
     }
 
-    public void drink(Drink drink){
+    public void drink(Drink drink) {
         getDrinks().add(drink);
         drink.setDrinker(this);
     }
@@ -116,11 +120,10 @@ public class User extends AbstractEntity{
     public void setPassphrase(String passphrase) {
         this.passphrase = passphrase;
     }
-    
+
     public String getPassphrase() {
         return passphrase;
     }
-
 
     /**
      * Weight in kilos
@@ -150,7 +153,7 @@ public class User extends AbstractEntity{
      * @return the drinks
      */
     // The classic party view reads the drinks of every participant.
-    @OneToMany(mappedBy="drinker")
+    @OneToMany(mappedBy = "drinker")
     @BatchSize(size = 100)
     @OrderBy("timeStamp asc")
     public List<Drink> getDrinks() {
@@ -173,7 +176,7 @@ public class User extends AbstractEntity{
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
     public void removeDrink(Drink drink) {
         getDrinks().remove(drink);
     }
@@ -188,8 +191,6 @@ public class User extends AbstractEntity{
 
     @Override
     public String toString() {
-        return "User{"+"name=" + name + ", email=" + email + '}';
+        return "User{" + "name=" + name + ", email=" + email + '}';
     }
-    
-    
 }

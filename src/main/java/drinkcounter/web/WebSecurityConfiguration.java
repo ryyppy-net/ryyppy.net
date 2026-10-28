@@ -24,53 +24,49 @@ public class WebSecurityConfiguration {
     private final Customizer<HttpSecurity> oauth2LoginCustomizer;
 
     @Autowired
-    public WebSecurityConfiguration(
-            UserAccounts userAccounts,
-            Customizer<HttpSecurity> oauth2LoginCustomizer) {
+    public WebSecurityConfiguration(UserAccounts userAccounts, Customizer<HttpSecurity> oauth2LoginCustomizer) {
         this.userAccounts = userAccounts;
         this.oauth2LoginCustomizer = oauth2LoginCustomizer;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .formLogin(form -> form
-                .loginPage("/ui/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/app/index.html", true)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .permitAll()
-            )
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authorize -> {
-                authorize
-                    .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
-                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                    .requestMatchers(
-                        "/login",
-                        "/ui/login",
-                        "/ui/privacy",
-                        "/ui/terms",
-                        "/static/**",
-                        "/ui/newuser",
-                        "/ui/addUser",
-                        "/ui/checkEmail*",
-                        "/ui/timezone/*",
-                        "/app/css/**",
-                        "/app/js/**",
-                        "/sw.js",
-                        "/apple-touch-icon.png",
-                        "/apple-touch-icon-precomposed.png",
-                        "/API/passphrase/**",
-                        "/oauth2/**",
-                        "/api/auth/google/one-tap",
-                        "/api/auth/relay/**",
-                        "/actuator/health"
-                    ).permitAll()
-                    .anyRequest().authenticated();
-            });
+        http.formLogin(form -> form.loginPage("/ui/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/app/index.html", true)
+                        .permitAll())
+                .logout(logout -> logout.permitAll())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorize -> {
+                    authorize
+                            .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR)
+                            .permitAll()
+                            .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                            .permitAll()
+                            .requestMatchers(
+                                    "/login",
+                                    "/ui/login",
+                                    "/ui/privacy",
+                                    "/ui/terms",
+                                    "/static/**",
+                                    "/ui/newuser",
+                                    "/ui/addUser",
+                                    "/ui/checkEmail*",
+                                    "/ui/timezone/*",
+                                    "/app/css/**",
+                                    "/app/js/**",
+                                    "/sw.js",
+                                    "/apple-touch-icon.png",
+                                    "/apple-touch-icon-precomposed.png",
+                                    "/API/passphrase/**",
+                                    "/oauth2/**",
+                                    "/api/auth/google/one-tap",
+                                    "/api/auth/relay/**",
+                                    "/actuator/health")
+                            .permitAll()
+                            .anyRequest()
+                            .authenticated();
+                });
 
         // Apply OAuth2 login configuration
         oauth2LoginCustomizer.customize(http);

@@ -1,10 +1,5 @@
 package drinkcounter.authentication.relay;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +9,10 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 /**
  * Signs and verifies the short-lived handoff token that carries a verified Google identity from
@@ -185,7 +184,7 @@ public class AuthRelayTokenService {
                 case "aud" -> claims.aud = value;
                 case "exp" -> claims.exp = Long.parseLong(value);
                 case "jti" -> claims.jti = value;
-                default -> { }
+                default -> {}
             }
         }
         return claims;

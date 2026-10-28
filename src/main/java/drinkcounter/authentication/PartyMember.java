@@ -13,5 +13,4 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("@partyAccess.isMember(#partyId, principal.userId)")
-public @interface PartyMember {
-}
+public @interface PartyMember {}

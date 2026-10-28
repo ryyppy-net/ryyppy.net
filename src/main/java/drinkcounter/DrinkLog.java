@@ -5,11 +5,6 @@ import drinkcounter.model.User;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,6 +13,10 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DrinkLog {
@@ -91,7 +90,7 @@ public class DrinkLog {
      * {@code getTimezoneOffset()}, so UTC+02:00 is -120.
      */
     public int recordAt(int userId, String localTime, double timezoneOffset) {
-        ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+        ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds((int) (-timezoneOffset * 60));
         Instant instant = LocalDateTime.parse(localTime, LOCAL_TIME_FORMAT).toInstant(zoneOffset);
 
         if (instant.isAfter(Instant.now())) throw new IllegalArgumentException(localTime);
@@ -132,6 +131,7 @@ public class DrinkLog {
         return user.getDrinks().stream()
                 .filter(drink -> Objects.equals(drink.getId(), drinkId))
                 .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId()));
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Drink " + drinkId + " does not belong to user " + user.getId()));
     }
 }

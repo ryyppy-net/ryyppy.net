@@ -37,7 +37,7 @@ public class ParticipantDTO {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public Float getPromilles() {
         return promilles;
     }
@@ -69,16 +69,16 @@ public class ParticipantDTO {
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
-    
+
     public List<HistoryPoint> getHistory() {
         return history;
     }
-    
+
     public void setHistory(List<HistoryPoint> history) {
         this.history = history;
     }
 
-    public static ParticipantDTO fromUser(BloodAlcohol bloodAlcohol){
+    public static ParticipantDTO fromUser(BloodAlcohol bloodAlcohol) {
         User user = bloodAlcohol.user();
         ParticipantDTO participant = new ParticipantDTO();
         participant.setId(user.getId());

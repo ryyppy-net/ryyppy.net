@@ -1,5 +1,10 @@
 package drinkcounter.authentication;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import drinkcounter.repository.PartyRepository;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -15,11 +20,6 @@ import org.springframework.security.authorization.method.PreAuthorizeAuthorizati
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
  * Evaluates each access annotation through Spring Security's {@code @PreAuthorize} interceptor,
  * signed in as user 42, with party membership answered by a mocked {@link PartyRepository}.
@@ -28,20 +28,16 @@ public class AccessAnnotationsTest {
 
     static class Handlers {
         @PartyMember
-        public void party(int partyId) {
-        }
+        public void party(int partyId) {}
 
         @OwnUser
-        public void ownUser(int userId) {
-        }
+        public void ownUser(int userId) {}
 
         @OwnUserOrPartyMate
-        public void ownUserOrPartyMate(int userId) {
-        }
+        public void ownUserOrPartyMate(int userId) {}
 
         @PartyMemberAndOwnUserOrPartyMate
-        public void partyMemberAndOwnUserOrPartyMate(int partyId, int userId) {
-        }
+        public void partyMemberAndOwnUserOrPartyMate(int partyId, int userId) {}
     }
 
     private PartyRepository partyRepository;
@@ -65,10 +61,10 @@ public class AccessAnnotationsTest {
         handlers = (Handlers) proxyFactory.getProxy();
 
         List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-        DrinkcounterUserDetails principal = new DrinkcounterUserDetails("user@example.com", "",
-                true, true, true, true, authorities, 42);
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, null, authorities));
+        DrinkcounterUserDetails principal =
+                new DrinkcounterUserDetails("user@example.com", "", true, true, true, true, authorities, 42);
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, authorities));
     }
 
     @AfterEach

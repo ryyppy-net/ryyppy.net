@@ -2,6 +2,9 @@ package drinkcounter.web;
 
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.LoggedInUserArgumentResolver;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -19,10 +22,6 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.resource.ResourceUrlEncodingFilter;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
@@ -87,7 +86,8 @@ public class WebConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        CacheControl oneYearImmutable = CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable();
+        CacheControl oneYearImmutable =
+                CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic().immutable();
         CacheControl oneWeek = CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
 
         registry.addResourceHandler("/webjars/**")
@@ -99,7 +99,10 @@ public class WebConfiguration implements WebMvcConfigurer {
                 .setCacheControl(oneYearImmutable);
 
         registry.addResourceHandler("/static/css/**", "/static/js/**", "/static/images/**")
-                .addResourceLocations("classpath:/public/static/css/", "classpath:/public/static/js/", "classpath:/public/static/images/")
+                .addResourceLocations(
+                        "classpath:/public/static/css/",
+                        "classpath:/public/static/js/",
+                        "classpath:/public/static/images/")
                 .setCacheControl(oneYearImmutable)
                 .resourceChain(true)
                 .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
