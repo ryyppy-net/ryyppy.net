@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
     </parent>
 
     <groupId>net.ryyppy</groupId>
@@ -98,7 +98,7 @@
             <plugin>
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-maven-plugin</artifactId>
-                <version>7.4.13.Final</version>
+                <version>7.4.14.Final</version>
                 <executions>
                     <execution>
                         <id>enhance</id>
@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>13.10.3</version>
+            <version>13.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -170,7 +170,7 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>2.9.1</version>
+            <version>2.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
