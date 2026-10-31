@@ -48,6 +48,18 @@ drinker {
     text-align: center;
 }
 
+/* iOS Safari zooms the page in on focusing a field under 16px and never zooms back out. */
+@media (max-width: 767px) {
+    select,
+    textarea,
+    input[type="text"],
+    input[type="email"],
+    input[type="number"] {
+        font-size: 16px;
+        height: auto;
+    }
+}
+
 form.edit-drink {
     margin-left: 0px;
     margin-bottom: 0px;
