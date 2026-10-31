@@ -73,7 +73,7 @@ public class ProfileApiController {
     /** The user's drinks, oldest first. */
     @GetMapping("drinks")
     public List<DrinkDTO> getDrinks(@LoggedInUser User user){
-        return OwnDrinksView.drinks(user);
+        return OwnDrinksView.drinks(drinkLog.drinksOf(user.getId()));
     }
 
     @PutMapping("drinks/{drinkId}")

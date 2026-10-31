@@ -110,7 +110,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void partiesAreJsonWhateverTheBrowserPrefers() throws Exception {
-        signedIn.setParties(List.of(party));
+        when(partyRoster.allWithParticipantsOf(42)).thenReturn(List.of(party));
 
         mvc.perform(get(PARTIES).header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"))
                 .andExpect(status().isOk())
@@ -119,7 +119,7 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void partiesAreListedForTheSignedInUser() throws Exception {
-        signedIn.setParties(List.of(party));
+        when(partyRoster.allWithParticipantsOf(42)).thenReturn(List.of(party));
 
         mvc.perform(get(PARTIES))
                 .andExpect(status().isOk())
@@ -254,6 +254,8 @@ public class PartyApiControllerWebTest {
 
     @Test
     public void memberGetsTheParticipants() throws Exception {
+        when(partyRoster.members(1)).thenReturn(List.of(signedIn, participant));
+
         mvc.perform(get(PARTIES + "/1/participants"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))

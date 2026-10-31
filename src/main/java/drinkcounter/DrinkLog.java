@@ -3,6 +3,7 @@ package drinkcounter;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.repository.DrinkRepository;
+import drinkcounter.repository.LastDrink;
 import drinkcounter.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -16,8 +17,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class DrinkLog {
@@ -90,6 +95,7 @@ public class DrinkLog {
      * Records a drink at a "dd.MM.yyyy HH:mm" local time. The offset is the browser's
      * {@code getTimezoneOffset()}, so UTC+02:00 is -120.
      */
+    @Transactional
     public int recordAt(int userId, String localTime, double timezoneOffset) {
         ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
         Instant instant = LocalDateTime.parse(localTime, LOCAL_TIME_FORMAT).toInstant(zoneOffset);
@@ -115,6 +121,18 @@ public class DrinkLog {
         drink.setAlcohol(grams);
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), grams);
         return drink;
+    }
+
+    /** The user's drinks, oldest first. */
+    public List<Drink> drinksOf(int userId) {
+        return drinkRepository.findByDrinkerIdOrderByTimeStampAsc(userId);
+    }
+
+    /** When each of the given users last drank; a user who never has is left out. */
+    public Map<Integer, Instant> lastDrinkTimes(Collection<Integer> userIds) {
+        if (userIds.isEmpty()) return Map.of();
+        return drinkRepository.findLastDrinks(userIds).stream()
+                .collect(Collectors.toMap(LastDrink::drinkerId, LastDrink::timeStamp));
     }
 
     /** All drinks ever recorded, counted at most once a minute. */

@@ -12,6 +12,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -57,6 +58,7 @@ class PartyTemplateTest {
         JakartaServletWebApplication webApplication = JakartaServletWebApplication.buildApplication(servletContext);
         WebContext context = new WebContext(webApplication.buildExchange(request, response), Locale.of("fi", "FI"));
         context.setVariable("party", party);
+        context.setVariable("participants", List.copyOf(party.getParticipants()));
         context.setVariable("user", currentUser);
 
         return engine.process("party", context);

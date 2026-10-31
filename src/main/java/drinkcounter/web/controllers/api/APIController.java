@@ -83,13 +83,15 @@ public class APIController {
     @PartyMember
     @GetMapping(value = "/parties/{partyId}", produces = XML)
     public String party(@PathVariable int partyId) {
-        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), promilles.of(partyRoster.members(partyId)), clock));
+        List<BloodAlcohol> participants = promilles.of(partyRoster.members(partyId));
+        Map<Integer, Instant> lastDrinkTimes = drinkLog.lastDrinkTimes(participants.stream().map(participant -> participant.user().getId()).toList());
+        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), participants, lastDrinkTimes, clock));
     }
 
     @OwnUser
     @GetMapping(value = "/users/{userId}/show-drinks", produces = XML)
     public String showDrinks(@PathVariable int userId) {
-        return xml(ClassicUserDrinksDTO.fromUser(userAccounts.get(userId)));
+        return xml(ClassicUserDrinksDTO.fromUser(userAccounts.get(userId), drinkLog.drinksOf(userId)));
     }
 
     @OwnUserOrPartyMate
@@ -128,14 +130,14 @@ public class APIController {
     @OwnUserOrPartyMate
     @GetMapping(value = "/users/{userId}", produces = XML)
     public String user(@PathVariable int userId) {
-        return xml(ClassicUserDTO.fromUser(promilles.of(userAccounts.get(userId)), clock));
+        Instant lastDrinkAt = drinkLog.lastDrinkTimes(List.of(userId)).get(userId);
+        return xml(ClassicUserDTO.fromUser(promilles.of(userAccounts.get(userId)), lastDrinkAt, clock));
     }
 
     @OwnUser
     @GetMapping("/users/{userId}/drinks")
     public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException{
-        User user = userAccounts.get(userId);
-        List<Drink> drinks = user.getDrinks();
+        List<Drink> drinks = drinkLog.drinksOf(userId);
 
         Map<String, Integer> drinksPerDay = new LinkedHashMap<String, Integer>();
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -293,9 +295,9 @@ public class APIController {
         if (user == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
-        int count = user.getDrinks().size();
-        if (count > 0)
-            drinkLog.undo(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
+        List<Drink> drinks = drinkLog.drinksOf(user.getId());
+        if (!drinks.isEmpty())
+            drinkLog.undo(user.getId(), drinks.get(drinks.size() - 1).getId());
 
         return getUserCsv(user);
     }

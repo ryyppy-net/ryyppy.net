@@ -24,8 +24,8 @@ public record ClassicUserDrinksDTO(int id, DrinksDTO drinks) {
     public record DrinkDTO(int id, long timestamp) {
     }
 
-    public static ClassicUserDrinksDTO fromUser(User user) {
-        List<Drink> drinks = user.getDrinks();
+    /** @param drinks the user's drinks, oldest first */
+    public static ClassicUserDrinksDTO fromUser(User user, List<Drink> drinks) {
         List<DrinkDTO> latest = drinks.reversed().stream()
                 .limit(LATEST_DRINKS)
                 .map(drink -> new DrinkDTO(drink.getId(), drink.getTimeStamp().toEpochMilli()))
