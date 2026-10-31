@@ -11,6 +11,7 @@ package drinkcounter.web.controllers.api.v2;
 public class HistoryPoint {
     private long timestamp;
     private double promilles;
+    private boolean projected;
     
     public long getTimestamp() {
         return timestamp;
@@ -26,5 +27,14 @@ public class HistoryPoint {
     
     public void setPromilles(double promilles) {
         this.promilles = promilles;
+    }
+
+    /** True for points after now: the estimate of how promilles fall until the user is sober. */
+    public boolean isProjected() {
+        return projected;
+    }
+
+    public void setProjected(boolean projected) {
+        this.projected = projected;
     }
 }
