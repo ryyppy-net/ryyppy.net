@@ -365,47 +365,15 @@ p {
 }
 
 /* Full-bleed under the navbar; the container's side padding is 20px on phones. */
-.time-strip {
+.party-time {
     background-color: #262626;
     color: white;
-    padding: 8px 20px 10px;
+    padding: 8px 20px;
     margin-bottom: 15px;
 }
 
-.time-strip-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.time-strip-warning {
-    color: #E6A465;
-}
-
-.time-strip-bar {
-    height: 8px;
-    margin-top: 8px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.time-strip-bar-fill {
-    height: 100%;
-    background-color: #65E6A4;
-}
-
-.time-strip-lastHour .time-strip-bar-fill {
-    background-color: #E6A465;
-}
-
-.time-strip-scale {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 4px;
-    font-size: 0.8em;
-    color: #BDBDBD;
+.party-time span {
+    white-space: nowrap;
 }
 
 .day-stepper-value {

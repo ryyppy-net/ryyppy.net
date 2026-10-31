@@ -43,9 +43,8 @@ async function createPartyWithDays(page: Page, partyName: string, extraDays: num
   return partyIdOf(page);
 }
 
-/** The party page's time strip, in the layout a desktop browser shows. */
-function timeStrip(page: Page) {
-  return page.locator('.time-strip .hidden-phone');
+function partyTime(page: Page) {
+  return page.locator('.party-time');
 }
 
 function partyCard(page: Page, partyName: string) {
@@ -65,8 +64,7 @@ test('a party created with the default length runs for 1 vrk and shows as runnin
   await expect(page).toHaveURL(/#!\/party\/\d+/);
   const partyId = partyIdOf(page);
 
-  await expect(timeStrip(page).locator('.time-strip-bar')).toBeVisible();
-  await expect(timeStrip(page).locator('.time-strip-left')).toContainText('jäljellä');
+  await expect(partyTime(page)).toHaveText(TIME_RANGE_WITH_KLO);
 
   await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
   const card = partyCard(page, partyName);
@@ -104,11 +102,10 @@ test('the party admin page changes the length only once the value differs from t
   expect(lengthMs(after)).toBe(2 * DAY_MS);
 
   await page.goto(`/app/index.html#!/party/${partyId}`, { waitUntil: 'domcontentloaded' });
-  await expect(timeStrip(page).locator('.time-strip-main')).toContainText(TIME_RANGE_WITH_KLO);
-  await expect(timeStrip(page).locator('.time-strip-left')).toContainText(/1 vrk 2\d h jäljellä|2 vrk jäljellä/);
+  await expect(partyTime(page)).toHaveText(TIME_RANGE_WITH_KLO);
 });
 
-test('the party page and list show the last hour and then the end of a party', async ({ page }) => {
+test('the party list drops the progress bar once a party has ended', async ({ page }) => {
   const partyName = `E2E Clock ${Date.now()}`;
   const created = await page.request.post('/API/v2/parties', { form: { name: partyName } });
   expect(created.ok()).toBeTruthy();
@@ -116,16 +113,11 @@ test('the party page and list show the last hour and then the end of a party', a
   const end = new Date(party.endTime).getTime();
 
   await page.clock.install({ time: end - 30 * 60 * 1000 });
-  await page.goto(`/app/index.html#!/party/${party.id}`, { waitUntil: 'domcontentloaded' });
-  await expect(timeStrip(page).locator('.time-strip-bar')).toBeVisible();
-  await expect(timeStrip(page).locator('.time-strip-warning')).toHaveText(/^(29|30) min jäljellä$/);
-
-  await page.clock.fastForward('01:00:00');
-  await expect(timeStrip(page).locator('.time-strip-bar')).toHaveCount(0);
-  await expect(timeStrip(page).locator('.time-strip-left')).toHaveText('kesti 1 vrk');
-
   await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
   const card = partyCard(page, partyName);
+  await expect(card.locator('.party-progress')).toBeVisible();
+
+  await page.clock.fastForward('01:00:00');
   await expect(card.locator('.party-progress')).toHaveCount(0);
 });
 

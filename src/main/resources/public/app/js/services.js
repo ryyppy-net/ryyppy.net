@@ -233,9 +233,7 @@
     }
 
 
-    var MINUTE = 60 * 1000;
-    var HOUR = 60 * MINUTE;
-    var DAY = 24 * HOUR;
+    var DAY = 24 * 60 * 60 * 1000;
     var WEEKDAYS = ['su', 'ma', 'ti', 'ke', 'to', 'pe', 'la'];
 
     function pad(n) {
@@ -250,23 +248,6 @@
         return WEEKDAYS[date.getDay()] + ' ' + date.getDate() + '.' + (date.getMonth() + 1) + '.';
     }
 
-    // "1 vrk 21 h" from a day or more, "5 h 15 min" below that, "35 min" below an hour.
-    function formatSpan(minutes) {
-        var total = Math.max(0, minutes);
-        var days = Math.floor(total / 1440);
-        var hours = Math.floor((total % 1440) / 60);
-        var mins = total % 60;
-        var parts = [];
-        if (days > 0) {
-            parts.push(days + ' vrk');
-            if (hours > 0) { parts.push(hours + ' h'); }
-        } else {
-            if (hours > 0) { parts.push(hours + ' h'); }
-            if (mins > 0 || hours === 0) { parts.push(mins + ' min'); }
-        }
-        return parts.join(' ');
-    }
-
     /**
      * Pure helpers for the start and end of a party. Times are anything `new Date` accepts.
      */
@@ -275,18 +256,10 @@
             var start = new Date(startTime).getTime();
             var end = new Date(endTime).getTime();
             var current = new Date(now).getTime();
-            var left = end - current;
-            var state = left <= 0 ? 'ended' : (left <= HOUR ? 'lastHour' : 'running');
             var progress = end > start ? Math.min(1, Math.max(0, (current - start) / (end - start))) : 1;
-            var elapsedMinutes = Math.floor(Math.max(0, current - start) / MINUTE);
-            var leftMinutes = Math.ceil(Math.max(0, left) / MINUTE);
-            var lengthMinutes = Math.round((end - start) / MINUTE);
             return {
-                state: state,
-                progress: progress,
-                leftText: formatSpan(leftMinutes) + ' jäljellä',
-                elapsedText: formatSpan(elapsedMinutes) + ' takana',
-                lengthText: 'kesti ' + formatSpan(lengthMinutes)
+                state: end - current <= 0 ? 'ended' : 'running',
+                progress: progress
             };
         };
 
@@ -307,27 +280,12 @@
             return Math.max(1, Math.round(length / DAY));
         };
 
-        // "la 31.10. 20:00 – ma 2.11. 20:00"; withKlo gives "la 31.10. klo 20:00 – ...".
-        this.range = function (startTime, endTime, withKlo) {
-            var separator = withKlo ? ' klo ' : ' ';
+        // "la 31.10. 20:00 – ma 2.11. 20:00"
+        this.range = function (startTime, endTime) {
             return [startTime, endTime].map(function (time) {
                 var date = new Date(time);
-                return weekdayAndDate(date) + separator + clockTime(date);
+                return weekdayAndDate(date) + ' ' + clockTime(date);
             }).join(' – ');
-        };
-
-        // "la 20:00 · su 20:00 · ma 20:00": the start time of day on each day boundary up to the end.
-        this.dayScale = function (startTime, endTime) {
-            var start = new Date(startTime);
-            var end = new Date(endTime).getTime();
-            var labels = [];
-            for (var i = 0; i < 100; i++) {
-                var tick = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i,
-                    start.getHours(), start.getMinutes());
-                if (tick.getTime() > end) { break; }
-                labels.push(WEEKDAYS[tick.getDay()] + ' ' + clockTime(tick));
-            }
-            return labels;
         };
     }
 
