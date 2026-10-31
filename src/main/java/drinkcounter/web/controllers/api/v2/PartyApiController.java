@@ -147,7 +147,7 @@ public class PartyApiController {
     @PartyMember
     public ParticipantDTO getParticipant(@PathVariable Integer partyId, @PathVariable Integer participantId){
         requireParticipant(partyId, participantId);
-        return ParticipantDTO.inParty(duringParty(partyId, participantId));
+        return ParticipantDTO.inParty(duringParty(partyRoster.get(partyId), participantId));
     }
 
     @PostMapping("{partyId}/participants/{participantId}/drinks")
@@ -191,11 +191,12 @@ public class PartyApiController {
     }
 
     private ParticipantDrinksDTO participantDrinks(Drink drink, int partyId, int participantId) {
-        return ParticipantDrinksDTO.of(drink, duringParty(partyId, participantId), partyRoster.get(partyId));
+        Party party = partyRoster.get(partyId);
+        return ParticipantDrinksDTO.of(drink, duringParty(party, participantId), party);
     }
 
-    private BloodAlcohol duringParty(int partyId, int participantId) {
-        return promilles.during(partyRoster.get(partyId), List.of(userAccounts.get(participantId))).get(0);
+    private BloodAlcohol duringParty(Party party, int participantId) {
+        return promilles.during(party, List.of(userAccounts.get(participantId))).get(0);
     }
 
     private void requireParticipant(Integer partyId, Integer participantId) {
