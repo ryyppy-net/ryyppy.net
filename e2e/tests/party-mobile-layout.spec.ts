@@ -76,7 +76,7 @@ test.describe('form fields on a phone', () => {
     await expect(page.locator('#weight')).toBeVisible();
 
     await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#weight')).toBeVisible();
+    await expect(page.locator('profile-settings-page #weight')).toBeVisible();
     expect(await smallFields(page), 'profile settings').toEqual([]);
 
     await page.goto(`/app/index.html#!/party/${partyId}`, { waitUntil: 'domcontentloaded' });
