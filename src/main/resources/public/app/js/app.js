@@ -12,5 +12,6 @@ angular.module('ryyppy', ['ngRoute', 'ngAnimate', 'ryyppy.filters', 'ryyppy.serv
     $routeProvider.when('/party/:partyId', {template: '<party-page></party-page>'});
     $routeProvider.when('/party-admin/', {template: '<general-party-admin-page></general-party-admin-page>'});
     $routeProvider.when('/party-admin/:partyId', {template: '<party-admin-page></party-admin-page>'});
+    $routeProvider.when('/join/:token', {template: '<join-page></join-page>'});
     $routeProvider.otherwise({redirectTo: '/'});
   }]);

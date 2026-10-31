@@ -176,6 +176,13 @@
                 return party;
             });
         };
+
+        this.joinWithLink = function (token) {
+            return RyyppyAPI.joinWithLink(token).then(function (party) {
+                self.parties.invalidate();
+                return party;
+            });
+        };
     }
 
 

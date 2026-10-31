@@ -58,6 +58,7 @@ public class WebSecurityConfiguration {
                         "/ui/addUser",
                         "/ui/checkEmail*",
                         "/ui/timezone/*",
+                        "/join/*",
                         "/app/css/**",
                         "/app/js/**",
                         "/sw.js",
