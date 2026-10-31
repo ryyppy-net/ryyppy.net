@@ -9,6 +9,7 @@ import drinkcounter.web.ControllerWebTest;
 import jakarta.servlet.ServletException;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +160,7 @@ public class ProfileApiControllerWebTest {
         drink.setId(9);
         drink.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
         user.drink(drink);
+        when(drinkLog.drinksOf(42)).thenReturn(List.of(drink));
 
         mvc.perform(get("/API/v2/profile/drinks"))
                 .andExpect(status().isOk())

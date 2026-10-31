@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers;
 
+import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
@@ -7,6 +8,7 @@ import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class DefaultControllerWebTest {
     @Autowired
     private UserAccounts userAccounts;
 
+    @Autowired
+    private DrinkLog drinkLog;
+
     private User user;
 
     @BeforeEach
@@ -51,6 +56,7 @@ public class DefaultControllerWebTest {
         drink.setId(9);
         drink.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
         user.drink(drink);
+        when(drinkLog.drinksOf(42)).thenReturn(List.of(drink));
 
         mvc.perform(get("/app/index.html"))
                 .andExpect(status().isOk())
