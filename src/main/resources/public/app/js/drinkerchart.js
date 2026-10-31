@@ -14,7 +14,7 @@
                 if (row.length === 0) {
                     continue;
                 }
-                points.push({x: row.timestamp + timezoneoffset, y: row.promilles});
+                points.push({x: row.timestamp + timezoneoffset, y: row.promilles, projected: row.projected === true});
             }
             return points;
         }
@@ -40,7 +40,12 @@
                     borderColor: 'rgb(0, 0, 0)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    pointHitRadius: 0
+                    pointHitRadius: 0,
+                    segment: {
+                        borderDash: function (ctx) {
+                            return ctx.chart.data.datasets[0].data[ctx.p1DataIndex].projected ? [6, 4] : undefined;
+                        }
+                    }
                 }]
             },
             options: {

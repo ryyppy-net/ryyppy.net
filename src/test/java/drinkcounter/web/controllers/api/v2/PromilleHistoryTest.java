@@ -39,7 +39,7 @@ public class PromilleHistoryTest {
         assertTrue(Math.abs(firstTimestamp - (before - WINDOW_MILLIS)) < TOLERANCE_MILLIS,
                 "first point should be ~300 minutes before now, was " + firstTimestamp);
 
-        HistoryPoint last = slopes.get(slopes.size() - 1);
+        HistoryPoint last = lastNotProjected(slopes);
         assertTrue(last.getTimestamp() >= before - TOLERANCE_MILLIS && last.getTimestamp() <= after + TOLERANCE_MILLIS,
                 "last point should be ~now, was " + last.getTimestamp());
         assertEquals(bloodAlcohol.promilles(), (float) last.getPromilles(), 0.01f);
@@ -67,8 +67,9 @@ public class PromilleHistoryTest {
         BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), Instant.now());
         List<HistoryPoint> points = PromilleHistory.of(bloodAlcohol);
         long start = points.get(0).getTimestamp();
+        long end = points.get(points.size() - 1).getTimestamp();
         List<Float> everyMinute = bloodAlcohol.promillesAt(
-                Instant.ofEpochMilli(start), Instant.ofEpochMilli(start + WINDOW_MILLIS), Duration.ofMinutes(1));
+                Instant.ofEpochMilli(start), Instant.ofEpochMilli(end), Duration.ofMinutes(1));
 
         assertTrue(points.size() < everyMinute.size() / 5, "only bends are sent, got " + points.size());
         int segment = 0;
@@ -83,5 +84,66 @@ public class PromilleHistoryTest {
                     * (x - from.getTimestamp()) / (double) (to.getTimestamp() - from.getTimestamp());
             assertEquals(everyMinute.get(minute), drawn, 0.001, "minute " + minute);
         }
+    }
+
+    @Test
+    public void drinkingUserEndsWithProjectedZeroAtTheEstimatedSoberTime() {
+        User user = user(3, 80);
+        drinkAt(user, Instant.now().minus(Duration.ofMinutes(30)));
+
+        Instant now = Instant.now();
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), now);
+        List<HistoryPoint> points = PromilleHistory.of(bloodAlcohol);
+
+        HistoryPoint last = points.get(points.size() - 1);
+        assertTrue(last.isProjected());
+        assertEquals(0.0, last.getPromilles(), 0.0001);
+        // Burn rate is weight / 10 grams per hour; the body holds sex factor * weight grams per promille.
+        double hoursToSober = bloodAlcohol.grams() / (user.getWeight() / 10.0);
+        long expected = now.toEpochMilli() + Math.round(hoursToSober * 3_600_000);
+        assertEquals(expected, last.getTimestamp(), 60_000);
+        assertFalse(lastNotProjected(points).isProjected());
+        assertEquals(now.toEpochMilli(), lastNotProjected(points).getTimestamp(), 1);
+    }
+
+    @Test
+    public void soberUserHasNoProjectedPoints() {
+        User user = user(4, 80);
+        drinkAt(user, Instant.now().minus(Duration.ofHours(20)));
+
+        List<HistoryPoint> points = PromilleHistory.of(new BloodAlcohol(user, user.getDrinks(), Instant.now()));
+
+        assertTrue(points.stream().noneMatch(HistoryPoint::isProjected));
+    }
+
+    @Test
+    public void nowPointIsKeptWhenThePromilleLineIsStraightAroundNow() {
+        User user = user(5, 80);
+        drinkAt(user, Instant.now().minus(Duration.ofMinutes(60)));
+
+        Instant now = Instant.now();
+        List<HistoryPoint> points = PromilleHistory.of(new BloodAlcohol(user, user.getDrinks(), now));
+
+        HistoryPoint nowPoint = lastNotProjected(points);
+        assertEquals(now.toEpochMilli(), nowPoint.getTimestamp());
+        assertTrue(points.get(points.size() - 1).isProjected());
+    }
+
+    private static HistoryPoint lastNotProjected(List<HistoryPoint> points) {
+        return points.stream().filter(p -> !p.isProjected()).reduce((a, b) -> b).orElseThrow();
+    }
+
+    private static User user(int id, int weight) {
+        User user = new User();
+        user.setId(id);
+        user.setWeight(weight);
+        user.setSex(User.Sex.MALE);
+        return user;
+    }
+
+    private static void drinkAt(User user, Instant time) {
+        Drink drink = new Drink();
+        drink.setTimeStamp(time);
+        user.drink(drink);
     }
 }
