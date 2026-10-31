@@ -12,10 +12,10 @@
             };
         },
         template: `
-    <div class="day-stepper">
-        <button type="button" class="day-stepper-button" aria-label="Lyhennä vuorokaudella" ng-disabled="$ctrl.days <= 1" ng-click="$ctrl.step(-1)">&minus;</button>
-        <output class="day-stepper-value">{{ $ctrl.days }} vrk</output>
-        <button type="button" class="day-stepper-button" aria-label="Pidennä vuorokaudella" ng-click="$ctrl.step(1)">+</button>
+    <div class="day-stepper input-prepend input-append">
+        <button type="button" class="btn" aria-label="Lyhennä vuorokaudella" ng-disabled="$ctrl.days <= 1" ng-click="$ctrl.step(-1)">&minus;</button>
+        <output class="add-on day-stepper-value">{{ $ctrl.days }} vrk</output>
+        <button type="button" class="btn" aria-label="Pidennä vuorokaudella" ng-click="$ctrl.step(1)">+</button>
     </div>`
     });
 })(angular);
