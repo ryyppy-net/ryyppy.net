@@ -20,7 +20,7 @@ public interface DrinkRepository extends CrudRepository<Drink, Integer> {
     /** The user's drinks, oldest first. */
     List<Drink> findByDrinkerIdOrderByTimeStampAsc(int drinkerId);
 
-    @Query("select new drinkcounter.repository.LastDrink(d.drinker.id, max(d.timeStamp)) from Drink d"
+    @Query("select d.drinker.id, max(d.timeStamp) from Drink d"
             + " where d.drinker.id in :drinkerIds group by d.drinker.id")
     List<LastDrink> findLastDrinks(@Param("drinkerIds") Collection<Integer> drinkerIds);
 
