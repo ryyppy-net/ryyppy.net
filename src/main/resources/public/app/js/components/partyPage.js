@@ -26,6 +26,12 @@
             self.rows = rows;
         }
 
+        // Drinks cannot be added through a party that has ended.
+        this.hasEnded = function () {
+            var party = self.store.party.data;
+            return !!party && !!party.endTime && self.now >= new Date(party.endTime).getTime();
+        };
+
         this.$doCheck = function () {
             self.timeInfo = time();
             var participants = self.store.participants.data;
@@ -105,7 +111,7 @@
     <div class="container-fluid" ng-repeat="row in $ctrl.rows track by row[0].id">
         <div class="row-fluid">
             <div class="span4" ng-repeat="participant in row track by participant.id">
-                <drinker participant="participant" party-history="true"></drinker>
+                <drinker participant="participant" party-history="true" ended="$ctrl.hasEnded()"></drinker>
             </div>
         </div>
     </div>`

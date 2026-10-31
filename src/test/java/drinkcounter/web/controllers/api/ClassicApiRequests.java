@@ -42,6 +42,11 @@ final class ClassicApiRequests {
         return post("/API/users/{userId}/add-drink", userId);
     }
 
+    static MockHttpServletRequestBuilder addDrinkInParty(int partyId, int userId) {
+        return post("/API/parties/{partyId}/users/{userId}/add-drink", partyId, userId)
+                .param("volume", "0.33").param("alcohol", "0.047");
+    }
+
     static MockHttpServletRequestBuilder editDrink(int userId, int drinkId) {
         return post("/API/users/{userId}/edit-drink/{drinkId}", userId, drinkId)
                 .param("volume", "0.5").param("alcohol", "0.05");

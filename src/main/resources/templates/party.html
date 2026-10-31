@@ -34,6 +34,8 @@
             var partyHost = new PartyHost(partyId);
             partyHost.onUpdate = pageUpdate;
             var grid = new UserButtonGrid($('#drinkers'));
+            grid.partyId = partyId;
+            grid.partyEndTime = [[${party.endTime?.toEpochMilli()}]];
             grid.onUserDrunk = onUserDrunk;
 
             $(document).ready(function() {

@@ -16,6 +16,10 @@ drinker {
     font-size: 0.8em;;
 }
 
+.drinker-ended {
+    cursor: default;
+}
+
 /* Chart.js sizes the canvas from this container, so the container must not take its size from the canvas. */
 .drinker-graph {
     position: relative;

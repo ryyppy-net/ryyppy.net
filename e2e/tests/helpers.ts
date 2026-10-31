@@ -1,4 +1,5 @@
 import { Browser, BrowserContext, Page, expect } from '@playwright/test';
+import { Client } from 'pg';
 
 export interface TestUser {
   name: string;
@@ -133,7 +134,7 @@ export async function getClassicUserId(page: Page): Promise<number> {
 
 /** Clicks a classic-UI drinker button and waits for the drink to be saved. */
 export async function addDrinkClassic(page: Page, userId: number): Promise<void> {
-  const saved = page.waitForResponse((response) => response.url().includes(`/API/users/${userId}/add-drink`));
+  const saved = page.waitForResponse((response) => new RegExp(`/API/(parties/\\d+/)?users/${userId}/add-drink`).test(response.url()));
   await page.click(`#user${userId}`);
   expect((await saved).ok()).toBeTruthy();
 }
@@ -152,4 +153,25 @@ export async function getOwnDrinks(page: Page): Promise<{ id: number; amountOfSh
 export async function waitForSoundsReady(page: Page): Promise<void> {
   await page.waitForFunction(() => (window as any).RyyppySound !== undefined);
   await page.evaluate(() => (window as any).RyyppySound.ready as Promise<void>);
+}
+
+/**
+ * Ends a party an hour ago, in the database. The server judges a party's end by its own clock,
+ * so this is the only way to get a party that has really ended. Set E2E_DATABASE_URL when the
+ * app's database is not the local one.
+ */
+export async function endPartyInDatabase(partyId: number | string): Promise<void> {
+  const client = new Client({
+    connectionString: process.env.E2E_DATABASE_URL ?? 'postgres://ryyppynet:ryyppynet@localhost:5432/ryyppynet',
+  });
+  await client.connect();
+  try {
+    await client.query(
+      "update party set start_time = (now() at time zone 'utc') - interval '25 hours', " +
+      "end_time = (now() at time zone 'utc') - interval '1 hour' where id = $1",
+      [partyId],
+    );
+  } finally {
+    await client.end();
+  }
 }

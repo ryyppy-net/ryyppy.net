@@ -27,7 +27,7 @@ Each email address belongs to exactly one account. Signing in with Google uses t
 Only you can see and change your profile and your full drink log.
 
 - Your profile is your name, email, sex and weight. Only you can change it, and a new email must not belong to another account.
-- You can log drinks for yourself, now or at an earlier time, and change or delete them.
+- You can log drinks for yourself, now or at an earlier time, and change or delete them. This works from your own dashboard whether or not a party has ended.
 - Only you can see your full list of drinks with their times, and your drinks per day.
 - You see the parties you are a member of, and no others.
 
@@ -70,3 +70,7 @@ For a party-mate, you can:
 - change the alcohol amount of one of their drinks, or delete it
 
 You cannot see a party-mate's full drink log or change their profile. A guest has no account, so the other members of the guest's party keep the guest's drinks.
+
+## Ended parties
+
+Once a party has ended, that is, its end time has been reached, no drink can be added to its members through that party, whoever asks and whether it is their own drink or a party-mate's. The party page of either front end then offers no way to add one, and the server refuses it with 409 Conflict. This covers only adding a drink through the party: changing or deleting an existing drink stays allowed, so a drink tapped just before the end can still be undone or edited, and you can still log a drink for yourself from your own dashboard, which is not tied to any party.
