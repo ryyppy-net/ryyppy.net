@@ -90,8 +90,8 @@ class PostHogTemplateTest {
         assertTrue(html.contains("\"7\""));
         assertTrue(html.contains("\"name\":\"Ville\""));
         assertTrue(html.contains("\"email\":\"ville@example.com\""));
-        assertTrue(html.contains("\"sex\":\"female\""));
-        assertTrue(html.contains("\"weight\":62.5"));
+        assertFalse(html.contains("\"sex\""));
+        assertFalse(html.contains("\"weight\""));
         assertTrue(html.indexOf("posthog.identify(") < html.indexOf("posthog.capture('$pageview')"),
                 "the pageview must be attributed to the identified user");
     }

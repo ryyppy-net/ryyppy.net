@@ -70,8 +70,8 @@ class AnalyticsTest {
         JsonNode person = json.get("properties").get("$set");
         assertEquals("Ville", person.get("name").asString());
         assertEquals("ville@example.com", person.get("email").asString());
-        assertEquals("female", person.get("sex").asString());
-        assertEquals(62.5, person.get("weight").asDouble());
+        assertFalse(person.has("sex"));
+        assertFalse(person.has("weight"));
         assertFalse(person.get("guest").asBoolean());
     }
 

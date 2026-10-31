@@ -15,8 +15,6 @@ public final class PersonProperties {
         Map<String, Object> properties = new LinkedHashMap<>();
         properties.put("name", user.getName());
         properties.put("email", user.getEmail());
-        properties.put("sex", user.getSex().name().toLowerCase());
-        properties.put("weight", user.getWeight());
         properties.put("guest", user.isGuest());
         return properties;
     }
