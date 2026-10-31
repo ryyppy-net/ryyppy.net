@@ -78,7 +78,6 @@
         <div class="hidden-phone">
             <div class="time-strip-row">
                 <span class="time-strip-main">
-                    <span class="status-badge status-badge-{{ $ctrl.timeInfo.status.state }}">{{ $ctrl.timeInfo.status.state == 'ended' ? 'PÄÄTTYNYT' : ($ctrl.timeInfo.status.state == 'lastHour' ? 'VIIMEINEN TUNTI' : 'KÄYNNISSÄ') }}</span>
                     {{ $ctrl.timeInfo.range }}
                 </span>
                 <span class="time-strip-left">
@@ -92,7 +91,6 @@
         </div>
         <div class="visible-phone">
             <div class="time-strip-row">
-                <span class="status-badge status-badge-{{ $ctrl.timeInfo.status.state }}">{{ $ctrl.timeInfo.status.state == 'ended' ? 'PÄÄTTYNYT' : ($ctrl.timeInfo.status.state == 'lastHour' ? 'VIIMEINEN TUNTI' : 'KÄYNNISSÄ') }}</span>
                 <span class="time-strip-left">
                     <span ng-if="$ctrl.timeInfo.status.state == 'running'">{{ $ctrl.timeInfo.status.leftText }}</span>
                     <strong class="time-strip-warning" ng-if="$ctrl.timeInfo.status.state == 'lastHour'">{{ $ctrl.timeInfo.status.leftText }}</strong>

@@ -351,28 +351,6 @@ p {
     }
 }
 
-.status-badge {
-    display: inline-block;
-    padding: 1px 8px;
-    border-radius: 10px;
-    font-size: 0.7em;
-    font-weight: bold;
-    letter-spacing: 0.05em;
-    vertical-align: middle;
-    border: 1px dashed transparent;
-}
-
-.party .status-badge-running {
-    background-color: black;
-    color: white;
-}
-
-.party .status-badge-ended {
-    background-color: transparent;
-    border-color: black;
-    color: black;
-}
-
 .party-progress {
     height: 6px;
     margin-top: 8px;
@@ -399,21 +377,6 @@ p {
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-}
-
-.time-strip .status-badge-running {
-    background-color: #65E6A4;
-    color: black;
-}
-
-.time-strip .status-badge-lastHour {
-    background-color: #E6A465;
-    color: black;
-}
-
-.time-strip .status-badge-ended {
-    border-color: white;
-    color: white;
 }
 
 .time-strip-warning {

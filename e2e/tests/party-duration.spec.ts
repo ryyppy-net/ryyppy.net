@@ -65,12 +65,12 @@ test('a party created with the default length runs for 1 vrk and shows as runnin
   await expect(page).toHaveURL(/#!\/party\/\d+/);
   const partyId = partyIdOf(page);
 
-  await expect(timeStrip(page).locator('.status-badge')).toHaveText('KÄYNNISSÄ');
+  await expect(timeStrip(page).locator('.time-strip-bar')).toBeVisible();
   await expect(timeStrip(page).locator('.time-strip-left')).toContainText('jäljellä');
 
   await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
   const card = partyCard(page, partyName);
-  await expect(card.locator('.status-badge')).toHaveText('KÄYNNISSÄ');
+  await expect(card.locator('.party-progress')).toBeVisible();
   await expect(card.locator('small')).toHaveText(TIME_RANGE);
 
   expect(lengthMs(await partyTimes(page, partyId))).toBe(DAY_MS);
@@ -117,16 +117,15 @@ test('the party page and list show the last hour and then the end of a party', a
 
   await page.clock.install({ time: end - 30 * 60 * 1000 });
   await page.goto(`/app/index.html#!/party/${party.id}`, { waitUntil: 'domcontentloaded' });
-  await expect(timeStrip(page).locator('.status-badge')).toHaveText('VIIMEINEN TUNTI');
+  await expect(timeStrip(page).locator('.time-strip-bar')).toBeVisible();
   await expect(timeStrip(page).locator('.time-strip-warning')).toHaveText(/^(29|30) min jäljellä$/);
 
   await page.clock.fastForward('01:00:00');
-  await expect(timeStrip(page).locator('.status-badge')).toHaveText('PÄÄTTYNYT');
+  await expect(timeStrip(page).locator('.time-strip-bar')).toHaveCount(0);
   await expect(timeStrip(page).locator('.time-strip-left')).toHaveText('kesti 1 vrk');
 
   await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
   const card = partyCard(page, partyName);
-  await expect(card.locator('.status-badge')).toHaveText('PÄÄTTYNYT');
   await expect(card.locator('.party-progress')).toHaveCount(0);
 });
 
