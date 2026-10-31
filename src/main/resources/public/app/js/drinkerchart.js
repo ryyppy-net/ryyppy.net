@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    function DrinkerChart(canvas, participant) {
+    function DrinkerChart(canvas, participant, party) {
         var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function historyPoints(participant) {
@@ -32,7 +32,57 @@
             scale.ticks = ticks;
         }
 
+        function partyWindow(party) {
+            if (!party || !party.startTime || !party.endTime) {
+                return null;
+            }
+            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
+            return {
+                start: new Date(party.startTime).getTime() + timezoneoffset,
+                end: new Date(party.endTime).getTime() + timezoneoffset
+            };
+        }
+
+        var shownWindow = partyWindow(party);
+
+        var partyWindowPlugin = {
+            id: 'partyWindow',
+            beforeDatasetsDraw: function (chart) {
+                if (!shownWindow) {
+                    return;
+                }
+                var area = chart.chartArea;
+                var x = chart.scales.x;
+                if (shownWindow.end < x.min || shownWindow.start > x.max) {
+                    return;
+                }
+                var left = Math.max(x.getPixelForValue(shownWindow.start), area.left);
+                var right = Math.min(x.getPixelForValue(shownWindow.end), area.right);
+                var ctx = chart.ctx;
+                ctx.save();
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
+                ctx.fillRect(left, area.top, right - left, area.bottom - area.top);
+                ctx.strokeStyle = 'rgb(0, 0, 0)';
+                ctx.lineWidth = 1;
+                if (shownWindow.start >= x.min && shownWindow.start <= x.max) {
+                    ctx.beginPath();
+                    ctx.moveTo(left, area.top);
+                    ctx.lineTo(left, area.bottom);
+                    ctx.stroke();
+                }
+                if (shownWindow.end >= x.min && shownWindow.end <= x.max) {
+                    ctx.setLineDash([4, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(right, area.top);
+                    ctx.lineTo(right, area.bottom);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+        };
+
         var chart = new Chart(canvas, {
+            plugins: [partyWindowPlugin],
             type: 'line',
             data: {
                 datasets: [{
@@ -66,7 +116,8 @@
             }
         });
 
-        this.update = function (participant) {
+        this.update = function (participant, party) {
+            shownWindow = partyWindow(party);
             chart.data.datasets[0].data = historyPoints(participant);
             chart.update();
         };
