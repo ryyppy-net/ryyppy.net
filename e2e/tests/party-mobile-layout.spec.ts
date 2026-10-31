@@ -1,6 +1,7 @@
 import { devices } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { createParty } from './helpers';
+import type { Page } from '@playwright/test';
 import { SHARED_STORAGE_STATE } from './shared-user';
 
 test.use({ storageState: SHARED_STORAGE_STATE });
@@ -38,3 +39,49 @@ for (const name of ['iPhone SE', 'iPhone 13', 'iPhone 15 Pro Max']) {
     });
   });
 }
+
+/** Font sizes in px of every visible field on the page that is under 16px. */
+async function smallFields(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('input, select, textarea')]
+      .filter((e) => e.getClientRects().length > 0 && !['hidden', 'checkbox', 'radio'].includes((e as HTMLInputElement).type))
+      .map((e) => ({ id: e.id || e.tagName, size: parseFloat(getComputedStyle(e).fontSize) }))
+      .filter(({ size }) => size < 16)
+      .map(({ id, size }) => `${id}: ${size}px`),
+  );
+}
+
+// iOS Safari zooms in on focusing a field under 16px, and the single-page app then stays zoomed.
+test.describe('form fields on a phone', () => {
+  const { defaultBrowserType, ...iPhone } = devices['iPhone 13'];
+  test.use(iPhone);
+
+  test('are at least 16px on every form', async ({ page }) => {
+    await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#partyName')).toBeVisible();
+    expect(await smallFields(page), 'new party form').toEqual([]);
+
+    await page.fill('#partyName', `E2E Fields ${Date.now()}`);
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL(/#!\/party\/(\d+)/);
+    const partyId = page.url().match(/#!\/party\/(\d+)/)![1];
+
+    await page.goto(`/app/index.html#!/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#type')).toBeVisible();
+    for (const option of ['2', '3']) {
+      await page.locator('#type').selectOption({ index: Number(option) - 1 });
+      expect(await smallFields(page), `party admin, user type ${option}`).toEqual([]);
+    }
+    await expect(page.locator('#weight')).toBeVisible();
+
+    await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#weight')).toBeVisible();
+    expect(await smallFields(page), 'profile settings').toEqual([]);
+
+    await page.goto(`/app/index.html#!/party/${partyId}`, { waitUntil: 'domcontentloaded' });
+    await page.locator('drinker [role="button"]').first().click();
+    await page.getByRole('button', { name: 'Muokkaa' }).click();
+    await expect(page.locator('#portionSize')).toBeVisible();
+    expect(await smallFields(page), 'drink edit dialog').toEqual([]);
+  });
+});
