@@ -68,9 +68,10 @@ test.describe('form fields on a phone', () => {
 
     await page.goto(`/app/index.html#!/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#type')).toBeVisible();
-    for (const option of ['2', '3']) {
-      await page.locator('#type').selectOption({ index: Number(option) - 1 });
-      expect(await smallFields(page), `party admin, user type ${option}`).toEqual([]);
+    const typeCount = await page.locator('#type option').count();
+    for (let index = 0; index < typeCount; index++) {
+      await page.locator('#type').selectOption({ index });
+      expect(await smallFields(page), `party admin, user type ${index}`).toEqual([]);
     }
     await expect(page.locator('#weight')).toBeVisible();
 
