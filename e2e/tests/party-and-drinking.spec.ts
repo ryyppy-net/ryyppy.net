@@ -9,10 +9,6 @@ test.describe('party start date', () => {
   test.use({ storageState: SHARED_STORAGE_STATE });
 
   test('a newly created party shows its actual start date, not a misparsed one', async ({ page }) => {
-  // Regression test: the party list used to parse the ISO-8601 startTime the
-  // API returns with a moment format string meant for a completely different
-  // date shape ('MMM DD, YYYY h:mm:ss A'), which silently misparsed today's
-  // date into a garbage one (see filters.js formatDateTime / partySort).
   await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
 
   const partyName = `E2E Date Party ${Date.now()}`;
@@ -22,11 +18,14 @@ test.describe('party start date', () => {
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 
   const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const expectedDate = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${pad(now.getFullYear() % 100)}`;
+  const startDate = `${now.getDate()}.${now.getMonth() + 1}.`;
 
   const partyTile = page.locator('.party', { has: page.getByText(partyName) });
-  await expect(partyTile.getByText('Alkamisaika:').locator('..')).toContainText(expectedDate);
+  await expect(partyTile.locator('small')).toHaveText(
+    new RegExp(`^\\S{2} ${startDate.replace(/\./g, '\\.')} \\d{2}:\\d{2} – \\S{2} \\d+\\.\\d+\\. \\d{2}:\\d{2}$`));
+  await expect(partyTile.locator('.status-badge')).toHaveText('KÄYNNISSÄ');
+  await expect(partyTile.locator('.party-progress')).toBeVisible();
+  await expect(partyTile).not.toContainText('Alkamisaika');
 });
 
 });
