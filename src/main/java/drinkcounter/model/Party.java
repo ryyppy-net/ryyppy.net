@@ -21,6 +21,7 @@ public class Party extends AbstractEntity{
     private Set<User> participants;
     private String name;
     private Instant startTime;
+    private Instant endTime;
 
     public void setStartTime(Instant startTime) {
         this.startTime = startTime;
@@ -31,6 +32,15 @@ public class Party extends AbstractEntity{
     @JdbcTypeCode(SqlTypes.TIMESTAMP)
     public Instant getStartTime() {
         return this.startTime;
+    }
+
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
+    }
+
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    public Instant getEndTime() {
+        return this.endTime;
     }
 
     public String getName(){
