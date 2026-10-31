@@ -52,6 +52,11 @@ google:
   auth:
     hub-url: ${GOOGLE_AUTH_HUB_URL:}
 
+posthog:
+  key: ${POSTHOG_KEY:}
+  # Railway names each deployment (production, a PR preview's name).
+  environment: ${POSTHOG_ENVIRONMENT:${RAILWAY_ENVIRONMENT_NAME:local}}
+
 auth:
   relay:
     secret: ${AUTH_RELAY_SECRET:}

@@ -15,6 +15,7 @@
     <meta name="ryyppy-net-commit" th:content="${gitCommit}" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script type="text/javascript" th:src="@{/static/js/sw-client.js}"></script>
+    <th:block th:replace="~{fragments/posthog :: init}" />
 </head>
 <body>
     <div ng-view></div>

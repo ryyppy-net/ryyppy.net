@@ -53,6 +53,7 @@ public class AuthenticationController {
 
         ModelAndView mav = new ModelAndView("login");
         mav.addObject("totalDrinkCount", drinkLog.total());
+        mav.addObject("posthogReset", true);
         return mav;
     }
 }

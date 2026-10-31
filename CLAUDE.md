@@ -74,6 +74,21 @@ args; omit them locally and it is skipped. Two invariants:
   for 5s, which delete or change the saved drink, in both front ends.
 - Use constructor injection in new code.
 
+## Analytics
+
+PostHog (EU cloud) is on when `POSTHOG_KEY` is set and absent otherwise. Every event carries an
+`environment` property (`POSTHOG_ENVIRONMENT`, else Railway's environment name), so one project
+holds production and PR previews.
+
+- Browser: `fragments/posthog.html` is included by `fragments/master.html` and `app/index.html`.
+  It loads posthog-js and posts events through the `/ph` proxy (`PostHogProxyController`), and
+  identifies a page's `${user}`. The AngularJS app captures its own route pageviews in `app.js`.
+  Session replay is off.
+- Server: `Analytics.capture(user, event, properties)` sends after the transaction commits.
+  `drink_added`, `drink_edited`, `drink_undone` come from `DrinkLog` and `party_created`,
+  `party_joined` from `PartyRoster`, so both front ends and the classic API are covered.
+- Person properties live in `PersonProperties`; the page and the server events send the same ones.
+
 ## Comments
 
 Write for someone opening the file for the first time, not for a reviewer of your

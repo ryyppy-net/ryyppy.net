@@ -1,5 +1,6 @@
 package drinkcounter;
 
+import drinkcounter.analytics.Analytics;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.repository.DrinkRepository;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -30,14 +32,16 @@ public class DrinkLog {
 
     private final DrinkRepository drinkRepository;
     private final UserRepository userRepository;
+    private final Analytics analytics;
 
     private Clock clock = Clock.systemUTC();
     private volatile Instant totalCountedAt = Instant.EPOCH;
     private volatile long total;
 
-    public DrinkLog(DrinkRepository drinkRepository, UserRepository userRepository) {
+    public DrinkLog(DrinkRepository drinkRepository, UserRepository userRepository, Analytics analytics) {
         this.drinkRepository = drinkRepository;
         this.userRepository = userRepository;
+        this.analytics = analytics;
     }
 
     /** Records a drink at the given time; a time in the future is rejected. */
@@ -50,6 +54,7 @@ public class DrinkLog {
         user.drink(drink);
         drinkRepository.save(drink);
         log.info("{} has drunk a drink at {}", user, at.toString());
+        drinkAdded(user, drink);
         return drink.getId();
     }
 
@@ -63,6 +68,7 @@ public class DrinkLog {
         user.drink(drink);
         drinkRepository.save(drink);
         log.info("User {} has drunk a drink", user.getName());
+        drinkAdded(user, drink);
         return drink.getId();
     }
 
@@ -83,6 +89,7 @@ public class DrinkLog {
         user.drink(drink);
         drinkRepository.save(drink);
         log.info("{} has drunk a drink at {}", user, drink.getTimeStamp());
+        drinkAdded(user, drink);
         return drink;
     }
 
@@ -106,6 +113,7 @@ public class DrinkLog {
         user.removeDrink(drink);
         drinkRepository.delete(drink);
         log.info("{} has removed a drink {}", user, drink.getTimeStamp());
+        analytics.capture(user, "drink_undone", Map.of("alcohol_grams", drink.getAlcohol()));
     }
 
     @Transactional
@@ -114,7 +122,12 @@ public class DrinkLog {
         Drink drink = findDrinkOf(user, drinkId);
         drink.setAlcohol(grams);
         log.info("{} has changed drink {} to {} grams", user, drink.getId(), grams);
+        analytics.capture(user, "drink_edited", Map.of("alcohol_grams", grams));
         return drink;
+    }
+
+    private void drinkAdded(User user, Drink drink) {
+        analytics.capture(user, "drink_added", Map.of("alcohol_grams", drink.getAlcohol()));
     }
 
     /** All drinks ever recorded, counted at most once a minute. */

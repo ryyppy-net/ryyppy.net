@@ -141,18 +141,18 @@ public class PartyApiControllerWebTest {
     }
 
     @Test
-    public void startedPartyIsLinkedToTheSignedInUser() throws Exception {
+    public void startedPartyIsStartedForTheSignedInUser() throws Exception {
         Party started = new Party();
         started.setId(5);
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
-        when(partyRoster.start("Mökki")).thenReturn(started);
+        when(partyRoster.start("Mökki", 42)).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5));
 
-        verify(partyRoster).join(5, 42);
+        verify(partyRoster).start("Mökki", 42);
     }
 
     @Test

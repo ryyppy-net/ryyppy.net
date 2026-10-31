@@ -1,5 +1,6 @@
 package drinkcounter.web;
 
+import drinkcounter.analytics.PostHogProperties;
 import drinkcounter.authentication.relay.Origins;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class GlobalControllerAdvice {
     private final boolean fedcmEnabled;
     private final String hubUrl;
     private final SoundManifest soundManifest;
+    private final PostHogProperties posthog;
 
     @Autowired
     public GlobalControllerAdvice(
@@ -33,13 +35,30 @@ public class GlobalControllerAdvice {
             @Autowired(required = false) GitProperties gitProperties,
             @Value("${google.fedcm-enabled:false}") boolean fedcmEnabled,
             @Value("${google.auth.hub-url:}") String hubUrl,
-            SoundManifest soundManifest) {
+            SoundManifest soundManifest,
+            PostHogProperties posthog) {
         this.clientRegistrationRepository = clientRegistrationRepository;
         this.buildProperties = buildProperties;
         this.gitProperties = gitProperties;
         this.fedcmEnabled = fedcmEnabled;
         this.hubUrl = hubUrl;
         this.soundManifest = soundManifest;
+        this.posthog = posthog;
+    }
+
+    /**
+     * The PostHog project key, or null when analytics is off, which keeps the snippet out of the page.
+     * Available in templates as ${posthogKey}
+     */
+    @ModelAttribute("posthogKey")
+    public String posthogKey() {
+        return posthog.enabled() ? posthog.key() : null;
+    }
+
+    /** Available in templates as ${posthogEnvironment} */
+    @ModelAttribute("posthogEnvironment")
+    public String posthogEnvironment() {
+        return posthog.environment();
     }
 
     /**

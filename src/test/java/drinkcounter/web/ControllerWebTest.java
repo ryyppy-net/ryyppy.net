@@ -6,6 +6,8 @@ import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
+import drinkcounter.analytics.Analytics;
+import drinkcounter.analytics.PostHogHttp;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
@@ -38,7 +40,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         UserAccounts.class,
         PassphraseLogin.class,
         GoogleIdentityLinkingService.class,
-        AuthRelayTokenService.class
+        AuthRelayTokenService.class,
+        Analytics.class,
+        PostHogHttp.class
 })
 @MockitoBean(name = "oauth2LoginCustomizer", types = Customizer.class)
 public @interface ControllerWebTest {

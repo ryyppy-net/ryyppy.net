@@ -1,5 +1,6 @@
 package drinkcounter;
 
+import drinkcounter.analytics.Analytics;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.repository.PartyRepository;
@@ -8,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Limit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +23,12 @@ public class PartyRoster {
 
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
+    private final Analytics analytics;
 
-    public PartyRoster(PartyRepository partyRepository, UserRepository userRepository) {
+    public PartyRoster(PartyRepository partyRepository, UserRepository userRepository, Analytics analytics) {
         this.partyRepository = partyRepository;
         this.userRepository = userRepository;
+        this.analytics = analytics;
     }
 
     @Transactional
@@ -39,6 +43,16 @@ public class PartyRoster {
         partyRepository.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());
+        return party;
+    }
+
+    /** Starts a party that the user joins as its first participant. */
+    @Transactional
+    public Party start(String partyName, int userId) {
+        Party party = start(partyName);
+        join(party.getId(), userId);
+        analytics.capture(userRepository.findById(userId).orElseThrow(EntityNotFoundException::new),
+                "party_created", Map.of("party_id", party.getId()));
         return party;
     }
 
@@ -75,6 +89,7 @@ public class PartyRoster {
         party.addParticipant(user);
         partyRepository.save(party);
         log.info("{} was added to party {}", user, party.getName());
+        analytics.capture(user, "party_joined", Map.of("party_id", party.getId()));
     }
 
     @Transactional

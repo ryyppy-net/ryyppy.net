@@ -40,8 +40,7 @@ public class PartyController {
     @RequestMapping("/addParty")
     @OwnUser
     public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") int userId){
-        Party party = partyRoster.start(partyName);
-        partyRoster.join(party.getId(), userId);
+        Party party = partyRoster.start(partyName, userId);
         return "redirect:party?id="+party.getId();
     }
    

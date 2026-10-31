@@ -13,4 +13,12 @@ angular.module('ryyppy', ['ngRoute', 'ngAnimate', 'ryyppy.filters', 'ryyppy.serv
     $routeProvider.when('/party-admin/', {template: '<general-party-admin-page></general-party-admin-page>'});
     $routeProvider.when('/party-admin/:partyId', {template: '<party-admin-page></party-admin-page>'});
     $routeProvider.otherwise({redirectTo: '/'});
+  }]).
+  run(['$rootScope', function($rootScope) {
+    // Routes live in the URL hash, which the PostHog library does not treat as a navigation.
+    $rootScope.$on('$routeChangeSuccess', function(event, current, previous) {
+      if (previous && window.posthog) {
+        window.posthog.capture('$pageview');
+      }
+    });
   }]);

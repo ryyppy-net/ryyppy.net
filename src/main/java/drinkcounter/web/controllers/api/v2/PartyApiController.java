@@ -69,8 +69,7 @@ public class PartyApiController {
     
     @PostMapping
     public PartyDTO addParty(@LoggedInUserId int userId, @RequestParam("name") String partyName){
-        Party party = partyRoster.start(partyName);
-        partyRoster.join(party.getId(), userId);
+        Party party = partyRoster.start(partyName, userId);
         return PartyDTO.fromParty(party);
     }
 

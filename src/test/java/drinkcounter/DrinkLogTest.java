@@ -1,5 +1,6 @@
 package drinkcounter;
 
+import drinkcounter.analytics.Analytics;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.UserRepository;
 import drinkcounter.model.Drink;
@@ -9,6 +10,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +33,7 @@ public class DrinkLogTest {
     private UserRepository userRepository;
     private User user;
     private DrinkRepository drinkRepository;
+    private Analytics analytics;
 
     @BeforeEach
     public void setUp() {
@@ -42,7 +45,8 @@ public class DrinkLogTest {
             drink.setId(nextDrinkId.getAndIncrement());
             return drink;
         });
-        drinkLog = new DrinkLog(drinkRepository, userRepository);
+        analytics = mock(Analytics.class);
+        drinkLog = new DrinkLog(drinkRepository, userRepository, analytics);
 
         user = new User();
         user.setId(1);
@@ -99,6 +103,38 @@ public class DrinkLogTest {
 
         assertThrows(EntityNotFoundException.class, () -> drinkLog.undo(1, othersDrink.getId()));
         verify(drinkRepository, never()).delete(any(Drink.class));
+    }
+
+    @Test
+    public void recordedDrinkIsReportedToAnalytics() {
+        drinkLog.record(1, new Date());
+
+        verify(analytics).capture(user, "drink_added", Map.of("alcohol_grams", user.getDrinks().get(0).getAlcohol()));
+    }
+
+    @Test
+    public void correctedDrinkIsReportedToAnalytics() {
+        Drink drink = usersDrink();
+
+        drinkLog.correctAlcohol(1, drink.getId(), 30f);
+
+        verify(analytics).capture(user, "drink_edited", Map.of("alcohol_grams", 30f));
+    }
+
+    @Test
+    public void undoneDrinkIsReportedToAnalytics() {
+        Drink drink = usersDrink();
+
+        drinkLog.undo(1, drink.getId());
+
+        verify(analytics).capture(user, "drink_undone", Map.of("alcohol_grams", drink.getAlcohol()));
+    }
+
+    @Test
+    public void rejectedDrinkIsNotReportedToAnalytics() {
+        assertThrows(IllegalArgumentException.class, () -> drinkLog.recordAt(1, "01.01.2099 00:00", 0));
+
+        verify(analytics, never()).capture(any(), any(), any());
     }
 
     private Drink usersDrink() {

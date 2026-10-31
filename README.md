@@ -64,6 +64,8 @@ Set configuration using environment variables:
 * AUTH_RELAY_SECRET - (Optional) Shared secret signing the Google sign-in handoff between environments
 * GOOGLE_AUTH_HUB_URL - (Optional) Environment that hosts Google sign-in (set to `https://ryyppy.net` by the `production` profile)
 * GOOGLE_FEDCM_ENABLED - (Optional) Enables FedCM for Google One Tap (default `false`)
+* POSTHOG_KEY - (Optional) PostHog project API key; analytics is off when unset
+* POSTHOG_ENVIRONMENT - (Optional) Value of the `environment` property on every event (default: Railway's environment name, else `local`)
 
 1. Copy `target/ryyppynet.jar` to server
 2. Run application `java -jar ryyppynet.jar`

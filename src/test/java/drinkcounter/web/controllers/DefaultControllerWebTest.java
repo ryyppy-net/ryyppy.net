@@ -55,6 +55,7 @@ public class DefaultControllerWebTest {
         mvc.perform(get("/app/index.html"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("app/index"))
+                .andExpect(model().attribute("user", user))
                 .andExpect(model().attribute("initialProfile", containsString("Ville")))
                 .andExpect(model().attribute("initialParties", "[]"))
                 .andExpect(model().attribute("initialDrinks", containsString("2024-03-05T13:37:42.123Z")));

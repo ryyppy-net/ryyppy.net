@@ -61,6 +61,7 @@ public class WebSecurityConfiguration {
                         "/app/css/**",
                         "/app/js/**",
                         "/sw.js",
+                        "/ph/**",
                         "/apple-touch-icon.png",
                         "/apple-touch-icon-precomposed.png",
                         "/API/passphrase/**",

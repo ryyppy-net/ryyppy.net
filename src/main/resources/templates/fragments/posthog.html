@@ -1,0 +1,44 @@
+<!--
+    PostHog's browser library, loaded through the /ph proxy (PostHogProxyController).
+    Renders nothing when POSTHOG_KEY is unset. Pages with a ${user} identify them; the
+    login page sets ${posthogReset} so a sign-out starts a new anonymous person;
+    reset clears registered properties, so the environment is registered after it.
+    Pageviews are captured here, after the environment and identity are set, and by the
+    AngularJS app's route changes (app/js/app.js), which the library cannot see.
+-->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="init" th:if="${posthogKey != null}">
+    <script type="text/javascript" th:inline="javascript">
+        (function (d, w) {
+            var ph = w.posthog = w.posthog || [];
+            if (ph.__SV) return;
+            ph._i = [];
+            ph.init = function (key, config, name) { ph._i.push([key, config, name]); };
+            ['capture', 'identify', 'register', 'reset'].forEach(function (method) {
+                ph[method] = function () { ph.push([method].concat(Array.prototype.slice.call(arguments, 0))); };
+            });
+            ph.__SV = 1;
+            var script = d.createElement('script');
+            script.async = true;
+            script.crossOrigin = 'anonymous';
+            script.src = '/ph/static/array.js';
+            d.head.appendChild(script);
+        })(document, window);
+
+        posthog.init(/*[[${posthogKey}]]*/ '', {
+            api_host: '/ph',
+            ui_host: 'https://eu.posthog.com',
+            capture_pageview: false,
+            disable_session_recording: true
+        });
+        /*[# th:if="${posthogReset != null}"]*/
+        posthog.reset();
+        /*[/]*/
+        posthog.register({ environment: /*[[${posthogEnvironment}]]*/ 'local' });
+        /*[# th:if="${user != null}"]*/
+        posthog.identify(
+            /*[[${T(drinkcounter.analytics.PersonProperties).distinctId(user)}]]*/ '1',
+            /*[[${T(drinkcounter.analytics.PersonProperties).of(user)}]]*/ {});
+        /*[/]*/
+        posthog.capture('$pageview');
+    </script>
+</th:block>
