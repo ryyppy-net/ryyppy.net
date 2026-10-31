@@ -1,9 +1,10 @@
 (function (angular) {
     'use strict';
 
-    function UserPageCtrl(Drinks, OwnDrinksStore, PartiesStore, ProfileStore) {
+    function UserPageCtrl($interval, Drinks, OwnDrinksStore, PartiesStore, ProfileStore, PartyTime) {
         var self = this;
         var releases = [];
+        var refresh = null;
         var shownProfile = null;
 
         this.parties = PartiesStore.parties;
@@ -12,6 +13,7 @@
         this.showMoreParties = PartiesStore.showMore;
         this.drinks = OwnDrinksStore.drinks;
         this.participants = [];
+        this.now = Date.now();
 
         this.$doCheck = function () {
             var profile = ProfileStore.profile.data;
@@ -19,6 +21,14 @@
                 shownProfile = profile;
                 self.participants = profile ? [angular.extend({type: 'profile', color: 1}, profile)] : [];
             }
+        };
+
+        this.status = function (party) {
+            return PartyTime.status(party.startTime, party.endTime, self.now);
+        };
+
+        this.range = function (party) {
+            return PartyTime.range(party.startTime, party.endTime);
         };
 
         this.partySort = function (party) {
@@ -39,16 +49,18 @@
                 OwnDrinksStore.drinks.use(),
                 PartiesStore.parties.use()
             ];
+            refresh = $interval(function () { self.now = Date.now(); }, 60000);
         };
 
         this.$onDestroy = function () {
+            $interval.cancel(refresh);
             releases.forEach(function (release) {
                 release();
             });
         };
     }
 
-    UserPageCtrl.$inject = ['Drinks', 'OwnDrinksStore', 'PartiesStore', 'ProfileStore'];
+    UserPageCtrl.$inject = ['$interval', 'Drinks', 'OwnDrinksStore', 'PartiesStore', 'ProfileStore', 'PartyTime'];
 
     angular.module('ryyppy').component('userPage', {
         controller: UserPageCtrl,
@@ -77,10 +89,15 @@
                     <div ng-repeat="party in $ctrl.parties.data | orderBy:[$ctrl.partySort, 'id']:true | limitTo:$ctrl.partiesShown() track by party.id">
                         <a href="#!/party/{{ ::party.id }}">
                             <div class="party color{{ ($index % 12) + 1 }}">
-                                <div>{{ ::party.name }} <small style="float: right;"><span class="hidden-phone">Alkamisaika:</span> {{ ::party.startTime | formatDateTime }}</small></div>
+                                <div>
+                                    {{ ::party.name }}
+                                    <span class="status-badge" ng-class="$ctrl.status(party).state == 'ended' ? 'status-badge-ended' : 'status-badge-running'">{{ $ctrl.status(party).state == 'ended' ? 'PÄÄTTYNYT' : 'KÄYNNISSÄ' }}</span>
+                                    <small style="float: right;">{{ $ctrl.range(party) }}</small>
+                                </div>
                                 <ul class="inline" ng-if="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
                                     <li ng-repeat="participantPreview in party.participants"><img ng-src="{{ participantPreview.profilePictureUrl }}&size=30" title="{{ participantPreview.name }}" /></li>
                                 </ul>
+                                <div class="party-progress" ng-if="$ctrl.status(party).state != 'ended'"><div class="party-progress-fill" ng-style="{width: ($ctrl.status(party).progress * 100) + '%'}"></div></div>
                             </div>
                         </a>
                     </div>
