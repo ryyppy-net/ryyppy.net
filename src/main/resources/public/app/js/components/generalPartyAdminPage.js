@@ -7,6 +7,7 @@
         var refresh = null;
 
         this.now = Date.now();
+        this.days = 1;
 
         this.parties = PartiesStore.parties;
         this.partiesShown = PartiesStore.shown;
@@ -15,7 +16,7 @@
         this.profile = ProfileStore.profile;
 
         this.addParty = function () {
-            PartiesStore.addParty(self.partyName).then(function (party) {
+            PartiesStore.addParty(self.partyName, self.days).then(function (party) {
                 $location.path('/party/' + party.id);
             });
         };
@@ -24,6 +25,14 @@
             PartyStore.leave(party.id, self.profile.data).then(function () {
                 Notify.success("Nyt jo kotiin?", "Lähdit bileistä " + party.name + ".");
             });
+        };
+
+        this.setDays = function (days) {
+            self.days = days;
+        };
+
+        this.endText = function () {
+            return PartyTime.at(PartyTime.after(self.now, self.days));
         };
 
         this.status = function (party) {
@@ -67,6 +76,14 @@
                         <label class="control-label" for="partyName">Bileiden nimi</label>
                         <div class="controls">
                             <input id="partyName" type="text" ng-model="$ctrl.partyName" />
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <span class="control-label">Kesto</span>
+                        <div class="controls">
+                            <day-stepper days="$ctrl.days" on-change="$ctrl.setDays(days)"></day-stepper>
+                            <span class="duration-summary">alkaa nyt, päättyy {{ $ctrl.endText() }}</span>
                         </div>
                     </div>
 

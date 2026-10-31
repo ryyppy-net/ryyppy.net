@@ -91,8 +91,12 @@
             return http.delete(participantsUrl(partyId) + "/" + participant.id).then(data);
         };
 
-        this.addParty = function (partyName) {
-            return http.post(baseUrl + "/parties", serialize({ name: partyName })).then(data);
+        this.addParty = function (partyName, days) {
+            return http.post(baseUrl + "/parties", serialize({ name: partyName, days: days })).then(data);
+        };
+
+        this.changePartyDuration = function (partyId, days) {
+            return http.put(baseUrl + "/parties/" + partyId + "/duration", null, {params: {days: days}}).then(data);
         };
     }
 
@@ -231,6 +235,7 @@
 
     var MINUTE = 60 * 1000;
     var HOUR = 60 * MINUTE;
+    var DAY = 24 * HOUR;
     var WEEKDAYS = ['su', 'ma', 'ti', 'ke', 'to', 'pe', 'la'];
 
     function pad(n) {
@@ -283,6 +288,23 @@
                 elapsedText: formatSpan(elapsedMinutes) + ' takana',
                 lengthText: 'kesti ' + formatSpan(lengthMinutes)
             };
+        };
+
+        // "su 1.11. klo 22:45"
+        this.at = function (time) {
+            var date = new Date(time);
+            return weekdayAndDate(date) + ' klo ' + clockTime(date);
+        };
+
+        // The time `days` whole days after `time`.
+        this.after = function (time, days) {
+            return new Date(new Date(time).getTime() + days * DAY);
+        };
+
+        // The party's length in whole days, at least 1.
+        this.days = function (startTime, endTime) {
+            var length = new Date(endTime).getTime() - new Date(startTime).getTime();
+            return Math.max(1, Math.round(length / DAY));
         };
 
         // "la 31.10. 20:00 – ma 2.11. 20:00"; withKlo gives "la 31.10. klo 20:00 – ...".

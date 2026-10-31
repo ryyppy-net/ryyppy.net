@@ -170,8 +170,8 @@
             return self.parties.refresh();
         };
 
-        this.addParty = function (name) {
-            return RyyppyAPI.addParty(name).then(function (party) {
+        this.addParty = function (name, days) {
+            return RyyppyAPI.addParty(name, days).then(function (party) {
                 self.parties.invalidate();
                 return party;
             });
@@ -297,6 +297,15 @@
             return RyyppyAPI.removeParticipant(partyId, participant).then(function (data) {
                 participantsChanged(partyId);
                 return data;
+            });
+        };
+
+        this.changeDuration = function (partyId, days) {
+            var ticket = Resource.ticket();
+            return RyyppyAPI.changePartyDuration(partyId, days).then(function (party) {
+                self.get(partyId).party.set(party, ticket);
+                PartiesStore.parties.invalidate();
+                return party;
             });
         };
 

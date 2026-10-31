@@ -1,12 +1,37 @@
 (function (angular) {
     'use strict';
 
-    function PartyAdminPageCtrl($routeParams, $location, PartyStore, ProfileStore, Notify) {
+    function PartyAdminPageCtrl($routeParams, $location, PartyStore, ProfileStore, Notify, PartyTime) {
         var self = this;
         var partyId = $routeParams.partyId;
         var releases = [];
 
         this.store = PartyStore.get(partyId);
+
+        this.days = null;
+
+        this.savedDays = function () {
+            var party = self.store.party.data;
+            return party ? PartyTime.days(party.startTime, party.endTime) : null;
+        };
+
+        this.setDays = function (days) {
+            self.days = days;
+        };
+
+        this.startText = function () {
+            return PartyTime.at(self.store.party.data.startTime);
+        };
+
+        this.endText = function () {
+            return PartyTime.at(PartyTime.after(self.store.party.data.startTime, self.days));
+        };
+
+        this.saveDuration = function () {
+            PartyStore.changeDuration(partyId, self.days).then(function () {
+                Notify.success("Aika päivitetty!", "Bileet kestävät nyt " + self.days + " vrk.");
+            });
+        };
 
         this.addUser = function () {
             if (self.selectedUserTypeId === 2)
@@ -68,6 +93,9 @@
             self.selectedUserTypeId = 1;
 
             ProfileStore.profile.load();
+            self.store.party.load().then(function () {
+                self.days = self.savedDays();
+            });
             releases = [
                 self.store.party.use(),
                 self.store.participants.use(),
@@ -82,7 +110,7 @@
         };
     }
 
-    PartyAdminPageCtrl.$inject = ['$routeParams', '$location', 'PartyStore', 'ProfileStore', 'Notify'];
+    PartyAdminPageCtrl.$inject = ['$routeParams', '$location', 'PartyStore', 'ProfileStore', 'Notify', 'PartyTime'];
 
     angular.module('ryyppy').component('partyAdminPage', {
         controller: PartyAdminPageCtrl,
@@ -92,6 +120,31 @@
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span10 offset1">
+                <div ng-if="$ctrl.days !== null">
+                    <h1>Bileiden aika</h1>
+
+                    <form class="form-horizontal" ng-submit="$ctrl.saveDuration()">
+                        <div class="control-group">
+                            <span class="control-label">Alkoi</span>
+                            <div class="controls duration-summary">{{ $ctrl.startText() }}</div>
+                        </div>
+
+                        <div class="control-group">
+                            <span class="control-label">Kesto</span>
+                            <div class="controls">
+                                <day-stepper days="$ctrl.days" on-change="$ctrl.setDays(days)"></day-stepper>
+                                <span class="duration-summary">päättyy {{ $ctrl.endText() }}</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="controls">
+                                <button type="submit" class="btn btn-success" ng-disabled="$ctrl.days === $ctrl.savedDays()">Tallenna</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
                 <h1>Lisää uusi bilettäjä</h1>
 
                 <form class="form-horizontal" ng-submit="$ctrl.addUser()">
