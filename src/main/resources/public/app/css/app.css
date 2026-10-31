@@ -483,3 +483,14 @@ p {
         margin-left: 0;
     }
 }
+
+/* A read-only value lines up with its .control-label, which has 5px of top padding. */
+.controls-static {
+    padding-top: 5px;
+}
+
+@media (max-width: 767px) {
+    .controls-static {
+        padding-top: 0;
+    }
+}
