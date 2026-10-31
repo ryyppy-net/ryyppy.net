@@ -1,7 +1,24 @@
 (function (angular) {
     'use strict';
 
-    function DrinkerChart(canvas, participant, party) {
+    var MINUTE = 60 * 1000;
+    var HOUR = 60 * MINUTE;
+    var DAY = 24 * HOUR;
+    var TICK_STEPS = [15 * MINUTE, 30 * MINUTE, HOUR, 2 * HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR,
+        DAY, 2 * DAY, 7 * DAY, 14 * DAY, 28 * DAY];
+    // A tile's chart is about 240px wide on a phone.
+    var MAX_TICKS = 6;
+    var WEEKDAYS = ['su', 'ma', 'ti', 'ke', 'to', 'pe', 'la'];
+
+    function pad(n) {
+        return ('0' + n).slice(-2);
+    }
+
+    /**
+     * A drinker's promille curve. With partyHistory the history is the party's own, from its
+     * start up to now or its end, and the ticks thin out as the party grows longer.
+     */
+    function DrinkerChart(canvas, participant, partyHistory) {
         var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         function historyPoints(participant) {
@@ -23,70 +40,44 @@
             return ('0' + new Date(timestamp).getUTCHours()).slice(-2);
         }
 
-        function wholeHourTicks(scale) {
-            var hour = 60 * 60 * 1000;
+        function ticksEvery(scale, step) {
             var ticks = [];
-            for (var t = Math.ceil(scale.min / hour) * hour; t <= scale.max; t += hour) {
+            for (var t = Math.ceil(scale.min / step) * step; t <= scale.max; t += step) {
                 ticks.push({value: t});
             }
             scale.ticks = ticks;
         }
 
-        function partyWindow(party) {
-            if (!party || !party.startTime || !party.endTime) {
-                return null;
-            }
-            var timezoneoffset = -1 * 1000 * 60 * new Date().getTimezoneOffset();
-            return {
-                start: new Date(party.startTime).getTime() + timezoneoffset,
-                end: new Date(party.endTime).getTime() + timezoneoffset
-            };
+        function wholeHourTicks(scale) {
+            ticksEvery(scale, HOUR);
         }
 
-        var shownWindow = partyWindow(party);
+        var partyStep = HOUR;
 
-        var partyWindowPlugin = {
-            id: 'partyWindow',
-            beforeDatasetsDraw: function (chart) {
-                if (!shownWindow) {
-                    return;
+        function partyTicks(scale) {
+            partyStep = TICK_STEPS[TICK_STEPS.length - 1];
+            for (var i = 0; i < TICK_STEPS.length; i++) {
+                if ((scale.max - scale.min) / TICK_STEPS[i] <= MAX_TICKS) {
+                    partyStep = TICK_STEPS[i];
+                    break;
                 }
-                var area = chart.chartArea;
-                var x = chart.scales.x;
-                if (shownWindow.end < x.min || shownWindow.start > x.max) {
-                    return;
-                }
-                var left = Math.max(x.getPixelForValue(shownWindow.start), area.left);
-                var right = Math.min(x.getPixelForValue(shownWindow.end), area.right);
-                var ctx = chart.ctx;
-                ctx.save();
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
-                ctx.fillRect(left, area.top, right - left, area.bottom - area.top);
-                ctx.fillStyle = 'rgb(0, 0, 0)';
-                ctx.fillRect(left, area.top, right - left, 3);
-                ctx.strokeStyle = 'rgb(0, 0, 0)';
-                ctx.lineWidth = 1;
-                if (shownWindow.start >= x.min && shownWindow.start <= x.max) {
-                    ctx.beginPath();
-                    ctx.moveTo(left, area.top);
-                    ctx.lineTo(left, area.bottom);
-                    ctx.stroke();
-                }
-                if (shownWindow.end >= x.min && shownWindow.end <= x.max) {
-                    ctx.lineWidth = 2;
-                    ctx.lineCap = 'round';
-                    ctx.setLineDash([0, 5]);
-                    ctx.beginPath();
-                    ctx.moveTo(right, area.top);
-                    ctx.lineTo(right, area.bottom);
-                    ctx.stroke();
-                }
-                ctx.restore();
             }
-        };
+            ticksEvery(scale, partyStep);
+        }
+
+        // Timestamps are shifted to local time, so the UTC fields read as local ones.
+        function formatPartyTick(timestamp) {
+            var date = new Date(timestamp);
+            if (partyStep >= DAY) {
+                return date.getUTCDate() + '.' + (date.getUTCMonth() + 1) + '.';
+            }
+            if (partyStep < HOUR) {
+                return pad(date.getUTCHours()) + ':' + pad(date.getUTCMinutes());
+            }
+            return timestamp % DAY === 0 ? WEEKDAYS[date.getUTCDay()] : formatHour(timestamp);
+        }
 
         var chart = new Chart(canvas, {
-            plugins: [partyWindowPlugin],
             type: 'line',
             data: {
                 datasets: [{
@@ -112,16 +103,15 @@
                     x: {
                         type: 'linear',
                         bounds: 'data',
-                        afterBuildTicks: wholeHourTicks,
-                        ticks: {callback: formatHour}
+                        afterBuildTicks: partyHistory ? partyTicks : wholeHourTicks,
+                        ticks: {callback: partyHistory ? formatPartyTick : formatHour}
                     },
                     y: {min: 0}
                 }
             }
         });
 
-        this.update = function (participant, party) {
-            shownWindow = partyWindow(party);
+        this.update = function (participant) {
             chart.data.datasets[0].data = historyPoints(participant);
             chart.update();
         };

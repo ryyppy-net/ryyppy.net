@@ -393,6 +393,11 @@ public class BloodAlcoholTest {
         assertEquals(0, man80(drink(12, Duration.ofHours(-5))).drinksSinceSober());
     }
 
+    @Test
+    public void standardDrinksCountsEveryDrinkGivenWhetherSoberOrNot() {
+        assertEquals(3, man80(drink(12, Duration.ofHours(-10)), drink(24, Duration.ofHours(-1))).standardDrinks());
+    }
+
     private static BloodAlcohol man80(Drink... drinks) {
         return new BloodAlcohol(user(80, User.Sex.MALE), List.of(drinks), NOW);
     }

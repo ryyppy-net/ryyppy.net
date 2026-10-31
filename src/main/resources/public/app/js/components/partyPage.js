@@ -107,7 +107,7 @@
     <div class="container-fluid" ng-repeat="row in $ctrl.rows track by row[0].id">
         <div class="row-fluid">
             <div class="span4" ng-repeat="participant in row track by participant.id">
-                <drinker participant="participant" party="$ctrl.store.party.data"></drinker>
+                <drinker participant="participant" party-history="true"></drinker>
             </div>
         </div>
     </div>`

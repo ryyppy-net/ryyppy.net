@@ -70,6 +70,15 @@ public class BloodAlcohol {
         return Math.round(shots);
     }
 
+    /** Standard drinks in all the drinks this was worked out from. */
+    public int standardDrinks() {
+        float shots = 0f;
+        for (Drink drink : drinks) {
+            shots += drink.getAmountOfShots();
+        }
+        return Math.round(shots);
+    }
+
     private float gramsAt(Instant time) {
         return calculator.getAlcoholAmountAt(Date.from(time));
     }

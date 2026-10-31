@@ -35,12 +35,12 @@
 
         this.$postLink = function () {
             var canvas = $element[0].querySelector('.drinker-graph canvas');
-            self.chart = new DrinkerChart(canvas, self.participant, self.party);
+            self.chart = new DrinkerChart(canvas, self.participant, self.partyHistory);
         };
 
         this.$onChanges = function (changes) {
-            if ((changes.participant || changes.party) && self.participant && self.chart) {
-                self.chart.update(self.participant, self.party);
+            if (changes.participant && self.participant && self.chart) {
+                self.chart.update(self.participant);
             }
         };
 
@@ -57,7 +57,7 @@
         controller: DrinkerCtrl,
         bindings: {
             participant: '<',
-            party: '<'
+            partyHistory: '<'
         },
         template: `
     <div class="drinker color{{ $ctrl.participant.color }}" style="position: relative;">
