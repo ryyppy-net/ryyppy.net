@@ -1,20 +1,24 @@
 (function (angular) {
     'use strict';
 
-    function ToastsCtrl(Notify) {
+    function ToastsCtrl($element, Notify) {
         this.toasts = Notify.toasts;
         this.pause = Notify.pause;
         this.resume = Notify.resume;
         this.close = Notify.dismiss;
+
+        this.$postLink = function () {
+            $element[0].querySelector('.toast-list').showPopover();
+        };
     }
 
-    ToastsCtrl.$inject = ['Notify'];
+    ToastsCtrl.$inject = ['$element', 'Notify'];
 
     angular.module('ryyppy').component('toasts', {
         controller: ToastsCtrl,
         bindings: {closeLabel: '@'},
         template:
-            '<div class="toast-list" aria-live="polite">' +
+            '<div class="toast-list" popover="manual" aria-live="polite">' +
             '<div class="toast-slot" ng-repeat="t in $ctrl.toasts track by t.id" ng-class="{\'toast-withdrawn\': t.withdrawn}">' +
             '<div class="toast-item" ng-mouseenter="$ctrl.pause(t)" ng-mouseleave="$ctrl.resume(t)">' +
             '<div class="toast-body">' +
