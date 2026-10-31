@@ -98,7 +98,7 @@ public class APIController {
         return xml(ClassicUserDrinksDTO.fromUser(userAccounts.get(userId), drinkLog.drinksOf(userId)));
     }
 
-    @OwnUserOrPartyMate
+    @OwnUser
     @PostMapping("/users/{userId}/add-drink")
     public String addDrink(
     @PathVariable int userId, 

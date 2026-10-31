@@ -179,23 +179,19 @@ public class UserControllerWebTest {
     }
 
     @Test
-    public void addDrinkToDateAddsADrinkForAPartyMate()throws Exception {
+    public void addDrinkToDateIsForbiddenForAPartyMate() throws Exception {
         when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
-        mvc.perform(addDrinkToDate(7))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("user"));
+        mvc.perform(addDrinkToDate(7)).andExpect(status().isForbidden());
 
-        verify(partyRepository).countSharedParties(42, 7);
-        verify(drinkLog).recordAt(7, DATE, 0.0);
+        verifyNoInteractions(drinkLog);
     }
 
     @Test
     public void addDrinkToDateIsForbiddenForAnOutsider() throws Exception {
         mvc.perform(addDrinkToDate(7)).andExpect(status().isForbidden());
 
-        verify(partyRepository).countSharedParties(42, 7);
-        verifyNoMoreInteractions(drinkLog);
+        verifyNoInteractions(drinkLog);
     }
 
     @Test

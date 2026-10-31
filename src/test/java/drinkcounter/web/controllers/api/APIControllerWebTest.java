@@ -100,7 +100,7 @@ public class APIControllerWebTest {
                 Arguments.of("show drinks", showDrinks(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("drinks per day", drinksPerDay(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("user", userXml(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
-                Arguments.of("add drink", addDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("add drink", addDrink(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("edit drink", editDrink(OTHER_USER, DRINK), Rule.OWN_USER_OR_PARTY_MATE),
                 Arguments.of("remove drink", removeDrink(OTHER_USER, DRINK), Rule.OWN_USER_OR_PARTY_MATE),
                 Arguments.of("show history", showHistory(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE));
@@ -143,7 +143,6 @@ public class APIControllerWebTest {
     static Stream<Arguments> partyMateRequests() {
         return Stream.of(
                 Arguments.of("user", userXml(OTHER_USER)),
-                Arguments.of("add drink", addDrink(OTHER_USER)),
                 Arguments.of("edit drink", editDrink(OTHER_USER, DRINK)),
                 Arguments.of("remove drink", removeDrink(OTHER_USER, DRINK)),
                 Arguments.of("show history", showHistory(OTHER_USER)));
@@ -160,12 +159,13 @@ public class APIControllerWebTest {
     static Stream<Arguments> ownOnlyRequests() {
         return Stream.of(
                 Arguments.of("show drinks", showDrinks(OTHER_USER)),
-                Arguments.of("drinks per day", drinksPerDay(OTHER_USER)));
+                Arguments.of("drinks per day", drinksPerDay(OTHER_USER)),
+                Arguments.of("add drink outside a party", addDrink(OTHER_USER)));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("ownOnlyRequests")
-    public void partyMateIsForbiddenFromTheFullDrinkLog(String name, MockHttpServletRequestBuilder request) throws Exception {
+    public void partyMateIsForbiddenFromOwnOnlyRequests(String name, MockHttpServletRequestBuilder request) throws Exception {
         when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isForbidden());
@@ -188,16 +188,6 @@ public class APIControllerWebTest {
     @MethodSource("ownUserRequests")
     public void ownUserIsAllowed(String name, MockHttpServletRequestBuilder request) throws Exception {
         mvc.perform(request).andExpect(status().isOk());
-    }
-
-    @Test
-    public void partyMateAddsADrinkForTheOtherUser() throws Exception {
-        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
-        when(drinkLog.record(eq(OTHER_USER), any(Date.class))).thenReturn(9);
-
-        mvc.perform(addDrink(OTHER_USER))
-                .andExpect(status().isOk())
-                .andExpect(content().string("9"));
     }
 
     @Test

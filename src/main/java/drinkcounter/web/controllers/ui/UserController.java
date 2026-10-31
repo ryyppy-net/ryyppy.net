@@ -151,7 +151,7 @@ public class UserController {
     }
 
     @RequestMapping("/addDrinkToDate")
-    @OwnUserOrPartyMate
+    @OwnUser
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") int userId, @RequestParam("date") String date){
         drinkLog.recordAt(userId, date, AuthenticationController.timezoneOffset(session));
         return "redirect:user";

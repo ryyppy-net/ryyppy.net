@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
-import { endPartyInDatabase, makeTestUser, registerUser, TestUser } from './helpers';
+import { endPartyInDatabase, makeTestUser, registerUser, signedInContext, TestUser } from './helpers';
 
 // Once a party has ended, no drink is added through it. The server ends a party in real time,
 // so these end their party in the database; the dashboard, outside any party, stays open.
@@ -58,6 +58,31 @@ test('the classic API refuses a drink through an ended party but not one from th
   expect((await page.request.post(url, { form })).status()).toBe(409);
   expect(await (await page.request.get('/API/v2/profile/drinks')).json()).toHaveLength(1);
   expect((await page.request.post(`/API/users/${started.userId}/add-drink`, { form })).ok()).toBeTruthy();
+});
+
+test('a party-mate cannot add a drink to someone outside a party, only through the party', async ({ page, browser, baseURL }) => {
+  const started = await startParty(page, 'mate-owner');
+  const mateContext = await signedInContext(browser, baseURL!, 'mate');
+  try {
+    const mate = mateContext.request;
+    const mateId = (await (await mate.get('/API/v2/profile')).json()).id;
+    const invited = await page.request.post(`/API/v2/parties/${started.partyId}/invitations`, { form: { userId: String(mateId) } });
+    expect(invited.ok()).toBeTruthy();
+    const form = { volume: '0.33', alcohol: '0.047' };
+
+    expect((await mate.post(`/API/users/${started.userId}/add-drink`, { form })).status()).toBe(403);
+    expect((await mate.post('/ui/addDrinkToDate', {
+      maxRedirects: 0,
+      form: { userId: String(started.userId), date: '01.01.2024 12:00' },
+    })).status()).toBe(403);
+    expect((await mate.post(`/API/parties/${started.partyId}/users/${started.userId}/add-drink`, { form })).ok()).toBeTruthy();
+
+    await endPartyInDatabase(started.partyId);
+    expect((await mate.post(`/API/parties/${started.partyId}/users/${started.userId}/add-drink`, { form })).status()).toBe(409);
+    expect(await (await page.request.get('/API/v2/profile/drinks')).json()).toHaveLength(1);
+  } finally {
+    await mateContext.close();
+  }
 });
 
 test.describe('AngularJS party page', () => {
