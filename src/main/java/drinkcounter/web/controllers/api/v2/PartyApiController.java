@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  *
@@ -68,8 +70,10 @@ public class PartyApiController {
     }
     
     @PostMapping
-    public PartyDTO addParty(@LoggedInUserId int userId, @RequestParam("name") String partyName){
-        Party party = partyRoster.start(partyName);
+    public PartyDTO addParty(@LoggedInUserId int userId, @RequestParam("name") String partyName,
+            @RequestParam(value="days", defaultValue="1") int days){
+        requireDays(days);
+        Party party = partyRoster.start(partyName, days);
         partyRoster.join(party.getId(), userId);
         return PartyDTO.fromParty(party);
     }
@@ -79,6 +83,19 @@ public class PartyApiController {
     public PartyDTO getParty(@PathVariable Integer partyId){
         Party party = partyRoster.get(partyId);
         return PartyDTO.fromParty(party);
+    }
+
+    @PutMapping("{partyId}/duration")
+    @PartyMember
+    public PartyDTO changeDuration(@PathVariable Integer partyId, @RequestParam("days") int days){
+        requireDays(days);
+        return PartyDTO.fromParty(partyRoster.changeDuration(partyId, days));
+    }
+
+    private static void requireDays(int days) {
+        if (days < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A party lasts at least 1 day");
+        }
     }
 
     @GetMapping("{partyId}/participants")

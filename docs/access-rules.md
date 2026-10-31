@@ -6,7 +6,7 @@ You control your own account. You see and act on other people only through the p
 | --- | --- |
 | User | Someone with an account, who signs in with email and password or with Google. |
 | Guest | A participant added to a party with just a name, sex and weight. A guest has no account and cannot sign in. |
-| Party | A drinking session with a name, a start time and its participants. |
+| Party | A drinking session with a name, a start time, an end time and its participants. |
 | Member | A participant of a party, either a user or a guest. |
 | Party-mate | A member of a party you are also a member of. |
 
@@ -37,7 +37,7 @@ Only a party's members can see it. Anyone else cannot open it, see who is in it 
 
 A member sees:
 
-- the party's name and start time
+- the party's name, start time and end time
 - every participant's name and profile picture
 - every participant's current promilles, total drinks and time since their last drink
 - every participant's promille graph for the last few hours
@@ -50,7 +50,8 @@ All members of a party are equal: any member can add and remove participants, an
 
 | Action | Who can do it | How it works |
 | --- | --- | --- |
-| Create a party | Any signed-in user | You become its first member. |
+| Create a party | Any signed-in user | You become its first member. The party lasts 1 day unless you give a number of days. |
+| Change a party's duration | Any member | In whole days, at least 1. The party ends that many days after it started. |
 | Add a user | Any member | Found by their exact email address, or picked from people you have been in parties with. The party then appears in their list. |
 | Add a guest | Any member | Give a name, sex and weight. The guest belongs to that party only. |
 | Remove a participant | Any member | Any participant, user or guest, including yourself. |
