@@ -338,3 +338,97 @@ p {
         transition: none;
     }
 }
+
+.status-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.7em;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+    border: 1px dashed transparent;
+}
+
+.party .status-badge-running {
+    background-color: black;
+    color: white;
+}
+
+.party .status-badge-ended {
+    background-color: transparent;
+    border-color: black;
+    color: black;
+}
+
+.party-progress {
+    height: 6px;
+    margin-top: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.party-progress-fill {
+    height: 100%;
+    background-color: #262626;
+}
+
+/* Full-bleed under the navbar; the container's side padding is 20px on phones. */
+.time-strip {
+    background-color: #262626;
+    color: white;
+    padding: 8px 20px 10px;
+    margin-bottom: 15px;
+}
+
+.time-strip-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.time-strip .status-badge-running {
+    background-color: #65E6A4;
+    color: black;
+}
+
+.time-strip .status-badge-lastHour {
+    background-color: #E6A465;
+    color: black;
+}
+
+.time-strip .status-badge-ended {
+    border-color: white;
+    color: white;
+}
+
+.time-strip-warning {
+    color: #E6A465;
+}
+
+.time-strip-bar {
+    height: 8px;
+    margin-top: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.time-strip-bar-fill {
+    height: 100%;
+    background-color: #65E6A4;
+}
+
+.time-strip-lastHour .time-strip-bar-fill {
+    background-color: #E6A465;
+}
+
+.time-strip-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.8em;
+    color: #BDBDBD;
+}
