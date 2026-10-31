@@ -33,6 +33,7 @@ public class PartyController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", partyRoster.get(partyId));
+        mav.addObject("participants", partyRoster.members(partyId));
         mav.addObject("user", user);
         return mav;
     }
