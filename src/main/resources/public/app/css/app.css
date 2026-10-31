@@ -459,3 +459,27 @@ p {
         margin-top: 10px;
     }
 }
+
+.party-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    column-gap: 8px;
+}
+
+.party-header-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.party-header-range {
+    margin-left: auto;
+}
+
+@media (max-width: 767px) {
+    .party-header-range {
+        flex-basis: 100%;
+        margin-left: 0;
+    }
+}
