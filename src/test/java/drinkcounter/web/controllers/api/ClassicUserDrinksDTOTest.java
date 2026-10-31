@@ -22,7 +22,7 @@ public class ClassicUserDrinksDTOTest {
         user.setId(1);
         user.drink(drink);
 
-        String out = xml.writeValueAsString(ClassicUserDrinksDTO.fromUser(user));
+        String out = xml.writeValueAsString(ClassicUserDrinksDTO.fromUser(user, user.getDrinks()));
 
         assertEquals("<user><id>1</id><drinks><count>1</count><drink><id>7</id><timestamp>"
                 + timeStamp.toEpochMilli() + "</timestamp></drink></drinks></user>", out);
@@ -39,7 +39,7 @@ public class ClassicUserDrinksDTOTest {
             user.drink(drink);
         }
 
-        ClassicUserDrinksDTO dto = ClassicUserDrinksDTO.fromUser(user);
+        ClassicUserDrinksDTO dto = ClassicUserDrinksDTO.fromUser(user, user.getDrinks());
 
         assertEquals(15, dto.drinks().count());
         assertEquals(11, dto.drinks().drink().size());

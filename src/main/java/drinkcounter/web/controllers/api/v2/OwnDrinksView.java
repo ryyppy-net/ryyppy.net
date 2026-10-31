@@ -1,7 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.alcoholcalculator.BloodAlcohol;
-import drinkcounter.model.User;
+import drinkcounter.model.Drink;
 import java.util.List;
 
 /**
@@ -20,7 +20,7 @@ public final class OwnDrinksView {
     }
 
     // Every drink, oldest first: the dashboard lists the newest and graphs them all per day.
-    public static List<DrinkDTO> drinks(User user) {
-        return user.getDrinks().stream().map(DrinkDTO::fromDrink).toList();
+    public static List<DrinkDTO> drinks(List<Drink> drinks) {
+        return drinks.stream().map(DrinkDTO::fromDrink).toList();
     }
 }

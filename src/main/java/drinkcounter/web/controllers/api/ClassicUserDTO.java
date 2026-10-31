@@ -1,10 +1,9 @@
 package drinkcounter.web.controllers.api;
 
 import drinkcounter.alcoholcalculator.BloodAlcohol;
-import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import java.time.Clock;
-import java.util.List;
+import java.time.Instant;
 import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
@@ -13,13 +12,12 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "user")
 public record ClassicUserDTO(int id, String name, float alcoholInPromilles, int totalDrinks, long idle) {
 
-    public static ClassicUserDTO fromUser(BloodAlcohol bloodAlcohol, Clock clock) {
+    /** @param lastDrinkAt when the user last drank, or null if never */
+    public static ClassicUserDTO fromUser(BloodAlcohol bloodAlcohol, Instant lastDrinkAt, Clock clock) {
         User user = bloodAlcohol.user();
-        List<Drink> drinks = user.getDrinks();
         long idleSeconds = 0;
-        if (!drinks.isEmpty()) {
-            Drink lastDrink = drinks.get(drinks.size() - 1);
-            idleSeconds = (clock.millis() - lastDrink.getTimeStamp().toEpochMilli()) / 1000;
+        if (lastDrinkAt != null) {
+            idleSeconds = (clock.millis() - lastDrinkAt.toEpochMilli()) / 1000;
         }
         return new ClassicUserDTO(user.getId(), user.getName(), bloodAlcohol.promilles(), bloodAlcohol.drinksSinceSober(),
                 idleSeconds);

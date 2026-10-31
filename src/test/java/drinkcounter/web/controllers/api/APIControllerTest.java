@@ -43,13 +43,15 @@ public class APIControllerTest {
     private UserAccounts userAccounts;
     private HttpSession session;
     private DrinkRepository drinkRepository;
+    private DrinkLog drinkLog;
 
     @BeforeEach
     public void setUp() {
         userAccounts = mock(UserAccounts.class);
         session = mock(HttpSession.class);
         drinkRepository = mock(DrinkRepository.class);
-        controller = new APIController(mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
+        drinkLog = mock(DrinkLog.class);
+        controller = new APIController(mock(PartyRoster.class), drinkLog, userAccounts,
                 mock(PassphraseLogin.class), new Promilles(drinkRepository));
     }
 
@@ -79,7 +81,7 @@ public class APIControllerTest {
         drink.setTimeStamp(Instant.parse("2024-03-05T22:30:00Z")); // 2024-03-06T00:30 in client zone
         user.drink(drink);
 
-        when(userAccounts.get(1)).thenReturn(user);
+        when(drinkLog.drinksOf(1)).thenReturn(user.getDrinks());
 
         ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 
@@ -147,7 +149,7 @@ public class APIControllerTest {
         user.drink(beforeMidnightLocal);
         user.drink(afterMidnightLocal);
 
-        when(userAccounts.get(1)).thenReturn(user);
+        when(drinkLog.drinksOf(1)).thenReturn(user.getDrinks());
 
         ResponseEntity<byte[]> response = controller.drinkHistory(session, 1);
 

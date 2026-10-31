@@ -1,5 +1,6 @@
 package drinkcounter.web.controllers;
 
+import drinkcounter.DrinkLog;
 import drinkcounter.PartyRoster;
 import drinkcounter.Promilles;
 import drinkcounter.authentication.LoggedInUser;
@@ -29,11 +30,13 @@ public class DefaultController {
     private final ObjectMapper objectMapper;
     private final PartyRoster partyRoster;
     private final Promilles promilles;
+    private final DrinkLog drinkLog;
 
-    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster, Promilles promilles) {
+    public DefaultController(ObjectMapper objectMapper, PartyRoster partyRoster, Promilles promilles, DrinkLog drinkLog) {
         this.objectMapper = objectMapper;
         this.partyRoster = partyRoster;
         this.promilles = promilles;
+        this.drinkLog = drinkLog;
     }
 
     @GetMapping
@@ -47,7 +50,7 @@ public class DefaultController {
         // API right after load - see templates/app/index.html.
         model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(promilles.of(user)))));
         model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
-        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinks(user))));
+        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinks(drinkLog.drinksOf(user.getId())))));
         return "app/index";
     }
 

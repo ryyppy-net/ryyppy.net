@@ -282,7 +282,7 @@ public class APIControllerWebTest {
                 .andExpect(xpath("/user/id").string(Integer.toString(SIGNED_IN)))
                 .andExpect(xpath("/user/drinks/count").string("0"));
 
-        verifyNoInteractions(partyRoster, drinkLog);
+        verifyNoInteractions(partyRoster);
     }
 
     @Test
