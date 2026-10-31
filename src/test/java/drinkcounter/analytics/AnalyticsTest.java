@@ -72,7 +72,7 @@ class AnalyticsTest {
         assertEquals("ville@example.com", person.get("email").asString());
         assertFalse(person.has("sex"));
         assertFalse(person.has("weight"));
-        assertFalse(person.get("guest").asBoolean());
+        assertFalse(person.has("guest"));
     }
 
     @Test
