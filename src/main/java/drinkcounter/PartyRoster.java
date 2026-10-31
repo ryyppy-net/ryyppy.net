@@ -5,6 +5,7 @@ import drinkcounter.model.User;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class PartyRoster {
 
     private static final Logger log = LoggerFactory.getLogger(PartyRoster.class);
+
+    private static final Duration DEFAULT_LENGTH = Duration.ofDays(1);
 
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
@@ -35,7 +38,9 @@ public class PartyRoster {
 
         Party party = new Party();
         party.setName(partyName);
-        party.setStartTime(Instant.now());
+        Instant startTime = Instant.now();
+        party.setStartTime(startTime);
+        party.setEndTime(startTime.plus(DEFAULT_LENGTH));
         partyRepository.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());

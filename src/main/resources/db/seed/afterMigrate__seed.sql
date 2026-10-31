@@ -107,13 +107,14 @@ begin
     insert into seed_party
     select nextval('party_seq'), (now() at time zone 'UTC') - interval '4 hours', 499, 'huge';
 
-    insert into party (id, name, start_time)
+    insert into party (id, name, start_time, end_time)
     select p.id,
            case when p.kind = 'huge' then 'Seed Huge Party'
                 else nm.occasion[1 + floor(random() * cardinality(nm.occasion))::int]
                      || ' ' || extract(year from p.start_time)
            end,
-           p.start_time
+           p.start_time,
+           p.start_time + interval '48 hours'
     from seed_party p, seed_names nm
     order by p.id;
 
