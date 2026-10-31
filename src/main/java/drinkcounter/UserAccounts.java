@@ -1,7 +1,7 @@
 package drinkcounter;
 
-import drinkcounter.repository.UserRepository;
 import drinkcounter.model.User;
+import drinkcounter.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,7 @@ public class UserAccounts {
 
     @Transactional
     public User add(User user) {
-        if (!user.isGuest())
-            user.setEmail(user.getEmail().toLowerCase());
+        if (!user.isGuest()) user.setEmail(user.getEmail().toLowerCase());
         userRepository.save(user);
         log.info("User with name {} was added", user.getName());
         return user;
@@ -43,7 +42,7 @@ public class UserAccounts {
     @Transactional
     public void delete(int userId) {
         User user = get(userId);
-        
+
         /*
          * TODO Does this cascade automatically? Test if these are needed
         List<Drink> drinks = drinkRepository.findByDrinker(user);
@@ -58,22 +57,21 @@ public class UserAccounts {
                 party.getParticipants().remove(user);
             }
         }
-         * 
+         *
          */
 
         userRepository.delete(user);
     }
 
     public User byOpenId(String openId) {
-        if (openId == null || openId.length() == 0)
-            throw new IllegalArgumentException("openId");
+        if (openId == null || openId.length() == 0) throw new IllegalArgumentException("openId");
 
         return userRepository.findByOpenId(openId);
     }
 
     public User byEmail(String email) {
         if (email == null || email.length() == 0) return null;
-        
+
         return userRepository.findByEmail(email.toLowerCase());
     }
 }

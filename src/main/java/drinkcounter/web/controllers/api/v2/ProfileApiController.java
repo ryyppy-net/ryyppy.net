@@ -41,52 +41,56 @@ public class ProfileApiController {
     }
 
     @PostMapping
-    public void updateUser(@LoggedInUser User user,
-                        @RequestParam("name") String name,
-                        @RequestParam("email") String email,
-                        @RequestParam("sex") User.Sex sex,
-                        @RequestParam("weight") Float weight){
+    public void updateUser(
+            @LoggedInUser User user,
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("sex") User.Sex sex,
+            @RequestParam("weight") Float weight) {
         user.setName(name);
         user.setEmail(email);
         user.setSex(sex);
-        user.setWeight(weight); 
+        user.setWeight(weight);
         userAccounts.update(user);
     }
 
     @PostMapping("drinks")
-    public OwnDrinksDTO drink(@LoggedInUser User user,
-            @RequestParam(value="volume", required=false) Float volume,
-            @RequestParam(value="alcohol", required=false) Float alcoholPercentage,
-            @RequestParam(value="timestamp", required=false) String timestamp){
+    public OwnDrinksDTO drink(
+            @LoggedInUser User user,
+            @RequestParam(value = "volume", required = false) Float volume,
+            @RequestParam(value = "alcohol", required = false) Float alcoholPercentage,
+            @RequestParam(value = "timestamp", required = false) String timestamp) {
         double alcoholAmount = AlcoholCalculator.STANDARD_DRINK_ALCOHOL_GRAMS;
         if (volume != null && alcoholPercentage != null) {
             alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
         }
         Date time = null;
-        if(timestamp != null){
+        if (timestamp != null) {
             time = Date.from(Instant.parse(timestamp));
         }
-        Drink drink = drinkLog.record(user.getId(), time, (float)alcoholAmount);
+        Drink drink = drinkLog.record(user.getId(), time, (float) alcoholAmount);
         return OwnDrinksDTO.of(drink, promilles.of(user));
     }
 
     /** The user's drinks, oldest first. */
     @GetMapping("drinks")
-    public List<DrinkDTO> getDrinks(@LoggedInUser User user){
+    public List<DrinkDTO> getDrinks(@LoggedInUser User user) {
         return OwnDrinksView.drinks(user);
     }
 
     @PutMapping("drinks/{drinkId}")
-    public OwnDrinksDTO changeDrink(@LoggedInUser User user, @PathVariable Integer drinkId,
+    public OwnDrinksDTO changeDrink(
+            @LoggedInUser User user,
+            @PathVariable Integer drinkId,
             @RequestParam("volume") Float volume,
-            @RequestParam("alcohol") Float alcoholPercentage){
-        Drink drink = drinkLog.correctAlcohol(user.getId(), drinkId,
-                AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
+            @RequestParam("alcohol") Float alcoholPercentage) {
+        Drink drink = drinkLog.correctAlcohol(
+                user.getId(), drinkId, AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
         return OwnDrinksDTO.of(drink, promilles.of(user));
     }
 
     @DeleteMapping("drinks/{drinkId}")
-    public OwnDrinksDTO deleteDrink(@LoggedInUser User user, @PathVariable Integer drinkId){
+    public OwnDrinksDTO deleteDrink(@LoggedInUser User user, @PathVariable Integer drinkId) {
         drinkLog.undo(user.getId(), drinkId);
         return OwnDrinksDTO.of(null, promilles.of(user));
     }

@@ -1,5 +1,9 @@
 package drinkcounter.web.controllers.ui;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -9,11 +13,6 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
-
-import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Renders error.html directly (no full Spring context, no datasource), the
@@ -52,11 +51,17 @@ class ErrorTemplateTest {
     void errorTemplateRendersResolvedFinnishTextThroughMasterLayout() {
         String html = render("error", Locale.of("fi", "FI"));
 
-        assertTrue(html.contains("<title>Ryyppy.net - Virhe!</title>"), "title from the page wasn't projected into the master layout's <head>");
+        assertTrue(
+                html.contains("<title>Ryyppy.net - Virhe!</title>"),
+                "title from the page wasn't projected into the master layout's <head>");
         assertTrue(html.contains("Tapahtui virhe!"), "error.title should resolve to Finnish text");
         assertTrue(html.contains("Mahdollisia syitä:"), "error.reasons should resolve to Finnish text");
-        assertTrue(html.contains("sinulla ei riitä oikeudet yrittämällesi sivulle"), "error.list.unauthorized should resolve to Finnish text");
-        assertTrue(html.contains("yritit mennä sivulle, jota ei ole olemassa"), "error.list.page_doesnt_exist should resolve to Finnish text");
+        assertTrue(
+                html.contains("sinulla ei riitä oikeudet yrittämällesi sivulle"),
+                "error.list.unauthorized should resolve to Finnish text");
+        assertTrue(
+                html.contains("yritit mennä sivulle, jota ei ole olemassa"),
+                "error.list.page_doesnt_exist should resolve to Finnish text");
         assertTrue(html.contains("kerro siitä meille"), "error.list.tell_us should resolve to Finnish text");
         assertTrue(html.contains("etusivulle"), "error.to_frontpage should resolve to Finnish text");
         assertTrue(html.contains("href=\"mailto:ryyppy.net@gmail.com\""), "mailto link should be preserved");
@@ -68,7 +73,9 @@ class ErrorTemplateTest {
 
         assertFalse(html.contains("error.title"), "raw message key leaked - MessageSource wiring is broken");
         assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
-        assertFalse(html.contains("customHead"), "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
+        assertFalse(
+                html.contains("customHead"),
+                "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
     }
 
     @Test

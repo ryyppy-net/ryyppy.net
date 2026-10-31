@@ -1,2 +1,5 @@
 # Convert CRLF line endings to LF
 688db110b7b34579d2cd77022f7dd1330ddce6c0
+
+# Format Java sources with palantir-java-format
+2932d20a70977c672495b3ab1418f45db17b021c

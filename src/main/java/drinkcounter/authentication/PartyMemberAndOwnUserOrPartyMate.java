@@ -15,5 +15,4 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Retention(RetentionPolicy.RUNTIME)
 @PreAuthorize("@partyAccess.isMember(#partyId, principal.userId)"
         + " and (#userId == principal.userId or @partyAccess.isPartyMate(principal.userId, #userId))")
-public @interface PartyMemberAndOwnUserOrPartyMate {
-}
+public @interface PartyMemberAndOwnUserOrPartyMate {}

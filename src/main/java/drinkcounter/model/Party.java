@@ -1,13 +1,13 @@
 package drinkcounter.model;
 
-import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OrderBy;
+import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -17,7 +17,7 @@ import org.hibernate.type.SqlTypes;
  * @author Toni
  */
 @Entity
-public class Party extends AbstractEntity{
+public class Party extends AbstractEntity {
     private Set<User> participants;
     private String name;
     private Instant startTime;
@@ -33,10 +33,10 @@ public class Party extends AbstractEntity{
         return this.startTime;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -44,14 +44,14 @@ public class Party extends AbstractEntity{
     // A user's party list shows the participants of every party.
     @ManyToMany
     @BatchSize(size = 100)
-    @JoinTable(name="participants", 
-            joinColumns={@JoinColumn(name="party_id")}
-            ,inverseJoinColumns={@JoinColumn(name="participant_id")}
-            )
+    @JoinTable(
+            name = "participants",
+            joinColumns = {@JoinColumn(name = "party_id")},
+            inverseJoinColumns = {@JoinColumn(name = "participant_id")})
     @OrderBy("id")
     public Set<User> getParticipants() {
-        if(participants == null){
-            participants =  new LinkedHashSet<User>();
+        if (participants == null) {
+            participants = new LinkedHashSet<User>();
         }
         return participants;
     }
@@ -60,7 +60,7 @@ public class Party extends AbstractEntity{
         this.participants = participants;
     }
 
-    public void addParticipant(User participant){
+    public void addParticipant(User participant) {
         getParticipants().add(participant);
     }
 

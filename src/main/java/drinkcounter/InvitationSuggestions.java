@@ -27,12 +27,13 @@ public class InvitationSuggestions {
 
     @Transactional(readOnly = true)
     public List<Friend> forParty(int userId, int partyId, int amount) {
-        TypedQuery<Object[]> q = em.createQuery("select distinct par.id, p.startTime \n" +
-                " from Party p join p.participants par \n" +
-                " where par.id not in(select pp.id from Party p join p.participants pp where p.id = :partyId)\n" +
-                " and p in (select party from Party party join party.participants participant where participant.id = :userId)\n" +
-                " and par.guest = false\n" +
-                " order by p.startTime desc", Object[].class);
+        TypedQuery<Object[]> q = em.createQuery(
+                "select distinct par.id, p.startTime \n" + " from Party p join p.participants par \n"
+                        + " where par.id not in(select pp.id from Party p join p.participants pp where p.id = :partyId)\n"
+                        + " and p in (select party from Party party join party.participants participant where participant.id = :userId)\n"
+                        + " and par.guest = false\n"
+                        + " order by p.startTime desc",
+                Object[].class);
         q.setParameter("partyId", partyId);
         q.setParameter("userId", userId);
         q.setFirstResult(0);

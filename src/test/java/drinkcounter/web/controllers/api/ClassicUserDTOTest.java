@@ -1,5 +1,7 @@
 package drinkcounter.web.controllers.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -7,8 +9,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ClassicUserDTOTest {
 
@@ -21,7 +21,8 @@ public class ClassicUserDTOTest {
         user.drink(drinkAt(1, NOW.minusSeconds(3600)));
         user.drink(drinkAt(2, NOW.minusSeconds(90)));
 
-        ClassicUserDTO dto = ClassicUserDTO.fromUser(new BloodAlcohol(user, user.getDrinks(), NOW), Clock.fixed(NOW, ZoneOffset.UTC));
+        ClassicUserDTO dto = ClassicUserDTO.fromUser(
+                new BloodAlcohol(user, user.getDrinks(), NOW), Clock.fixed(NOW, ZoneOffset.UTC));
 
         assertEquals(90, dto.idle());
     }
@@ -31,7 +32,10 @@ public class ClassicUserDTOTest {
         User user = new User();
         user.setId(1);
 
-        assertEquals(0, ClassicUserDTO.fromUser(new BloodAlcohol(user, user.getDrinks(), NOW), Clock.fixed(NOW, ZoneOffset.UTC)).idle());
+        assertEquals(
+                0,
+                ClassicUserDTO.fromUser(new BloodAlcohol(user, user.getDrinks(), NOW), Clock.fixed(NOW, ZoneOffset.UTC))
+                        .idle());
     }
 
     private static Drink drinkAt(int id, Instant timeStamp) {

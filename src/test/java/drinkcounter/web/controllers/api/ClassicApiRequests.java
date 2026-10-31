@@ -1,17 +1,16 @@
 package drinkcounter.web.controllers.api;
 
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
  * Requests to the classic /API endpoints, sent the way the jQuery UI sends them.
  */
 final class ClassicApiRequests {
 
-    private ClassicApiRequests() {
-    }
+    private ClassicApiRequests() {}
 
     static MockHttpServletRequestBuilder partyXml(int partyId) {
         return get("/API/parties/{partyId}", partyId);
@@ -19,7 +18,9 @@ final class ClassicApiRequests {
 
     static MockHttpServletRequestBuilder addGuest(int partyId) {
         return post("/API/parties/{partyId}/add-anonymous-user", partyId)
-                .param("name", "Vieras").param("sex", "MALE").param("weight", "80");
+                .param("name", "Vieras")
+                .param("sex", "MALE")
+                .param("weight", "80");
     }
 
     static MockHttpServletRequestBuilder linkUser(int partyId, int userId) {
@@ -44,7 +45,8 @@ final class ClassicApiRequests {
 
     static MockHttpServletRequestBuilder editDrink(int userId, int drinkId) {
         return post("/API/users/{userId}/edit-drink/{drinkId}", userId, drinkId)
-                .param("volume", "0.5").param("alcohol", "0.05");
+                .param("volume", "0.5")
+                .param("alcohol", "0.05");
     }
 
     static MockHttpServletRequestBuilder removeDrink(int userId, int drinkId) {

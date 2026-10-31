@@ -1,6 +1,9 @@
 package drinkcounter.web.controllers.ui;
 
+import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
+
 import drinkcounter.DrinkLog;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpSession;
-
-import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
-
 /**
  *
  * @author murgo
@@ -24,10 +23,11 @@ import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPA
 @Controller
 @RequestMapping("ui")
 public class AuthenticationController {
-    
+
     public static final String TIMEZONEOFFSET = "timeZoneOffset";
 
-    @Autowired private DrinkLog drinkLog;
+    @Autowired
+    private DrinkLog drinkLog;
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
 
@@ -38,15 +38,15 @@ public class AuthenticationController {
     }
 
     @RequestMapping("/timezone/{timezoneOffset}")
-    public @ResponseBody String receiveTimezone(HttpSession session,  @PathVariable String timezoneOffset) {
+    public @ResponseBody String receiveTimezone(HttpSession session, @PathVariable String timezoneOffset) {
         session.setAttribute(TIMEZONEOFFSET, Double.parseDouble(timezoneOffset));
         return null;
     }
-    
+
     @RequestMapping("/login")
     public ModelAndView login(@CurrentSecurityContext SecurityContext context) {
         // Redirect already logged in users to frontpage
-        if(!(context.getAuthentication() instanceof AnonymousAuthenticationToken)) {
+        if (!(context.getAuthentication() instanceof AnonymousAuthenticationToken)) {
             log.info("Heh");
             return new ModelAndView(REDIRECT_TO_FRONTPAGE);
         }

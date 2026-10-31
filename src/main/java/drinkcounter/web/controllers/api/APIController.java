@@ -1,8 +1,8 @@
 package drinkcounter.web.controllers.api;
 
 import com.csvreader.CsvWriter;
-import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
+import drinkcounter.PartyRoster;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
@@ -14,6 +14,7 @@ import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.ui.AuthenticationController;
+import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -30,15 +31,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -71,8 +71,12 @@ public class APIController {
 
     private Clock clock = Clock.systemUTC();
 
-    public APIController(PartyRoster partyRoster,
-            DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin, Promilles promilles) {
+    public APIController(
+            PartyRoster partyRoster,
+            DrinkLog drinkLog,
+            UserAccounts userAccounts,
+            PassphraseLogin passphraseLogin,
+            Promilles promilles) {
         this.partyRoster = partyRoster;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
@@ -83,7 +87,8 @@ public class APIController {
     @PartyMember
     @GetMapping(value = "/parties/{partyId}", produces = XML)
     public String party(@PathVariable int partyId) {
-        return xml(ClassicPartyDTO.fromParty(partyRoster.get(partyId), promilles.of(partyRoster.members(partyId)), clock));
+        return xml(
+                ClassicPartyDTO.fromParty(partyRoster.get(partyId), promilles.of(partyRoster.members(partyId)), clock));
     }
 
     @OwnUser
@@ -95,36 +100,38 @@ public class APIController {
     @OwnUserOrPartyMate
     @PostMapping("/users/{userId}/add-drink")
     public String addDrink(
-    @PathVariable int userId, 
-    @RequestParam(value="volume", required=false) Float volume,
-    @RequestParam(value="alcohol", required=false) Float alcoholPercentage ){
-        if(volume != null && alcoholPercentage != null){
+            @PathVariable int userId,
+            @RequestParam(value = "volume", required = false) Float volume,
+            @RequestParam(value = "alcohol", required = false) Float alcoholPercentage) {
+        if (volume != null && alcoholPercentage != null) {
             float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
             return Integer.toString(drinkLog.record(userId, alcoholAmount));
         }
-        
+
         return Integer.toString(drinkLog.record(userId, new Date()));
     }
 
     @OwnUserOrPartyMate
     @PostMapping("/users/{userId}/edit-drink/{drinkId}")
-    public String editDrinkOfUser(@PathVariable int userId, @PathVariable String drinkId,
-    @RequestParam("volume") Float volume,
-    @RequestParam("alcohol") Float alcoholPercentage){
-        drinkLog.correctAlcohol(userId, Integer.parseInt(drinkId),
-                AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
+    public String editDrinkOfUser(
+            @PathVariable int userId,
+            @PathVariable String drinkId,
+            @RequestParam("volume") Float volume,
+            @RequestParam("alcohol") Float alcoholPercentage) {
+        drinkLog.correctAlcohol(
+                userId, Integer.parseInt(drinkId), AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage));
         return "";
     }
 
     @OwnUserOrPartyMate
     @PostMapping("/users/{userId}/remove-drink/{drinkId}")
-    public String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId){
+    public String removeDrinkFromUser(@PathVariable int userId, @PathVariable String drinkId) {
         int drinkIdInt = Integer.parseInt(drinkId);
         drinkLog.undo(userId, drinkIdInt);
         log.info(String.format("Removed drink %d from user %d.", drinkIdInt, userId));
         return "";
     }
-    
+
     @OwnUserOrPartyMate
     @GetMapping(value = "/users/{userId}", produces = XML)
     public String user(@PathVariable int userId) {
@@ -133,7 +140,7 @@ public class APIController {
 
     @OwnUser
     @GetMapping("/users/{userId}/drinks")
-    public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException{
+    public ResponseEntity<byte[]> drinkHistory(HttpSession session, @PathVariable int userId) throws IOException {
         User user = userAccounts.get(userId);
         List<Drink> drinks = user.getDrinks();
 
@@ -141,31 +148,33 @@ public class APIController {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         double timezoneOffset = AuthenticationController.timezoneOffset(session);
-        ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int)(-timezoneOffset * 60));
+        ZoneOffset dtz = ZoneOffset.ofTotalSeconds((int) (-timezoneOffset * 60));
 
         for (Drink d : drinks) {
             String s = d.getTimeStamp().atZone(dtz).format(format);
 
             Integer i = 0;
-            if (drinksPerDay.containsKey(s))
-                i = drinksPerDay.get(s);
+            if (drinksPerDay.containsKey(s)) i = drinksPerDay.get(s);
             i += 1;
             drinksPerDay.put(s, i);
         }
 
         String today = LocalDate.now(clock.withZone(dtz)).format(format);
-        if (!drinksPerDay.containsKey(today))
-            drinksPerDay.put(today, 0);
+        if (!drinksPerDay.containsKey(today)) drinksPerDay.put(today, 0);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{"Time", "Drinks"});
+        csvWriter.writeRecord(new String[] {"Time", "Drinks"});
 
         for (Entry<String, Integer> p : drinksPerDay.entrySet()) {
-            long millis = LocalDate.parse(p.getKey(), format).atStartOfDay(dtz).toInstant().toEpochMilli();
-            csvWriter.writeRecord(new String[]{Long.toString(millis), p.getValue().toString()});
+            long millis = LocalDate.parse(p.getKey(), format)
+                    .atStartOfDay(dtz)
+                    .toInstant()
+                    .toEpochMilli();
+            csvWriter.writeRecord(
+                    new String[] {Long.toString(millis), p.getValue().toString()});
         }
 
         csvWriter.close();
@@ -175,12 +184,12 @@ public class APIController {
 
     @OwnUserOrPartyMate
     @GetMapping("/users/{userId}/show-history")
-    public ResponseEntity<byte[]> showHistory(@PathVariable int userId) throws IOException{
+    public ResponseEntity<byte[]> showHistory(@PathVariable int userId) throws IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{"Time", "Alcohol"});
+        csvWriter.writeRecord(new String[] {"Time", "Alcohol"});
 
         User user = userAccounts.get(userId);
         List<String[]> history = getSlopes(user, false);
@@ -199,7 +208,7 @@ public class APIController {
             @PathVariable int partyId,
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
-            @RequestParam("weight") float weight){
+            @RequestParam("weight") float weight) {
         User user = new User();
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
@@ -209,11 +218,10 @@ public class APIController {
         partyRoster.join(partyId, user.getId());
         return user.getId().toString();
     }
-    
+
     @PartyMember
     @PostMapping("/parties/{partyId}/link-user-to-party/{userId}")
-    public String linkUserToParty(@PathVariable int partyId,
-            @PathVariable int userId){
+    public String linkUserToParty(@PathVariable int partyId, @PathVariable int userId) {
         partyRoster.join(partyId, userId);
         return "";
     }
@@ -255,31 +263,27 @@ public class APIController {
     }
 
     private String[] getCsvValues(long x, float y, User user, boolean getId) {
-        if (getId)
-            return new String[]{Integer.toString(user.getId()), Long.toString(x), Float.toString(y)};
-        return new String[]{Long.toString(x), Float.toString(y)};
+        if (getId) return new String[] {Integer.toString(user.getId()), Long.toString(x), Float.toString(y)};
+        return new String[] {Long.toString(x), Float.toString(y)};
     }
-    
+
     @GetMapping("/passphrase/{passphrase}")
-    public String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException{
+    public String getInfoWithPassphrase(@PathVariable String passphrase) throws IOException {
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
-        if (user == null)
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (user == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         return getUserCsv(user);
     }
 
     @PostMapping("/passphrase/{passphrase}/add-drink/{time}")
-    public String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time) throws IOException{
+    public String addDrinkWithPassphrase(@PathVariable String passphrase, @PathVariable String time)
+            throws IOException {
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
-        if (user == null)
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (user == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         try {
-            if (time == null || time.equals("") || time.equals("0"))
-                drinkLog.record(user.getId(), new Date());
-            else
-                drinkLog.record(user.getId(), new Date(Long.parseLong(time)));
+            if (time == null || time.equals("") || time.equals("0")) drinkLog.record(user.getId(), new Date());
+            else drinkLog.record(user.getId(), new Date(Long.parseLong(time)));
         } catch (Exception e) {
             return "-1";
         }
@@ -288,14 +292,17 @@ public class APIController {
     }
 
     @PostMapping("/passphrase/{passphrase}/undo-drink")
-    public String undoDrink(@PathVariable String passphrase) throws IOException{
+    public String undoDrink(@PathVariable String passphrase) throws IOException {
         User user = passphraseLogin.findUser(passphrase.toLowerCase());
-        if (user == null)
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (user == null) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         int count = user.getDrinks().size();
         if (count > 0)
-            drinkLog.undo(user.getId(), user.getDrinks().get(count - 1).getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
+            drinkLog.undo(
+                    user.getId(),
+                    user.getDrinks()
+                            .get(count - 1)
+                            .getId()); // TODO: optimize (if needed, Toni mitenköhä nuo laiskat listat toimii)
 
         return getUserCsv(user);
     }
@@ -304,7 +311,8 @@ public class APIController {
         // I've had it with this motherfucking XML in this motherfucking Java
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         CsvWriter csvWriter = new CsvWriter(new OutputStreamWriter(baos, StandardCharsets.UTF_8), ',');
-        csvWriter.writeRecord(new String[]{user.getName(), Double.toString(promilles.of(user).promilles())});
+        csvWriter.writeRecord(
+                new String[] {user.getName(), Double.toString(promilles.of(user).promilles())});
         csvWriter.close();
 
         return baos.toString();

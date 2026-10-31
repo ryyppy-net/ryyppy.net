@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-
 /**
  *
  * @author Toni
@@ -29,7 +28,7 @@ public class PartyController {
 
     @RequestMapping("/party")
     @PartyMember
-    public ModelAndView party(@LoggedInUser User user, @RequestParam("id") int partyId){
+    public ModelAndView party(@LoggedInUser User user, @RequestParam("id") int partyId) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("party");
         mav.addObject("party", partyRoster.get(partyId));
@@ -39,16 +38,15 @@ public class PartyController {
 
     @RequestMapping("/addParty")
     @OwnUser
-    public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") int userId){
+    public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") int userId) {
         Party party = partyRoster.start(partyName);
         partyRoster.join(party.getId(), userId);
-        return "redirect:party?id="+party.getId();
+        return "redirect:party?id=" + party.getId();
     }
-   
+
     @RequestMapping("/removeUserFromParty")
     @PartyMemberAndOwnUserOrPartyMate
-    public String removeUserFromParty(@RequestParam("partyId") int partyId,
-            @RequestParam("userId") int userId){
+    public String removeUserFromParty(@RequestParam("partyId") int partyId, @RequestParam("userId") int userId) {
         partyRoster.leave(partyId, userId);
 
         return "redirect:user";

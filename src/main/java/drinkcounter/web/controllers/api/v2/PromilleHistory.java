@@ -29,7 +29,8 @@ public class PromilleHistory {
         // lines between points, so only the minutes where the line bends are sent.
         long x = start.toEpochMilli();
         for (int i = 0; i < history.size(); i++, x += intervalMs) {
-            boolean bends = i == 0 || i == history.size() - 1
+            boolean bends = i == 0
+                    || i == history.size() - 1
                     || Math.abs(history.get(i + 1) - 2 * history.get(i) + history.get(i - 1)) > BEND_TOLERANCE;
             if (bends) {
                 HistoryPoint point = new HistoryPoint();

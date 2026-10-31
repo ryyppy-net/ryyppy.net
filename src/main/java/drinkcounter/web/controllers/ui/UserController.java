@@ -1,13 +1,10 @@
 package drinkcounter.web.controllers.ui;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import drinkcounter.model.User;
+import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
+
 import drinkcounter.DrinkLog;
 import drinkcounter.EmailAddress;
+import drinkcounter.PartyRoster;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.LoggedInUser;
@@ -16,27 +13,28 @@ import drinkcounter.authentication.OwnUserOrPartyMate;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Party;
-import drinkcounter.PartyRoster;
-import java.util.List;
+import drinkcounter.model.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.servlet.ModelAndView;
-
+import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -76,30 +74,32 @@ public class UserController {
     }
 
     @RequestMapping("/newuser")
-    public String newUser(){
+    public String newUser() {
         return "newuser";
     }
-    
+
     @RequestMapping("/addUser")
     public String addUser(
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
-            @RequestParam("weight") float weight, 
+            @RequestParam("weight") float weight,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
             HttpSession session,
             HttpServletRequest request,
-            HttpServletResponse response){
+            HttpServletResponse response) {
 
-        if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null){
+        if (session.getAttribute(AuthenticationController.TIMEZONEOFFSET) == null) {
             session.setAttribute(AuthenticationController.TIMEZONEOFFSET, (double) 0);
         }
 
-        if (name == null || name.length() == 0 || weight < 1 || !EmailAddress.isValid(email) || userAccounts.byEmail(email) != null) {
+        if (name == null
+                || name.length() == 0
+                || weight < 1
+                || !EmailAddress.isValid(email)
+                || userAccounts.byEmail(email) != null) {
             throw new IllegalArgumentException();
         }
-
-
 
         User user = new User();
         user.setName(name);
@@ -115,9 +115,10 @@ public class UserController {
         return REDIRECT_TO_FRONTPAGE;
     }
 
-    private void authenticate(User user, HttpServletRequest request, HttpServletResponse response){
+    private void authenticate(User user, HttpServletRequest request, HttpServletResponse response) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        Authentication authentication =
+                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
@@ -131,16 +132,16 @@ public class UserController {
             @RequestParam("userId") int userId,
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
-            @RequestParam("weight") float weight, 
-            @RequestParam("email") String email){
-                
+            @RequestParam("weight") float weight,
+            @RequestParam("email") String email) {
+
         User user = userAccounts.get(userId);
 
-        if (!user.getEmail().equalsIgnoreCase(email) && (!EmailAddress.isValid(email) || userAccounts.byEmail(email) != null))
+        if (!user.getEmail().equalsIgnoreCase(email)
+                && (!EmailAddress.isValid(email) || userAccounts.byEmail(email) != null))
             throw new IllegalArgumentException();
 
-        if (name == null || name.length() == 0 || weight < 1)
-            throw new IllegalArgumentException();
+        if (name == null || name.length() == 0 || weight < 1) throw new IllegalArgumentException();
 
         user.setName(name);
         user.setSex(User.Sex.valueOf(sex));
@@ -152,21 +153,23 @@ public class UserController {
 
     @RequestMapping("/addDrinkToDate")
     @OwnUserOrPartyMate
-    public String addDrinkToDate(HttpSession session, @RequestParam("userId") int userId, @RequestParam("date") String date){
+    public String addDrinkToDate(
+            HttpSession session, @RequestParam("userId") int userId, @RequestParam("date") String date) {
         drinkLog.recordAt(userId, date, AuthenticationController.timezoneOffset(session));
         return "redirect:user";
     }
 
     @RequestMapping("/removeDrink")
     @OwnUser
-    public String removeDrink(@RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId){
+    public String removeDrink(@RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId) {
         drinkLog.undo(userId, drinkId);
         return "redirect:user";
     }
 
     @RequestMapping("/user")
-    public ModelAndView userPage(@LoggedInUser User user,
-            @RequestParam(value="parties", defaultValue=""+PARTIES_PER_PAGE) int shownParties){
+    public ModelAndView userPage(
+            @LoggedInUser User user,
+            @RequestParam(value = "parties", defaultValue = "" + PARTIES_PER_PAGE) int shownParties) {
         int shown = Math.max(PARTIES_PER_PAGE, Math.min(shownParties, MAX_PARTIES_SHOWN));
         List<Party> parties = partyRoster.newestOf(user.getId(), shown + 1);
         ModelAndView mav = new ModelAndView();
@@ -179,47 +182,47 @@ public class UserController {
 
         return mav;
     }
-    
+
     @RequestMapping("/checkEmail")
-    public ResponseEntity<byte[]> checkEmail(@RequestParam("email") String email){
+    public ResponseEntity<byte[]> checkEmail(@RequestParam("email") String email) {
         String data = EmailAddress.isValid(email) && userAccounts.byEmail(email) == null ? "1" : "0";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "text/plain;charset=utf-8");
         return new ResponseEntity<byte[]>(data.getBytes(), headers, HttpStatus.OK);
     }
-    
+
     @RequestMapping("/getUserByEmail")
     @PartyMember
-    public @ResponseBody String getUserNotInPartyByEmail(@RequestParam("email") String email, @RequestParam("partyId") int partyId){
-        if (!EmailAddress.isValid(email)){
+    public @ResponseBody String getUserNotInPartyByEmail(
+            @RequestParam("email") String email, @RequestParam("partyId") int partyId) {
+        if (!EmailAddress.isValid(email)) {
             return "0";
         }
-        
+
         User user = userAccounts.byEmail(email);
-        if (user == null){
+        if (user == null) {
             return "0";
-        }
-        else {
-            if(partyAccess.isMember(partyId, user.getId())){
+        } else {
+            if (partyAccess.isMember(partyId, user.getId())) {
                 return "0";
-            }else{
+            } else {
                 return Integer.toString(user.getId());
             }
         }
     }
-    
+
     @RequestMapping("/passphrase")
-    public ModelAndView passphrase(@LoggedInUser User user){
+    public ModelAndView passphrase(@LoggedInUser User user) {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("passphrase");
         mav.addObject("passphrase", user.getPassphrase());
         return mav;
     }
-    
+
     @RequestMapping("/passphrase-generate")
     public String generatePassphrase(@LoggedInUser User user) {
         passphraseLogin.issue(user);
         return "redirect:passphrase";
-    }    
+    }
 }

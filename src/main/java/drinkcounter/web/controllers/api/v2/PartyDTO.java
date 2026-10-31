@@ -34,7 +34,7 @@ public class PartyDTO {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
@@ -50,8 +50,8 @@ public class PartyDTO {
     public List<ParticipantPreviewDTO> getParticipants() {
         return participants;
     }
-    
-    public static PartyDTO fromParty(Party party){
+
+    public static PartyDTO fromParty(Party party) {
         PartyDTO partyDTO = new PartyDTO();
         partyDTO.setId(party.getId());
         partyDTO.setName(party.getName());

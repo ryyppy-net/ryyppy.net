@@ -21,7 +21,7 @@ public record ClassicUserDTO(int id, String name, float alcoholInPromilles, int 
             Drink lastDrink = drinks.get(drinks.size() - 1);
             idleSeconds = (clock.millis() - lastDrink.getTimeStamp().toEpochMilli()) / 1000;
         }
-        return new ClassicUserDTO(user.getId(), user.getName(), bloodAlcohol.promilles(), bloodAlcohol.drinksSinceSober(),
-                idleSeconds);
+        return new ClassicUserDTO(
+                user.getId(), user.getName(), bloodAlcohol.promilles(), bloodAlcohol.drinksSinceSober(), idleSeconds);
     }
 }

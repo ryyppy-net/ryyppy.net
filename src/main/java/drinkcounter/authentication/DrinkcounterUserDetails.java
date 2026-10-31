@@ -12,10 +12,18 @@ import org.springframework.security.core.userdetails.User;
  *
  * @author Toni
  */
-public class DrinkcounterUserDetails extends User{
+public class DrinkcounterUserDetails extends User {
     private int userId;
 
-    public DrinkcounterUserDetails(String username, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities, int userId) {
+    public DrinkcounterUserDetails(
+            String username,
+            String password,
+            boolean enabled,
+            boolean accountNonExpired,
+            boolean credentialsNonExpired,
+            boolean accountNonLocked,
+            Collection<? extends GrantedAuthority> authorities,
+            int userId) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.userId = userId;
     }
@@ -23,5 +31,4 @@ public class DrinkcounterUserDetails extends User{
     public int getUserId() {
         return userId;
     }
-    
 }

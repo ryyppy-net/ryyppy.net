@@ -26,14 +26,10 @@ public class OAuth2Configuration {
             RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler) {
         return http -> {
             try {
-                http.oauth2Login(oauth2 -> oauth2
-                    .loginPage("/ui/login")
-                    .userInfoEndpoint(userInfo -> userInfo
-                        .oidcUserService(oidcUserService)
-                        .userService(customOAuth2UserService)
-                    )
-                    .successHandler(relayAwareAuthenticationSuccessHandler)
-                );
+                http.oauth2Login(oauth2 -> oauth2.loginPage("/ui/login")
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.oidcUserService(oidcUserService).userService(customOAuth2UserService))
+                        .successHandler(relayAwareAuthenticationSuccessHandler));
             } catch (Exception e) {
                 throw new RuntimeException("Failed to configure OAuth2 login", e);
             }
@@ -46,8 +42,8 @@ public class OAuth2Configuration {
      * started it; otherwise this is an ordinary successful login on the current host.
      */
     @Bean
-    public RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler(AuthRelayTokenService tokenService,
-            GoogleIdentityLinkingService identityLinkingService) {
+    public RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler(
+            AuthRelayTokenService tokenService, GoogleIdentityLinkingService identityLinkingService) {
         return new RelayAwareAuthenticationSuccessHandler(tokenService, identityLinkingService);
     }
 

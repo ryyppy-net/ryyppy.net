@@ -1,5 +1,14 @@
 package drinkcounter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
@@ -16,15 +25,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class PromillesTest {
 
     private static final Instant NOW = Instant.parse("2024-03-05T22:00:00Z");
@@ -38,15 +38,16 @@ public class PromillesTest {
     public void setUp() {
         drinkRepository = mock(DrinkRepository.class);
         // Answers as the query does: the given drinkers' drinks after the cutoff, oldest first.
-        when(drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(any(), any())).thenAnswer(invocation -> {
-            Collection<Integer> ids = invocation.getArgument(0);
-            Instant since = invocation.getArgument(1);
-            return stored.stream()
-                    .filter(drink -> ids.contains(drink.getDrinker().getId()))
-                    .filter(drink -> drink.getTimeStamp().isAfter(since))
-                    .sorted(Comparator.comparing(Drink::getTimeStamp))
-                    .toList();
-        });
+        when(drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(any(), any()))
+                .thenAnswer(invocation -> {
+                    Collection<Integer> ids = invocation.getArgument(0);
+                    Instant since = invocation.getArgument(1);
+                    return stored.stream()
+                            .filter(drink -> ids.contains(drink.getDrinker().getId()))
+                            .filter(drink -> drink.getTimeStamp().isAfter(since))
+                            .sorted(Comparator.comparing(Drink::getTimeStamp))
+                            .toList();
+                });
         promilles = new Promilles(drinkRepository);
         ReflectionTestUtils.setField(promilles, "clock", Clock.fixed(NOW, ZoneOffset.UTC));
     }
@@ -57,7 +58,8 @@ public class PromillesTest {
 
         promilles.of(user);
 
-        verify(drinkRepository).findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(List.of(1), NOW.minus(Duration.ofDays(7)));
+        verify(drinkRepository)
+                .findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(List.of(1), NOW.minus(Duration.ofDays(7)));
     }
 
     @Test

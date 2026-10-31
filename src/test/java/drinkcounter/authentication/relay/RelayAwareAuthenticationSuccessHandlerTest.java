@@ -1,5 +1,16 @@
 package drinkcounter.authentication.relay;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import java.util.List;
 import java.util.Map;
@@ -17,17 +28,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class RelayAwareAuthenticationSuccessHandlerTest {
 
     private static final List<GrantedAuthority> AUTHORITIES = List.of(new SimpleGrantedAuthority("ROLE_USER"));
@@ -42,8 +42,10 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
         tokenService = mock(AuthRelayTokenService.class);
         identityLinkingService = mock(GoogleIdentityLinkingService.class);
         handler = new RelayAwareAuthenticationSuccessHandler(tokenService, identityLinkingService);
-        DefaultOAuth2User oauth2User = new DefaultOAuth2User(AUTHORITIES,
-                Map.of("sub", "google-sub", "email", "user@example.com", "name", "User", "userId", 42), "email");
+        DefaultOAuth2User oauth2User = new DefaultOAuth2User(
+                AUTHORITIES,
+                Map.of("sub", "google-sub", "email", "user@example.com", "name", "User", "userId", 42),
+                "email");
         authentication = new OAuth2AuthenticationToken(oauth2User, AUTHORITIES, "google");
     }
 
@@ -74,7 +76,8 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
         SecurityContext context = new SecurityContextImpl(authentication);
         SecurityContextHolder.setContext(context);
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
-        when(tokenService.mint("google-sub", "user@example.com", "User", returnTo)).thenReturn("token");
+        when(tokenService.mint("google-sub", "user@example.com", "User", returnTo))
+                .thenReturn("token");
 
         handler.onAuthenticationSuccess(request, response, authentication);
 

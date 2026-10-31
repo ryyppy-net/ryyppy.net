@@ -1,10 +1,5 @@
 package drinkcounter.web;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.resource.ResourceUrlProvider;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.HashMap;
@@ -14,6 +9,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.resource.ResourceUrlProvider;
 
 /**
  * Content-hashed URLs of the drink sound clips, scanned from the sounds
@@ -58,7 +57,10 @@ public class SoundManifest {
         }
 
         return formatsByStem.values().stream()
-                .map(formats -> FORMAT_PRIORITY.stream().map(formats::get).filter(Objects::nonNull).toList())
+                .map(formats -> FORMAT_PRIORITY.stream()
+                        .map(formats::get)
+                        .filter(Objects::nonNull)
+                        .toList())
                 .filter(urls -> !urls.isEmpty())
                 .toList();
     }

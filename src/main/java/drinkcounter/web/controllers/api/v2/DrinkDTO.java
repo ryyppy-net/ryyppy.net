@@ -38,11 +38,11 @@ public class DrinkDTO {
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
-    
+
     public Float getAmountOfShots() {
         return amountOfShots;
     }
-    
+
     public void setAmountOfShots(Float amountOfShots) {
         this.amountOfShots = amountOfShots;
     }

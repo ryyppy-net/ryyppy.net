@@ -9,10 +9,9 @@ import java.util.Locale;
 
 public class GravatarUrls {
     public static String forUser(User user) {
-        if(user.getEmail() != null) {
+        if (user.getEmail() != null) {
             return forValue(user.getEmail());
-        }
-        else {
+        } else {
             return forValue(user.getName() + user.getWeight());
         }
     }

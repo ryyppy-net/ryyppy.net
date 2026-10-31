@@ -1,19 +1,5 @@
 package drinkcounter.web.controllers.ui;
 
-import drinkcounter.PartyRoster;
-import drinkcounter.repository.PartyRepository;
-import drinkcounter.UserAccounts;
-import drinkcounter.authentication.WithDrinkcounterUser;
-import drinkcounter.model.Party;
-import drinkcounter.model.User;
-import drinkcounter.web.ControllerWebTest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.test.context.support.WithAnonymousUser;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,6 +11,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import drinkcounter.PartyRoster;
+import drinkcounter.UserAccounts;
+import drinkcounter.authentication.WithDrinkcounterUser;
+import drinkcounter.model.Party;
+import drinkcounter.model.User;
+import drinkcounter.repository.PartyRepository;
+import drinkcounter.web.ControllerWebTest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /** Drives PartyController through MockMvc and the app's security filter chain. */
 @ControllerWebTest
@@ -108,8 +108,7 @@ public class PartyControllerWebTest {
     public void partyPageIsForbiddenToAnOutsider() throws Exception {
         when(partyRepository.countUserParticipations(5, 42)).thenReturn(0L);
 
-        mvc.perform(get("/ui/party").param("id", "5"))
-                .andExpect(status().isForbidden());
+        mvc.perform(get("/ui/party").param("id", "5")).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
         verifyNoMoreInteractions(partyRoster);
@@ -138,8 +137,7 @@ public class PartyControllerWebTest {
         when(partyRepository.countUserParticipations(5, 42)).thenReturn(0L);
         when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
-        mvc.perform(removeUserFromParty(5, 7))
-                .andExpect(status().isForbidden());
+        mvc.perform(removeUserFromParty(5, 7)).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
         verifyNoMoreInteractions(partyRoster);
@@ -149,8 +147,7 @@ public class PartyControllerWebTest {
     public void removeUserFromPartyIsForbiddenToAnOutsiderRemovingThemself() throws Exception {
         when(partyRepository.countUserParticipations(5, 42)).thenReturn(0L);
 
-        mvc.perform(removeUserFromParty(5, 42))
-                .andExpect(status().isForbidden());
+        mvc.perform(removeUserFromParty(5, 42)).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
         verifyNoMoreInteractions(partyRoster);
@@ -161,8 +158,7 @@ public class PartyControllerWebTest {
         when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
         when(partyRepository.countSharedParties(42, 7)).thenReturn(0L);
 
-        mvc.perform(removeUserFromParty(5, 7))
-                .andExpect(status().isForbidden());
+        mvc.perform(removeUserFromParty(5, 7)).andExpect(status().isForbidden());
 
         verify(partyRepository).countUserParticipations(5, 42);
         verify(partyRepository).countSharedParties(42, 7);
@@ -194,7 +190,8 @@ public class PartyControllerWebTest {
     }
 
     private static MockHttpServletRequestBuilder removeUserFromParty(int partyId, int userId) {
-        return get("/ui/removeUserFromParty").param("partyId", String.valueOf(partyId))
+        return get("/ui/removeUserFromParty")
+                .param("partyId", String.valueOf(partyId))
                 .param("userId", String.valueOf(userId));
     }
 }

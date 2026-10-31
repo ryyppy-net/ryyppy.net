@@ -13,8 +13,8 @@ public class WithDrinkcounterUserSecurityContextFactory implements WithSecurityC
     @Override
     public SecurityContext createSecurityContext(WithDrinkcounterUser annotation) {
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
-        DrinkcounterUserDetails principal = new DrinkcounterUserDetails(annotation.email(), "",
-                true, true, true, true, authorities, annotation.userId());
+        DrinkcounterUserDetails principal = new DrinkcounterUserDetails(
+                annotation.email(), "", true, true, true, true, authorities, annotation.userId());
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, authorities));

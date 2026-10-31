@@ -39,8 +39,10 @@ public class Promilles {
         if (users.isEmpty()) return List.of();
         Instant now = clock.instant();
         List<Integer> ids = users.stream().map(User::getId).toList();
-        Map<Integer, List<Drink>> drinksByUser = drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(ids, now.minus(LOOKBACK)).stream()
-                .collect(Collectors.groupingBy(drink -> drink.getDrinker().getId()));
+        Map<Integer, List<Drink>> drinksByUser =
+                drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(ids, now.minus(LOOKBACK)).stream()
+                        .collect(Collectors.groupingBy(
+                                drink -> drink.getDrinker().getId()));
         return users.stream()
                 .map(user -> new BloodAlcohol(user, drinksByUser.getOrDefault(user.getId(), List.of()), now))
                 .toList();

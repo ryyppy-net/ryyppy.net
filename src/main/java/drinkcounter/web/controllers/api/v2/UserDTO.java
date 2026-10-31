@@ -79,7 +79,7 @@ public class UserDTO {
     public void setTotalDrinks(Integer totalDrinks) {
         this.totalDrinks = totalDrinks;
     }
-    
+
     public String getProfilePictureUrl() {
         return profilePictureUrl;
     }
@@ -87,16 +87,16 @@ public class UserDTO {
     public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
-    
+
     public List<HistoryPoint> getHistory() {
         return history;
     }
-    
+
     public void setHistory(List<HistoryPoint> history) {
         this.history = history;
     }
-    
-    public static UserDTO fromUser(BloodAlcohol bloodAlcohol){
+
+    public static UserDTO fromUser(BloodAlcohol bloodAlcohol) {
         User user = bloodAlcohol.user();
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());

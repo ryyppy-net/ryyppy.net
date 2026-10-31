@@ -4,10 +4,10 @@
  */
 package drinkcounter.authentication;
 
-import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.AuthenticationException;
@@ -20,9 +20,9 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
  * @author Toni
  */
 public class UserNotRegisteredFailureHandler extends SimpleUrlAuthenticationFailureHandler {
-    
+
     private static final Logger log = LoggerFactory.getLogger(UserNotRegisteredFailureHandler.class);
-    
+
     private String registrationURL = "/ui/newuser";
 
     public void setRegistrationURL(String registrationURL) {
@@ -30,7 +30,9 @@ public class UserNotRegisteredFailureHandler extends SimpleUrlAuthenticationFail
     }
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(
+            HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
+            throws IOException, ServletException {
         if (exception instanceof UsernameNotFoundException) {
             DefaultRedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
             // redirect to registration

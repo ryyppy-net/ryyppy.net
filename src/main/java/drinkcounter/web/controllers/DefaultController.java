@@ -8,15 +8,14 @@ import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.OwnDrinksView;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
-import tools.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.JavaScriptUtils;
-
-import java.util.ArrayList;
-import java.util.List;
+import tools.jackson.databind.ObjectMapper;
 
 @RequestMapping("/")
 @Controller
@@ -45,9 +44,16 @@ public class DefaultController {
     public String appIndex(@LoggedInUser User user, Model model) {
         // Seeds the AngularJS stores, which would otherwise fetch this over the
         // API right after load - see templates/app/index.html.
-        model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(promilles.of(user)))));
-        model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
-        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinks(user))));
+        model.addAttribute(
+                "initialProfile",
+                JavaScriptUtils.javaScriptEscape(
+                        objectMapper.writeValueAsString(OwnDrinksView.profile(promilles.of(user)))));
+        model.addAttribute(
+                "initialParties",
+                JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
+        model.addAttribute(
+                "initialDrinks",
+                JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinks(user))));
         return "app/index";
     }
 

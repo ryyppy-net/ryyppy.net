@@ -1,8 +1,15 @@
 package drinkcounter.web.controllers.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.csvreader.CsvReader;
-import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
+import drinkcounter.PartyRoster;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
@@ -12,13 +19,12 @@ import drinkcounter.repository.DrinkRepository;
 import drinkcounter.web.controllers.ui.AuthenticationController;
 import jakarta.servlet.http.HttpSession;
 import java.io.ByteArrayInputStream;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.Clock;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class APIControllerTest {
 
@@ -49,8 +48,12 @@ public class APIControllerTest {
         userAccounts = mock(UserAccounts.class);
         session = mock(HttpSession.class);
         drinkRepository = mock(DrinkRepository.class);
-        controller = new APIController(mock(PartyRoster.class), mock(DrinkLog.class), userAccounts,
-                mock(PassphraseLogin.class), new Promilles(drinkRepository));
+        controller = new APIController(
+                mock(PartyRoster.class),
+                mock(DrinkLog.class),
+                userAccounts,
+                mock(PassphraseLogin.class),
+                new Promilles(drinkRepository));
     }
 
     private TimeZone originalDefaultTimeZone;
@@ -86,9 +89,11 @@ public class APIControllerTest {
         long millis = findMillisForClientDay(response.getBody(), ZoneOffset.ofHours(2), "2024-03-06");
 
         long clientMidnightMillis = Instant.parse("2024-03-05T22:00:00Z").toEpochMilli();
-        assertEquals(clientMidnightMillis, millis,
+        assertEquals(
+                clientMidnightMillis,
+                millis,
                 "Time column should be midnight 2024-03-06 in the CLIENT's zone (UTC+2), "
-                + "not the server's zone (America/Los_Angeles)");
+                        + "not the server's zone (America/Los_Angeles)");
     }
 
     private long findMillisForClientDay(byte[] csv, ZoneOffset clientZone, String targetDay) throws Exception {
@@ -97,7 +102,10 @@ public class APIControllerTest {
         long result = -1;
         while (reader.readRecord()) {
             long millis = Long.parseLong(reader.get(0));
-            String dayInClientZone = Instant.ofEpochMilli(millis).atZone(clientZone).toLocalDate().toString();
+            String dayInClientZone = Instant.ofEpochMilli(millis)
+                    .atZone(clientZone)
+                    .toLocalDate()
+                    .toString();
             if (dayInClientZone.equals(targetDay)) {
                 result = millis;
             }
@@ -127,7 +135,8 @@ public class APIControllerTest {
 
         Map<String, Integer> countsByDay = parseTimeCountCsv(response.getBody(), ZoneOffset.ofHours(14));
 
-        assertTrue(countsByDay.containsKey("2024-03-06"),
+        assertTrue(
+                countsByDay.containsKey("2024-03-06"),
                 "today's bucket should be 2024-03-06 (client's UTC+14 date), not 2024-03-05 (UTC/server date)");
     }
 
@@ -175,7 +184,8 @@ public class APIControllerTest {
         user.drink(drink);
 
         when(userAccounts.get(1)).thenReturn(user);
-        when(drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(eq(List.of(1)), any())).thenReturn(user.getDrinks());
+        when(drinkRepository.findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(eq(List.of(1)), any()))
+                .thenReturn(user.getDrinks());
 
         long before = System.currentTimeMillis();
         ResponseEntity<byte[]> response = controller.showHistory(1);
@@ -186,11 +196,13 @@ public class APIControllerTest {
 
         long windowMillis = Duration.ofMinutes(300).toMillis();
         long firstTimestamp = rows.get(0)[0];
-        assertTrue(Math.abs(firstTimestamp - (before - windowMillis)) < 5000,
+        assertTrue(
+                Math.abs(firstTimestamp - (before - windowMillis)) < 5000,
                 "first point should be ~300 minutes before now, was " + firstTimestamp);
 
         long lastTimestamp = rows.get(rows.size() - 1)[0];
-        assertTrue(lastTimestamp >= before - 5000 && lastTimestamp <= after + 5000,
+        assertTrue(
+                lastTimestamp >= before - 5000 && lastTimestamp <= after + 5000,
                 "last point should be ~now, was " + lastTimestamp);
     }
 
@@ -201,7 +213,9 @@ public class APIControllerTest {
         while (reader.readRecord()) {
             long millis = Long.parseLong(reader.get(0));
             int count = Integer.parseInt(reader.get(1));
-            String day = Instant.ofEpochMilli(millis).atZone(decodeZone).toLocalDate()
+            String day = Instant.ofEpochMilli(millis)
+                    .atZone(decodeZone)
+                    .toLocalDate()
                     .format(DateTimeFormatter.ISO_LOCAL_DATE);
             result.put(day, count);
         }
@@ -214,7 +228,7 @@ public class APIControllerTest {
         CsvReader reader = new CsvReader(new ByteArrayInputStream(csv), java.nio.charset.StandardCharsets.UTF_8);
         reader.readHeaders();
         while (reader.readRecord()) {
-            result.add(new long[]{Long.parseLong(reader.get(0))});
+            result.add(new long[] {Long.parseLong(reader.get(0))});
         }
         reader.close();
         return result;

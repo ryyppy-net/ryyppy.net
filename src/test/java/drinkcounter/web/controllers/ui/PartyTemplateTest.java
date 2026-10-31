@@ -1,7 +1,12 @@
 package drinkcounter.web.controllers.ui;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import java.util.Locale;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -11,13 +16,6 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
-
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Renders party.html directly (no full Spring context, no datasource), the
@@ -72,10 +70,16 @@ class PartyTemplateTest {
 
         String html = render(party, owner);
 
-        assertTrue(html.contains("<title>Kattoparty</title>"), "party.name wasn't projected into the master layout's <title>");
-        assertTrue(html.contains("var partyId = 77;"), "party.id wasn't inlined into the page's <script> block for party.js/partygraph.js");
+        assertTrue(
+                html.contains("<title>Kattoparty</title>"),
+                "party.name wasn't projected into the master layout's <title>");
+        assertTrue(
+                html.contains("var partyId = 77;"),
+                "party.id wasn't inlined into the page's <script> block for party.js/partygraph.js");
         assertFalse(html.contains("${"), "unresolved Thymeleaf expression leaked into output");
-        assertFalse(html.contains("customHead"), "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
+        assertFalse(
+                html.contains("customHead"),
+                "the customHead/content wrapper divs should be removed by th:remove=\"tag\"");
     }
 
     @Test
@@ -90,7 +94,9 @@ class PartyTemplateTest {
         String html = render(party, owner);
 
         assertTrue(html.contains("Vieras Ville"), "the other participant should be listed in the kick dialog");
-        assertFalse(html.contains(">Isäntä<"), "the current user must never appear in their own kick dialog - see #111/#92");
+        assertFalse(
+                html.contains(">Isäntä<"),
+                "the current user must never appear in their own kick dialog - see #111/#92");
     }
 
     @Test
@@ -104,8 +110,11 @@ class PartyTemplateTest {
 
         String html = render(party, owner);
 
-        assertTrue(html.contains("data-user-id=\"2\""), "the kick link should carry the participant's id for party.js to read");
-        assertTrue(html.contains("data-confirm=\"Poistetaanko Vieras Ville bileistä?\""),
+        assertTrue(
+                html.contains("data-user-id=\"2\""),
+                "the kick link should carry the participant's id for party.js to read");
+        assertTrue(
+                html.contains("data-confirm=\"Poistetaanko Vieras Ville bileistä?\""),
                 "party.confirm.remove_user and party.confirm.from_party should sandwich the participant's name in one data-confirm attribute");
     }
 
@@ -119,7 +128,9 @@ class PartyTemplateTest {
 
         String html = render(party, owner);
 
-        assertTrue(html.contains("Ei potkittavia juojia"), "party.no_users should render when fewer than two participants exist");
+        assertTrue(
+                html.contains("Ei potkittavia juojia"),
+                "party.no_users should render when fewer than two participants exist");
         assertFalse(html.contains("<ul>"), "the participant list should not render alongside the no-users message");
     }
 }
