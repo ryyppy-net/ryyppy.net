@@ -166,10 +166,12 @@ p {
 }
 
 .toast-list {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    z-index: 9999;
+    inset: 15px 15px auto auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    overflow: visible;
     width: 300px;
     max-width: calc(100vw - 30px);
 }
