@@ -116,6 +116,19 @@
         this.revokeJoinLink = function (partyId) {
             return http.delete(joinLinkUrl(partyId)).then(data);
         };
+
+        function tokenUrl(token) {
+            return baseUrl + "/join-links/" + encodeURIComponent(token);
+        }
+
+        // An unknown, revoked or expired link answers 404.
+        this.getJoinLinkPreview = function (token) {
+            return http.get(tokenUrl(token)).then(data);
+        };
+
+        this.joinWithLink = function (token) {
+            return http.post(tokenUrl(token) + "/participants").then(data);
+        };
     }
 
 
