@@ -180,9 +180,10 @@
 
 
     /**
-     * A party, its participants and the users that can be invited to it, per
-     * party id. Only party members may read these (docs/access-rules.md), so
-     * a party's entry is dropped once the user leaves or is removed from it.
+     * A party, its participants, the users that can be invited to it and its
+     * join link, per party id. Only party members may read these
+     * (docs/access-rules.md), so a party's entry is dropped once the user
+     * leaves or is removed from it.
      */
     function PartyStore($q, Resource, RyyppyAPI, PartiesStore) {
         var self = this;
@@ -221,6 +222,12 @@
             entry.participants = new Resource(forgetOnForbidden(RyyppyAPI.getPartyParticipants),
                 {pollMs: POLL_MS, merge: keepNewerWrites});
             entry.invitations = new Resource(forgetOnForbidden(RyyppyAPI.getPartyInvitations));
+            // null while the party has no join link.
+            entry.joinLink = new Resource(forgetOnForbidden(function (partyId) {
+                return RyyppyAPI.getJoinLink(partyId).catch(function (response) {
+                    return response && response.status === 404 ? null : $q.reject(response);
+                });
+            }));
             return entry;
         }
 
@@ -306,6 +313,21 @@
                 self.get(partyId).party.set(party, ticket);
                 PartiesStore.parties.invalidate();
                 return party;
+            });
+        };
+
+        this.createJoinLink = function (partyId) {
+            var ticket = Resource.ticket();
+            return RyyppyAPI.createJoinLink(partyId).then(function (joinLink) {
+                self.get(partyId).joinLink.set(joinLink, ticket);
+                return joinLink;
+            });
+        };
+
+        this.revokeJoinLink = function (partyId) {
+            var ticket = Resource.ticket();
+            return RyyppyAPI.revokeJoinLink(partyId).then(function () {
+                self.get(partyId).joinLink.set(null, ticket);
             });
         };
 

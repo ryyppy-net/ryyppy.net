@@ -1,7 +1,7 @@
 (function (angular) {
     'use strict';
 
-    function PartyAdminPageCtrl($routeParams, $location, PartyStore, ProfileStore, Notify, PartyTime) {
+    function PartyAdminPageCtrl($routeParams, $location, $element, $q, $window, PartyStore, ProfileStore, Notify, PartyTime) {
         var self = this;
         var partyId = $routeParams.partyId;
         var releases = [];
@@ -30,6 +30,59 @@
         this.saveDuration = function () {
             PartyStore.changeDuration(partyId, self.days).then(function () {
                 Notify.success("Aika päivitetty!", "Bileet kestävät nyt " + self.days + " vrk.");
+            });
+        };
+
+        this.canShare = !!$window.navigator.share;
+
+        this.joinLinkValidUntil = function () {
+            return PartyTime.at(self.store.party.data.endTime);
+        };
+
+        function joinLinkRequest(request) {
+            self.joinLinkBusy = true;
+            return request.finally(function () {
+                self.joinLinkBusy = false;
+            });
+        }
+
+        this.createJoinLink = function () {
+            self.confirmingNewJoinLink = false;
+            joinLinkRequest(PartyStore.createJoinLink(partyId));
+        };
+
+        this.revokeJoinLink = function () {
+            self.confirmingNewJoinLink = false;
+            joinLinkRequest(PartyStore.revokeJoinLink(partyId));
+        };
+
+        function selectJoinLink() {
+            var input = $element[0].querySelector('#joinLinkUrl');
+            input.focus();
+            input.select();
+        }
+
+        this.copyJoinLink = function () {
+            var clipboard = $window.navigator.clipboard;
+            if (!clipboard || !clipboard.writeText) {
+                selectJoinLink();
+                return;
+            }
+            $q.when(clipboard.writeText(self.store.joinLink.data.url)).then(function () {
+                Notify.success("Linkki kopioitu!", "Lähetä se kavereille.");
+            }, selectJoinLink);
+        };
+
+        this.shareJoinLink = function () {
+            var name = self.store.party.data ? self.store.party.data.name : '';
+            $window.navigator.share({
+                title: name,
+                text: "Liity bileisiin " + name,
+                url: self.store.joinLink.data.url
+            }).catch(function (error) {
+                if (error.name !== 'AbortError') {
+                    throw error;
+                }
             });
         };
 
@@ -91,6 +144,9 @@
                 {TypeId: 3, TypeName: 'Vieras'}
             ];
             self.selectedUserTypeId = 1;
+            self.joinLinkLoaded = false;
+            self.joinLinkBusy = false;
+            self.confirmingNewJoinLink = false;
 
             ProfileStore.profile.load();
             self.store.party.load().then(function () {
@@ -99,8 +155,12 @@
             releases = [
                 self.store.party.use(),
                 self.store.participants.use(),
-                self.store.invitations.use()
+                self.store.invitations.use(),
+                self.store.joinLink.use()
             ];
+            self.store.joinLink.load().then(function () {
+                self.joinLinkLoaded = true;
+            });
         };
 
         this.$onDestroy = function () {
@@ -110,7 +170,7 @@
         };
     }
 
-    PartyAdminPageCtrl.$inject = ['$routeParams', '$location', 'PartyStore', 'ProfileStore', 'Notify', 'PartyTime'];
+    PartyAdminPageCtrl.$inject = ['$routeParams', '$location', '$element', '$q', '$window', 'PartyStore', 'ProfileStore', 'Notify', 'PartyTime'];
 
     angular.module('ryyppy').component('partyAdminPage', {
         controller: PartyAdminPageCtrl,
@@ -144,6 +204,37 @@
                         </div>
                     </form>
                 </div>
+
+                <section class="join-link" ng-if="$ctrl.joinLinkLoaded">
+                    <h1>Kutsulinkki</h1>
+
+                    <div ng-if="!$ctrl.store.joinLink.data">
+                        <p>Luo linkki, jonka voit lähettää kavereille. Kirjautunut käyttäjä liittyy bileisiin avaamalla sen.</p>
+                        <button type="button" class="btn btn-success" ng-click="$ctrl.createJoinLink()" ng-disabled="$ctrl.joinLinkBusy">Luo kutsulinkki</button>
+                    </div>
+
+                    <div ng-if="$ctrl.store.joinLink.data">
+                        <label for="joinLinkUrl">Lähetä tämä linkki kavereille</label>
+                        <input id="joinLinkUrl" class="join-link-url" type="text" readonly ng-value="$ctrl.store.joinLink.data.url" />
+                        <div class="join-link-actions">
+                            <button type="button" class="btn btn-success" ng-click="$ctrl.copyJoinLink()">Kopioi</button>
+                            <button type="button" class="btn btn-primary" ng-if="$ctrl.canShare" ng-click="$ctrl.shareJoinLink()">Jaa</button>
+                        </div>
+                        <p class="join-link-validity" ng-if="$ctrl.store.party.data">Voimassa {{ $ctrl.joinLinkValidUntil() }} asti</p>
+                        <p class="join-link-note">Linkin saanut voi liittyä ja näkee kaikkien lukemat bileiden alusta.</p>
+                        <div class="join-link-actions">
+                            <button type="button" class="btn" ng-click="$ctrl.confirmingNewJoinLink = true" ng-disabled="$ctrl.joinLinkBusy">Luo uusi linkki</button>
+                            <button type="button" class="btn btn-danger" ng-click="$ctrl.revokeJoinLink()" ng-disabled="$ctrl.joinLinkBusy">Poista linkki käytöstä</button>
+                        </div>
+                        <div class="join-link-confirm" role="alertdialog" aria-label="Luo uusi linkki" ng-if="$ctrl.confirmingNewJoinLink">
+                            <p>Vanha linkki lakkaa toimimasta. Jatketaanko?</p>
+                            <div class="join-link-actions">
+                                <button type="button" class="btn" ng-click="$ctrl.confirmingNewJoinLink = false">Peruuta</button>
+                                <button type="button" class="btn btn-success" ng-click="$ctrl.createJoinLink()" ng-disabled="$ctrl.joinLinkBusy">Luo uusi</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 <h1>Lisää uusi bilettäjä</h1>
 

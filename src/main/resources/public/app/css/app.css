@@ -454,3 +454,41 @@ p {
         padding-top: 0;
     }
 }
+
+.join-link .join-link-url {
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    font-size: 16px;
+    cursor: text;
+}
+
+.join-link-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.join-link-actions .btn {
+    min-height: 44px;
+}
+
+.join-link-note {
+    background-color: #3b3b3b;
+    border-radius: 4px;
+    padding: 10px 12px;
+}
+
+.join-link-confirm {
+    background-color: white;
+    color: #222;
+    border-radius: 6px;
+    padding: 14px;
+}
+
+.join-link-confirm .join-link-actions {
+    justify-content: flex-end;
+    margin-bottom: 0;
+}
