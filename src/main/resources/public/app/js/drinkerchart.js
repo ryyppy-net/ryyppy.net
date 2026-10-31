@@ -60,8 +60,10 @@
                 var right = Math.min(x.getPixelForValue(shownWindow.end), area.right);
                 var ctx = chart.ctx;
                 ctx.save();
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.30)';
                 ctx.fillRect(left, area.top, right - left, area.bottom - area.top);
+                ctx.fillStyle = 'rgb(0, 0, 0)';
+                ctx.fillRect(left, area.top, right - left, 3);
                 ctx.strokeStyle = 'rgb(0, 0, 0)';
                 ctx.lineWidth = 1;
                 if (shownWindow.start >= x.min && shownWindow.start <= x.max) {
@@ -71,7 +73,9 @@
                     ctx.stroke();
                 }
                 if (shownWindow.end >= x.min && shownWindow.end <= x.max) {
-                    ctx.setLineDash([4, 3]);
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.setLineDash([0, 5]);
                     ctx.beginPath();
                     ctx.moveTo(right, area.top);
                     ctx.lineTo(right, area.bottom);
