@@ -280,12 +280,11 @@
             return Math.max(1, Math.round(length / DAY));
         };
 
-        // "la 31.10. 20:00 – ma 2.11. 20:00"; withKlo gives "la 31.10. klo 20:00 – ...".
-        this.range = function (startTime, endTime, withKlo) {
-            var separator = withKlo ? ' klo ' : ' ';
+        // "la 31.10. 20:00 – ma 2.11. 20:00"
+        this.range = function (startTime, endTime) {
             return [startTime, endTime].map(function (time) {
                 var date = new Date(time);
-                return weekdayAndDate(date) + separator + clockTime(date);
+                return weekdayAndDate(date) + ' ' + clockTime(date);
             }).join(' – ');
         };
     }
