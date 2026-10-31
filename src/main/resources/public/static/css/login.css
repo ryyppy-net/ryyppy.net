@@ -34,6 +34,30 @@ body {
     margin-bottom: 20px;
 }
 
+.joinNotice {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin: 10px 5px;
+    padding: 14px;
+    border-radius: 4px;
+    background-color: #dff0d8;
+    color: #2d5e2e;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-align: left;
+}
+
+.joinNotice svg {
+    flex: none;
+    margin-top: 1px;
+}
+
+.login .joinNotice p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
 .login a {
     color: #aaaaaa;
     text-decoration: none;

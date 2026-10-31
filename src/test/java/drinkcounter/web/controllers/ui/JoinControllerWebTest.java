@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ControllerWebTest
@@ -41,11 +42,19 @@ public class JoinControllerWebTest {
     }
 
     @Test
+    @WithDrinkcounterUser(userId = 42)
+    public void signedInUserLeavesNoPendingJoinInTheSession() throws Exception {
+        mvc.perform(get("/join/AbCdEfGhIjKlMnOpQrSt-_"))
+                .andExpect(request().sessionAttributeDoesNotExist(JoinController.PENDING_TOKEN_SESSION_ATTR));
+    }
+
+    @Test
     @WithAnonymousUser
-    public void signedOutVisitorIsSentToTheLoginPage() throws Exception {
+    public void signedOutVisitorIsSentToTheLoginPageWithTheTokenKeptInTheSession() throws Exception {
         mvc.perform(get("/join/AbCdEfGhIjKlMnOpQrSt-_"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ui/login"));
+                .andExpect(redirectedUrl("/ui/login?join"))
+                .andExpect(request().sessionAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR, "AbCdEfGhIjKlMnOpQrSt-_"));
 
         verifyNoInteractions(joinLinks);
     }

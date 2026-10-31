@@ -129,4 +129,22 @@ class LoginTemplateTest {
 
         assertTrue(html.contains("data-auto_select=\"false\""), "data-auto_select should be false when ?logout is present");
     }
+
+    @Test
+    void joinParamShowsTheJoinNoticeAndKeepsEverySignInOption() {
+        String html = render(defaultModel(), Map.of("join", ""));
+
+        assertTrue(html.contains("class=\"joinNotice\""), ".joinNotice should render on ?join");
+        assertTrue(html.contains("Kirjaudu sisään liittyäksesi bileisiin."), "login.join_notice should resolve to Finnish text");
+        assertTrue(html.contains("id=\"username\""), "the password form should stay on ?join");
+        assertTrue(html.contains("id=\"g_id_onload\""), "Google sign-in should stay on ?join");
+        assertTrue(html.contains("href=\"newuser\""), "the registration link should stay on ?join");
+    }
+
+    @Test
+    void noJoinParamHidesTheJoinNotice() {
+        String html = render(defaultModel(), Map.of());
+
+        assertFalse(html.contains("joinNotice"), ".joinNotice should not render without ?join");
+    }
 }
