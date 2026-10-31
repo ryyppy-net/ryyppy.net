@@ -35,6 +35,8 @@ Only you can see and change your profile and your full drink log.
 
 Only a party's members can see it. Anyone else cannot open it, see who is in it or see anyone's readings, even with its link or number.
 
+The one exception is a join link: a signed-in user who holds a valid one sees the party's name, start time and end time, but not who is in it, and can join it.
+
 A member sees:
 
 - the party's name, start time and end time
@@ -59,10 +61,13 @@ All members of a party are equal: any member can add and remove participants, an
 | Add a guest | Any member | Give a name, sex and weight. The guest belongs to that party only. |
 | Remove a participant | Any member | Any participant, user or guest, including yourself. |
 | Share a join link | Any member | A party has one join link at a time. Any member can show it again, replace it with a new one, which stops the old one working, or turn it off. |
+| Join with a link | Any signed-in user with a valid link | Adds only yourself; works until the party ends. A link that is unknown, replaced, turned off or past its party's end does not work, and does not say which. |
 
 ## Party-mates
 
 Party-mates can keep score for each other, so one phone can log drinks for the whole table. People who share no party with you cannot see or do anything that concerns you.
+
+Joining a party with its link makes you a party-mate of all its members, the same as being added to it.
 
 For a party-mate, you can:
 

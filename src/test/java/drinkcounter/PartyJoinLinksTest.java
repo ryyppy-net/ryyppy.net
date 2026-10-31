@@ -4,14 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import drinkcounter.authentication.PartyAccess;
+import drinkcounter.model.Party;
 import drinkcounter.model.PartyJoinLink;
 import drinkcounter.repository.PartyJoinLinkRepository;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +27,9 @@ import org.junit.jupiter.api.Test;
 class PartyJoinLinksTest {
 
     private final PartyJoinLinkRepository repository = mock(PartyJoinLinkRepository.class);
-    private final PartyJoinLinks joinLinks = new PartyJoinLinks(repository);
+    private final PartyRoster partyRoster = mock(PartyRoster.class);
+    private final PartyAccess partyAccess = mock(PartyAccess.class);
+    private final PartyJoinLinks joinLinks = new PartyJoinLinks(repository, partyRoster, partyAccess);
 
     @BeforeEach
     void saveReturnsTheSavedLink() {
@@ -83,5 +92,64 @@ class PartyJoinLinksTest {
         joinLinks.revoke(1);
 
         verify(repository).deleteById(1);
+    }
+
+    @Test
+    void previewShowsTheLinksPartyAndWhetherTheUserIsAlreadyInIt() {
+        Party party = partyEndingIn(Duration.ofHours(1));
+        linkTo(party, "token");
+        when(partyAccess.isMember(1, 42)).thenReturn(true);
+
+        JoinLinkPreview preview = joinLinks.preview("token", 42);
+
+        assertSame(party, preview.party());
+        assertTrue(preview.alreadyMember());
+        assertFalse(joinLinks.preview("token", 43).alreadyMember());
+    }
+
+    @Test
+    void joiningAddsOnlyTheUserHoldingTheLink() {
+        Party party = partyEndingIn(Duration.ofHours(1));
+        linkTo(party, "token");
+
+        assertSame(party, joinLinks.join("token", 42));
+
+        verify(partyRoster).join(1, 42);
+        verify(partyRoster, never()).join(anyInt(), intThat(id -> id != 42));
+    }
+
+    @Test
+    void unknownRevokedOrReplacedTokenIsUnusable() {
+        when(repository.findByToken("gone")).thenReturn(Optional.empty());
+
+        assertThrows(UnusableJoinLinkException.class, () -> joinLinks.preview("gone", 42));
+        assertThrows(UnusableJoinLinkException.class, () -> joinLinks.join("gone", 42));
+        verify(partyRoster, never()).join(anyInt(), anyInt());
+    }
+
+    @Test
+    void linkStopsWorkingWhenThePartyEnds() {
+        linkTo(partyEndingIn(Duration.ofSeconds(-1)), "token");
+
+        assertThrows(UnusableJoinLinkException.class, () -> joinLinks.preview("token", 42));
+        assertThrows(UnusableJoinLinkException.class, () -> joinLinks.join("token", 42));
+        verify(partyRoster, never()).join(anyInt(), anyInt());
+    }
+
+    private static Party partyEndingIn(Duration untilEnd) {
+        Party party = new Party();
+        party.setId(1);
+        party.setName("Pikkujoulut");
+        party.setStartTime(Instant.now().minus(Duration.ofHours(2)));
+        party.setEndTime(Instant.now().plus(untilEnd));
+        return party;
+    }
+
+    private void linkTo(Party party, String token) {
+        PartyJoinLink link = new PartyJoinLink();
+        link.setPartyId(party.getId());
+        link.setToken(token);
+        when(repository.findByToken(token)).thenReturn(Optional.of(link));
+        when(partyRoster.get(party.getId())).thenReturn(party);
     }
 }
