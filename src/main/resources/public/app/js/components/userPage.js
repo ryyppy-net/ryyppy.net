@@ -89,10 +89,10 @@
                     <div ng-repeat="party in $ctrl.parties.data | orderBy:[$ctrl.partySort, 'id']:true | limitTo:$ctrl.partiesShown() track by party.id">
                         <a href="#!/party/{{ ::party.id }}">
                             <div class="party color{{ ($index % 12) + 1 }}">
-                                <div>
-                                    {{ ::party.name }}
-                                    <span class="status-badge" ng-class="$ctrl.status(party).state == 'ended' ? 'status-badge-ended' : 'status-badge-running'">{{ $ctrl.status(party).state == 'ended' ? 'PÄÄTTYNYT' : 'KÄYNNISSÄ' }}</span>
-                                    <small style="float: right;">{{ $ctrl.range(party) }}</small>
+                                <div class="party-header">
+                                    <span class="party-header-title">{{ ::party.name }}
+                                    <span class="status-badge" ng-class="$ctrl.status(party).state == 'ended' ? 'status-badge-ended' : 'status-badge-running'">{{ $ctrl.status(party).state == 'ended' ? 'PÄÄTTYNYT' : 'KÄYNNISSÄ' }}</span></span>
+                                    <small class="party-header-range">{{ $ctrl.range(party) }}</small>
                                 </div>
                                 <ul class="inline" ng-if="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">
                                     <li ng-repeat="participantPreview in party.participants"><img ng-src="{{ participantPreview.profilePictureUrl }}&size=30" title="{{ participantPreview.name }}" /></li>
