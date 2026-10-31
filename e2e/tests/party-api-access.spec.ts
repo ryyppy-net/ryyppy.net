@@ -50,6 +50,40 @@ test("an outsider is forbidden from another user's party API and changes nothing
   }
 });
 
+test("an outsider cannot change a party's length, and a length below 1 vrk is rejected", async ({ browser, baseURL }) => {
+  const contexts: BrowserContext[] = [];
+  try {
+    const ownerContext = await signedInContext(browser, baseURL!, 'duration-owner');
+    contexts.push(ownerContext);
+    const outsiderContext = await signedInContext(browser, baseURL!, 'duration-outsider');
+    contexts.push(outsiderContext);
+    const owner = ownerContext.request;
+    const outsider = outsiderContext.request;
+
+    const party = await (await owner.post(PARTIES, { form: { name: 'Fixed length party' } })).json();
+    const duration = `${PARTIES}/${party.id}/duration`;
+
+    const outsiderResponse = await outsider.put(duration, { params: { days: '3' } });
+    expect(outsiderResponse.status()).toBe(403);
+    expect((await (await owner.get(`${PARTIES}/${party.id}`)).json()).endTime).toBe(party.endTime);
+
+    for (const days of ['0', '-1']) {
+      const response = await owner.put(duration, { params: { days } });
+      expect(response.status(), `days=${days}`).toBe(400);
+    }
+    expect((await (await owner.get(`${PARTIES}/${party.id}`)).json()).endTime).toBe(party.endTime);
+
+    const changed = await owner.put(duration, { params: { days: '3' } });
+    expect(changed.ok()).toBeTruthy();
+    const { startTime, endTime } = await changed.json();
+    expect(new Date(endTime).getTime() - new Date(startTime).getTime()).toBe(3 * 24 * 60 * 60 * 1000);
+  } finally {
+    for (const context of contexts) {
+      await context.close();
+    }
+  }
+});
+
 test('removing yourself on the party admin page returns to the party list', async ({ page }) => {
   const user = makeTestUser('party-leaver');
   await registerUser(page, user);
