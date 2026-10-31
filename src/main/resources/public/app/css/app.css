@@ -469,3 +469,20 @@ p {
 .duration-summary {
     margin-left: 12px;
 }
+
+.help-inline.duration-summary {
+    color: inherit;
+}
+
+.duration-end {
+    white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+    .help-inline.duration-summary {
+        display: block;
+        margin-left: 0;
+        padding-left: 0;
+        margin-top: 10px;
+    }
+}

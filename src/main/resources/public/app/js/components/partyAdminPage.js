@@ -133,7 +133,7 @@
                             <span class="control-label">Kesto</span>
                             <div class="controls">
                                 <day-stepper days="$ctrl.days" on-change="$ctrl.setDays(days)"></day-stepper>
-                                <span class="duration-summary">päättyy {{ $ctrl.endText() }}</span>
+                                <span class="help-inline duration-summary"><span class="duration-end">päättyy {{ $ctrl.endText() }}</span></span>
                             </div>
                         </div>
 
