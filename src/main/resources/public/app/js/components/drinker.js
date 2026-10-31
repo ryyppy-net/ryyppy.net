@@ -33,13 +33,6 @@
             return salutation;
         };
 
-        // The server marks points after now as projected; the last one is when the user is sober.
-        this.soberAt = function () {
-            var history = self.participant && self.participant.history;
-            var last = history && history[history.length - 1];
-            return last && last.projected ? last.timestamp : null;
-        };
-
         this.$postLink = function () {
             var canvas = $element[0].querySelector('.drinker-graph canvas');
             self.chart = new DrinkerChart(canvas, self.participant);
@@ -85,7 +78,6 @@
                         <div class="span12" style="text-align: center;">
                             <p>Juomia: {{ $ctrl.participant.totalDrinks }} kpl</p>
                             <p>Promilleja:  {{ $ctrl.participant.promilles | number: 2 }}&permil;</p>
-                            <p ng-if="$ctrl.soberAt()">Selvänä noin klo {{ $ctrl.soberAt() | date: 'HH:mm' }}</p>
                         </div>
                     </div>
                 </div>

@@ -20,7 +20,7 @@ test('the drinker tile chart gains history points after a drink is logged', asyn
   await expect.poll(pointCount).toBeGreaterThan(before);
 });
 
-test('the drinker tile chart projects promilles down to zero and shows the sober time', async ({ page }) => {
+test('the drinker tile chart projects promilles down to zero', async ({ page }) => {
   const user = makeTestUser('drinker-sober');
   await registerUser(page, user);
 
@@ -30,14 +30,12 @@ test('the drinker tile chart projects promilles down to zero and shows the sober
       const chart = (window as any).Chart.getChart(canvas);
       return chart ? chart.data.datasets[0].data : [];
     });
-  const soberText = ownTile.getByText(/Selvänä noin klo \d\d:\d\d/);
 
   expect((await points()).filter((p: any) => p.projected)).toHaveLength(0);
-  await expect(soberText).toHaveCount(0);
 
   await ownTile.locator('.container-fluid').click();
 
-  await expect(soberText).toBeVisible();
+  await expect.poll(async () => (await points()).some((p: any) => p.projected)).toBe(true);
   const data = await points();
   const last = data[data.length - 1];
   expect(last.projected).toBe(true);
