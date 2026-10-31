@@ -125,8 +125,8 @@
 
                     <form class="form-horizontal" ng-submit="$ctrl.saveDuration()">
                         <div class="control-group">
-                            <span class="control-label">Alkoi</span>
-                            <div class="controls duration-summary">{{ $ctrl.startText() }}</div>
+                            <label class="control-label">Alkoi</label>
+                            <div class="controls controls-static">{{ $ctrl.startText() }}</div>
                         </div>
 
                         <div class="control-group">
