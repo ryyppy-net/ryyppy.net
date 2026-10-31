@@ -58,6 +58,7 @@ All members of a party are equal: any member can add and remove participants, an
 | Add a user | Any member | Found by their exact email address, or picked from people you have been in parties with. The party then appears in their list. |
 | Add a guest | Any member | Give a name, sex and weight. The guest belongs to that party only. |
 | Remove a participant | Any member | Any participant, user or guest, including yourself. |
+| Share a join link | Any member | A party has one join link at a time. Any member can show it again, replace it with a new one, which stops the old one working, or turn it off. |
 
 ## Party-mates
 
