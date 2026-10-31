@@ -1,6 +1,6 @@
 import { BrowserContext, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
-import { signedInContext } from './helpers';
+import { makeTestUser, registerUser, signedInContext } from './helpers';
 import { SHARED_STORAGE_STATE } from './shared-user';
 
 test.use({ storageState: SHARED_STORAGE_STATE });
@@ -159,11 +159,59 @@ test.describe('opening a join link', () => {
     expect(await joinerStatusOf(partyId)).toBe(403);
   });
 
-  test('a signed-out visitor who opens a join link is sent to the login page', async ({ page }) => {
-    const { joinPath } = await createPartyWithJoinLink(member, `E2E Join Signed Out ${Date.now()}`);
-
+  async function opensTheLinkSignedOut(page: Page, joinPath: string) {
     await page.goto(joinPath, { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/ui\/login\?join$/);
+    await expect(page.getByRole('status')).toHaveText('Kirjaudu sisään liittyäksesi bileisiin.');
+  }
 
-    await expect(page).toHaveURL(/\/ui\/login$/);
+  async function joinsFromTheJoinPage(page: Page, joinPath: string, partyId: number, name: string) {
+    await expect(page).toHaveURL(new RegExp(`/app/index\\.html#!/join/${joinPath.split('/').pop()}$`));
+    await expect(page.getByRole('heading', { name })).toBeVisible();
+    await page.getByRole('button', { name: 'Liity bileisiin' }).click();
+    await expect(page).toHaveURL(new RegExp(`#!/party/${partyId}$`));
+    await expect(page.locator('.toast-title', { hasText: 'Tervetuloa bileisiin!' })).toBeVisible();
+    expect((await page.request.get(`/API/v2/parties/${partyId}`)).status()).toBe(200);
+  }
+
+  test('a signed-out visitor sees no party on the login page, signs in and joins', async ({ browser, baseURL, page }) => {
+    const user = makeTestUser('link-login');
+    const registering = await browser.newContext();
+    await registering.route((url) => url.origin !== new URL(baseURL!).origin, (route) => route.abort());
+    await registerUser(await registering.newPage(), user);
+    await registering.close();
+    const name = `E2E Join Login ${Date.now()}`;
+    const { partyId, joinPath } = await createPartyWithJoinLink(member, name);
+
+    await opensTheLinkSignedOut(page, joinPath);
+    await expect(page.getByText(name)).toHaveCount(0);
+    await expect(page.locator('#username')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Rekisteröi itsesi saadaksesi tunnukset' })).toBeVisible();
+
+    await page.fill('#username', user.email);
+    await page.fill('#password', user.password);
+    await page.click('input[type="submit"]');
+
+    await joinsFromTheJoinPage(page, joinPath, partyId, name);
+
+    await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
+  });
+
+  test('a signed-out visitor registers a new account and joins', async ({ page }) => {
+    const user = makeTestUser('link-register');
+    const name = `E2E Join Register ${Date.now()}`;
+    const { partyId, joinPath } = await createPartyWithJoinLink(member, name);
+
+    await opensTheLinkSignedOut(page, joinPath);
+    await page.getByRole('link', { name: 'Rekisteröi itsesi saadaksesi tunnukset' }).click();
+    await page.fill('#drinkerName', user.name);
+    await page.fill('#email', user.email);
+    await page.selectOption('#sex', 'MALE');
+    await page.fill('#drinkerWeight', user.weight);
+    await page.fill('#password', user.password);
+    await page.click('#submitButton');
+
+    await joinsFromTheJoinPage(page, joinPath, partyId, name);
   });
 });

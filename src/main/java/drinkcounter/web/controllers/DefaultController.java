@@ -10,6 +10,8 @@ import drinkcounter.web.controllers.api.v2.DrinkDTO;
 import drinkcounter.web.controllers.api.v2.OwnDrinksView;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
+import drinkcounter.web.controllers.ui.JoinController;
+import jakarta.servlet.http.HttpSession;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,7 +48,12 @@ public class DefaultController {
     }
 
     @GetMapping("/app/index.html")
-    public String appIndex(@LoggedInUser User user, Model model) {
+    public String appIndex(@LoggedInUser User user, Model model, HttpSession session) {
+        // Every way of signing in lands here, so a join link opened while signed out continues here.
+        if (session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR) instanceof String token) {
+            session.removeAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR);
+            return JoinController.joinPage(token);
+        }
         // Seeds the AngularJS stores, which would otherwise fetch this over the
         // API right after load - see templates/app/index.html.
         model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(promilles.of(user)))));

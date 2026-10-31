@@ -35,7 +35,7 @@ Only you can see and change your profile and your full drink log.
 
 Only a party's members can see it. Anyone else cannot open it, see who is in it or see anyone's readings, even with its link or number.
 
-The one exception is a join link: a signed-in user who holds a valid one sees the party's name, start time and end time, but not who is in it, and can join it.
+The one exception is a join link: a signed-in user who holds a valid one sees the party's name, start time and end time, but not who is in it, and can join it. A visitor who opens a join link while signed out sees nothing of the party: they are asked to sign in or register first, and then continue to the link.
 
 A member sees:
 

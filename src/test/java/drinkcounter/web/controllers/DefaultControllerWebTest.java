@@ -6,16 +6,19 @@ import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
+import drinkcounter.web.controllers.ui.JoinController;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -66,6 +69,21 @@ public class DefaultControllerWebTest {
                 .andExpect(model().attribute("initialDrinks", containsString("2024-03-05T13:37:42.123Z")));
 
         verify(userAccounts).get(42);
+    }
+
+    @Test
+    public void appIndexContinuesAJoinLinkOpenedBeforeSigningIn() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR, "AbCdEfGhIjKlMnOpQrSt-_");
+
+        mvc.perform(get("/app/index.html").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/app/index.html#!/join/AbCdEfGhIjKlMnOpQrSt-_"));
+
+        assertNull(session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR));
+        mvc.perform(get("/app/index.html").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("app/index"));
     }
 
     @Test

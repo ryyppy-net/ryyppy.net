@@ -25,6 +25,11 @@
         </div>
 
         <div class="login">
+            <div class="joinNotice" role="status" th:if="${param.join != null}">
+                <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>
+                <p th:text="#{login.join_notice}">Sign in to join the party.</p>
+            </div>
+
             <h2 th:text="#{login.login_title}">Log in</h2>
 
             <p class="loginError" style="color:#c00;" th:if="${param.error != null}" th:text="#{login.error}">Login failed. Check your username and password and try again.</p>
