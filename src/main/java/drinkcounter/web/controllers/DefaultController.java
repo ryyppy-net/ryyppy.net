@@ -6,6 +6,7 @@ import drinkcounter.Promilles;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.web.controllers.api.v2.DrinkDTO;
 import drinkcounter.web.controllers.api.v2.OwnDrinksView;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
@@ -50,7 +51,7 @@ public class DefaultController {
         // API right after load - see templates/app/index.html.
         model.addAttribute("initialProfile", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.profile(promilles.of(user)))));
         model.addAttribute("initialParties", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(loadInitialParties(user))));
-        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(OwnDrinksView.drinks(drinkLog.drinksOf(user.getId())))));
+        model.addAttribute("initialDrinks", JavaScriptUtils.javaScriptEscape(objectMapper.writeValueAsString(drinkLog.drinksOf(user.getId()).stream().map(DrinkDTO::fromDrink).toList())));
         return "app/index";
     }
 
