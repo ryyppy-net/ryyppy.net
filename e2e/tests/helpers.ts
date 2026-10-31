@@ -157,12 +157,12 @@ export async function waitForSoundsReady(page: Page): Promise<void> {
 
 /**
  * Ends a party an hour ago, in the database. The server judges a party's end by its own clock,
- * so this is the only way to get a party that has really ended. Set E2E_DATABASE_URL when the
- * app's database is not the local one.
+ * so this is the only way to get a party that has really ended. The default is the database
+ * docker/docker-compose.yml starts for the app; set E2E_DATABASE_URL for any other.
  */
 export async function endPartyInDatabase(partyId: number | string): Promise<void> {
   const client = new Client({
-    connectionString: process.env.E2E_DATABASE_URL ?? 'postgres://ryyppynet:ryyppynet@localhost:5432/ryyppynet',
+    connectionString: process.env.E2E_DATABASE_URL ?? 'postgres://postgres:demo@127.0.0.1:5432/postgres',
   });
   await client.connect();
   try {
