@@ -24,7 +24,7 @@ for (const name of ['iPhone SE', 'iPhone 13', 'iPhone 15 Pro Max']) {
         await page.request.post(`/API/v2/parties/${partyId}/participants/${id}/drinks`);
       }
       await page.reload();
-      await expect(page.locator('.time-strip')).toBeVisible();
+      await expect(page.locator('.party-time')).toBeVisible();
 
       const m = await page.evaluate(() => {
         const vw = document.documentElement.clientWidth;

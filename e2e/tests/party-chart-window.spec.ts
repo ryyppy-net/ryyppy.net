@@ -132,7 +132,7 @@ test('an ended party graph spans the party with few enough ticks for a phone', a
   });
 
   await page.goto(`/app/index.html#!/party/${party.id}`, { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('.time-strip .visible-phone .time-strip-left')).toContainText('kesti ');
+  await expect(page.locator('.party-time')).toBeVisible();
   const chart = chartOf(page, user.name);
   await expect.poll(async () => (await chart())?.points.length ?? 0).toBe(4);
   const state = (await chart())!;
