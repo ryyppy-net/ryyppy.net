@@ -139,7 +139,7 @@
 
                         <div class="control-group">
                             <div class="controls">
-                                <button type="submit" class="btn btn-success" ng-disabled="$ctrl.days === $ctrl.savedDays()">Tallenna</button>
+                                <button type="submit" class="btn btn-success duration-save" ng-disabled="$ctrl.days === $ctrl.savedDays()">Tallenna</button>
                             </div>
                         </div>
                     </form>
