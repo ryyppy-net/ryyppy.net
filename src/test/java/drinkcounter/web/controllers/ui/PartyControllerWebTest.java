@@ -7,6 +7,7 @@ import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,12 +58,14 @@ public class PartyControllerWebTest {
         Party party = new Party();
         party.setId(5);
         when(partyRoster.get(5)).thenReturn(party);
+        when(partyRoster.members(5)).thenReturn(List.of(user));
         when(partyRepository.countUserParticipations(5, 42)).thenReturn(1L);
 
         mvc.perform(get("/ui/party").param("id", "5"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("party"))
                 .andExpect(model().attribute("party", party))
+                .andExpect(model().attribute("participants", List.of(user)))
                 .andExpect(model().attribute("user", user));
 
         verify(partyRepository).countUserParticipations(5, 42);

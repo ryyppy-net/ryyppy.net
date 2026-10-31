@@ -54,7 +54,7 @@ public class PartyApiController {
     @GetMapping
     public List<PartyDTO> getParties(@LoggedInUser User user,
             @RequestParam(value="limit", required=false) Integer limit){
-        List<Party> parties = limit == null ? user.getParties() : partyRoster.newestWithParticipantsOf(user.getId(), Math.max(1, limit));
+        List<Party> parties = limit == null ? partyRoster.allWithParticipantsOf(user.getId()) : partyRoster.newestWithParticipantsOf(user.getId(), Math.max(1, limit));
         List<PartyDTO> partyDTOs = new ArrayList<PartyDTO>();
         for (Party party : parties) {
             PartyDTO partyDTO = PartyDTO.fromParty(party);
@@ -84,8 +84,7 @@ public class PartyApiController {
     @GetMapping("{partyId}/participants")
     @PartyMember
     public List<ParticipantDTO> getParticipants(@PathVariable Integer partyId){
-        Party party = partyRoster.get(partyId);
-        Set<User> participants = party.getParticipants();
+        List<User> participants = partyRoster.members(partyId);
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (BloodAlcohol participant : promilles.of(participants)) {
             ParticipantDTO participantDTO = ParticipantDTO.fromUser(participant);
