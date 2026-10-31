@@ -165,7 +165,7 @@ public class PartyApiController {
         if(timestamp != null){
             time = Date.from(Instant.parse(timestamp));
         }
-        Drink drink = drinkLog.record(participantId, time, alcoholAmount);
+        Drink drink = drinkLog.recordInParty(partyId, participantId, time, alcoholAmount);
         return participantDrinks(drink, partyId, participantId);
     }
 

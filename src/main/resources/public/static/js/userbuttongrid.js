@@ -13,6 +13,9 @@ function UserButtonGrid(target) {
     this.onUserDrunk = undefined;
     this.renderedUserIds = null;
     this.renderedLayout = null;
+    // Set on a party's page: drinks are added through the party, until its end time (epoch millis).
+    this.partyId = undefined;
+    this.partyEndTime = undefined;
 }
 
 UserButtonGrid.prototype.empty = function() {
@@ -58,7 +61,7 @@ UserButtonGrid.prototype.updateGrid = function() {
             newElement.addClass('roundedCornersBordered');
             newElement.attr("width", width);
             var user = this.users[colorIndex].id;
-            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex));
+            var ub = new UserButton(user, newElement, getColorAtIndex(colorIndex), this.partyId, this.partyEndTime);
             ub.onDrunk = this.onUserDrunk;
             this.userButtons.push(ub);
 

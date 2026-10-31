@@ -6,6 +6,7 @@ import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
+import drinkcounter.authentication.PartyAccess;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.repository.DrinkRepository;
@@ -52,7 +53,7 @@ public class APIControllerTest {
         drinkRepository = mock(DrinkRepository.class);
         drinkLog = mock(DrinkLog.class);
         controller = new APIController(mock(PartyRoster.class), drinkLog, userAccounts,
-                mock(PassphraseLogin.class), new Promilles(drinkRepository));
+                mock(PassphraseLogin.class), new Promilles(drinkRepository), mock(PartyAccess.class));
     }
 
     private TimeZone originalDefaultTimeZone;

@@ -1,11 +1,14 @@
 (function (angular) {
     'use strict';
 
-    function DrinkerCtrl($element, DrinkerChart, DrinkOptions, Drinks, Sound, Notify) {
+    function DrinkerCtrl($q, $element, DrinkerChart, DrinkOptions, Drinks, Sound, Notify) {
         var self = this;
 
 
         this.addDefaultDrink = function (participant) {
+            if (self.ended) {
+                return;
+            }
             Sound.playSound();
 
             var defaultDrink = {volume: DrinkOptions.defaultPortionSize, alcohol: DrinkOptions.defaultAlcoholPercentage};
@@ -22,7 +25,15 @@
                     : "Sinulle lisättiin juoma.";
                 added.notice = Notify.success(self.getRandomSalutation(), message);
                 return saved;
+            }, function (error) {
+                // The party ended while the page was open: nothing was saved.
+                if (error && error.status === 409) {
+                    Notify.success("Bileet ovat päättyneet", "Juomaa ei lisätty.");
+                    self.addedDrink = null;
+                }
+                return $q.reject(error);
             });
+            added.saved.catch(angular.noop);
             self.addedDrink = added;
         };
 
@@ -51,17 +62,18 @@
         };
     }
 
-    DrinkerCtrl.$inject = ['$element', 'DrinkerChart', 'DrinkOptions', 'Drinks', 'Sound', 'Notify'];
+    DrinkerCtrl.$inject = ['$q', '$element', 'DrinkerChart', 'DrinkOptions', 'Drinks', 'Sound', 'Notify'];
 
     angular.module('ryyppy').component('drinker', {
         controller: DrinkerCtrl,
         bindings: {
             participant: '<',
-            partyHistory: '<'
+            partyHistory: '<',
+            ended: '<'
         },
         template: `
-    <div class="drinker color{{ $ctrl.participant.color }}" style="position: relative;">
-        <div ng-click="$ctrl.addDefaultDrink($ctrl.participant)" keyboard-click role="button" tabindex="0" class="container-fluid" style="margin-top: 10px;">
+    <div class="drinker color{{ $ctrl.participant.color }}" ng-class="{'drinker-ended': $ctrl.ended}" style="position: relative;">
+        <div ng-click="$ctrl.addDefaultDrink($ctrl.participant)" keyboard-click ng-attr-role="{{ $ctrl.ended ? undefined : 'button' }}" ng-attr-tabindex="{{ $ctrl.ended ? undefined : 0 }}" class="container-fluid" style="margin-top: 10px;">
             <div class="row-fluid">
                 <div class="span4" style="text-align: center;">
                     <img ng-src="{{ $ctrl.participant.profilePictureUrl }}" />

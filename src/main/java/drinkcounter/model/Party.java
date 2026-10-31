@@ -43,6 +43,11 @@ public class Party extends AbstractEntity{
         return this.endTime;
     }
 
+    /** A party ends at its end time; at that instant it has ended. */
+    public boolean hasEnded(Instant now) {
+        return endTime != null && !now.isBefore(endTime);
+    }
+
     public String getName(){
         return name;
     }

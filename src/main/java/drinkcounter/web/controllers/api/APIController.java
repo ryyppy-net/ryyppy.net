@@ -10,7 +10,9 @@ import drinkcounter.alcoholcalculator.AlcoholCalculator;
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
+import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
+import drinkcounter.authentication.PartyMemberAndOwnUserOrPartyMate;
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.ui.AuthenticationController;
@@ -68,16 +70,18 @@ public class APIController {
     private final UserAccounts userAccounts;
     private final PassphraseLogin passphraseLogin;
     private final Promilles promilles;
+    private final PartyAccess partyAccess;
 
     private Clock clock = Clock.systemUTC();
 
     public APIController(PartyRoster partyRoster,
-            DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin, Promilles promilles) {
+            DrinkLog drinkLog, UserAccounts userAccounts, PassphraseLogin passphraseLogin, Promilles promilles, PartyAccess partyAccess) {
         this.partyRoster = partyRoster;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
         this.passphraseLogin = passphraseLogin;
         this.promilles = promilles;
+        this.partyAccess = partyAccess;
     }
 
     @PartyMember
@@ -106,6 +110,20 @@ public class APIController {
         }
         
         return Integer.toString(drinkLog.record(userId, new Date()));
+    }
+
+    /** Adds a drink to a participant through the party; refused with 409 once the party has ended. */
+    @PartyMemberAndOwnUserOrPartyMate
+    @PostMapping("/parties/{partyId}/users/{userId}/add-drink")
+    public String addDrinkInParty(
+    @PathVariable int partyId, @PathVariable int userId,
+    @RequestParam("volume") Float volume,
+    @RequestParam("alcohol") Float alcoholPercentage){
+        if (!partyAccess.isMember(partyId, userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        float alcoholAmount = AlcoholCalculator.getAlcoholAmount(volume, alcoholPercentage);
+        return Integer.toString(drinkLog.recordInParty(partyId, userId, null, alcoholAmount).getId());
     }
 
     @OwnUserOrPartyMate
