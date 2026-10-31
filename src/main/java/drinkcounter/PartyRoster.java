@@ -20,7 +20,7 @@ public class PartyRoster {
 
     private static final Logger log = LoggerFactory.getLogger(PartyRoster.class);
 
-    private static final Duration DEFAULT_LENGTH = Duration.ofDays(1);
+    public static final int DEFAULT_DAYS = 1;
 
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
@@ -32,19 +32,43 @@ public class PartyRoster {
 
     @Transactional
     public Party start(String partyName) {
+        return start(partyName, DEFAULT_DAYS);
+    }
+
+    @Transactional
+    public Party start(String partyName, int days) {
         if(partyName == null || partyName.isBlank()) {
             throw new IllegalArgumentException("Party name cannot be empty");
         }
+
+        requireDays(days);
 
         Party party = new Party();
         party.setName(partyName);
         Instant startTime = Instant.now();
         party.setStartTime(startTime);
-        party.setEndTime(startTime.plus(DEFAULT_LENGTH));
+        party.setEndTime(startTime.plus(Duration.ofDays(days)));
         partyRepository.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());
         return party;
+    }
+
+    /** Ends the party {@code days} whole days after it started. */
+    @Transactional
+    public Party changeDuration(int partyId, int days) {
+        requireDays(days);
+        Party party = get(partyId);
+        party.setEndTime(party.getStartTime().plus(Duration.ofDays(days)));
+        partyRepository.save(party);
+        log.info("Party {} now lasts {} days", party.getName(), days);
+        return party;
+    }
+
+    private static void requireDays(int days) {
+        if (days < 1) {
+            throw new IllegalArgumentException("A party lasts at least 1 day");
+        }
     }
 
     public Party get(int partyId) {

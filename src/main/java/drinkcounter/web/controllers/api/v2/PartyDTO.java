@@ -17,6 +17,7 @@ public class PartyDTO {
     private Integer id;
     private String name;
     private Date startTime;
+    private Date endTime;
     private List<ParticipantPreviewDTO> participants = new LinkedList<ParticipantPreviewDTO>();
 
     public Integer getId() {
@@ -43,6 +44,14 @@ public class PartyDTO {
         return this.startTime;
     }
 
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public Date getEndTime() {
+        return this.endTime;
+    }
+
     public void addParticipant(ParticipantPreviewDTO participant) {
         participants.add(participant);
     }
@@ -56,6 +65,7 @@ public class PartyDTO {
         partyDTO.setId(party.getId());
         partyDTO.setName(party.getName());
         partyDTO.setStartTime(Date.from(party.getStartTime()));
+        partyDTO.setEndTime(Date.from(party.getEndTime()));
         return partyDTO;
     }
 }

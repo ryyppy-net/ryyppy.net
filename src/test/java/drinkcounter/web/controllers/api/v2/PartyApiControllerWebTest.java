@@ -92,6 +92,7 @@ public class PartyApiControllerWebTest {
         party.setId(1);
         party.setName("Sauna");
         party.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
+        party.setEndTime(Instant.parse("2024-03-06T12:00:00Z"));
         party.addParticipant(signedIn);
         party.addParticipant(participant);
 
@@ -146,13 +147,66 @@ public class PartyApiControllerWebTest {
         started.setId(5);
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
-        when(partyRoster.start("Mökki")).thenReturn(started);
+        started.setEndTime(Instant.parse("2024-03-06T12:00:00Z"));
+        when(partyRoster.start("Mökki", 1)).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5));
 
         verify(partyRoster).join(5, 42);
+    }
+
+    @Test
+    public void startedPartyLastsTheRequestedDays() throws Exception {
+        Party started = new Party();
+        started.setId(5);
+        started.setName("Mökki");
+        started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
+        started.setEndTime(Instant.parse("2024-03-08T12:00:00Z"));
+        when(partyRoster.start("Mökki", 3)).thenReturn(started);
+
+        mvc.perform(post(PARTIES).param("name", "Mökki").param("days", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.endTime").value("2024-03-08T12:00:00.000Z"));
+    }
+
+    @Test
+    public void partyLastingLessThanADayIsNotStarted() throws Exception {
+        mvc.perform(post(PARTIES).param("name", "Mökki").param("days", "0"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(partyRoster);
+    }
+
+    @Test
+    public void partyShowsItsEndTime() throws Exception {
+        mvc.perform(get(PARTIES + "/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.endTime").value("2024-03-06T12:00:00.000Z"));
+    }
+
+    @Test
+    public void memberChangesThePartyDuration() throws Exception {
+        Party changed = new Party();
+        changed.setId(1);
+        changed.setName("Sauna");
+        changed.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
+        changed.setEndTime(Instant.parse("2024-03-08T12:00:00Z"));
+        when(partyRoster.changeDuration(1, 3)).thenReturn(changed);
+
+        mvc.perform(put(PARTIES + "/1/duration").param("days", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.endTime").value("2024-03-08T12:00:00.000Z"));
+    }
+
+    @Test
+    public void durationOfLessThanADayIsRejected() throws Exception {
+        mvc.perform(put(PARTIES + "/1/duration").param("days", "0"))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(partyRoster);
     }
 
     @Test
@@ -321,6 +375,7 @@ public class PartyApiControllerWebTest {
                 Arguments.of("change drink", put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05")),
                 Arguments.of("remove drink", delete(PARTIES + "/1/participants/2/drinks/7")),
                 Arguments.of("suggest invitations", get(PARTIES + "/1/invitations")),
+                Arguments.of("change duration", put(PARTIES + "/1/duration").param("days", "3")),
                 Arguments.of("invite", post(PARTIES + "/1/invitations").param("userId", "42")));
     }
 
