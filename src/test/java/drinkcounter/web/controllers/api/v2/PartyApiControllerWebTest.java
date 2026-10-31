@@ -3,6 +3,7 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
+import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
@@ -12,7 +13,10 @@ import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
 import jakarta.servlet.ServletException;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
@@ -27,7 +31,13 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,6 +85,11 @@ public class PartyApiControllerWebTest {
     @Autowired
     private UserAccounts userAccounts;
 
+    @Autowired
+    private DrinkRepository drinkRepository;
+
+    private final List<Drink> stored = new ArrayList<>();
+
     private User signedIn;
     private User participant;
     private User outsider;
@@ -84,8 +99,12 @@ public class PartyApiControllerWebTest {
     public void setUp() {
         signedIn = new User();
         signedIn.setId(42);
+        signedIn.setWeight(80);
+        signedIn.setSex(User.Sex.MALE);
         participant = new User();
         participant.setId(2);
+        participant.setWeight(80);
+        participant.setSex(User.Sex.MALE);
         outsider = new User();
         outsider.setId(3);
         party = new Party();
@@ -107,6 +126,30 @@ public class PartyApiControllerWebTest {
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
         when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
+
+        // Answers as the query does: the given drinkers' drinks from start to end, both included, oldest first.
+        stored.clear();
+        when(drinkRepository.findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(any(), any(), any())).thenAnswer(invocation -> {
+            Collection<Integer> ids = invocation.getArgument(0);
+            Instant start = invocation.getArgument(1);
+            Instant end = invocation.getArgument(2);
+            return stored.stream()
+                    .filter(drink -> ids.contains(drink.getDrinker().getId()))
+                    .filter(drink -> !drink.getTimeStamp().isBefore(start) && !drink.getTimeStamp().isAfter(end))
+                    .toList();
+        });
+    }
+
+    private void drink(User drinker, Instant time) {
+        Drink drink = new Drink();
+        drink.setTimeStamp(time);
+        drinker.drink(drink);
+        stored.add(drink);
+    }
+
+    private void runParty(Instant now) {
+        party.setStartTime(now.minus(Duration.ofHours(3)));
+        party.setEndTime(now.plus(Duration.ofHours(21)));
     }
 
     @Test
@@ -314,6 +357,76 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[*].id", containsInAnyOrder(42, 2)));
+    }
+
+    @Test
+    public void endedPartysParticipantsShowOnlyWhatWasDrunkFromItsStartToItsEnd() throws Exception {
+        when(partyRoster.members(1)).thenReturn(List.of(signedIn, participant));
+        Instant start = party.getStartTime();
+        Instant end = party.getEndTime();
+        drink(participant, start.minus(Duration.ofHours(1)));
+        drink(participant, start.plus(Duration.ofHours(2)));
+        drink(participant, end.plus(Duration.ofHours(1)));
+
+        mvc.perform(get(PARTIES + "/1/participants"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[1].totalDrinks").value(1))
+                .andExpect(jsonPath("$[1].promilles").value(0.0))
+                .andExpect(jsonPath("$[1].history[0].timestamp").value(start.toEpochMilli()))
+                .andExpect(jsonPath("$[1].history[0].promilles").value(0.0))
+                .andExpect(jsonPath("$[1].history[-1].timestamp").value(end.toEpochMilli()))
+                .andExpect(jsonPath("$[*].history[*].timestamp",
+                        everyItem(allOf(greaterThanOrEqualTo(start.toEpochMilli()), lessThanOrEqualTo(end.toEpochMilli())))))
+                .andExpect(jsonPath("$[*].history[*].projected", everyItem(is(false))))
+                // The drink in the party bends the line: it rises, then falls back to zero.
+                .andExpect(jsonPath("$[1].history.length()").value(greaterThan(2)));
+
+        verify(drinkRepository).findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(List.of(42, 2), start, end);
+    }
+
+    @Test
+    public void runningPartysParticipantsShowWhatWasDrunkFromItsStartToNow() throws Exception {
+        when(partyRoster.members(1)).thenReturn(List.of(signedIn, participant));
+        Instant before = Instant.now();
+        runParty(before);
+        Instant start = party.getStartTime();
+        drink(participant, start.minus(Duration.ofMinutes(30)));
+        drink(participant, before.minus(Duration.ofHours(1)));
+        drink(participant, before.plus(Duration.ofHours(1)));
+
+        mvc.perform(get(PARTIES + "/1/participants"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[1].totalDrinks").value(1))
+                .andExpect(jsonPath("$[1].promilles").value(greaterThan(0.0)))
+                .andExpect(jsonPath("$[1].history[0].timestamp").value(start.toEpochMilli()))
+                .andExpect(jsonPath("$[1].history[0].promilles").value(0.0))
+                .andExpect(jsonPath("$[1].history[-1].timestamp", allOf(
+                        greaterThanOrEqualTo(before.toEpochMilli()), lessThanOrEqualTo(Instant.now().toEpochMilli()))))
+                .andExpect(jsonPath("$[*].history[*].projected", everyItem(is(false))));
+    }
+
+    @Test
+    public void drinkAnswersWithTheParticipantAsThePartyShowsThem() throws Exception {
+        drink(participant, party.getStartTime().minus(Duration.ofHours(1)));
+        drink(participant, party.getStartTime().plus(Duration.ofHours(1)));
+
+        mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.participant.totalDrinks").value(1))
+                .andExpect(jsonPath("$.participant.history[0].timestamp").value(party.getStartTime().toEpochMilli()))
+                .andExpect(jsonPath("$.participant.history[-1].timestamp").value(party.getEndTime().toEpochMilli()));
+    }
+
+    @Test
+    public void participantShowsOnlyWhatWasDrunkDuringTheParty() throws Exception {
+        runParty(Instant.now());
+        drink(participant, party.getStartTime().minus(Duration.ofHours(1)));
+
+        mvc.perform(get(PARTIES + "/1/participants/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalDrinks").value(0))
+                .andExpect(jsonPath("$.promilles").value(0.0));
     }
 
     @Test

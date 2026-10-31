@@ -2,6 +2,7 @@ package drinkcounter;
 
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.Drink;
+import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.repository.DrinkRepository;
 import java.time.Clock;
@@ -44,6 +45,17 @@ public class PromillesTest {
             return stored.stream()
                     .filter(drink -> ids.contains(drink.getDrinker().getId()))
                     .filter(drink -> drink.getTimeStamp().isAfter(since))
+                    .sorted(Comparator.comparing(Drink::getTimeStamp))
+                    .toList();
+        });
+        // Answers as the query does: the given drinkers' drinks from start to end, both included, oldest first.
+        when(drinkRepository.findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(any(), any(), any())).thenAnswer(invocation -> {
+            Collection<Integer> ids = invocation.getArgument(0);
+            Instant start = invocation.getArgument(1);
+            Instant end = invocation.getArgument(2);
+            return stored.stream()
+                    .filter(drink -> ids.contains(drink.getDrinker().getId()))
+                    .filter(drink -> !drink.getTimeStamp().isBefore(start) && !drink.getTimeStamp().isAfter(end))
                     .sorted(Comparator.comparing(Drink::getTimeStamp))
                     .toList();
         });
@@ -104,6 +116,88 @@ public class PromillesTest {
     public void aPartyWithoutMembersReadsNothing() {
         assertTrue(promilles.of(List.of()).isEmpty());
         verify(drinkRepository, never()).findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(any(), any());
+    }
+
+    @Test
+    public void duringARunningPartyReadsItsDrinksFromItsStartToNow() {
+        User man80 = user(1, 80);
+        drink(man80, 12, Duration.ofHours(-4));
+        drink(man80, 12, Duration.ofHours(-1));
+        drink(man80, 12, Duration.ofMinutes(10));
+
+        BloodAlcohol bloodAlcohol = promilles.during(party(Duration.ofHours(-2), Duration.ofHours(22)), List.of(man80)).get(0);
+
+        verify(drinkRepository).findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(List.of(1), NOW.minus(Duration.ofHours(2)), NOW);
+        assertEquals(NOW, bloodAlcohol.now());
+        // Only the drink an hour ago counts; 80 kg burns 8 g an hour.
+        assertEquals(4f, bloodAlcohol.grams(), EXACT);
+        assertEquals(1, bloodAlcohol.standardDrinks());
+    }
+
+    @Test
+    public void duringAnEndedPartyReadsItsDrinksFromItsStartToItsEnd() {
+        User man80 = user(1, 80);
+        Instant end = NOW.minus(Duration.ofHours(2));
+        drink(man80, 12, Duration.ofHours(-30));
+        drink(man80, 24, Duration.ofHours(-3));
+        drink(man80, 12, Duration.ofHours(-1));
+
+        BloodAlcohol bloodAlcohol = promilles.during(party(Duration.ofHours(-26), Duration.ofHours(-2)), List.of(man80)).get(0);
+
+        verify(drinkRepository).findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(List.of(1), NOW.minus(Duration.ofHours(26)), end);
+        assertEquals(end, bloodAlcohol.now());
+        // 24 g an hour before the end, burnt down to 16 g at the end.
+        assertEquals(16f, bloodAlcohol.grams(), EXACT);
+        assertEquals(2, bloodAlcohol.standardDrinks());
+    }
+
+    @Test
+    public void duringAPartyIsSoberAtItsStartWhateverWasDrunkBefore() {
+        User man80 = user(1, 80);
+        drink(man80, 120, Duration.ofHours(-3));
+
+        BloodAlcohol bloodAlcohol = promilles.during(party(Duration.ofHours(-2), Duration.ofHours(22)), List.of(man80)).get(0);
+
+        assertEquals(0f, bloodAlcohol.grams(), EXACT);
+        assertEquals(0, bloodAlcohol.standardDrinks());
+    }
+
+    @Test
+    public void duringAPartyLongerThanAWeekReadsAllOfIt() {
+        User man10 = user(1, 10);
+        drink(man10, 500, Duration.ofDays(-8));
+
+        BloodAlcohol bloodAlcohol = promilles.during(party(Duration.ofDays(-9), Duration.ofDays(1)), List.of(man10)).get(0);
+
+        // 10 kg burns 1 g an hour: 500 g drunk 192 hours ago leaves 308 g.
+        assertEquals(308f, bloodAlcohol.grams(), EXACT);
+    }
+
+    @Test
+    public void duringAPartyReadsAllMembersInOneQuery() {
+        User man80 = user(1, 80);
+        User man100 = user(2, 100);
+        drink(man80, 12, Duration.ofHours(-1));
+        drink(man100, 24, Duration.ofHours(-1));
+
+        List<BloodAlcohol> bloodAlcohol = promilles.during(party(Duration.ofHours(-2), Duration.ofHours(22)), List.of(man80, man100));
+
+        verify(drinkRepository, times(1)).findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(any(), any(), any());
+        assertEquals(4f, bloodAlcohol.get(0).grams(), EXACT);
+        assertEquals(14f, bloodAlcohol.get(1).grams(), EXACT);
+    }
+
+    @Test
+    public void duringAPartyWithoutMembersReadsNothing() {
+        assertTrue(promilles.during(party(Duration.ofHours(-2), Duration.ofHours(22)), List.of()).isEmpty());
+        verify(drinkRepository, never()).findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(any(), any(), any());
+    }
+
+    private static Party party(Duration startFromNow, Duration endFromNow) {
+        Party party = new Party();
+        party.setStartTime(NOW.plus(startFromNow));
+        party.setEndTime(NOW.plus(endFromNow));
+        return party;
     }
 
     private void drink(User user, float grams, Duration fromNow) {

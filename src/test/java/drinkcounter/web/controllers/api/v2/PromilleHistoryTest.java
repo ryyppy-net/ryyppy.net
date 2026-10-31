@@ -129,6 +129,55 @@ public class PromilleHistoryTest {
         assertTrue(points.get(points.size() - 1).isProjected());
     }
 
+    @Test
+    public void duringRunsFromTheStartToNowWithNothingProjected() {
+        User user = user(6, 80);
+        Instant now = Instant.parse("2024-03-05T22:00:30Z");
+        Instant start = now.minus(Duration.ofHours(3));
+        drinkAt(user, now.minus(Duration.ofMinutes(20)));
+
+        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user, user.getDrinks(), now), start);
+
+        assertEquals(start.toEpochMilli(), points.get(0).getTimestamp());
+        assertEquals(0.0, points.get(0).getPromilles(), 0.0001);
+        assertEquals(now.toEpochMilli(), points.get(points.size() - 1).getTimestamp());
+        assertTrue(points.get(points.size() - 1).getPromilles() > 0);
+        assertTrue(points.stream().noneMatch(HistoryPoint::isProjected));
+    }
+
+    @Test
+    public void duringALongPartyKeepsTheSamplesFewAndTheLineTrue() {
+        User user = user(7, 80);
+        Instant now = Instant.parse("2024-03-12T22:00:00Z");
+        Instant start = now.minus(Duration.ofDays(7));
+        for (int hoursAgo : new int[] {150, 149, 100, 30, 2}) {
+            drinkAt(user, now.minus(Duration.ofHours(hoursAgo)));
+        }
+        BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), now);
+
+        List<HistoryPoint> points = PromilleHistory.during(bloodAlcohol, start);
+
+        assertTrue(points.size() < 40, "only bends are sent, got " + points.size());
+        assertEquals(start.toEpochMilli(), points.get(0).getTimestamp());
+        assertEquals(now.toEpochMilli(), points.get(points.size() - 1).getTimestamp());
+        assertEquals(bloodAlcohol.promilles(), (float) points.get(points.size() - 1).getPromilles(), 0.0001f);
+        // 4 g left of the first drink when the second comes; 80 kg burns 8 g an hour, and seven
+        // days in at most 1440 samples is a sample every 7 minutes, so the peak is seen within one.
+        double peak = points.stream().mapToDouble(HistoryPoint::getPromilles).max().orElseThrow();
+        double gramsPerPromille = User.Sex.MALE.factor * 80;
+        assertEquals(16 / gramsPerPromille, peak, 8 * 7 / 60.0 / gramsPerPromille);
+    }
+
+    @Test
+    public void duringAPartyThatJustStartedIsOnePoint() {
+        Instant now = Instant.parse("2024-03-05T22:00:00Z");
+
+        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user(8, 80), List.of(), now), now);
+
+        assertEquals(1, points.size());
+        assertEquals(now.toEpochMilli(), points.get(0).getTimestamp());
+    }
+
     private static HistoryPoint lastNotProjected(List<HistoryPoint> points) {
         return points.stream().filter(p -> !p.isProjected()).reduce((a, b) -> b).orElseThrow();
     }

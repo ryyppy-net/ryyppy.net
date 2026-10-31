@@ -78,14 +78,15 @@ public class ParticipantDTO {
         this.history = history;
     }
 
-    public static ParticipantDTO fromUser(BloodAlcohol bloodAlcohol){
+    /** From {@link drinkcounter.Promilles#during}: the promilles and drinks of the party only. */
+    public static ParticipantDTO inParty(BloodAlcohol bloodAlcohol){
         User user = bloodAlcohol.user();
         ParticipantDTO participant = new ParticipantDTO();
         participant.setId(user.getId());
         participant.setName(user.getName());
         participant.setPromilles(bloodAlcohol.promilles());
         participant.setSex(user.getSex());
-        participant.setTotalDrinks(bloodAlcohol.drinksSinceSober());
+        participant.setTotalDrinks(bloodAlcohol.standardDrinks());
         participant.setProfilePictureUrl(GravatarUrls.forUser(user));
         return participant;
     }

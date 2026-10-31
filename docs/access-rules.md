@@ -39,8 +39,11 @@ A member sees:
 
 - the party's name, start time and end time
 - every participant's name and profile picture
-- every participant's current promilles, total drinks and time since their last drink
-- every participant's promille graph for the last few hours
+- every participant's promille graph from the party's start up to now, or up to its end once it has ended, and their promilles and number of drinks at that moment
+
+These come only from drinks logged during the party, so they show nothing drunk before it started or after it ended, and nothing is projected past now.
+
+The classic party view instead shows each participant's current promilles, drinks since they were last sober, time since their last drink and promille graph for the last five hours, whenever those drinks were logged.
 
 A member does not see other participants' email, weight or individual drink times.
 

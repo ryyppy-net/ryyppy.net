@@ -60,6 +60,8 @@ args; omit them locally and it is skipped. Two invariants:
 - Promilles are computed on each request from the user's last 7 days of drinks:
   `Promilles.of(...)` gives a `BloodAlcohol` that the DTOs read. Pass a whole party
   to `Promilles.of(Collection)` so it reads every participant's drinks in one query.
+  The party page instead uses `Promilles.during(party, ...)`: only drinks logged within
+  the party window, so members never see a party-mate's drinking outside it.
 - Google sign-in only works on the hub domain registered with Google
   (`GOOGLE_AUTH_HUB_URL`, `https://ryyppy.net` in production). Other environments,
   such as PR previews, reach it through `authentication/relay/`, signed with

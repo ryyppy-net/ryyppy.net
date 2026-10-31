@@ -2,6 +2,7 @@ package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.alcoholcalculator.BloodAlcohol;
 import drinkcounter.model.Drink;
+import drinkcounter.model.Party;
 
 /**
  * The answer to adding, changing or removing a party participant's drink: the drink (null once
@@ -9,9 +10,10 @@ import drinkcounter.model.Drink;
  */
 public record ParticipantDrinksDTO(DrinkDTO drink, ParticipantDTO participant) {
 
-    public static ParticipantDrinksDTO of(Drink drink, BloodAlcohol bloodAlcohol) {
-        ParticipantDTO participantDTO = ParticipantDTO.fromUser(bloodAlcohol);
-        participantDTO.setHistory(PromilleHistory.of(bloodAlcohol));
+    /** @param bloodAlcohol the participant's, from {@link drinkcounter.Promilles#during} the party */
+    public static ParticipantDrinksDTO of(Drink drink, BloodAlcohol bloodAlcohol, Party party) {
+        ParticipantDTO participantDTO = ParticipantDTO.inParty(bloodAlcohol);
+        participantDTO.setHistory(PromilleHistory.during(bloodAlcohol, party.getStartTime()));
         return new ParticipantDrinksDTO(drink == null ? null : DrinkDTO.fromDrink(drink), participantDTO);
     }
 }

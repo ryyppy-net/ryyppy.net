@@ -25,4 +25,7 @@ public interface DrinkRepository extends CrudRepository<Drink, Integer> {
     List<LastDrink> findLastDrinks(@Param("drinkerIds") Collection<Integer> drinkerIds);
 
     List<Drink> findByDrinkerIdInAndTimeStampAfterOrderByTimeStampAsc(Collection<Integer> drinkerIds, Instant since);
+
+    /** The drinkers' drinks from {@code start} to {@code end}, both included, oldest first. */
+    List<Drink> findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(Collection<Integer> drinkerIds, Instant start, Instant end);
 }
