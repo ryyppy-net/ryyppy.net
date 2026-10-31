@@ -98,6 +98,24 @@
         this.changePartyDuration = function (partyId, days) {
             return http.put(baseUrl + "/parties/" + partyId + "/duration", null, {params: {days: days}}).then(data);
         };
+
+        function joinLinkUrl(partyId) {
+            return baseUrl + "/parties/" + partyId + "/join-link";
+        }
+
+        // A party without a link answers 404.
+        this.getJoinLink = function (partyId) {
+            return http.get(joinLinkUrl(partyId)).then(data);
+        };
+
+        // Replaces the current link, if any, so the old one stops working.
+        this.createJoinLink = function (partyId) {
+            return http.post(joinLinkUrl(partyId)).then(data);
+        };
+
+        this.revokeJoinLink = function (partyId) {
+            return http.delete(joinLinkUrl(partyId)).then(data);
+        };
     }
 
 
