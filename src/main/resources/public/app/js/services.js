@@ -142,6 +142,21 @@
             return http.get(baseUrl + "/nearby-parties", {params: {lat: latitude, lon: longitude}}).then(data);
         };
 
+        function nearbyPartyUrl(partyId) {
+            return baseUrl + "/nearby-parties/" + partyId;
+        }
+
+        // A party the position cannot join answers 404, whatever the reason.
+        this.getNearbyPartyPreview = function (partyId, latitude, longitude) {
+            return http.get(nearbyPartyUrl(partyId), {params: {lat: latitude, lon: longitude}}).then(data);
+        };
+
+        // The server checks the distance again from this position before adding the user.
+        this.joinNearbyParty = function (partyId, latitude, longitude) {
+            var body = {latitude: latitude, longitude: longitude};
+            return http.post(nearbyPartyUrl(partyId) + "/participants", body, {headers: {"Content-Type": "application/json"}}).then(data);
+        };
+
         function tokenUrl(token) {
             return baseUrl + "/join-links/" + encodeURIComponent(token);
         }
