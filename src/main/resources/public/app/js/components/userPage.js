@@ -72,6 +72,11 @@
             <div class="span10 offset1">
                 <drinker ng-repeat="participant in $ctrl.participants track by participant.id" participant="participant"></drinker>
 
+                <div class="join-link-note nearby-entry">
+                    <p>Bileet lähellä? Etsi bileet, joihin voit liittyä sijaintisi perusteella.</p>
+                    <a class="btn btn-success btn-large btn-block nearby-entry-button" href="#!/nearby"><svg class="nearby-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"></circle><circle cx="12" cy="12" r="2" fill="currentColor"></circle><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22"></path></svg>Etsi bileitä läheltä</a>
+                </div>
+
                 <h2>Bileesi</h2>
 
                 <div ng-if="$ctrl.parties.data.length <= 0">

@@ -136,6 +136,12 @@
             return http.delete(locationInviteUrl(partyId)).then(data);
         };
 
+        // Parties whose location invite reaches the position, nearest first. The position is sent
+        // with this request only and kept nowhere in the app.
+        this.findNearbyParties = function (latitude, longitude) {
+            return http.get(baseUrl + "/nearby-parties", {params: {lat: latitude, lon: longitude}}).then(data);
+        };
+
         function tokenUrl(token) {
             return baseUrl + "/join-links/" + encodeURIComponent(token);
         }
