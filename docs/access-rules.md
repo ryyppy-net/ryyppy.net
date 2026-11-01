@@ -35,7 +35,9 @@ Only you can see and change your profile and your full drink log.
 
 Only a party's members can see it. Anyone else cannot open it, see who is in it or see anyone's readings, even with its link or number.
 
-The one exception is a join link: a signed-in user who holds a valid one sees the party's name, start time and end time, but not who is in it, and can join it. A visitor who opens a join link while signed out sees nothing of the party: they are asked to sign in or register first, and then continue to the link.
+One exception is a join link: a signed-in user who holds a valid one sees the party's name, start time and end time, but not who is in it, and can join it. A visitor who opens a join link while signed out sees nothing of the party: they are asked to sign in or register first, and then continue to the link.
+
+A location invite is the other exception. A signed-in user within its radius, by the position their device reports, sees the party's name, start time, end time and a rough distance to it (under 100 m, rounded to 100 m below 1 km, rounded to 0.5 km from 1 km up), but not who is in it or its exact place, and can join it. Their position is sent with each search and join, used only for the distance check, and not stored or logged.
 
 A member sees:
 
@@ -63,12 +65,13 @@ All members of a party are equal: any member can add and remove participants, an
 | Share a join link | Any member | A party has one join link at a time. Any member can show it again, replace it with a new one, which stops the old one working, or turn it off. |
 | Share a location invite | Any member | A party has one location invite at a time: a place and a radius from 100 m to 5 km around it. Any member can turn it on, change its place or radius, or turn it off. |
 | Join with a link | Any signed-in user with a valid link | Adds only yourself; works until the party ends. A link that is unknown, replaced, turned off or past its party's end does not work, and does not say which. |
+| Join by location | Any signed-in user within a location invite's radius | Adds only yourself; works until the party ends. The server checks the distance again from the position sent with the join. A party that is unknown, has no location invite, has ended or is out of range cannot be found or joined, and does not say which. |
 
 ## Party-mates
 
 Party-mates can keep score for each other, so one phone can log drinks for the whole table. People who share no party with you cannot see or do anything that concerns you.
 
-Joining a party with its link makes you a party-mate of all its members, the same as being added to it.
+Joining a party with its link or by location makes you a party-mate of all its members, the same as being added to it.
 
 For a party-mate, you can:
 

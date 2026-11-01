@@ -1,6 +1,7 @@
 package drinkcounter.web;
 
 import drinkcounter.InvitationSuggestions;
+import drinkcounter.NearbyParties;
 import drinkcounter.PartyJoinLinks;
 import drinkcounter.PartyLocationInvites;
 import drinkcounter.PartyRoster;
@@ -35,6 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         PartyRoster.class,
         PartyJoinLinks.class,
         PartyLocationInvites.class,
+        NearbyParties.class,
         InvitationSuggestions.class,
         DrinkLog.class,
         PartyRepository.class,
