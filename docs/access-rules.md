@@ -61,6 +61,7 @@ All members of a party are equal: any member can add and remove participants, an
 | Add a guest | Any member | Give a name, sex and weight. The guest belongs to that party only. |
 | Remove a participant | Any member | Any participant, user or guest, including yourself. |
 | Share a join link | Any member | A party has one join link at a time. Any member can show it again, replace it with a new one, which stops the old one working, or turn it off. |
+| Share a location invite | Any member | A party has one location invite at a time: a place and a radius from 100 m to 5 km around it. Any member can turn it on, change its place or radius, or turn it off. |
 | Join with a link | Any signed-in user with a valid link | Adds only yourself; works until the party ends. A link that is unknown, replaced, turned off or past its party's end does not work, and does not say which. |
 
 ## Party-mates
