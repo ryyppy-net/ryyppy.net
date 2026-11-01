@@ -117,6 +117,25 @@
             return http.delete(joinLinkUrl(partyId)).then(data);
         };
 
+        function locationInviteUrl(partyId) {
+            return baseUrl + "/parties/" + partyId + "/location-invite";
+        }
+
+        // A party without a location invite answers 404.
+        this.getLocationInvite = function (partyId) {
+            return http.get(locationInviteUrl(partyId)).then(data);
+        };
+
+        // Turns the invite on, or replaces its place and radius.
+        this.setLocationInvite = function (partyId, invite) {
+            var body = {latitude: invite.latitude, longitude: invite.longitude, radiusM: invite.radiusM};
+            return http.put(locationInviteUrl(partyId), body, {headers: {"Content-Type": "application/json"}}).then(data);
+        };
+
+        this.revokeLocationInvite = function (partyId) {
+            return http.delete(locationInviteUrl(partyId)).then(data);
+        };
+
         function tokenUrl(token) {
             return baseUrl + "/join-links/" + encodeURIComponent(token);
         }
@@ -264,6 +283,35 @@
     }
 
 
+    var GEOLOCATION_DENIED = 1;
+
+    /**
+     * The device's current position from the browser. Rejects with
+     * {reason: 'denied'} when the user or the browser blocks location for the site,
+     * and {reason: 'unavailable'} when the device cannot tell where it is.
+     */
+    function GeolocationService($q, $window) {
+        this.current = function () {
+            var geolocation = $window.navigator.geolocation;
+            if (!geolocation) {
+                return $q.reject({reason: 'unavailable'});
+            }
+            return $q(function (resolve, reject) {
+                geolocation.getCurrentPosition(function (position) {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        at: new Date(position.timestamp || Date.now())
+                    });
+                }, function (error) {
+                    reject({reason: error && error.code === GEOLOCATION_DENIED ? 'denied' : 'unavailable'});
+                }, {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+            });
+        };
+    }
+
+
     var DAY = 24 * 60 * 60 * 1000;
     var WEEKDAYS = ['su', 'ma', 'ti', 'ke', 'to', 'pe', 'la'];
 
@@ -311,6 +359,11 @@
             return Math.max(1, Math.round(length / DAY));
         };
 
+        // "21:14"
+        this.clock = function (time) {
+            return clockTime(new Date(time));
+        };
+
         // "la 31.10. 20:00 – ma 2.11. 20:00"
         this.range = function (startTime, endTime) {
             return [startTime, endTime].map(function (time) {
@@ -339,6 +392,10 @@
 
         $provide.factory('Poller', ['$timeout', '$document', function ($timeout, $document) {
             return new Poller($timeout, $document);
+        }]);
+
+        $provide.factory('Geolocation', ['$q', '$window', function ($q, $window) {
+            return new GeolocationService($q, $window);
         }]);
 
         $provide.factory('PartyTime', [function () {

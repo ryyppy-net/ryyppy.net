@@ -187,8 +187,8 @@
 
 
     /**
-     * A party, its participants, the users that can be invited to it and its
-     * join link, per party id. Only party members may read these
+     * A party, its participants, the users that can be invited to it, its
+     * join link and its location invite, per party id. Only party members may read these
      * (docs/access-rules.md), so a party's entry is dropped once the user
      * leaves or is removed from it.
      */
@@ -232,6 +232,12 @@
             // null while the party has no join link.
             entry.joinLink = new Resource(forgetOnForbidden(function (partyId) {
                 return RyyppyAPI.getJoinLink(partyId).catch(function (response) {
+                    return response && response.status === 404 ? null : $q.reject(response);
+                });
+            }));
+            // null while the party has no location invite.
+            entry.locationInvite = new Resource(forgetOnForbidden(function (partyId) {
+                return RyyppyAPI.getLocationInvite(partyId).catch(function (response) {
                     return response && response.status === 404 ? null : $q.reject(response);
                 });
             }));
@@ -335,6 +341,21 @@
             var ticket = Resource.ticket();
             return RyyppyAPI.revokeJoinLink(partyId).then(function () {
                 self.get(partyId).joinLink.set(null, ticket);
+            });
+        };
+
+        this.setLocationInvite = function (partyId, invite) {
+            var ticket = Resource.ticket();
+            return RyyppyAPI.setLocationInvite(partyId, invite).then(function (saved) {
+                self.get(partyId).locationInvite.set(saved, ticket);
+                return saved;
+            });
+        };
+
+        this.revokeLocationInvite = function (partyId) {
+            var ticket = Resource.ticket();
+            return RyyppyAPI.revokeLocationInvite(partyId).then(function () {
+                self.get(partyId).locationInvite.set(null, ticket);
             });
         };
 

@@ -6,6 +6,7 @@
         var partyId = $routeParams.partyId;
         var releases = [];
 
+        this.partyId = partyId;
         this.store = PartyStore.get(partyId);
 
         this.days = null;
@@ -235,6 +236,8 @@
                         </div>
                     </div>
                 </section>
+
+                <location-invite party-id="$ctrl.partyId"></location-invite>
 
                 <h1>Lisää uusi bilettäjä</h1>
 

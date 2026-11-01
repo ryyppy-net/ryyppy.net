@@ -497,6 +497,144 @@ p {
     margin-bottom: 0;
 }
 
+.location-invite-label {
+    display: block;
+    margin: 0 0 6px;
+}
+
+.location-invite-small {
+    font-size: 17px;
+}
+
+.location-invite-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #dff0d8;
+    color: #3c763d;
+    border-radius: 4px;
+    padding: 3px 9px;
+    font-size: 16px;
+}
+
+.location-invite-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #3c763d;
+}
+
+.location-invite-status-off {
+    background-color: #3b3b3b;
+    color: #e2e2e2;
+}
+
+.location-invite-status-off .location-invite-dot {
+    background-color: #999;
+}
+
+.location-invite-facts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.location-invite-facts dt {
+    color: #d8d8d8;
+    font-weight: normal;
+}
+
+.location-invite-facts dd {
+    margin: 0;
+}
+
+.location-invite-diagram {
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: #3b3b3b;
+    margin-bottom: 10px;
+    max-width: 480px;
+}
+
+.location-invite-diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.location-invite-radius {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 480px;
+    height: 34px;
+    margin: 0;
+    accent-color: #62c462;
+}
+
+.location-invite-scale {
+    position: relative;
+    max-width: 480px;
+    height: 20px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+.location-invite-scale span {
+    position: absolute;
+    top: 0;
+}
+
+.location-invite-scale span:first-child {
+    left: 0;
+}
+
+.location-invite-scale span:last-child {
+    right: 0;
+}
+
+.location-invite-scale-mark {
+    transform: translateX(-50%);
+}
+
+.location-invite-error {
+    background-color: #f2dede;
+    color: #b94a48;
+    border: 1px solid #eed3d7;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.location-invite-error p {
+    margin: 0 0 6px;
+}
+
+.location-invite-error p:last-child {
+    margin: 0;
+}
+
+.location-invite-spinner {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    vertical-align: -2px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    animation: location-invite-spin 0.8s linear infinite;
+}
+
+@keyframes location-invite-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .join-page {
     padding-top: 20px;
 }
