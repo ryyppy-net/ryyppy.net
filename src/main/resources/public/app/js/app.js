@@ -14,5 +14,6 @@ angular.module('ryyppy', ['ngRoute', 'ngAnimate', 'ryyppy.filters', 'ryyppy.serv
     $routeProvider.when('/party-admin/:partyId', {template: '<party-admin-page></party-admin-page>'});
     $routeProvider.when('/join/:token', {template: '<join-page></join-page>'});
     $routeProvider.when('/nearby', {template: '<nearby-page></nearby-page>'});
+    $routeProvider.when('/nearby/:partyId', {template: '<nearby-join-page></nearby-join-page>'});
     $routeProvider.otherwise({redirectTo: '/'});
   }]);

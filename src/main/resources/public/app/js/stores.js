@@ -183,6 +183,13 @@
                 return party;
             });
         };
+
+        this.joinNearby = function (partyId, latitude, longitude) {
+            return RyyppyAPI.joinNearbyParty(partyId, latitude, longitude).then(function (party) {
+                self.parties.invalidate();
+                return party;
+            });
+        };
     }
 
 

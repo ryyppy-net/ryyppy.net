@@ -711,6 +711,14 @@ p {
     padding-top: 10px;
 }
 
+.nearby-join-page {
+    padding-top: 20px;
+}
+
+.nearby-join-page .join-page-invalid .btn {
+    min-width: 260px;
+}
+
 .nearby-page-muted {
     color: #e2e2e2;
 }
