@@ -686,3 +686,84 @@ p {
     color: #e2e2e2;
     max-width: 320px;
 }
+
+.nearby-icon {
+    width: 18px;
+    height: 18px;
+    flex: none;
+}
+
+.nearby-entry {
+    margin-bottom: 10px;
+}
+
+.nearby-entry-button,
+.nearby-page .btn {
+    box-sizing: border-box;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nearby-page {
+    padding-top: 10px;
+}
+
+.nearby-page-muted {
+    color: #e2e2e2;
+}
+
+.nearby-party,
+.nearby-party:hover,
+.nearby-party:focus {
+    display: block;
+    text-decoration: none;
+}
+
+.nearby-party-times {
+    flex-basis: 100%;
+    font-size: 15px;
+}
+
+.nearby-party-distance {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 16px;
+}
+
+.nearby-page-refresh {
+    margin-top: 6px;
+}
+
+.nearby-page-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    padding-top: 20px;
+}
+
+.nearby-page-message h1,
+.nearby-page-message h2,
+.nearby-page-message p {
+    margin: 0;
+}
+
+.nearby-page-message p {
+    color: #e2e2e2;
+    max-width: 320px;
+}
+
+.nearby-page-message .btn {
+    min-width: 260px;
+}
+
+.nearby-page-message-icon {
+    width: 64px;
+    height: 64px;
+}
