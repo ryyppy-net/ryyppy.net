@@ -17,6 +17,10 @@ The app (and its Postgres via Docker Compose) needs to be reachable at
   It starts the app with the `seed` profile at `scale=0.01`, which fills an empty
   database with fake data first (see [Seed data](../docs/seed-data.md)).
 
+`party-ended.spec.ts` ends a party by updating the app's database directly, because the server only
+ends a party in real time. It connects to the database from `docker/docker-compose.yml`; set
+`E2E_DATABASE_URL` (a `postgres://` URL) when the app uses another.
+
 ## Running
 
 ```bash

@@ -3,17 +3,18 @@ package drinkcounter;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.UserRepository;
 import drinkcounter.model.Drink;
+import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,6 +32,8 @@ public class DrinkLogTest {
     private UserRepository userRepository;
     private User user;
     private DrinkRepository drinkRepository;
+    private PartyRoster partyRoster;
+    private MutableClock clock;
 
     @BeforeEach
     public void setUp() {
@@ -42,7 +45,9 @@ public class DrinkLogTest {
             drink.setId(nextDrinkId.getAndIncrement());
             return drink;
         });
-        drinkLog = new DrinkLog(drinkRepository, userRepository);
+        partyRoster = mock(PartyRoster.class);
+        clock = new MutableClock(Instant.parse("2024-03-05T12:00:00Z"));
+        drinkLog = new DrinkLog(drinkRepository, userRepository, partyRoster, clock);
 
         user = new User();
         user.setId(1);
@@ -119,15 +124,100 @@ public class DrinkLogTest {
     @Test
     public void totalIsCountedAtMostOnceAMinute() {
         Instant start = Instant.parse("2024-03-05T12:00:00Z");
-        ReflectionTestUtils.setField(drinkLog, "clock", Clock.fixed(start, ZoneOffset.UTC));
+        clock.set(start);
         when(drinkRepository.count()).thenReturn(10L, 11L);
 
         assertEquals(10L, drinkLog.total());
-        ReflectionTestUtils.setField(drinkLog, "clock", Clock.fixed(start.plusSeconds(59), ZoneOffset.UTC));
+        clock.set(start.plusSeconds(59));
         assertEquals(10L, drinkLog.total());
         verify(drinkRepository, times(1)).count();
 
-        ReflectionTestUtils.setField(drinkLog, "clock", Clock.fixed(start.plusSeconds(60), ZoneOffset.UTC));
+        clock.set(start.plusSeconds(60));
         assertEquals(11L, drinkLog.total());
+    }
+
+    private static final Instant PARTY_END = Instant.parse("2024-03-05T14:00:00Z");
+
+    private Party partyEndingAt(Instant end) {
+        Party party = new Party();
+        party.setId(5);
+        party.setStartTime(end.minusSeconds(7200));
+        party.setEndTime(end);
+        when(partyRoster.get(5)).thenReturn(party);
+        return party;
+    }
+
+    @Test
+    public void recordInPartySavesTheDrinkJustBeforeTheEnd() {
+        partyEndingAt(PARTY_END);
+        clock.set(PARTY_END.minusMillis(1));
+
+        Drink drink = drinkLog.recordInParty(5, 1, null, 12f);
+
+        assertEquals(PARTY_END.minusMillis(1), drink.getTimeStamp());
+        assertEquals(1, user.getDrinks().size());
+        verify(drinkRepository).save(any(Drink.class));
+    }
+
+    @Test
+    public void recordInPartyIsRefusedAtTheEnd() {
+        partyEndingAt(PARTY_END);
+        clock.set(PARTY_END);
+
+        assertThrows(PartyEndedException.class, () -> drinkLog.recordInParty(5, 1, null, 12f));
+
+        assertTrue(user.getDrinks().isEmpty());
+        verify(drinkRepository, never()).save(any(Drink.class));
+    }
+
+    @Test
+    public void recordInPartyIsRefusedAfterTheEnd() {
+        partyEndingAt(PARTY_END);
+        clock.set(PARTY_END.plusSeconds(3600));
+
+        assertThrows(PartyEndedException.class, () -> drinkLog.recordInParty(5, 1, Date.from(PARTY_END.minusSeconds(60)), 12f));
+
+        verify(drinkRepository, never()).save(any(Drink.class));
+    }
+
+    @Test
+    public void undoAndCorrectionStayAllowedAfterThePartyEnded() {
+        partyEndingAt(PARTY_END);
+        clock.set(PARTY_END.minusSeconds(1));
+        Drink drink = drinkLog.recordInParty(5, 1, null, 12f);
+        clock.set(PARTY_END.plusSeconds(1));
+        drink.setId(3);
+
+        drinkLog.correctAlcohol(1, 3, 6f);
+        drinkLog.undo(1, 3);
+
+        assertTrue(user.getDrinks().isEmpty());
+    }
+
+    private static final class MutableClock extends Clock {
+        private Instant now;
+
+        MutableClock(Instant now) {
+            this.now = now;
+        }
+
+        void set(Instant now) {
+            this.now = now;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return now;
+        }
     }
 }

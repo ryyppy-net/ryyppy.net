@@ -46,12 +46,14 @@ DrinkProgressBar.prototype.remove = function() {
 
 
 
-function UserButton(userId, element, color) {
+function UserButton(userId, element, color, partyId, partyEndTime) {
     var that = this;
 
     this.userId = userId;
     this.element = element;
     this.color = color;
+    this.partyId = partyId;
+    this.partyEndTime = partyEndTime;
 
     this.alcoholScale = 3;
     this.timeScale = 5 * 60 * 60 * 1000;
@@ -273,14 +275,24 @@ UserButton.prototype.onResize = function() {
     this.graphElement.css('height', height * 0.95);
 }
 
+UserButton.prototype.partyEnded = function() {
+    return this.partyEndTime !== undefined && this.partyEndTime !== null && Date.now() >= this.partyEndTime;
+}
+
 UserButton.prototype.buttonClick = function() {
     if (this.clicked)
         return;
 
+    if (this.partyEnded()) {
+        alert(getMessage('party_ended'));
+        return;
+    }
+
     this.clicked = true;
     playSound();
     this.savedDrink = this.addDrink();
-    this.showAdding();
+    // A refused drink leaves no overlay to undo, and the tile can be tapped again.
+    this.savedDrink.done($.proxy(this.showAdding, this)).fail($.proxy(this.enableButton, this));
 }
 
 // Resolves with the saved drink's id.
@@ -294,10 +306,14 @@ UserButton.prototype.addDrink = function() {
             this.drinksChanged();
             saved.resolve(drinkId);
         }, this),
-        function() {
-            alert(getMessage('drink_add_failed'));
+        $.proxy(function(xhr) {
+            alert(getMessage(xhr && xhr.status === 409 ? 'party_ended' : 'drink_add_failed'));
+            if (xhr && xhr.status === 409) {
+                this.partyEndTime = 0;
+            }
             saved.reject();
-        }
+        }, this),
+        this.partyId
     );
     return saved.promise();
 }

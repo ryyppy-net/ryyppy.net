@@ -6,6 +6,8 @@ import drinkcounter.repository.PartyRepository;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.WithDrinkcounterUser;
+import drinkcounter.PartyEndedException;
+import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static drinkcounter.web.controllers.api.ClassicApiRequests.addDrink;
+import static drinkcounter.web.controllers.api.ClassicApiRequests.addDrinkInParty;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.addGuest;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.drinksPerDay;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.editDrink;
@@ -39,7 +42,10 @@ import static drinkcounter.web.controllers.api.ClassicApiRequests.showHistory;
 import static drinkcounter.web.controllers.api.ClassicApiRequests.userXml;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -89,11 +95,12 @@ public class APIControllerWebTest {
         return Stream.of(
                 Arguments.of("party", partyXml(PARTY), Rule.PARTY_MEMBER),
                 Arguments.of("add guest to party", addGuest(PARTY), Rule.PARTY_MEMBER),
+                Arguments.of("add drink in party", addDrinkInParty(PARTY, OTHER_USER), Rule.PARTY_MEMBER),
                 Arguments.of("link user to party", linkUser(PARTY, SIGNED_IN), Rule.PARTY_MEMBER),
                 Arguments.of("show drinks", showDrinks(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("drinks per day", drinksPerDay(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("user", userXml(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
-                Arguments.of("add drink", addDrink(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE),
+                Arguments.of("add drink", addDrink(OTHER_USER), Rule.OWN_USER),
                 Arguments.of("edit drink", editDrink(OTHER_USER, DRINK), Rule.OWN_USER_OR_PARTY_MATE),
                 Arguments.of("remove drink", removeDrink(OTHER_USER, DRINK), Rule.OWN_USER_OR_PARTY_MATE),
                 Arguments.of("show history", showHistory(OTHER_USER), Rule.OWN_USER_OR_PARTY_MATE));
@@ -136,7 +143,6 @@ public class APIControllerWebTest {
     static Stream<Arguments> partyMateRequests() {
         return Stream.of(
                 Arguments.of("user", userXml(OTHER_USER)),
-                Arguments.of("add drink", addDrink(OTHER_USER)),
                 Arguments.of("edit drink", editDrink(OTHER_USER, DRINK)),
                 Arguments.of("remove drink", removeDrink(OTHER_USER, DRINK)),
                 Arguments.of("show history", showHistory(OTHER_USER)));
@@ -153,12 +159,13 @@ public class APIControllerWebTest {
     static Stream<Arguments> ownOnlyRequests() {
         return Stream.of(
                 Arguments.of("show drinks", showDrinks(OTHER_USER)),
-                Arguments.of("drinks per day", drinksPerDay(OTHER_USER)));
+                Arguments.of("drinks per day", drinksPerDay(OTHER_USER)),
+                Arguments.of("add drink outside a party", addDrink(OTHER_USER)));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("ownOnlyRequests")
-    public void partyMateIsForbiddenFromTheFullDrinkLog(String name, MockHttpServletRequestBuilder request) throws Exception {
+    public void partyMateIsForbiddenFromOwnOnlyRequests(String name, MockHttpServletRequestBuilder request) throws Exception {
         when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
 
         mvc.perform(request).andExpect(status().isForbidden());
@@ -184,13 +191,53 @@ public class APIControllerWebTest {
     }
 
     @Test
-    public void partyMateAddsADrinkForTheOtherUser() throws Exception {
-        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
-        when(drinkLog.record(eq(OTHER_USER), any(Date.class))).thenReturn(9);
+    public void drinkAddedThroughThePartyIsSavedAgainstTheParty() throws Exception {
+        partyMates();
+        Drink saved = new Drink();
+        saved.setId(9);
+        when(drinkLog.recordInParty(eq(PARTY), eq(OTHER_USER), isNull(), anyFloat())).thenReturn(saved);
 
-        mvc.perform(addDrink(OTHER_USER))
+        mvc.perform(addDrinkInParty(PARTY, OTHER_USER))
                 .andExpect(status().isOk())
                 .andExpect(content().string("9"));
+    }
+
+    @Test
+    public void drinkAddedThroughAnEndedPartyIsRefusedWithConflictAndNothingIsSaved() throws Exception {
+        partyMates();
+        when(drinkLog.recordInParty(eq(PARTY), eq(OTHER_USER), any(), any())).thenThrow(new PartyEndedException(PARTY));
+
+        mvc.perform(addDrinkInParty(PARTY, OTHER_USER)).andExpect(status().isConflict());
+
+        verify(drinkLog, never()).record(anyInt(), anyFloat());
+        verify(drinkLog, never()).record(anyInt(), any(Date.class));
+        verify(drinkLog, never()).record(anyInt(), any(Date.class), any());
+    }
+
+    @Test
+    public void drinkCannotBeAddedThroughAPartyTheUserIsNotIn() throws Exception {
+        partyMates();
+        when(partyRepository.countUserParticipations(PARTY, OTHER_USER)).thenReturn(0L);
+
+        mvc.perform(addDrinkInParty(PARTY, OTHER_USER)).andExpect(status().isForbidden());
+
+        verifyNoInteractions(drinkLog);
+    }
+
+    @Test
+    public void editingAndRemovingADrinkIsNotTiedToTheParty() throws Exception {
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
+
+        mvc.perform(editDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
+        mvc.perform(removeDrink(OTHER_USER, DRINK)).andExpect(status().isOk());
+
+        verify(drinkLog, never()).recordInParty(anyInt(), anyInt(), any(), any());
+    }
+
+    private void partyMates() {
+        when(partyRepository.countUserParticipations(PARTY, SIGNED_IN)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(PARTY, OTHER_USER)).thenReturn(1L);
+        when(partyRepository.countSharedParties(SIGNED_IN, OTHER_USER)).thenReturn(1L);
     }
 
     @Test

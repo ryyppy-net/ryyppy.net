@@ -3,6 +3,7 @@ package drinkcounter.web.controllers.api.v2;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
+import drinkcounter.PartyEndedException;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.UserAccounts;
@@ -41,6 +42,7 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -125,7 +127,7 @@ public class PartyApiControllerWebTest {
         Drink saved = new Drink();
         saved.setId(7);
         saved.setTimeStamp(Instant.parse("2024-03-05T13:37:42.123Z"));
-        when(drinkLog.record(anyInt(), any(), any())).thenReturn(saved);
+        when(drinkLog.recordInParty(anyInt(), anyInt(), any(), any())).thenReturn(saved);
 
         // Answers as the query does: the given drinkers' drinks from start to end, both included, oldest first.
         stored.clear();
@@ -269,7 +271,7 @@ public class PartyApiControllerWebTest {
                 .andExpect(status().isOk());
 
         Date expected = Date.from(Instant.parse("2024-03-05T13:37:42.123Z"));
-        verify(drinkLog).record(eq(2), eq(expected), any(Float.class));
+        verify(drinkLog).recordInParty(eq(1), eq(2), eq(expected), any(Float.class));
     }
 
     @Test
@@ -277,7 +279,32 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
                 .andExpect(status().isOk());
 
-        verify(drinkLog).record(eq(2), eq((Date) null), any(Float.class));
+        verify(drinkLog).recordInParty(eq(1), eq(2), eq((Date) null), any(Float.class));
+    }
+
+    @Test
+    public void drinkAfterThePartyEndedIsRefusedWithConflictAndNothingIsSaved() throws Exception {
+        when(drinkLog.recordInParty(eq(1), eq(2), any(), any())).thenThrow(new PartyEndedException(1));
+
+        mvc.perform(post(PARTIES + "/1/participants/2/drinks"))
+                .andExpect(status().isConflict());
+
+        verify(drinkLog, never()).record(anyInt(), any(), any());
+        verify(drinkLog, never()).record(anyInt(), anyFloat());
+        verify(drinkLog, never()).record(anyInt(), any(Date.class));
+    }
+
+    @Test
+    public void changingAndRemovingADrinkStaysAllowedAfterThePartyEnded() throws Exception {
+        party.setEndTime(Instant.parse("2024-03-05T13:00:00Z"));
+
+        mvc.perform(put(PARTIES + "/1/participants/2/drinks/7").param("volume", "0.5").param("alcohol", "0.05"))
+                .andExpect(status().isOk());
+        mvc.perform(delete(PARTIES + "/1/participants/2/drinks/7"))
+                .andExpect(status().isOk());
+
+        verify(drinkLog).correctAlcohol(eq(2), eq(7), any(Float.class));
+        verify(drinkLog).undo(2, 7);
     }
 
     @Test
@@ -285,7 +312,7 @@ public class PartyApiControllerWebTest {
         mvc.perform(post(PARTIES + "/1/participants/2/drinks").param("timestamp", "not-a-timestamp"))
                 .andExpect(status().isBadRequest());
 
-        verify(drinkLog, never()).record(anyInt(), any(), any());
+        verify(drinkLog, never()).recordInParty(anyInt(), anyInt(), any(), any());
     }
 
     @Test

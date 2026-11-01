@@ -20,10 +20,14 @@ function RyyppyAPI() {
         $.get('/API/users/{0}/show-history'.format(userId), callback);
     }
     
-    this.addDrinkToUser = function(userId, volume, alcohol, successCallback, errorCallback) {
+    // With a partyId the drink is added through that party, which refuses it once the party has ended.
+    this.addDrinkToUser = function(userId, volume, alcohol, successCallback, errorCallback, partyId) {
+        var url = partyId === undefined
+            ? '/API/users/{0}/add-drink'.format(userId)
+            : '/API/parties/{0}/users/{1}/add-drink'.format(partyId, userId);
         $.ajax(
             {
-                url: '/API/users/{0}/add-drink'.format(userId),
+                url: url,
                 type: 'POST',
                 data: {
                     'volume': volume,
@@ -177,6 +181,7 @@ MESSAGES['en']['drink_was_canceled'] = 'The drink was canceled!';
 MESSAGES['en']['loading'] = 'Loading...';
 MESSAGES['en']['drink_added'] = "Drink added";
 MESSAGES['en']['drink_add_failed'] = "Adding a drink failed! Please refresh the page and try again.";
+MESSAGES['en']['party_ended'] = "The party has ended. Drinks can no longer be added.";
 MESSAGES['en']['wait_for_adding_drink'] = "Please wait...";
 MESSAGES['en']['liters'] = 'liters';
 MESSAGES['en']['portion_size'] = 'Portion size';
@@ -193,6 +198,7 @@ MESSAGES['fi']['drink_was_canceled'] = 'Juoma peruttiin!';
 MESSAGES['fi']['loading'] = 'Ladataan...';
 MESSAGES['fi']['drink_added'] = "Juoma lisätty";
 MESSAGES['fi']['drink_add_failed'] = "Juoman lisääminen epäonnistui! Ole hyvä ja lataa sivu uudestaan.";
+MESSAGES['fi']['party_ended'] = "Bileet ovat päättyneet. Juomia ei voi enää lisätä.";
 MESSAGES['fi']['wait_for_adding_drink'] = "Ole hyvä ja odota...";
 MESSAGES['fi']['liters'] = 'l';
 MESSAGES['fi']['portion_size'] = 'Annoskoko';

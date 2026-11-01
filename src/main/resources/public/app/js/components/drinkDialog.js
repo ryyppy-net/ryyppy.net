@@ -16,7 +16,12 @@
         // The drink is saved on the tap; the overlay then offers a 5s window to
         // undo or edit it.
         this.$onChanges = function (changes) {
-            if (!changes.addedDrink || !changes.addedDrink.currentValue) {
+            if (!changes.addedDrink) {
+                return;
+            }
+            if (!changes.addedDrink.currentValue) {
+                $timeout.cancel(self.dismissTimeout);
+                self.hideDialog();
                 return;
             }
             self.showDrinkDialog = true;

@@ -36,13 +36,16 @@ public class DrinkLog {
     private final DrinkRepository drinkRepository;
     private final UserRepository userRepository;
 
-    private Clock clock = Clock.systemUTC();
+    private final PartyRoster partyRoster;
+    private final Clock clock;
     private volatile Instant totalCountedAt = Instant.EPOCH;
     private volatile long total;
 
-    public DrinkLog(DrinkRepository drinkRepository, UserRepository userRepository) {
+    public DrinkLog(DrinkRepository drinkRepository, UserRepository userRepository, PartyRoster partyRoster, Clock clock) {
         this.drinkRepository = drinkRepository;
         this.userRepository = userRepository;
+        this.partyRoster = partyRoster;
+        this.clock = clock;
     }
 
     /** Records a drink at the given time; a time in the future is rejected. */
@@ -89,6 +92,21 @@ public class DrinkLog {
         drinkRepository.save(drink);
         log.info("{} has drunk a drink at {}", user, drink.getTimeStamp());
         return drink;
+    }
+
+    /**
+     * Records a drink for a participant through a party, as {@link #record(int, Date, Float)};
+     * refused once the party has ended.
+     *
+     * @throws PartyEndedException if the party's end time has been reached
+     */
+    @Transactional
+    public Drink recordInParty(int partyId, int userId, Date at, Float grams) {
+        Instant now = clock.instant();
+        if (partyRoster.get(partyId).hasEnded(now)) {
+            throw new PartyEndedException(partyId);
+        }
+        return record(userId, at != null ? at : Date.from(now), grams);
     }
 
     /**
