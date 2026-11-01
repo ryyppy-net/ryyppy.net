@@ -10,7 +10,6 @@
         var search = 0;
         var destroyed = false;
 
-
         // 'locating', 'list', 'empty', 'denied', 'unavailable' or 'failed'
         this.state = 'locating';
         this.parties = [];
