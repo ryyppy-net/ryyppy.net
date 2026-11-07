@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.util.UriUtils;
 
 /**
- * The address a party's join link points to. The join page is an AngularJS route, and the hash
- * of a URL never reaches the server, so the shared link is this server path instead.
+ * The address a party's join link points to. A signed-out visitor is sent to sign in first and
+ * continues to the AngularJS join page afterwards.
  */
 @Controller
 public class JoinController {
@@ -27,6 +27,6 @@ public class JoinController {
     }
 
     public static String joinPage(String token) {
-        return "redirect:/app/index.html#!/join/" + UriUtils.encodePathSegment(token, "UTF-8");
+        return "redirect:/app/join/" + UriUtils.encodePathSegment(token, "UTF-8");
     }
 }

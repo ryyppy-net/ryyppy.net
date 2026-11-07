@@ -99,7 +99,7 @@ test.describe('AngularJS party page', () => {
         posts.push(request.url());
       }
     });
-    await page.goto(`/app/index.html#!/party/${started.partyId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/app/party/${started.partyId}`, { waitUntil: 'domcontentloaded' });
     const drinker = tile(page, started.user.name);
     await expect(drinker.getByText('Juomia: 0 kpl')).toBeVisible();
     await expect(drinker.locator('.drinker-graph canvas')).toBeVisible();
@@ -136,7 +136,7 @@ test.describe('AngularJS party page', () => {
     const end = new Date(party.endTime).getTime();
 
     await page.clock.install({ time: end - 90 * 1000 });
-    await page.goto(`/app/index.html#!/party/${started.partyId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/app/party/${started.partyId}`, { waitUntil: 'domcontentloaded' });
     const area = tile(page, started.user.name).locator('.container-fluid').first();
     await expect(area).toHaveAttribute('role', 'button');
     await expect(area).toHaveAttribute('tabindex', '0');
@@ -148,7 +148,7 @@ test.describe('AngularJS party page', () => {
 
   test('a tap after the server ended the party shows a toast and saves nothing', async ({ page }) => {
     const started = await startParty(page, 'ended-toast');
-    await page.goto(`/app/index.html#!/party/${started.partyId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/app/party/${started.partyId}`, { waitUntil: 'domcontentloaded' });
     const drinker = tile(page, started.user.name);
     await expect(drinker.getByText('Juomia: 0 kpl')).toBeVisible();
 

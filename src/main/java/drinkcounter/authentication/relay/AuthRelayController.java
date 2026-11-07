@@ -1,5 +1,6 @@
 package drinkcounter.authentication.relay;
 
+import drinkcounter.web.controllers.DefaultController;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
@@ -103,6 +104,6 @@ public class AuthRelayController {
 
         log.info("Auth relay: authentication completed for user: email={}, userId={}", claims.email, user.getId());
 
-        return "redirect:/app/index.html";
+        return DefaultController.REDIRECT_TO_FRONTPAGE;
     }
 }

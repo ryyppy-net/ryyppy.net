@@ -82,8 +82,8 @@ public class SignedOutJoinWebTest {
     }
 
     private void continuesToTheJoinPage(MockHttpSession session) throws Exception {
-        mvc.perform(get("/app/index.html").session(session))
-                .andExpect(redirectedUrl("/app/index.html#!/join/" + TOKEN))
+        mvc.perform(get("/app/").session(session))
+                .andExpect(redirectedUrl("/app/join/" + TOKEN))
                 .andExpect(request().sessionAttributeDoesNotExist(JoinController.PENDING_TOKEN_SESSION_ATTR));
     }
 
@@ -96,7 +96,7 @@ public class SignedOutJoinWebTest {
                         .with(sessionCookie(session))
                         .param("username", EMAIL)
                         .param("password", PASSWORD))
-                .andExpect(redirectedUrl("/app/index.html"))
+                .andExpect(redirectedUrl("/app/"))
                 .andReturn().getRequest().getSession(false);
 
         continuesToTheJoinPage(signedIn);
@@ -113,7 +113,7 @@ public class SignedOutJoinWebTest {
                         .param("weight", "80")
                         .param("email", EMAIL)
                         .param("password", PASSWORD))
-                .andExpect(redirectedUrl("/app/index.html#!/"));
+                .andExpect(redirectedUrl("/app/"));
 
         continuesToTheJoinPage(session);
     }
@@ -134,7 +134,7 @@ public class SignedOutJoinWebTest {
         MockHttpSession session = openJoinLinkSignedOut();
 
         mvc.perform(get("/api/auth/relay/complete").session(session).param("token", "handoff"))
-                .andExpect(redirectedUrl("/app/index.html"));
+                .andExpect(redirectedUrl("/app/"));
 
         continuesToTheJoinPage(session);
     }

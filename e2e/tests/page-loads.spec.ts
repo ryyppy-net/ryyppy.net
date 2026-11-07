@@ -57,7 +57,7 @@ test('/ui/privacy renders the privacy policy for an anonymous visitor', async ({
   await assertNoUnresolvedExpressions(page);
 });
 
-// These three only need *a* logged-in user - they assert rendering, not any
+// These only need *a* logged-in user - they assert rendering, not any
 // per-user state - so they reuse the shared session instead of registering.
 test.describe('logged-in page loads', () => {
   test.use({ storageState: SHARED_STORAGE_STATE });
@@ -73,11 +73,11 @@ test.describe('logged-in page loads', () => {
 });
 
   test('/ui/party renders the participant grid for a logged-in participant', async ({ page }) => {
-  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' });
 
   const partyName = `E2E Smoke Party ${Date.now()}`;
   await createParty(page, partyName);
-  const partyId = page.url().match(/#!\/party\/(\d+)/)?.[1];
+  const partyId = page.url().match(/\/app\/party\/(\d+)/)?.[1];
   expect(partyId).toBeTruthy();
 
   const response = await page.goto(`/ui/party?id=${partyId}`, { waitUntil: 'domcontentloaded' });
@@ -88,11 +88,27 @@ test.describe('logged-in page loads', () => {
   await assertNoUnresolvedExpressions(page);
 });
 
-  test('/app/index.html renders the modern dashboard for a logged-in user', async ({ page }) => {
-  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+  test('/app/ renders the modern dashboard for a logged-in user', async ({ page }) => {
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' });
 
   await expect(page).toHaveTitle('Ryyppy.net');
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   await assertNoUnresolvedExpressions(page);
+  });
+
+  test('/app/index.html, the old address, lands on the dashboard at /app/', async ({ page }) => {
+  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
+  await expect(page).toHaveURL(/\/app\/$/);
+  });
+
+  test('reloading a route renders that view again', async ({ page }) => {
+  await page.goto('/app/profile-settings', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#name')).toBeVisible();
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveURL(/\/app\/profile-settings$/);
+  await expect(page.locator('#name')).toBeVisible();
   });
 });

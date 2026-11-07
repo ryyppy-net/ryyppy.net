@@ -1,5 +1,6 @@
 package drinkcounter.authentication;
 
+import drinkcounter.web.controllers.DefaultController;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -119,6 +120,6 @@ public class GoogleOneTapController {
 
         log.info("One Tap: authentication successful for user: email={}, userId={}", email, user.getId());
 
-        return "redirect:/app/index.html";
+        return DefaultController.REDIRECT_TO_FRONTPAGE;
     }
 }

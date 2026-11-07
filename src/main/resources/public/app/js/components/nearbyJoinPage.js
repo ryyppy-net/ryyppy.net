@@ -123,7 +123,7 @@
                     <p class="join-link-note">Liittymällä bilettäjät näkevät lukemasi bileiden ajalta, ja sinä näet heidän lukemansa bileiden alusta.</p>
                     <div class="join-page-actions">
                         <button type="button" class="btn btn-success btn-large" ng-click="$ctrl.join()" ng-disabled="$ctrl.joining">Liity bileisiin</button>
-                        <a class="btn btn-large" href="#!/nearby">Peruuta</a>
+                        <a class="btn btn-large" href="/app/nearby">Peruuta</a>
                     </div>
                 </div>
 
@@ -132,7 +132,7 @@
                     <h1>Bileisiin ei voi liittyä</h1>
                     <p>Bileet eivät ole enää avoinna sijainnilla tai olet alueen ulkopuolella. Pyydä kutsulinkki bileisiin osallistuvalta.</p>
                     <button type="button" class="btn btn-success btn-large" ng-click="$ctrl.load()">${LOCATE_ICON}Päivitä sijainti</button>
-                    <a class="btn btn-large" href="#!/nearby">Takaisin listaan</a>
+                    <a class="btn btn-large" href="/app/nearby">Takaisin listaan</a>
                 </div>
 
                 <location-problem ng-if="$ctrl.state === 'denied' || $ctrl.state === 'unavailable'"

@@ -23,7 +23,7 @@ test('the app does not fetch the profile, parties, or own drinks over the API af
   });
 
   const user = sharedUser();
-  await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   const ownTile = page.locator('.drinker', { has: page.getByText(user.name) });
@@ -56,7 +56,7 @@ test('profile settings opened after the profile poll interval use the stored pro
   const user = sharedUser();
   await page.clock.install();
   // The party list page does not poll the profile, so it ages in the store.
-  await page.goto('/app/index.html#!/party-admin', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/party-admin', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h1', { hasText: 'Lisää uudet bileet' })).toBeVisible();
   await page.clock.fastForward('02:00');
 

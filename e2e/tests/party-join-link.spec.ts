@@ -13,7 +13,7 @@ async function createPartyAndOpenAdmin(page: Page): Promise<number> {
   });
   expect(response.ok()).toBeTruthy();
   const party = await response.json();
-  await page.goto(`/app/index.html#!/party-admin/${party.id}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party-admin/${party.id}`, { waitUntil: 'domcontentloaded' });
   return party.id;
 }
 
@@ -101,7 +101,7 @@ test.describe('opening a join link', () => {
     const { partyId, joinPath } = await createPartyWithJoinLink(member, name);
 
     await joiner.goto(joinPath, { waitUntil: 'domcontentloaded' });
-    await expect(joiner).toHaveURL(new RegExp(`/app/index\\.html#!/join/${joinPath.split('/').pop()}$`));
+    await expect(joiner).toHaveURL(new RegExp(`/app/join/${joinPath.split('/').pop()}$`));
     await expect(joiner.getByText('Sinut on kutsuttu bileisiin')).toBeVisible();
     await expect(joiner.getByRole('heading', { name })).toBeVisible();
     await expect(joiner.getByText(/^Alkoi \S+ \d{1,2}\.\d{1,2}\. klo \d{1,2}:\d{2}$/)).toBeVisible();
@@ -110,12 +110,12 @@ test.describe('opening a join link', () => {
 
     await joiner.getByRole('button', { name: 'Liity bileisiin' }).click();
 
-    await expect(joiner).toHaveURL(new RegExp(`#!/party/${partyId}$`));
+    await expect(joiner).toHaveURL(new RegExp(`/app/party/${partyId}$`));
     await expect(joiner.locator('.toast-title', { hasText: 'Tervetuloa bileisiin!' })).toBeVisible();
     await expect(joiner.locator('.toast-text', { hasText: `Liityit bileisiin ${name}.` })).toBeVisible();
     expect(await joinerStatusOf(partyId)).toBe(200);
 
-    await joiner.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+    await joiner.goto('/app/party-admin/', { waitUntil: 'domcontentloaded' });
     await expect(joiner.getByText(name)).toBeVisible();
   });
 
@@ -125,7 +125,7 @@ test.describe('opening a join link', () => {
     await joiner.goto(joinPath, { waitUntil: 'domcontentloaded' });
     await joiner.getByRole('link', { name: 'Peruuta' }).click();
 
-    await expect(joiner).toHaveURL(/#!\/$/);
+    await expect(joiner).toHaveURL(/\/app\/$/);
     await expect(joiner.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
     expect(await joinerStatusOf(partyId)).toBe(403);
   });
@@ -135,7 +135,7 @@ test.describe('opening a join link', () => {
 
     await member.goto(joinPath, { waitUntil: 'domcontentloaded' });
 
-    await expect(member).toHaveURL(new RegExp(`#!/party/${partyId}$`));
+    await expect(member).toHaveURL(new RegExp(`/app/party/${partyId}$`));
     await expect(member.locator('.toast-title', { hasText: 'Olet jo mukana näissä bileissä' })).toBeVisible();
     await expect(member.getByRole('button', { name: 'Liity bileisiin' })).toHaveCount(0);
   });
@@ -166,10 +166,10 @@ test.describe('opening a join link', () => {
   }
 
   async function joinsFromTheJoinPage(page: Page, joinPath: string, partyId: number, name: string) {
-    await expect(page).toHaveURL(new RegExp(`/app/index\\.html#!/join/${joinPath.split('/').pop()}$`));
+    await expect(page).toHaveURL(new RegExp(`/app/join/${joinPath.split('/').pop()}$`));
     await expect(page.getByRole('heading', { name })).toBeVisible();
     await page.getByRole('button', { name: 'Liity bileisiin' }).click();
-    await expect(page).toHaveURL(new RegExp(`#!/party/${partyId}$`));
+    await expect(page).toHaveURL(new RegExp(`/app/party/${partyId}$`));
     await expect(page.locator('.toast-title', { hasText: 'Tervetuloa bileisiin!' })).toBeVisible();
     expect((await page.request.get(`/API/v2/parties/${partyId}`)).status()).toBe(200);
   }
@@ -194,7 +194,7 @@ test.describe('opening a join link', () => {
 
     await joinsFromTheJoinPage(page, joinPath, partyId, name);
 
-    await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
   });
 

@@ -2,6 +2,7 @@ package drinkcounter.web;
 
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.UserDetailsServiceImpl;
+import drinkcounter.web.controllers.DefaultController;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
@@ -37,7 +38,7 @@ public class WebSecurityConfiguration {
             .formLogin(form -> form
                 .loginPage("/ui/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/app/index.html", true)
+                .defaultSuccessUrl(DefaultController.APP_ROOT, true)
                 .permitAll()
             )
             .logout(logout -> logout

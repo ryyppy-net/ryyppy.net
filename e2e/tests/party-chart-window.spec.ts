@@ -64,7 +64,7 @@ test('a running party graph runs from the party start to now and leaves out drin
   expect(history[0].timestamp).toBe(start);
   expect(history.every((point) => point.timestamp >= start && point.timestamp <= Date.now() && !point.projected)).toBe(true);
 
-  await page.goto(`/app/index.html#!/party/${party.id}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party/${party.id}`, { waitUntil: 'domcontentloaded' });
   const tile = page.locator('.drinker', { has: page.getByText(user.name) });
   await expect(tile).toContainText('Juomia: 1 kpl');
 
@@ -89,7 +89,7 @@ test('a running party graph moves its now edge on each poll', async ({ page }) =
   const created = await page.request.post('/API/v2/parties', { form: { name: `E2E Window Poll ${Date.now()}` } });
   const party = await created.json();
 
-  await page.goto(`/app/index.html#!/party/${party.id}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party/${party.id}`, { waitUntil: 'domcontentloaded' });
   await page.clock.install();
   await page.reload({ waitUntil: 'domcontentloaded' });
   const chart = chartOf(page, user.name);
@@ -131,7 +131,7 @@ test('an ended party graph spans the party with few enough ticks for a phone', a
     await route.fulfill({ json: participants });
   });
 
-  await page.goto(`/app/index.html#!/party/${party.id}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party/${party.id}`, { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.party-time')).toBeVisible();
   const chart = chartOf(page, user.name);
   await expect.poll(async () => (await chart())?.points.length ?? 0).toBe(4);

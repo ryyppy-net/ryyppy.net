@@ -1,5 +1,6 @@
 package drinkcounter.authentication.relay;
 
+import drinkcounter.web.controllers.DefaultController;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -62,6 +63,6 @@ public class RelayAwareAuthenticationSuccessHandler implements AuthenticationSuc
         }
 
         identityLinkingService.establishSession(oauth2User.getAttribute("userId"), email, request);
-        response.sendRedirect("/app/index.html");
+        response.sendRedirect(DefaultController.APP_ROOT);
     }
 }

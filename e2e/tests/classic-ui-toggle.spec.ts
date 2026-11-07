@@ -14,7 +14,7 @@ test('a user can switch from the modern dashboard to the classic UI and back', a
   const partyName = `E2E Toggle Party ${Date.now()}`;
   await createParty(page, partyName);
 
-  await page.goto('/app/index.html#!/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 
   await page.locator('.navbar.hidden-phone').getByTitle('Vaihda vanhaan käyttöliittymään').click();
@@ -27,6 +27,6 @@ test('a user can switch from the modern dashboard to the classic UI and back', a
   // attribute from every .headerButtonA once it binds on document ready.
   await page.locator('#uiSwitchButton').click();
 
-  await expect(page).toHaveURL(/\/app\/index\.html/);
+  await expect(page).toHaveURL(/\/app\/$/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 });
