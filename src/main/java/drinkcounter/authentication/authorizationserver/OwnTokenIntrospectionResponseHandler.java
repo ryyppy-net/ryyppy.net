@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 /**
  * Answers a token introspection request as inactive unless the token was issued to the app
- * asking. Any app can register, and a token's claims name the user who authorized it.
+ * asking. Any URL can be an app's client id, and a token's claims name the user who authorized it.
  */
 public class OwnTokenIntrospectionResponseHandler implements AuthenticationSuccessHandler {
 

@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 
-/** Registered apps and authorizations as the authorization server stores them. */
+/** Apps as the authorization server reads them from their client metadata documents. */
 public final class AuthorizationFixtures {
 
     public static final String REDIRECT_URI = "http://127.0.0.1:33418/callback";
@@ -17,7 +17,7 @@ public final class AuthorizationFixtures {
     private AuthorizationFixtures() {
     }
 
-    /** A public client, the way most MCP clients register. */
+    /** A public client, as most MCP clients' documents describe themselves. */
     public static RegisteredClient publicClient(String clientId) {
         return RegisteredClient.withId("id-" + clientId)
                 .clientId(clientId)
