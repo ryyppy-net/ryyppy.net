@@ -1,6 +1,5 @@
 package drinkcounter.authentication;
 
-import drinkcounter.web.controllers.DefaultController;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -9,6 +8,7 @@ import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.authentication.relay.Origins;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,7 @@ public class GoogleOneTapController {
     private static final Logger log = LoggerFactory.getLogger(GoogleOneTapController.class);
 
     private final GoogleIdentityLinkingService identityLinkingService;
+    private final SignInDestination signInDestination;
     private final AuthRelayTokenService relayTokenService;
     private final ClientRegistrationRepository clientRegistrationRepository;
 
@@ -41,7 +42,9 @@ public class GoogleOneTapController {
     public GoogleOneTapController(
             GoogleIdentityLinkingService identityLinkingService,
             AuthRelayTokenService relayTokenService,
-            ClientRegistrationRepository clientRegistrationRepository) {
+            ClientRegistrationRepository clientRegistrationRepository,
+            SignInDestination signInDestination) {
+        this.signInDestination = signInDestination;
         this.identityLinkingService = identityLinkingService;
         this.relayTokenService = relayTokenService;
         this.clientRegistrationRepository = clientRegistrationRepository;
@@ -50,7 +53,8 @@ public class GoogleOneTapController {
     @PostMapping("/api/auth/google/one-tap")
     public String handleOneTapCallback(
             @RequestParam("credential") String credential,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
 
         if (credential == null || credential.isEmpty()) {
             log.warn("One Tap callback received without credential");
@@ -120,6 +124,6 @@ public class GoogleOneTapController {
 
         log.info("One Tap: authentication successful for user: email={}, userId={}", email, user.getId());
 
-        return DefaultController.REDIRECT_TO_FRONTPAGE;
+        return signInDestination.redirect(request, response);
     }
 }

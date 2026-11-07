@@ -38,7 +38,7 @@ public class WebSecurityConfiguration {
             .formLogin(form -> form
                 .loginPage("/ui/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl(DefaultController.APP_ROOT, true)
+                .defaultSuccessUrl(DefaultController.APP_ROOT)
                 .permitAll()
             )
             .logout(logout -> logout

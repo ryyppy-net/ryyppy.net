@@ -61,7 +61,7 @@ public class DefaultController {
             "/app/join/*", "/app/nearby", "/app/nearby/*"
     })
     public String appIndex(@LoggedInUser User user, Model model, HttpSession session) {
-        // Every way of signing in lands here, so a join link opened while signed out continues here.
+        // Signing in after opening a join link lands here, so the join continues here.
         if (session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR) instanceof String token) {
             session.removeAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR);
             return JoinController.joinPage(token);

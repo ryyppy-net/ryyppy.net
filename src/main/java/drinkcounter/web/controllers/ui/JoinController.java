@@ -1,5 +1,8 @@
 package drinkcounter.web.controllers.ui;
 
+import drinkcounter.authentication.SignInDestination;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.security.Principal;
 import org.springframework.stereotype.Controller;
@@ -17,10 +20,19 @@ public class JoinController {
     /** Holds a signed-out visitor's join token until DefaultController continues the join after sign-in. */
     public static final String PENDING_TOKEN_SESSION_ATTR = "partyJoin.token";
 
+    private final SignInDestination signInDestination;
+
+    public JoinController(SignInDestination signInDestination) {
+        this.signInDestination = signInDestination;
+    }
+
     @GetMapping("/join/{token}")
-    public String join(@PathVariable String token, Principal principal, HttpSession session) {
+    public String join(@PathVariable String token, Principal principal, HttpSession session,
+            HttpServletRequest request, HttpServletResponse response) {
         if (principal == null) {
             session.setAttribute(PENDING_TOKEN_SESSION_ATTR, token);
+            // Signing in then lands on the app's front page, which continues the join.
+            signInDestination.forget(request, response);
             return "redirect:/ui/login?join";
         }
         return joinPage(token);

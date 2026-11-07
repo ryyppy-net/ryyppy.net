@@ -1,9 +1,10 @@
 package drinkcounter.authentication.relay;
 
-import drinkcounter.web.controllers.DefaultController;
+import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,14 +43,17 @@ public class AuthRelayController {
     private final AuthRelayTokenService tokenService;
     private final GoogleIdentityLinkingService identityLinkingService;
     private final String hubUrl;
+    private final SignInDestination signInDestination;
 
     public AuthRelayController(
             AuthRelayTokenService tokenService,
             GoogleIdentityLinkingService identityLinkingService,
-            @Value("${google.auth.hub-url:}") String hubUrl) {
+            @Value("${google.auth.hub-url:}") String hubUrl,
+            SignInDestination signInDestination) {
         this.tokenService = tokenService;
         this.identityLinkingService = identityLinkingService;
         this.hubUrl = hubUrl;
+        this.signInDestination = signInDestination;
     }
 
     @GetMapping("/api/auth/relay/redirect")
@@ -88,7 +92,7 @@ public class AuthRelayController {
     }
 
     @GetMapping("/api/auth/relay/complete")
-    public String complete(@RequestParam("token") String token, HttpServletRequest request) {
+    public String complete(@RequestParam("token") String token, HttpServletRequest request, HttpServletResponse response) {
         String ownOrigin = Origins.of(request);
 
         AuthRelayTokenService.HandoffClaims claims;
@@ -104,6 +108,6 @@ public class AuthRelayController {
 
         log.info("Auth relay: authentication completed for user: email={}, userId={}", claims.email, user.getId());
 
-        return DefaultController.REDIRECT_TO_FRONTPAGE;
+        return signInDestination.redirect(request, response);
     }
 }
