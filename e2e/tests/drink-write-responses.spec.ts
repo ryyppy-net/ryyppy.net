@@ -31,7 +31,7 @@ async function tap(page: Page, tile: Locator, method = 'POST') {
 async function openDashboard(page: Page) {
   const user = makeTestUser('write-response');
   await registerUser(page, user);
-  await page.goto('/app/index.html#!/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/', { waitUntil: 'domcontentloaded' });
   const tile = page.locator('.drinker', { has: page.getByText(user.name) });
   await expect(tile.getByText('Juomia: 0 kpl')).toBeVisible();
   return tile;
@@ -89,7 +89,7 @@ async function openPartyWithGuests(page: Page) {
   const user = makeTestUser('write-response-party');
   await registerUser(page, user);
   await createParty(page, `E2E Party ${Date.now()}`);
-  const partyId = page.url().match(/#!\/party\/(\d+)/)![1];
+  const partyId = page.url().match(/\/app\/party\/(\d+)/)![1];
   for (const name of ['Guest One', 'Guest Two']) {
     const added = await page.request.post(`/API/v2/parties/${partyId}/participants`, { form: { name, sex: 'MALE', weight: '80' } });
     expect(added.ok()).toBeTruthy();

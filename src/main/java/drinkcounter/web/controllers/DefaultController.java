@@ -26,7 +26,8 @@ import java.util.List;
 @Controller
 public class DefaultController {
 
-    public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#!/";
+    public static final String APP_ROOT = "/app/";
+    public static final String REDIRECT_TO_FRONTPAGE = "redirect:" + APP_ROOT;
     // PartiesStore first shows 20 parties and asks for one more to know whether to offer the rest.
     private static final int INITIAL_PARTIES = 21;
 
@@ -47,9 +48,20 @@ public class DefaultController {
         return REDIRECT_TO_FRONTPAGE;
     }
 
-    @GetMapping("/app/index.html")
+    @GetMapping("/app")
+    public String redirectToAppRoot() {
+        return REDIRECT_TO_FRONTPAGE;
+    }
+
+    // The AngularJS routes in app/js/app.js, so loading or reloading any of them renders the app.
+    // /app/index.html stays for bookmarks; the app redirects it to its front page.
+    @GetMapping({
+            "/app/", "/app/index.html", "/app/profile-settings",
+            "/app/party/*", "/app/party-admin", "/app/party-admin/", "/app/party-admin/*",
+            "/app/join/*", "/app/nearby", "/app/nearby/*"
+    })
     public String appIndex(@LoggedInUser User user, Model model, HttpSession session) {
-        // Every way of signing in lands here, so a join link opened while signed out continues here.
+        // Signing in after opening a join link lands here, so the join continues here.
         if (session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR) instanceof String token) {
             session.removeAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR);
             return JoinController.joinPage(token);

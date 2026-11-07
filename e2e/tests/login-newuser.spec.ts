@@ -26,7 +26,7 @@ test.describe('already-logged-in redirect', () => {
   test('L3: an already-logged-in user visiting /ui/login is redirected to the dashboard', async ({ page }) => {
   await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
 
-  await expect(page).toHaveURL(/\/app\/index\.html/);
+  await expect(page).toHaveURL(/\/app\/$/);
   await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 });
 

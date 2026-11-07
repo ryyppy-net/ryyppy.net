@@ -5,7 +5,7 @@ test('saving the profile settings without a weight keeps the stored weight', asy
   const user = makeTestUser('profile-keep-weight');
   await registerUser(page, user);
 
-  await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/profile-settings', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#name')).toHaveValue(user.name);
   await expect(page.locator('#weight')).toHaveValue('');
   await page.fill('#name', `${user.name} renamed`);
@@ -21,7 +21,7 @@ test('saving the profile settings with a weight replaces the stored weight', asy
   const user = makeTestUser('profile-new-weight');
   await registerUser(page, user);
 
-  await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/profile-settings', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#name')).toHaveValue(user.name);
   await page.fill('#weight', '95');
   await page.click('button[type="submit"]');
@@ -34,7 +34,7 @@ test('saving the profile settings with a weight replaces the stored weight', asy
 test('the sex and weight labels on the profile settings focus their own fields', async ({ page }) => {
   await registerUser(page, makeTestUser('profile-labels'));
 
-  await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/profile-settings', { waitUntil: 'domcontentloaded' });
   await page.getByText('Sukupuoli').click();
   await expect(page.locator('#sex')).toBeFocused();
   await page.getByText('Paino').click();

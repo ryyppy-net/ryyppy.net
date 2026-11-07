@@ -13,6 +13,7 @@ import drinkcounter.UserAccounts;
 import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
+import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Party;
@@ -36,8 +37,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import static drinkcounter.web.controllers.DefaultController.REDIRECT_TO_FRONTPAGE;
-
 /**
  *
  * @author murgo
@@ -55,6 +54,7 @@ public class UserController {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final PartyRoster partyRoster;
+    private final SignInDestination signInDestination;
 
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
@@ -65,7 +65,8 @@ public class UserController {
             PassphraseLogin passphraseLogin,
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder,
-            PartyRoster partyRoster) {
+            PartyRoster partyRoster,
+            SignInDestination signInDestination) {
         this.drinkLog = drinkLog;
         this.partyAccess = partyAccess;
         this.userAccounts = userAccounts;
@@ -73,6 +74,7 @@ public class UserController {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.partyRoster = partyRoster;
+        this.signInDestination = signInDestination;
     }
 
     @RequestMapping("/newuser")
@@ -112,7 +114,7 @@ public class UserController {
         userAccounts.add(user);
         authenticate(user, request, response);
 
-        return REDIRECT_TO_FRONTPAGE;
+        return signInDestination.redirect(request, response);
     }
 
     private void authenticate(User user, HttpServletRequest request, HttpServletResponse response){

@@ -28,7 +28,7 @@ public class JoinControllerWebTest {
     public void signedInUserIsSentToTheJoinPageOfTheApp() throws Exception {
         mvc.perform(get("/join/AbCdEfGhIjKlMnOpQrSt-_"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/app/index.html#!/join/AbCdEfGhIjKlMnOpQrSt-_"));
+                .andExpect(redirectedUrl("/app/join/AbCdEfGhIjKlMnOpQrSt-_"));
 
         verifyNoInteractions(joinLinks);
     }
@@ -38,7 +38,7 @@ public class JoinControllerWebTest {
     public void tokenIsEncodedIntoTheJoinPageAddress() throws Exception {
         mvc.perform(get("/join/{token}", "a b#c"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/app/index.html#!/join/a%20b%23c"));
+                .andExpect(redirectedUrl("/app/join/a%20b%23c"));
     }
 
     @Test
