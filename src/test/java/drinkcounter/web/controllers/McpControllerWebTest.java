@@ -10,16 +10,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import drinkcounter.authentication.WithDrinkcounterUser;
+import drinkcounter.authentication.authorizationserver.AuthorizationFixtures;
 import drinkcounter.web.ControllerWebTest;
 import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -42,31 +44,22 @@ public class McpControllerWebTest {
     }
 
     @Test
-    public void protectedResourceMetadataNamesThisServerAndTheMcpScope() throws Exception {
+    public void protectedResourceMetadataNamesThisServer() throws Exception {
         mvc.perform(get("/.well-known/oauth-protected-resource/mcp"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resource").value("http://localhost/mcp"))
-                .andExpect(jsonPath("$.authorization_servers", contains("http://localhost")))
-                .andExpect(jsonPath("$.scopes_supported", contains("mcp")));
+                .andExpect(jsonPath("$.authorization_servers", contains("http://localhost")));
     }
 
     @Test
-    public void accessTokenWithTheMcpScopeReachesMcpWithoutStartingASession() throws Exception {
-        when(jwtDecoder.decode("valid-token")).thenReturn(accessToken("valid-token", "mcp"));
+    public void accessTokenReachesMcpWithoutStartingASession() throws Exception {
+        when(jwtDecoder.decode("valid-token")).thenReturn(accessToken("valid-token"));
 
         MvcResult result = mvc.perform(post("/mcp").header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isNotImplemented())
                 .andReturn();
 
         assertNull(result.getRequest().getSession(false));
-    }
-
-    @Test
-    public void accessTokenWithoutTheMcpScopeIsForbidden() throws Exception {
-        when(jwtDecoder.decode("other-token")).thenReturn(accessToken("other-token", "other"));
-
-        mvc.perform(post("/mcp").header("Authorization", "Bearer other-token"))
-                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -79,17 +72,19 @@ public class McpControllerWebTest {
     }
 
     @Test
-    @WithDrinkcounterUser(userId = 42)
     public void signedInBrowserSessionCannotUseMcp() throws Exception {
-        mvc.perform(post("/mcp"))
-                .andExpect(status().isForbidden());
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                new SecurityContextImpl(AuthorizationFixtures.signedIn("ville@example.com", 42)));
+
+        mvc.perform(post("/mcp").session(session))
+                .andExpect(status().isUnauthorized());
     }
 
-    private static Jwt accessToken(String value, String scope) {
+    private static Jwt accessToken(String value) {
         return Jwt.withTokenValue(value)
                 .header("alg", "RS256")
                 .subject("42")
-                .claim("scope", List.of(scope))
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();

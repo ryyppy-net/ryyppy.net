@@ -29,7 +29,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 /**
  * The OAuth 2.1 authorization server that lets an LLM app act as a signed-in user on {@code /mcp}.
  * An app's client id is the https URL of its client metadata document, and every authorization goes
- * through the user's sign-in and consent.
+ * through the user's sign-in.
  * The issuer is each request's own origin, so PR previews issue their own tokens.
  */
 @Configuration
@@ -37,7 +37,6 @@ public class AuthorizationServerConfiguration {
 
     static final String MCP_PATH = "/mcp";
     static final String PROTECTED_RESOURCE_METADATA_PATH = "/.well-known/oauth-protected-resource" + MCP_PATH;
-    static final String CONSENT_PAGE = "/ui/consent";
 
     @Bean
     @Order(1)
@@ -52,7 +51,6 @@ public class AuthorizationServerConfiguration {
                     http.securityMatcher(authorizationServer.getEndpointsMatcher());
                     authorizationServer
                         .tokenGenerator(new DelegatingOAuth2TokenGenerator(accessTokens(jwkSource), new OAuth2AccessTokenGenerator(), new RefreshTokenGenerator()))
-                        .authorizationEndpoint(endpoint -> endpoint.consentPage(CONSENT_PAGE))
                         .clientAuthentication(clientAuthentication -> clientAuthentication
                             .authenticationConverter(new PublicClientAuthentication.Converter(PathPatternRequestMatcher.withDefaults()
                                 .matcher(HttpMethod.POST, settings.getTokenRevocationEndpoint())))
