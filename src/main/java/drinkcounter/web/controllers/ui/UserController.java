@@ -11,9 +11,9 @@ import drinkcounter.EmailAddress;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.LoggedInUser;
-import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.OwnUser;
 import drinkcounter.authentication.OwnUserOrPartyMate;
+import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
 import drinkcounter.model.Party;
@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 
 /**
  *

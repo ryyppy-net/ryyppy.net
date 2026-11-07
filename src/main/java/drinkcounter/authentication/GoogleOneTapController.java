@@ -34,9 +34,9 @@ public class GoogleOneTapController {
     private static final Logger log = LoggerFactory.getLogger(GoogleOneTapController.class);
 
     private final GoogleIdentityLinkingService identityLinkingService;
-    private final SignInDestination signInDestination;
     private final AuthRelayTokenService relayTokenService;
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final SignInDestination signInDestination;
 
     @Autowired
     public GoogleOneTapController(
@@ -44,10 +44,10 @@ public class GoogleOneTapController {
             AuthRelayTokenService relayTokenService,
             ClientRegistrationRepository clientRegistrationRepository,
             SignInDestination signInDestination) {
-        this.signInDestination = signInDestination;
         this.identityLinkingService = identityLinkingService;
         this.relayTokenService = relayTokenService;
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.signInDestination = signInDestination;
     }
 
     @PostMapping("/api/auth/google/one-tap")
