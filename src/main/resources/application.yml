@@ -56,6 +56,9 @@ google:
 auth:
   relay:
     secret: ${AUTH_RELAY_SECRET:}
+  jwt:
+    # PKCS#8 PEM RSA private key that signs access tokens; without it each start signs with a new key.
+    signing-key: ${AUTH_JWT_SIGNING_KEY:}
 
 server:
   # Railway assigns the container's public port via $PORT. The old Railpack

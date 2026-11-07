@@ -66,6 +66,12 @@ args; omit them locally and it is skipped. Two invariants:
   (`GOOGLE_AUTH_HUB_URL`, `https://ryyppy.net` in production). Other environments,
   such as PR previews, reach it through `authentication/relay/`, signed with
   `AUTH_RELAY_SECRET`.
+- Apps such as LLM clients act as a user through the OAuth 2.1 authorization server in
+  `authentication/authorizationserver/` and reach only `/mcp`. Access tokens are JWTs whose
+  `sub` is the user id, signed with `AUTH_JWT_SIGNING_KEY` (a new key on each start when unset).
+  Each authorization is a row in `oauth2_authorization`, whose JSON stores the user's
+  `DrinkcounterUserDetails` through the mixin in `AuthorizationJson`: a field added there is
+  lost unless the mixin writes it.
 - CSRF is disabled for the legacy front ends.
 - UI text goes in both `messages_fi.properties` and `messages_en.properties`;
   Finnish is the default locale.

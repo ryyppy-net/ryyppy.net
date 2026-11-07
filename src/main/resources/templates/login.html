@@ -30,6 +30,10 @@
                 <p th:text="#{login.join_notice}">Sign in to join the party.</p>
             </div>
 
+            <div class="joinNotice" role="status" th:if="${param.connect != null}">
+                <p th:text="#{login.connect_notice}">Sign in to connect an app to your account.</p>
+            </div>
+
             <h2 th:text="#{login.login_title}">Log in</h2>
 
             <p class="loginError" style="color:#c00;" th:if="${param.error != null}" th:text="#{login.error}">Login failed. Check your username and password and try again.</p>
