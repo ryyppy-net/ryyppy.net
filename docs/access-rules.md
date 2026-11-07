@@ -84,3 +84,18 @@ You cannot see a party-mate's full drink log or change their profile. A guest ha
 ## Ended parties
 
 Once a party has ended, that is, its end time has been reached, no drink can be added to its members through that party, whoever asks and whether it is their own drink or a party-mate's. The party page of either front end then offers no way to add one, and the server refuses it with 409 Conflict. A drink for someone else can only be added through a party, so it cannot be added to the members of an ended party any other way. This covers only adding a drink through the party: changing or deleting an existing drink stays allowed, so a drink tapped just before the end can still be undone or edited, and you can still log a drink for yourself from your own dashboard, which is not tied to any party.
+
+## Apps acting for you
+
+An app, such as an LLM client, can act on Ryyppy.net as you once you allow it. It reaches Ryyppy.net only at `/mcp`, with an access token sent in the request; your browser session does not open `/mcp`, and an app's token opens nothing else.
+
+| Action | Who can do it | How it works |
+| --- | --- | --- |
+| Register an app | Anyone, without signing in | The app gives its name and the addresses Ryyppy.net may send your answer to. Registering gives it access to nobody. |
+| Allow an app | You, for your own account | The app sends you to Ryyppy.net. You sign in if you are not signed in, and the consent page names the app, the account you are signed in as and the address your answer is sent to. Only you see your consent page. Once you have allowed an app, it is not asked again. |
+| Deny an app | You | The app is told access was denied and gets nothing. |
+| Use your account | An app you allowed | The app acts as you, with exactly your access: every rule in this document applies to it as it does to you. |
+| Keep access | An app you allowed | Its access token works for an hour. The app can renew it with a refresh token, which works once and for 30 days. |
+| End access | The app | The app can revoke its own tokens. Ryyppy.net does not list the apps you have allowed. |
+
+An app cannot see or use another app's tokens.

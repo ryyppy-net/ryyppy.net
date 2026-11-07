@@ -1,6 +1,10 @@
 spring:
   application:
     name: ryyppy.net
+  autoconfigure:
+    # Access tokens are opaque and looked up in the database, so the authorization server needs
+    # no signing key; this one would be a new RSA key on every start.
+    exclude: org.springframework.boot.security.oauth2.server.authorization.autoconfigure.servlet.OAuth2AuthorizationServerJwtAutoConfiguration
   datasource:
     url: jdbc:postgresql://localhost/ryyppynet
     username: ryyppynet

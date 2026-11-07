@@ -4,6 +4,7 @@ import drinkcounter.DrinkLog;
 import drinkcounter.PartyRoster;
 import drinkcounter.Promilles;
 import drinkcounter.authentication.LoggedInUser;
+import drinkcounter.authentication.authorizationserver.PendingAuthorization;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.DrinkDTO;
@@ -11,6 +12,8 @@ import drinkcounter.web.controllers.api.v2.OwnDrinksView;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
 import drinkcounter.web.controllers.ui.JoinController;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
@@ -48,8 +51,14 @@ public class DefaultController {
     }
 
     @GetMapping("/app/index.html")
-    public String appIndex(@LoggedInUser User user, Model model, HttpSession session) {
-        // Every way of signing in lands here, so a join link opened while signed out continues here.
+    public String appIndex(@LoggedInUser User user, Model model, HttpSession session,
+            HttpServletRequest request, HttpServletResponse response) {
+        // Every way of signing in lands here, so an app's authorization request or a join link
+        // opened while signed out continues here.
+        String pendingAuthorization = PendingAuthorization.take(request, response);
+        if (pendingAuthorization != null) {
+            return "redirect:" + pendingAuthorization;
+        }
         if (session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR) instanceof String token) {
             session.removeAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR);
             return JoinController.joinPage(token);

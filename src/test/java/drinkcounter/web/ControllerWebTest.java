@@ -11,6 +11,7 @@ import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
+import drinkcounter.authentication.authorizationserver.AuthorizationServerConfiguration;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.PartyRepository;
@@ -21,6 +22,9 @@ import java.lang.annotation.Target;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
@@ -31,7 +35,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
-@Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class})
+@Import({WebSecurityConfiguration.class, AuthorizationServerConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class})
 @MockitoBean(types = {
         PartyRoster.class,
         PartyJoinLinks.class,
@@ -44,7 +48,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         UserAccounts.class,
         PassphraseLogin.class,
         GoogleIdentityLinkingService.class,
-        AuthRelayTokenService.class
+        AuthRelayTokenService.class,
+        RegisteredClientRepository.class,
+        OAuth2AuthorizationService.class,
+        OAuth2AuthorizationConsentService.class
 })
 @MockitoBean(name = "oauth2LoginCustomizer", types = Customizer.class)
 public @interface ControllerWebTest {
