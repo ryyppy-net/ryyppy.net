@@ -2,20 +2,15 @@ package drinkcounter.authentication.authorizationserver;
 
 import drinkcounter.authentication.DrinkcounterUserDetails;
 import java.security.Principal;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Set;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
 /** Registered apps and authorizations as the authorization server stores them. */
 public final class AuthorizationFixtures {
@@ -36,7 +31,6 @@ public final class AuthorizationFixtures {
                 .redirectUri(REDIRECT_URI)
                 .scope(AuthorizationServerConfiguration.MCP_SCOPE)
                 .clientSettings(ClientSettings.builder().requireProofKey(true).requireAuthorizationConsent(true).build())
-                .tokenSettings(TokenSettings.builder().accessTokenFormat(OAuth2TokenFormat.REFERENCE).build())
                 .build();
     }
 
@@ -44,19 +38,6 @@ public final class AuthorizationFixtures {
         Set<SimpleGrantedAuthority> authorities = Set.of(new SimpleGrantedAuthority("ROLE_USER"));
         DrinkcounterUserDetails details = new DrinkcounterUserDetails(email, "", true, true, true, true, authorities, userId);
         return UsernamePasswordAuthenticationToken.authenticated(details, null, authorities);
-    }
-
-    /** An authorization whose access token is valid from {@code issuedAt} for an hour. */
-    public static OAuth2Authorization withAccessToken(RegisteredClient client, String token, Instant issuedAt,
-            String email, int userId) {
-        return OAuth2Authorization.withRegisteredClient(client)
-                .principalName(email)
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .authorizedScopes(client.getScopes())
-                .attribute(Principal.class.getName(), signedIn(email, userId))
-                .accessToken(new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, token, issuedAt,
-                        issuedAt.plus(Duration.ofHours(1)), client.getScopes()))
-                .build();
     }
 
     /** An authorization waiting for the user's consent, as the consent page finds it by its state. */

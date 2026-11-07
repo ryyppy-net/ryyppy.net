@@ -1,18 +1,24 @@
 package drinkcounter.authentication.authorizationserver;
 
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.jwt.BadJwtException;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationValidator;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
+import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
@@ -39,12 +45,13 @@ public class AuthorizationServerConfiguration {
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerFilterChain(HttpSecurity http,
-            RegisteredClientRepository registeredClients, AuthorizationServerSettings settings) throws Exception {
+            RegisteredClientRepository registeredClients, AuthorizationServerSettings settings, JWKSource<SecurityContext> jwkSource)
+            throws Exception {
         http
             .oauth2AuthorizationServer(authorizationServer -> {
                 http.securityMatcher(authorizationServer.getEndpointsMatcher());
                 authorizationServer
-                    .tokenGenerator(new DelegatingOAuth2TokenGenerator(new OAuth2AccessTokenGenerator(), new RefreshTokenGenerator()))
+                    .tokenGenerator(new DelegatingOAuth2TokenGenerator(accessTokens(jwkSource), new OAuth2AccessTokenGenerator(), new RefreshTokenGenerator()))
                     .authorizationEndpoint(endpoint -> endpoint
                         .consentPage(CONSENT_PAGE)
                         .authorizationRequestConverters(converters -> converters.replaceAll(converter ->
@@ -69,10 +76,6 @@ public class AuthorizationServerConfiguration {
                             }
                         })));
             })
-            // Registration is open, so this server issues no initial access tokens to accept.
-            .oauth2ResourceServer(resourceServer -> resourceServer.jwt(jwt -> jwt.decoder(token -> {
-                throw new BadJwtException("No bearer token is accepted here");
-            })))
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.POST, settings.getClientRegistrationEndpoint()).permitAll()
                 .anyRequest().authenticated())
@@ -85,7 +88,7 @@ public class AuthorizationServerConfiguration {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain mcpFilterChain(HttpSecurity http, OAuth2AuthorizationService authorizations) throws Exception {
+    public SecurityFilterChain mcpFilterChain(HttpSecurity http) throws Exception {
         BearerTokenAuthenticationEntryPoint entryPoint = new BearerTokenAuthenticationEntryPoint();
         entryPoint.setResourceMetadataParameterResolver(request ->
             ServletUriComponentsBuilder.fromContextPath(request).path(PROTECTED_RESOURCE_METADATA_PATH).toUriString());
@@ -96,7 +99,7 @@ public class AuthorizationServerConfiguration {
                 .anyRequest().hasAuthority("SCOPE_" + MCP_SCOPE))
             .oauth2ResourceServer(resourceServer -> resourceServer
                 .authenticationEntryPoint(entryPoint)
-                .opaqueToken(opaqueToken -> opaqueToken.authenticationManager(new AccessTokenAuthenticationManager(authorizations)))
+                .jwt(Customizer.withDefaults())
                 .protectedResourceMetadata(metadata -> metadata.protectedResourceMetadataCustomizer(resource -> resource
                     .authorizationServer(ServletUriComponentsBuilder.fromCurrentContextPath().toUriString())
                     .scope(MCP_SCOPE)
@@ -105,6 +108,17 @@ public class AuthorizationServerConfiguration {
             .requestCache(cache -> cache.requestCache(new NullRequestCache()))
             .csrf(csrf -> csrf.disable());
         return http.build();
+    }
+
+    @Bean
+    public JWKSource<SecurityContext> jwkSource(@Value("${auth.jwt.signing-key:}") String signingKey) {
+        return new ImmutableJWKSet<>(new JWKSet(SigningKey.of(signingKey)));
+    }
+
+    private static JwtGenerator accessTokens(JWKSource<SecurityContext> jwkSource) {
+        JwtGenerator generator = new JwtGenerator(new NimbusJwtEncoder(jwkSource));
+        generator.setJwtCustomizer(new UserIdSubject());
+        return generator;
     }
 
     @Bean

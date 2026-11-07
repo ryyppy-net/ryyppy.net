@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -51,7 +52,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         AuthRelayTokenService.class,
         RegisteredClientRepository.class,
         OAuth2AuthorizationService.class,
-        OAuth2AuthorizationConsentService.class
+        OAuth2AuthorizationConsentService.class,
+        JwtDecoder.class
 })
 @MockitoBean(name = "oauth2LoginCustomizer", types = Customizer.class)
 public @interface ControllerWebTest {

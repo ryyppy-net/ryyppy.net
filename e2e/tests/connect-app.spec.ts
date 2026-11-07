@@ -29,11 +29,12 @@ async function authorizeSigningIn(page: Page, user: TestUser, clientId: string, 
   await page.click('input[type="submit"]');
 }
 
-async function signedOutUser(page: Page, label: string): Promise<TestUser> {
+async function signedOutUser(page: Page, label: string): Promise<TestUser & { id: number }> {
   const user = makeTestUser(label);
   await registerUser(page, user);
+  const { id } = await (await page.request.get('/API/v2/profile')).json();
   await page.context().clearCookies();
-  return user;
+  return { ...user, id };
 }
 
 test('an app the user allows gets tokens that work on /mcp only', async ({ page, playwright, baseURL }) => {
@@ -60,6 +61,8 @@ test('an app the user allows gets tokens that work on /mcp only', async ({ page,
   const { access_token, refresh_token, scope } = await tokens.json();
   expect(scope).toBe('mcp');
   expect(refresh_token).toBeTruthy();
+  const claims = JSON.parse(Buffer.from(access_token.split('.')[1], 'base64url').toString());
+  expect(claims.sub).toBe(String(user.id));
 
   expect((await app.post('/mcp', { headers: { Authorization: `Bearer ${access_token}` } })).status()).toBe(501);
   expect((await app.get('/API/v2/profile', { headers: { Authorization: `Bearer ${access_token}` }, maxRedirects: 0 })).status())

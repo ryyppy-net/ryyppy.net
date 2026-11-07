@@ -26,7 +26,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.test.web.servlet.MockMvc;
 
 @ControllerWebTest
@@ -84,6 +83,6 @@ public class AuthorizationServerWebTest {
         assertEquals(Set.of(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
                 saved.getValue().getAuthorizationGrantTypes());
         assertEquals(Set.of("mcp"), saved.getValue().getScopes());
-        assertEquals(OAuth2TokenFormat.REFERENCE, saved.getValue().getTokenSettings().getAccessTokenFormat());
+        assertEquals(false, saved.getValue().getTokenSettings().isReuseRefreshTokens());
     }
 }

@@ -1,10 +1,6 @@
 spring:
   application:
     name: ryyppy.net
-  autoconfigure:
-    # Access tokens are opaque and looked up in the database, so the authorization server needs
-    # no signing key; this one would be a new RSA key on every start.
-    exclude: org.springframework.boot.security.oauth2.server.authorization.autoconfigure.servlet.OAuth2AuthorizationServerJwtAutoConfiguration
   datasource:
     url: jdbc:postgresql://localhost/ryyppynet
     username: ryyppynet
@@ -60,6 +56,9 @@ google:
 auth:
   relay:
     secret: ${AUTH_RELAY_SECRET:}
+  jwt:
+    # PKCS#8 PEM RSA private key that signs access tokens; without it each start signs with a new key.
+    signing-key: ${AUTH_JWT_SIGNING_KEY:}
 
 server:
   # Railway assigns the container's public port via $PORT. The old Railpack

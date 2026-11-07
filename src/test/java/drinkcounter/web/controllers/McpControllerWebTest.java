@@ -1,12 +1,8 @@
 package drinkcounter.web.controllers;
 
-import static drinkcounter.authentication.authorizationserver.AuthorizationFixtures.publicClient;
-import static drinkcounter.authentication.authorizationserver.AuthorizationFixtures.withAccessToken;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -16,13 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.web.ControllerWebTest;
-import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
-import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.jwt.BadJwtException;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -35,7 +31,7 @@ public class McpControllerWebTest {
     private MockMvc mvc;
 
     @Autowired
-    private OAuth2AuthorizationService authorizations;
+    private JwtDecoder jwtDecoder;
 
     @Test
     public void requestWithoutTokenIsToldWhereToGetOne() throws Exception {
@@ -55,9 +51,8 @@ public class McpControllerWebTest {
     }
 
     @Test
-    public void validAccessTokenReachesMcpWithoutStartingASession() throws Exception {
-        OAuth2Authorization authorization = withAccessToken(publicClient("app"), "valid-token", Instant.now(), "ville@example.com", 42);
-        when(authorizations.findByToken(eq("valid-token"), eq(OAuth2TokenType.ACCESS_TOKEN))).thenReturn(authorization);
+    public void accessTokenWithTheMcpScopeReachesMcpWithoutStartingASession() throws Exception {
+        when(jwtDecoder.decode("valid-token")).thenReturn(accessToken("valid-token", "mcp"));
 
         MvcResult result = mvc.perform(post("/mcp").header("Authorization", "Bearer valid-token"))
                 .andExpect(status().isNotImplemented())
@@ -67,22 +62,20 @@ public class McpControllerWebTest {
     }
 
     @Test
-    public void unknownAccessTokenIsUnauthorized() throws Exception {
-        when(authorizations.findByToken(anyString(), eq(OAuth2TokenType.ACCESS_TOKEN))).thenReturn(null);
+    public void accessTokenWithoutTheMcpScopeIsForbidden() throws Exception {
+        when(jwtDecoder.decode("other-token")).thenReturn(accessToken("other-token", "other"));
 
-        mvc.perform(post("/mcp").header("Authorization", "Bearer unknown-token"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string("WWW-Authenticate", endsWith("oauth-protected-resource/mcp\"")));
+        mvc.perform(post("/mcp").header("Authorization", "Bearer other-token"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    public void expiredAccessTokenIsUnauthorized() throws Exception {
-        OAuth2Authorization authorization = withAccessToken(publicClient("app"), "old-token",
-                Instant.now().minus(Duration.ofHours(2)), "ville@example.com", 42);
-        when(authorizations.findByToken(eq("old-token"), eq(OAuth2TokenType.ACCESS_TOKEN))).thenReturn(authorization);
+    public void invalidAccessTokenIsUnauthorized() throws Exception {
+        when(jwtDecoder.decode("invalid-token")).thenThrow(new BadJwtException("bad signature"));
 
-        mvc.perform(post("/mcp").header("Authorization", "Bearer old-token"))
-                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/mcp").header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate", endsWith("oauth-protected-resource/mcp\"")));
     }
 
     @Test
@@ -90,5 +83,15 @@ public class McpControllerWebTest {
     public void signedInBrowserSessionCannotUseMcp() throws Exception {
         mvc.perform(post("/mcp"))
                 .andExpect(status().isForbidden());
+    }
+
+    private static Jwt accessToken(String value, String scope) {
+        return Jwt.withTokenValue(value)
+                .header("alg", "RS256")
+                .subject("42")
+                .claim("scope", List.of(scope))
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
     }
 }

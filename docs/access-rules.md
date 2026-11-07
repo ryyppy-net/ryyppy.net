@@ -96,6 +96,6 @@ An app, such as an LLM client, can act on Ryyppy.net as you once you allow it. I
 | Deny an app | You | The app is told access was denied and gets nothing. |
 | Use your account | An app you allowed | The app acts as you, with exactly your access: every rule in this document applies to it as it does to you. |
 | Keep access | An app you allowed | Its access token works for an hour. The app can renew it with a refresh token, which works once and for 30 days. |
-| End access | The app | The app can revoke its own tokens. Ryyppy.net does not list the apps you have allowed. |
+| End access | The app | The app can revoke its own tokens. A revoked refresh token stops working at once; a revoked access token works until it expires, within the hour. Ryyppy.net does not list the apps you have allowed. |
 
 An app cannot see or use another app's tokens.
