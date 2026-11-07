@@ -25,7 +25,7 @@ test.describe('drink sounds', () => {
   test.use({ storageState: SHARED_STORAGE_STATE });
 
   test('the server renders a content-hashed clip manifest into the page', async ({ page }) => {
-    await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/', { waitUntil: 'domcontentloaded' });
 
     const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[][]);
 
@@ -48,7 +48,7 @@ test.describe('drink sounds', () => {
       }
     });
 
-    await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('h2', { hasText: 'Bileesi' })).toBeVisible();
 
     await waitForSoundsReady(page);
@@ -64,7 +64,7 @@ test.describe('drink sounds', () => {
   });
 
   test('clips are served immutable so a repeat visit never refetches them', async ({ page }) => {
-    await page.goto('/app/index.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/', { waitUntil: 'domcontentloaded' });
     const urls = await page.evaluate(() => (window as any).__SOUND_URLS__ as string[][]);
 
     const response = await page.request.get(urls[0][0]);

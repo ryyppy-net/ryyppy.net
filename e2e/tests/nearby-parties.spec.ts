@@ -13,14 +13,14 @@ test('someone inside the area finds the party from the front page with a rough d
     await searcherAt(context, baseURL, north(place, 300));
     const searcher = context.pages()[0];
 
-    await searcher.goto('/app/index.html#!/', { waitUntil: 'domcontentloaded' });
+    await searcher.goto('/app/', { waitUntil: 'domcontentloaded' });
     await searcher.getByRole('link', { name: 'Etsi bileitä läheltä' }).click();
-    await expect(searcher).toHaveURL(/#!\/nearby$/);
+    await expect(searcher).toHaveURL(/\/app\/nearby$/);
 
     await expect(searcher.getByRole('heading', { name: 'Bileet lähellä' })).toBeVisible();
     await expect(searcher.getByText('Sijaintiasi käytetään vain bileiden etsimiseen. Bilettäjät eivät näe sitä.')).toBeVisible();
     const tile = searcher.locator('a.nearby-party', { hasText: party.name });
-    await expect(tile).toHaveAttribute('href', `#!/nearby/${party.partyId}`);
+    await expect(tile).toHaveAttribute('href', `/app/nearby/${party.partyId}`);
     await expect(tile.locator('.nearby-party-distance')).toHaveText('noin 300 m');
     await expect(tile.locator('.nearby-party-times')).toHaveText(
       /^Alkoi \S+ \d{1,2}\.\d{1,2}\. klo \d{2}:\d{2} · päättyy \S+ \d{1,2}\.\d{1,2}\. klo \d{2}:\d{2}$/);
@@ -56,7 +56,7 @@ test('someone outside the area is told there are no parties nearby and can retry
     await searcherAt(context, baseURL, north(place, 1500));
     const searcher = context.pages()[0];
 
-    await searcher.goto('/app/index.html#!/nearby', { waitUntil: 'domcontentloaded' });
+    await searcher.goto('/app/nearby', { waitUntil: 'domcontentloaded' });
 
     await expect(searcher.getByRole('heading', { name: 'Lähellä ei ole bileitä' })).toBeVisible();
     await expect(searcher.getByText(party.name)).toHaveCount(0);
@@ -76,7 +76,7 @@ test.describe('signed in as the shared user', () => {
   test('a searcher whose browser blocks location is told how to allow it', async ({ page, context }) => {
     await context.clearPermissions();
 
-    await page.goto('/app/index.html#!/nearby', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/nearby', { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByRole('heading', { name: 'Sijainti on estetty' })).toBeVisible();
     await expect(page.getByText(/Salli sijainti \S+-sivustolle selaimen asetuksista/)).toBeVisible();
@@ -93,7 +93,7 @@ test.describe('signed in as the shared user', () => {
       };
     });
 
-    await page.goto('/app/index.html#!/nearby', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/nearby', { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByRole('heading', { name: 'Sijaintia ei saatu' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Yritä uudelleen' })).toBeVisible();

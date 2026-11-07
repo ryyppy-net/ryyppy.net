@@ -18,7 +18,7 @@ async function createParty(page: Page, label: string): Promise<number> {
 }
 
 async function openAdmin(page: Page, partyId: number): Promise<void> {
-  await page.goto(`/app/index.html#!/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Sijaintikutsu' })).toBeVisible();
 }
 

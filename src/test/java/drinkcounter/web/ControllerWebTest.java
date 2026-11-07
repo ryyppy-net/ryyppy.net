@@ -11,6 +11,7 @@ import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
+import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.authorizationserver.AuthorizationServerConfiguration;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.repository.DrinkRepository;
@@ -36,7 +37,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
-@Import({WebSecurityConfiguration.class, AuthorizationServerConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class})
+@Import({WebSecurityConfiguration.class, AuthorizationServerConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class,
+        SignInDestination.class})
 @MockitoBean(types = {
         PartyRoster.class,
         PartyJoinLinks.class,

@@ -6,7 +6,8 @@ angular.module('ryyppy', ['ngRoute', 'ngAnimate', 'ryyppy.filters', 'ryyppy.serv
     $compileProvider.debugInfoEnabled(false);
     $httpProvider.useApplyAsync(true);
   }]).
-  config(['$routeProvider', function($routeProvider) {
+  config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+    $locationProvider.html5Mode(true);
     $routeProvider.when('/', {template: '<user-page></user-page>'});
     $routeProvider.when('/profile-settings', {template: '<profile-settings-page></profile-settings-page>'});
     $routeProvider.when('/party/:partyId', {template: '<party-page></party-page>'});

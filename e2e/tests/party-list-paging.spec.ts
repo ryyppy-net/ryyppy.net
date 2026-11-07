@@ -16,8 +16,8 @@ async function userWithManyParties(page: Page, label: string): Promise<string> {
 }
 
 for (const { name, path } of [
-  { name: 'dashboard', path: '/app/index.html#!/' },
-  { name: 'party admin page', path: '/app/index.html#!/party-admin/' },
+  { name: 'dashboard', path: '/app/' },
+  { name: 'party admin page', path: '/app/party-admin/' },
 ]) {
   test(`the ${name} shows the 20 newest parties and the rest on "show more"`, async ({ page }) => {
     const prefix = await userWithManyParties(page, `paging-${name.replace(/ /g, '-')}`);

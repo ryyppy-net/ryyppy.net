@@ -37,10 +37,10 @@ async function expectCannotJoin(page: Page) {
 test('someone nearby opens a found party, joins it and lands on its page', async ({ baseURL }) => {
   await searcherAt(joinerContext, baseURL, north(place, 300));
 
-  await joiner.goto('/app/index.html#!/nearby', { waitUntil: 'domcontentloaded' });
+  await joiner.goto('/app/nearby', { waitUntil: 'domcontentloaded' });
   await joiner.locator('a.nearby-party', { hasText: party.name }).click();
 
-  await expect(joiner).toHaveURL(new RegExp(`#!/nearby/${party.partyId}$`));
+  await expect(joiner).toHaveURL(new RegExp(`/app/nearby/${party.partyId}$`));
   await expect(joiner.getByText('Bileet lähelläsi')).toBeVisible();
   await expect(joiner.getByRole('heading', { name: party.name })).toBeVisible();
   await expect(joiner.getByText(/^Alkoi \S+ \d{1,2}\.\d{1,2}\. klo \d{1,2}:\d{2}$/)).toBeVisible();
@@ -53,7 +53,7 @@ test('someone nearby opens a found party, joins it and lands on its page', async
   await joiner.getByRole('button', { name: 'Liity bileisiin' }).click();
   expect((await join).postDataJSON()).toEqual({ latitude: north(place, 300).latitude, longitude: place.longitude });
 
-  await expect(joiner).toHaveURL(new RegExp(`#!/party/${party.partyId}$`));
+  await expect(joiner).toHaveURL(new RegExp(`/app/party/${party.partyId}$`));
   await expect(joiner.locator('.toast-title', { hasText: 'Tervetuloa bileisiin!' })).toBeVisible();
   await expect(joiner.locator('.toast-text', { hasText: `Liityit bileisiin ${party.name}.` })).toBeVisible();
   expect(await joinerStatusOf(party.partyId)).toBe(200);
@@ -61,17 +61,17 @@ test('someone nearby opens a found party, joins it and lands on its page', async
   const stored = await joiner.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
   expect(stored).not.toContain(String(place.latitude).slice(0, 6));
 
-  await joiner.goto('/app/index.html#!/', { waitUntil: 'domcontentloaded' });
+  await joiner.goto('/app/', { waitUntil: 'domcontentloaded' });
   await expect(joiner.locator('.party', { hasText: party.name })).toBeVisible();
 });
 
 test('cancelling on the confirmation goes back to the nearby list without joining', async ({ baseURL }) => {
   await searcherAt(joinerContext, baseURL, north(place, 300));
 
-  await joiner.goto(`/app/index.html#!/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
+  await joiner.goto(`/app/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
   await joiner.getByRole('link', { name: 'Peruuta' }).click();
 
-  await expect(joiner).toHaveURL(/#!\/nearby$/);
+  await expect(joiner).toHaveURL(/\/app\/nearby$/);
   await expect(joiner.locator('a.nearby-party', { hasText: party.name })).toBeVisible();
   expect(await joinerStatusOf(party.partyId)).toBe(403);
 });
@@ -80,9 +80,9 @@ test('a member who opens the confirmation is taken to the party', async ({ baseU
   await searcherAt(owner, baseURL, north(place, 100));
   const member = owner.pages()[0];
 
-  await member.goto(`/app/index.html#!/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
+  await member.goto(`/app/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
 
-  await expect(member).toHaveURL(new RegExp(`#!/party/${party.partyId}$`));
+  await expect(member).toHaveURL(new RegExp(`/app/party/${party.partyId}$`));
   await expect(member.locator('.toast-title', { hasText: 'Olet jo mukana näissä bileissä' })).toBeVisible();
   await expect(member.locator('.toast-text', { hasText: party.name })).toBeVisible();
   await expect(member.getByRole('button', { name: 'Liity bileisiin' })).toHaveCount(0);
@@ -90,7 +90,7 @@ test('a member who opens the confirmation is taken to the party', async ({ baseU
 
 test('someone who moves outside the area before joining is told they cannot join', async ({ baseURL }) => {
   await searcherAt(joinerContext, baseURL, north(place, 900));
-  await joiner.goto(`/app/index.html#!/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
+  await joiner.goto(`/app/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
   await expect(joiner.getByRole('heading', { name: party.name })).toBeVisible();
 
   await joinerContext.setGeolocation(north(place, 1500));
@@ -107,13 +107,13 @@ test('someone who moves outside the area before joining is told they cannot join
   await joiner.getByRole('button', { name: 'Liity bileisiin' }).click();
   await expectCannotJoin(joiner);
   await joiner.getByRole('link', { name: 'Takaisin listaan' }).click();
-  await expect(joiner).toHaveURL(/#!\/nearby$/);
+  await expect(joiner).toHaveURL(/\/app\/nearby$/);
   await expect(joiner.getByRole('heading', { name: 'Lähellä ei ole bileitä' })).toBeVisible();
 });
 
 test('a party whose location invite was turned off cannot be joined', async ({ baseURL }) => {
   await searcherAt(joinerContext, baseURL, north(place, 300));
-  await joiner.goto(`/app/index.html#!/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
+  await joiner.goto(`/app/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
   await expect(joiner.getByRole('heading', { name: party.name })).toBeVisible();
 
   expect((await owner.request.delete(`/API/v2/parties/${party.partyId}/location-invite`)).ok()).toBeTruthy();
@@ -129,7 +129,7 @@ test('a party whose location invite was turned off cannot be joined', async ({ b
 test('a searcher whose browser blocks location is told how to allow it', async () => {
   await joinerContext.clearPermissions();
 
-  await joiner.goto(`/app/index.html#!/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
+  await joiner.goto(`/app/nearby/${party.partyId}`, { waitUntil: 'domcontentloaded' });
 
   await expect(joiner.getByRole('heading', { name: 'Sijainti on estetty' })).toBeVisible();
   await expect(joiner.getByRole('button', { name: 'Yritä uudelleen' })).toBeVisible();

@@ -80,7 +80,7 @@
                 <div ng-if="$ctrl.state === 'list'">
                     <h1>Bileet lähellä</h1>
                     <p class="nearby-page-muted location-invite-small">Bileet, joiden alueella olet nyt. Päivitetty klo {{ $ctrl.updatedAt }}.</p>
-                    <a class="nearby-party" ng-repeat="party in $ctrl.parties track by party.partyId" ng-href="#!/nearby/{{ party.partyId }}">
+                    <a class="nearby-party" ng-repeat="party in $ctrl.parties track by party.partyId" ng-href="/app/nearby/{{ party.partyId }}">
                         <div class="party color{{ ($index % 12) + 1 }}">
                             <div class="party-header">
                                 <span class="party-header-title">{{ party.name }}</span>
@@ -107,7 +107,7 @@
                         <h2>Lähellä ei ole bileitä</h2>
                         <p>Et ole minkään bileiden alueella juuri nyt. Bilettäjä voi ottaa sijaintikutsun käyttöön Bilettäjät-sivulla tai lähettää sinulle kutsulinkin.</p>
                         <button type="button" class="btn btn-success btn-large" ng-click="$ctrl.find()">${LOCATE_ICON}Päivitä</button>
-                        <a class="btn btn-large" href="#!/">Takaisin etusivulle</a>
+                        <a class="btn btn-large" href="/app/">Takaisin etusivulle</a>
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@
                     <h1>Haku epäonnistui</h1>
                     <p>Bileitä ei saatu haettua. Yritä hetken päästä uudelleen.</p>
                     <button type="button" class="btn btn-success btn-large" ng-click="$ctrl.find()">Yritä uudelleen</button>
-                    <a class="btn btn-large" href="#!/">Takaisin etusivulle</a>
+                    <a class="btn btn-large" href="/app/">Takaisin etusivulle</a>
                 </div>
             </div>
         </div>

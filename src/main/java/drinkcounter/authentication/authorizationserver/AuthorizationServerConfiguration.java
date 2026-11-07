@@ -79,10 +79,9 @@ public class AuthorizationServerConfiguration {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.POST, settings.getClientRegistrationEndpoint()).permitAll()
                 .anyRequest().authenticated())
-            .requestCache(cache -> cache.requestCache(PendingAuthorization.requestCache()))
             .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
                 new LoginUrlAuthenticationEntryPoint("/ui/login?connect"),
-                PendingAuthorization.AUTHORIZATION_REQUEST));
+                PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, settings.getAuthorizationEndpoint())));
         return http.build();
     }
 

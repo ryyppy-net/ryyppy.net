@@ -7,12 +7,12 @@
     <div class="navbar hidden-phone">
         <div class="navbar-inner">
             <ul class="nav">
-                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="#!/party/{{ ::$ctrl.party.id }}">{{ ::$ctrl.party.name }}</a></li>
-                <li ng-class="$ctrl.active == 'admin' && 'active'"><a ng-href="#!/party-admin/{{ ::$ctrl.party.id }}">Bilettäjät</a></li>
+                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="/app/party/{{ ::$ctrl.party.id }}">{{ ::$ctrl.party.name }}</a></li>
+                <li ng-class="$ctrl.active == 'admin' && 'active'"><a ng-href="/app/party-admin/{{ ::$ctrl.party.id }}">Bilettäjät</a></li>
             </ul>
             <ul class="nav pull-right">
                 <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään">Vanha käyttöliittymä</a></li>
-                <li><a href="#!/">Palaa takaisin</a></li>
+                <li><a href="/app/">Palaa takaisin</a></li>
             </ul>
         </div>
     </div>
@@ -20,12 +20,12 @@
     <div class="navbar mobile-navbar visible-phone">
         <div class="navbar-inner">
             <ul class="nav">
-                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="#!/party/{{ ::$ctrl.party.id }}">{{ ::$ctrl.party.name }}</a></li>
-                <li ng-class="$ctrl.active == 'admin' && 'active'"><a ng-href="#!/party-admin/{{ ::$ctrl.party.id }}"><i class="icon-plus-sign"></i></a></li>
+                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="/app/party/{{ ::$ctrl.party.id }}">{{ ::$ctrl.party.name }}</a></li>
+                <li ng-class="$ctrl.active == 'admin' && 'active'"><a ng-href="/app/party-admin/{{ ::$ctrl.party.id }}"><i class="icon-plus-sign"></i></a></li>
             </ul>
             <ul class="nav pull-right">
                 <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään"><i class="icon-share"></i></a></li>
-                <li><a href="#!/"><i class="icon-chevron-right"></i></a></li>
+                <li><a href="/app/"><i class="icon-chevron-right"></i></a></li>
             </ul>
         </div>
     </div>`

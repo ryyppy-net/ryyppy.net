@@ -74,7 +74,7 @@
 
                 <div class="join-link-note nearby-entry">
                     <p>Bileet lähellä? Etsi bileet, joihin voit liittyä sijaintisi perusteella.</p>
-                    <a class="btn btn-success btn-large btn-block nearby-entry-button" href="#!/nearby"><svg class="nearby-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"></circle><circle cx="12" cy="12" r="2" fill="currentColor"></circle><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22"></path></svg>Etsi bileitä läheltä</a>
+                    <a class="btn btn-success btn-large btn-block nearby-entry-button" href="/app/nearby"><svg class="nearby-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"></circle><circle cx="12" cy="12" r="2" fill="currentColor"></circle><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22"></path></svg>Etsi bileitä läheltä</a>
                 </div>
 
                 <h2>Bileesi</h2>
@@ -82,17 +82,17 @@
                 <div ng-if="$ctrl.parties.data.length <= 0">
                     <p>
                         Et näytä olevan vielä missään bileissä. Voit lisätä uudet bileet
-                        <a href="#!/party-admin">bileiden hallinnassa</a> tai antaa rekisteröityessäsi käyttämäsi
+                        <a href="/app/party-admin">bileiden hallinnassa</a> tai antaa rekisteröityessäsi käyttämäsi
                         sähköpostiosoitteen kavereillesi, jotta he voivat kutsua sinut bileisiinsä.
                     </p>
                 </div>
                 <div ng-if="$ctrl.parties.data.length > 0">
                     <p>
-                        Jos haluat muokata bileitäsi, voit tehdä sen <a href="#!/party-admin">bileiden hallinnassa</a>.
+                        Jos haluat muokata bileitäsi, voit tehdä sen <a href="/app/party-admin">bileiden hallinnassa</a>.
                     </p>
 
                     <div ng-repeat="party in $ctrl.parties.data | orderBy:[$ctrl.partySort, 'id']:true | limitTo:$ctrl.partiesShown() track by party.id">
-                        <a href="#!/party/{{ ::party.id }}">
+                        <a href="/app/party/{{ ::party.id }}">
                             <div class="party color{{ ($index % 12) + 1 }}">
                                 <div class="party-header">
                                     <span class="party-header-title">{{ ::party.name }}</span>

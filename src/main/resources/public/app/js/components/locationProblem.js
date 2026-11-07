@@ -22,7 +22,7 @@
         <p>Lähellä olevia bileitä ei voi etsiä ilman sijaintia. Salli sijainti {{ $ctrl.host }}-sivustolle selaimen asetuksista ja yritä uudelleen.</p>
         <button type="button" class="btn btn-success btn-large" ng-click="$ctrl.onRetry()">Yritä uudelleen</button>
         <p class="location-invite-small">Voit liittyä bileisiin myös kutsulinkillä.</p>
-        <a class="btn btn-large" href="#!/">Takaisin etusivulle</a>
+        <a class="btn btn-large" href="/app/">Takaisin etusivulle</a>
     </div>
 
     <div class="nearby-page-message" ng-if="$ctrl.reason === 'unavailable'">
@@ -30,7 +30,7 @@
         <h1>Sijaintia ei saatu</h1>
         <p>Laite ei löytänyt sijaintiasi. Tarkista, että sijaintipalvelut ovat päällä, tai siirry ulos ja yritä uudelleen.</p>
         <button type="button" class="btn btn-success btn-large" ng-click="$ctrl.onRetry()">Yritä uudelleen</button>
-        <a class="btn btn-large" href="#!/">Takaisin etusivulle</a>
+        <a class="btn btn-large" href="/app/">Takaisin etusivulle</a>
     </div>`
     });
 })(angular);

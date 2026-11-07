@@ -8,6 +8,7 @@ import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.authentication.relay.Origins;
 import drinkcounter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,21 +36,25 @@ public class GoogleOneTapController {
     private final GoogleIdentityLinkingService identityLinkingService;
     private final AuthRelayTokenService relayTokenService;
     private final ClientRegistrationRepository clientRegistrationRepository;
+    private final SignInDestination signInDestination;
 
     @Autowired
     public GoogleOneTapController(
             GoogleIdentityLinkingService identityLinkingService,
             AuthRelayTokenService relayTokenService,
-            ClientRegistrationRepository clientRegistrationRepository) {
+            ClientRegistrationRepository clientRegistrationRepository,
+            SignInDestination signInDestination) {
         this.identityLinkingService = identityLinkingService;
         this.relayTokenService = relayTokenService;
         this.clientRegistrationRepository = clientRegistrationRepository;
+        this.signInDestination = signInDestination;
     }
 
     @PostMapping("/api/auth/google/one-tap")
     public String handleOneTapCallback(
             @RequestParam("credential") String credential,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse response) {
 
         if (credential == null || credential.isEmpty()) {
             log.warn("One Tap callback received without credential");
@@ -119,6 +124,6 @@ public class GoogleOneTapController {
 
         log.info("One Tap: authentication successful for user: email={}, userId={}", email, user.getId());
 
-        return "redirect:/app/index.html";
+        return signInDestination.redirect(request, response);
     }
 }

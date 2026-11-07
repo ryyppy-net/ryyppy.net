@@ -95,7 +95,7 @@ test.describe('party page, shared owner', () => {
     expect(pageErrors).toEqual([]);
   });
 
-  test('back button navigates to /ui/user and the switch-to-modern link navigates to /app/index.html', async ({ page }) => {
+  test('back button navigates to /ui/user and the switch-to-modern link navigates to /app/', async ({ page }) => {
     const user = sharedUser();
     await gotoClassicDashboard(page, user.name);
 
@@ -109,7 +109,7 @@ test.describe('party page, shared owner', () => {
 
     await page.goto(partyUrl);
     await page.click('#uiSwitchButton');
-    await expect(page).toHaveURL(/\/app\/index\.html/);
+    await expect(page).toHaveURL(/\/app\/$/);
   });
 });
 
@@ -182,7 +182,7 @@ test.describe('participant previews, shared owner', () => {
     const guestName = `"><img src=x onerror=window.__xss=1>'`;
     await addGuestToParty(page, { name: guestName, sex: 'MALE', weight: '80' });
 
-    for (const path of ['/app/index.html#!/', '/app/index.html#!/party-admin/']) {
+    for (const path of ['/app/', '/app/party-admin/']) {
       await page.goto(path, { waitUntil: 'domcontentloaded' });
 
       const partyTile = page.locator('.party', { has: page.getByText(partyName) });

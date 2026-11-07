@@ -4,7 +4,6 @@ import drinkcounter.DrinkLog;
 import drinkcounter.PartyRoster;
 import drinkcounter.Promilles;
 import drinkcounter.authentication.LoggedInUser;
-import drinkcounter.authentication.authorizationserver.PendingAuthorization;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import drinkcounter.web.controllers.api.v2.DrinkDTO;
@@ -12,8 +11,6 @@ import drinkcounter.web.controllers.api.v2.OwnDrinksView;
 import drinkcounter.web.controllers.api.v2.ParticipantPreviewDTO;
 import drinkcounter.web.controllers.api.v2.PartyDTO;
 import drinkcounter.web.controllers.ui.JoinController;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Controller;
@@ -29,7 +26,8 @@ import java.util.List;
 @Controller
 public class DefaultController {
 
-    public static final String REDIRECT_TO_FRONTPAGE = "redirect:/app/index.html#!/";
+    public static final String APP_ROOT = "/app/";
+    public static final String REDIRECT_TO_FRONTPAGE = "redirect:" + APP_ROOT;
     // PartiesStore first shows 20 parties and asks for one more to know whether to offer the rest.
     private static final int INITIAL_PARTIES = 21;
 
@@ -50,15 +48,20 @@ public class DefaultController {
         return REDIRECT_TO_FRONTPAGE;
     }
 
-    @GetMapping("/app/index.html")
-    public String appIndex(@LoggedInUser User user, Model model, HttpSession session,
-            HttpServletRequest request, HttpServletResponse response) {
-        // Every way of signing in lands here, so an app's authorization request or a join link
-        // opened while signed out continues here.
-        String pendingAuthorization = PendingAuthorization.take(request, response);
-        if (pendingAuthorization != null) {
-            return "redirect:" + pendingAuthorization;
-        }
+    @GetMapping("/app")
+    public String redirectToAppRoot() {
+        return REDIRECT_TO_FRONTPAGE;
+    }
+
+    // The AngularJS routes in app/js/app.js, so loading or reloading any of them renders the app.
+    // /app/index.html stays for bookmarks; the app redirects it to its front page.
+    @GetMapping({
+            "/app/", "/app/index.html", "/app/profile-settings",
+            "/app/party/*", "/app/party-admin", "/app/party-admin/", "/app/party-admin/*",
+            "/app/join/*", "/app/nearby", "/app/nearby/*"
+    })
+    public String appIndex(@LoggedInUser User user, Model model, HttpSession session) {
+        // Signing in after opening a join link lands here, so the join continues here.
         if (session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR) instanceof String token) {
             session.removeAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR);
             return JoinController.joinPage(token);

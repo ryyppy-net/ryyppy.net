@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithAnonymousUser;
@@ -61,7 +63,7 @@ public class DefaultControllerWebTest {
         user.drink(drink);
         when(drinkLog.drinksOf(42)).thenReturn(List.of(drink));
 
-        mvc.perform(get("/app/index.html"))
+        mvc.perform(get("/app/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("app/index"))
                 .andExpect(model().attribute("initialProfile", containsString("Ville")))
@@ -76,27 +78,52 @@ public class DefaultControllerWebTest {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR, "AbCdEfGhIjKlMnOpQrSt-_");
 
-        mvc.perform(get("/app/index.html").session(session))
+        mvc.perform(get("/app/").session(session))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/app/index.html#!/join/AbCdEfGhIjKlMnOpQrSt-_"));
+                .andExpect(redirectedUrl("/app/join/AbCdEfGhIjKlMnOpQrSt-_"));
 
         assertNull(session.getAttribute(JoinController.PENDING_TOKEN_SESSION_ATTR));
-        mvc.perform(get("/app/index.html").session(session))
+        mvc.perform(get("/app/").session(session))
                 .andExpect(status().isOk())
                 .andExpect(view().name("app/index"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/app/", "/app/index.html", "/app/profile-settings", "/app/party/7",
+            "/app/party-admin", "/app/party-admin/", "/app/party-admin/7",
+            "/app/join/AbCdEfGhIjKlMnOpQrSt-_", "/app/nearby", "/app/nearby/7"
+    })
+    public void everyAppRouteRendersTheApp(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().isOk())
+                .andExpect(view().name("app/index"));
+    }
+
+    @Test
+    public void appWithoutTrailingSlashRedirectsToTheAppRoot() throws Exception {
+        mvc.perform(get("/app"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/app/"));
+    }
+
+    @Test
+    public void unknownAppPathIsNotTheApp() throws Exception {
+        mvc.perform(get("/app/js/missing.js"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     public void rootRedirectsToTheFrontPage() throws Exception {
         mvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/app/index.html#!/"));
+                .andExpect(redirectedUrl("/app/"));
     }
 
     @Test
     @WithAnonymousUser
-    public void anonymousAppIndexRequestIsSentToTheLoginPage() throws Exception {
-        mvc.perform(get("/app/index.html"))
+    public void anonymousAppRequestIsSentToTheLoginPage() throws Exception {
+        mvc.perform(get("/app/party/7"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ui/login"));
 

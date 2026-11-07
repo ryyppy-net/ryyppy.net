@@ -13,16 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import drinkcounter.UserAccounts;
-import drinkcounter.authentication.WithDrinkcounterUser;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
-import java.util.ArrayList;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -44,25 +43,31 @@ public class AuthorizationServerWebTest {
     @Autowired
     private UserAccounts userAccounts;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Test
-    @WithDrinkcounterUser(userId = 42)
     public void authorizationStartedWhileSignedOutContinuesAfterSigningIn() throws Exception {
         when(registeredClients.findByClientId("app")).thenReturn(publicClient("app"));
         User user = new User();
         user.setId(42);
-        user.setParties(new ArrayList<>());
-        when(userAccounts.get(42)).thenReturn(user);
-        MockHttpSession session = new MockHttpSession();
+        user.setEmail("ville@example.com");
+        user.setPassword(passwordEncoder.encode("secret"));
+        when(userAccounts.byEmail("ville@example.com")).thenReturn(user);
 
-        mvc.perform(get(AUTHORIZATION_REQUEST).session(session).with(anonymous()))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ui/login?connect"));
+        MockHttpSession session = (MockHttpSession) mvc.perform(get(AUTHORIZATION_REQUEST))
+                .andExpect(redirectedUrl("/ui/login?connect"))
+                .andReturn().getRequest().getSession(false);
 
-        mvc.perform(get("/app/index.html").session(session))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("http://localhost" + AUTHORIZATION_REQUEST));
-        mvc.perform(get("/app/index.html").session(session))
-                .andExpect(status().isOk());
+        mvc.perform(post("/login").session(session)
+                        .with(request -> {
+                            request.setRequestedSessionId(session.getId());
+                            request.setRequestedSessionIdValid(true);
+                            return request;
+                        })
+                        .param("username", "ville@example.com")
+                        .param("password", "secret"))
+                .andExpect(redirectedUrl("http://localhost" + AUTHORIZATION_REQUEST + "&continue"));
     }
 
     @Test

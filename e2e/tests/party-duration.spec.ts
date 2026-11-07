@@ -28,18 +28,18 @@ function lengthMs({ startTime, endTime }: PartyTimes): number {
 }
 
 function partyIdOf(page: Page): string {
-  return page.url().match(/#!\/party\/(\d+)/)![1];
+  return page.url().match(/\/app\/party\/(\d+)/)![1];
 }
 
 /** Creates a party through the new party form, pressing "+" the given number of times first. */
 async function createPartyWithDays(page: Page, partyName: string, extraDays: number): Promise<string> {
-  await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/party-admin/', { waitUntil: 'domcontentloaded' });
   await page.fill('#partyName', partyName);
   for (let i = 0; i < extraDays; i++) {
     await page.getByRole('button', { name: 'Pidennä vuorokaudella' }).click();
   }
   await page.getByRole('button', { name: 'Lisää bileet' }).click();
-  await expect(page).toHaveURL(/#!\/party\/\d+/);
+  await expect(page).toHaveURL(/\/app\/party\/\d+/);
   return partyIdOf(page);
 }
 
@@ -53,7 +53,7 @@ function partyCard(page: Page, partyName: string) {
 
 test('a party created with the default length runs for 1 vrk and shows as running', async ({ page }) => {
   const partyName = `E2E Default Length ${Date.now()}`;
-  await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/party-admin/', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('.day-stepper-value')).toHaveText('1 vrk');
   await expect(page.locator('.duration-summary')).toContainText(/alkaa nyt, päättyy \S+ \d{1,2}\.\d{1,2}\. klo \d{1,2}:\d{2}/);
@@ -61,12 +61,12 @@ test('a party created with the default length runs for 1 vrk and shows as runnin
 
   await page.fill('#partyName', partyName);
   await page.getByRole('button', { name: 'Lisää bileet' }).click();
-  await expect(page).toHaveURL(/#!\/party\/\d+/);
+  await expect(page).toHaveURL(/\/app\/party\/\d+/);
   const partyId = partyIdOf(page);
 
   await expect(partyTime(page)).toHaveText(TIME_RANGE_WITH_KLO);
 
-  await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/party-admin/', { waitUntil: 'domcontentloaded' });
   const card = partyCard(page, partyName);
   await expect(card.locator('.party-progress')).toBeVisible();
   await expect(card.locator('small')).toHaveText(TIME_RANGE);
@@ -84,7 +84,7 @@ test('the party admin page changes the length only once the value differs from t
   const partyId = await createPartyWithDays(page, `E2E Change Length ${Date.now()}`, 0);
   const before = await partyTimes(page, partyId);
 
-  await page.goto(`/app/index.html#!/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
   const save = page.getByRole('button', { name: 'Tallenna' });
   await expect(page.locator('.day-stepper-value')).toHaveText('1 vrk');
   await expect(save).toBeDisabled();
@@ -101,7 +101,7 @@ test('the party admin page changes the length only once the value differs from t
   expect(after.startTime).toBe(before.startTime);
   expect(lengthMs(after)).toBe(2 * DAY_MS);
 
-  await page.goto(`/app/index.html#!/party/${partyId}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`/app/party/${partyId}`, { waitUntil: 'domcontentloaded' });
   await expect(partyTime(page)).toHaveText(TIME_RANGE_WITH_KLO);
 });
 
@@ -113,7 +113,7 @@ test('the party list drops the progress bar once a party has ended', async ({ pa
   const end = new Date(party.endTime).getTime();
 
   await page.clock.install({ time: end - 30 * 60 * 1000 });
-  await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app/party-admin/', { waitUntil: 'domcontentloaded' });
   const card = partyCard(page, partyName);
   await expect(card.locator('.party-progress')).toBeVisible();
 

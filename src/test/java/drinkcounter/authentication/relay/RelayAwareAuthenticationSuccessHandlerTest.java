@@ -61,7 +61,7 @@ public class RelayAwareAuthenticationSuccessHandlerTest {
 
         // Controllers only accept a DrinkcounterUserDetails principal, so the OAuth2 one must be replaced.
         verify(identityLinkingService).establishSession(42, "user@example.com", request);
-        assertEquals("/app/index.html", response.getRedirectedUrl());
+        assertEquals("/app/", response.getRedirectedUrl());
     }
 
     @Test

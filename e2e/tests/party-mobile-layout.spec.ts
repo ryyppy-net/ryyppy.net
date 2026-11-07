@@ -13,7 +13,7 @@ for (const name of ['iPhone SE', 'iPhone 13', 'iPhone 15 Pro Max']) {
 
     test('party page does not scroll sideways', async ({ page }) => {
       await createParty(page, `E2E Overflow ${Date.now()}`);
-      const partyId = page.url().match(/#!\/party\/(\d+)/)![1];
+      const partyId = page.url().match(/\/app\/party\/(\d+)/)![1];
       for (const guest of ['Aino', 'Eino', 'Kalle']) {
         await page.request.post(`/API/v2/parties/${partyId}/participants`, {
           form: { name: guest, sex: 'MALE', weight: '80' },
@@ -57,16 +57,16 @@ test.describe('form fields on a phone', () => {
   test.use(iPhone);
 
   test('are at least 16px on every form', async ({ page }) => {
-    await page.goto('/app/index.html#!/party-admin/', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/party-admin/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#partyName')).toBeVisible();
     expect(await smallFields(page), 'new party form').toEqual([]);
 
     await page.fill('#partyName', `E2E Fields ${Date.now()}`);
     await page.click('button[type="submit"]');
-    await expect(page).toHaveURL(/#!\/party\/(\d+)/);
-    const partyId = page.url().match(/#!\/party\/(\d+)/)![1];
+    await expect(page).toHaveURL(/\/app\/party\/(\d+)/);
+    const partyId = page.url().match(/\/app\/party\/(\d+)/)![1];
 
-    await page.goto(`/app/index.html#!/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/app/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#type')).toBeVisible();
     const typeCount = await page.locator('#type option').count();
     for (let index = 0; index < typeCount; index++) {
@@ -75,11 +75,11 @@ test.describe('form fields on a phone', () => {
     }
     await expect(page.locator('#weight')).toBeVisible();
 
-    await page.goto('/app/index.html#!/profile-settings', { waitUntil: 'domcontentloaded' });
+    await page.goto('/app/profile-settings', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('profile-settings-page #weight')).toBeVisible();
     expect(await smallFields(page), 'profile settings').toEqual([]);
 
-    await page.goto(`/app/index.html#!/party/${partyId}`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/app/party/${partyId}`, { waitUntil: 'domcontentloaded' });
     await page.locator('drinker [role="button"]').first().click();
     await page.getByRole('button', { name: 'Muokkaa' }).click();
     await expect(page.locator('#portionSize')).toBeVisible();
