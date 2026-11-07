@@ -2,7 +2,8 @@ package drinkcounter.authentication.authorizationserver;
 
 import static drinkcounter.authentication.authorizationserver.AuthorizationFixtures.REDIRECT_URI;
 import static drinkcounter.authentication.authorizationserver.AuthorizationFixtures.publicClient;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
@@ -15,15 +16,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import drinkcounter.UserAccounts;
 import drinkcounter.model.User;
 import drinkcounter.web.ControllerWebTest;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -71,23 +68,18 @@ public class AuthorizationServerWebTest {
     }
 
     @Test
-    public void anyAppCanRegisterButOnlyForTheCodeFlowAndTheMcpScope() throws Exception {
+    public void appsAreIdentifiedByClientMetadataDocumentsAndCannotRegister() throws Exception {
+        mvc.perform(get("/.well-known/oauth-authorization-server"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.client_id_metadata_document_supported").value(true))
+                .andExpect(jsonPath("$.registration_endpoint").doesNotExist());
+
         mvc.perform(post("/oauth2/register").with(anonymous())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"client_name": "Some app", "redirect_uris": ["https://app.example/callback"],
-                                 "token_endpoint_auth_method": "none",
-                                 "grant_types": ["client_credentials", "authorization_code"], "scope": "admin"}
+                                {"client_name": "Some app", "redirect_uris": ["https://app.example/callback"]}
                                 """))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.scope").value("mcp"))
-                .andExpect(jsonPath("$.token_endpoint_auth_method").value("none"));
-
-        ArgumentCaptor<RegisteredClient> saved = ArgumentCaptor.forClass(RegisteredClient.class);
-        verify(registeredClients).save(saved.capture());
-        assertEquals(Set.of(AuthorizationGrantType.AUTHORIZATION_CODE, AuthorizationGrantType.REFRESH_TOKEN),
-                saved.getValue().getAuthorizationGrantTypes());
-        assertEquals(Set.of("mcp"), saved.getValue().getScopes());
-        assertEquals(false, saved.getValue().getTokenSettings().isReuseRefreshTokens());
+                .andExpect(status().is4xxClientError());
+        verify(registeredClients, never()).save(any());
     }
 }

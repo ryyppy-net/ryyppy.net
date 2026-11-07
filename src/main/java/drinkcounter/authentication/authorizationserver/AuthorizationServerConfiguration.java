@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springaicommunity.mcp.security.authorizationserver.config.McpAuthorizationServerConfigurer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +14,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationProvider;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientRegistrationAuthenticationValidator;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
@@ -30,7 +29,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * The OAuth 2.1 authorization server that lets an LLM app act as a signed-in user on {@code /mcp}.
- * Any app can register itself, and every authorization goes through the user's sign-in and consent.
+ * An app's client id is the https URL of its client metadata document, and every authorization goes
+ * through the user's sign-in and consent.
  * The issuer is each request's own origin, so PR previews issue their own tokens.
  */
 @Configuration
@@ -48,37 +48,26 @@ public class AuthorizationServerConfiguration {
             RegisteredClientRepository registeredClients, AuthorizationServerSettings settings, JWKSource<SecurityContext> jwkSource)
             throws Exception {
         http
-            .oauth2AuthorizationServer(authorizationServer -> {
-                http.securityMatcher(authorizationServer.getEndpointsMatcher());
-                authorizationServer
-                    .tokenGenerator(new DelegatingOAuth2TokenGenerator(accessTokens(jwkSource), new OAuth2AccessTokenGenerator(), new RefreshTokenGenerator()))
-                    .authorizationEndpoint(endpoint -> endpoint
-                        .consentPage(CONSENT_PAGE)
-                        .authorizationRequestConverters(converters -> converters.replaceAll(converter ->
-                            converter instanceof OAuth2AuthorizationCodeRequestAuthenticationConverter
-                                ? new DefaultScopeAuthorizationRequestConverter() : converter)))
-                    .clientAuthentication(clientAuthentication -> clientAuthentication
-                        .authenticationConverter(new PublicClientAuthentication.Converter(PathPatternRequestMatcher.withDefaults()
-                            .matcher(HttpMethod.POST, settings.getTokenRevocationEndpoint())))
-                        .authenticationProvider(new PublicClientAuthentication.Provider(registeredClients)))
-                    .tokenIntrospectionEndpoint(introspection -> introspection
-                        .introspectionResponseHandler(new OwnTokenIntrospectionResponseHandler()))
-                    .clientRegistrationEndpoint(registration -> registration
-                        .openRegistrationAllowed(true)
-                        .authenticationProviders(providers -> providers.forEach(provider -> {
-                            if (provider instanceof OAuth2ClientRegistrationAuthenticationProvider registrationProvider) {
-                                registrationProvider.setRegisteredClientConverter(new ClientRegistrationPolicy());
-                                // Requested scopes are replaced by the policy, so asking for one is not an error.
-                                registrationProvider.setAuthenticationValidator(
-                                    OAuth2ClientRegistrationAuthenticationValidator.DEFAULT_REDIRECT_URI_VALIDATOR
-                                        .andThen(OAuth2ClientRegistrationAuthenticationValidator.DEFAULT_JWK_SET_URI_VALIDATOR)
-                                        .andThen(OAuth2ClientRegistrationAuthenticationValidator.SIMPLE_SCOPE_VALIDATOR));
-                            }
-                        })));
-            })
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.POST, settings.getClientRegistrationEndpoint()).permitAll()
-                .anyRequest().authenticated())
+            .with(McpAuthorizationServerConfigurer.mcpAuthorizationServer(), mcp -> mcp
+                .cimd(true)
+                .dynamicClientRegistration(false)
+                .authorizationServer(authorizationServer -> {
+                    http.securityMatcher(authorizationServer.getEndpointsMatcher());
+                    authorizationServer
+                        .tokenGenerator(new DelegatingOAuth2TokenGenerator(accessTokens(jwkSource), new OAuth2AccessTokenGenerator(), new RefreshTokenGenerator()))
+                        .authorizationEndpoint(endpoint -> endpoint
+                            .consentPage(CONSENT_PAGE)
+                            .authorizationRequestConverters(converters -> converters.replaceAll(converter ->
+                                converter instanceof OAuth2AuthorizationCodeRequestAuthenticationConverter
+                                    ? new DefaultScopeAuthorizationRequestConverter() : converter)))
+                        .clientAuthentication(clientAuthentication -> clientAuthentication
+                            .authenticationConverter(new PublicClientAuthentication.Converter(PathPatternRequestMatcher.withDefaults()
+                                .matcher(HttpMethod.POST, settings.getTokenRevocationEndpoint())))
+                            .authenticationProvider(new PublicClientAuthentication.Provider(registeredClients)))
+                        .tokenIntrospectionEndpoint(introspection -> introspection
+                            .introspectionResponseHandler(new OwnTokenIntrospectionResponseHandler()));
+                }))
+            .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
             .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
                 new LoginUrlAuthenticationEntryPoint("/ui/login?connect"),
                 PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, settings.getAuthorizationEndpoint())));
