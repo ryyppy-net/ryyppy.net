@@ -91,11 +91,10 @@ An app, such as an LLM client, can act on Ryyppy.net as you once you allow it. I
 
 | Action | Who can do it | How it works |
 | --- | --- | --- |
-| Register an app | Anyone, without signing in | The app gives its name and the addresses Ryyppy.net may send your answer to. Registering gives it access to nobody. |
-| Allow an app | You, for your own account | The app sends you to Ryyppy.net. You sign in if you are not signed in, and the consent page names the app, the account you are signed in as and the address your answer is sent to. Only you see your consent page. Once you have allowed an app, it is not asked again. |
-| Deny an app | You | The app is told access was denied and gets nothing. |
+| Identify an app | Anyone who publishes a document | An app's id is the https address of its client metadata document, which gives its name and the addresses Ryyppy.net may send your answer to: https addresses, or a loopback http address for an app on your own computer. Ryyppy.net reads the document when the app connects; there is no registration. |
+| Allow an app | You, for your own account | The app sends you to Ryyppy.net and you sign in if you are not signed in. Nothing more is asked: once you are signed in, the app gets access to your account and your answer goes to the address in its document. |
 | Use your account | An app you allowed | The app acts as you, with exactly your access: every rule in this document applies to it as it does to you. |
-| Keep access | An app you allowed | Its access token works for an hour. The app can renew it with a refresh token, which works once and for 30 days. |
-| End access | The app | The app can revoke its own tokens. A revoked refresh token stops working at once; a revoked access token works until it expires, within the hour. Ryyppy.net does not list the apps you have allowed. |
+| Keep access | An app you allowed | Its access token works for 5 minutes. The app can renew it with a refresh token, which works any number of times for 60 minutes from when you allowed the app; after that the app sends you to Ryyppy.net again. |
+| End access | The app | The app can revoke its own tokens. A revoked refresh token stops working at once; a revoked access token works until it expires, within 5 minutes. Ryyppy.net does not list the apps you have allowed. |
 
 An app cannot see or use another app's tokens.

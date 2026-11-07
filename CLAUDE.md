@@ -67,7 +67,9 @@ args; omit them locally and it is skipped. Two invariants:
   such as PR previews, reach it through `authentication/relay/`, signed with
   `AUTH_RELAY_SECRET`.
 - Apps such as LLM clients act as a user through the OAuth 2.1 authorization server in
-  `authentication/authorizationserver/` and reach only `/mcp`. Access tokens are JWTs whose
+  `authentication/authorizationserver/` and reach only `/mcp`. An app's `client_id` is the https
+  URL of its OAuth Client ID Metadata Document (CIMD), fetched by
+  `org.springaicommunity:mcp-authorization-server`; there is no client registration. Access tokens are JWTs whose
   `sub` is the user id, signed with `AUTH_JWT_SIGNING_KEY` (a new key on each start when unset).
   Each authorization is a row in `oauth2_authorization`, whose JSON stores the user's
   `DrinkcounterUserDetails` through the mixin in `AuthorizationJson`: a field added there is

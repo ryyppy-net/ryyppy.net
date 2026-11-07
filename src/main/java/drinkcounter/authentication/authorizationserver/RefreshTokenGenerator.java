@@ -12,9 +12,8 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 
 /**
- * Issues refresh tokens to public clients too, which register without a secret: most desktop and
- * command-line MCP clients do. Every client's refresh token is replaced on each use, as
- * {@link ClientRegistrationPolicy} turns off reuse.
+ * Issues refresh tokens to public clients too, which have no secret: most MCP clients' metadata
+ * documents name {@code token_endpoint_auth_method} {@code none}.
  */
 public class RefreshTokenGenerator implements OAuth2TokenGenerator<OAuth2RefreshToken> {
 
