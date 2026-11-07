@@ -19,7 +19,6 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2AccessTokenGenerator;
-import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeRequestAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -35,8 +34,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
  */
 @Configuration
 public class AuthorizationServerConfiguration {
-
-    public static final String MCP_SCOPE = "mcp";
 
     static final String MCP_PATH = "/mcp";
     static final String PROTECTED_RESOURCE_METADATA_PATH = "/.well-known/oauth-protected-resource" + MCP_PATH;
@@ -55,11 +52,7 @@ public class AuthorizationServerConfiguration {
                     http.securityMatcher(authorizationServer.getEndpointsMatcher());
                     authorizationServer
                         .tokenGenerator(new DelegatingOAuth2TokenGenerator(accessTokens(jwkSource), new OAuth2AccessTokenGenerator(), new RefreshTokenGenerator()))
-                        .authorizationEndpoint(endpoint -> endpoint
-                            .consentPage(CONSENT_PAGE)
-                            .authorizationRequestConverters(converters -> converters.replaceAll(converter ->
-                                converter instanceof OAuth2AuthorizationCodeRequestAuthenticationConverter
-                                    ? new DefaultScopeAuthorizationRequestConverter() : converter)))
+                        .authorizationEndpoint(endpoint -> endpoint.consentPage(CONSENT_PAGE))
                         .clientAuthentication(clientAuthentication -> clientAuthentication
                             .authenticationConverter(new PublicClientAuthentication.Converter(PathPatternRequestMatcher.withDefaults()
                                 .matcher(HttpMethod.POST, settings.getTokenRevocationEndpoint())))
@@ -84,13 +77,12 @@ public class AuthorizationServerConfiguration {
             .securityMatcher(MCP_PATH, MCP_PATH + "/**", PROTECTED_RESOURCE_METADATA_PATH)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(PROTECTED_RESOURCE_METADATA_PATH).permitAll()
-                .anyRequest().hasAuthority("SCOPE_" + MCP_SCOPE))
+                .anyRequest().authenticated())
             .oauth2ResourceServer(resourceServer -> resourceServer
                 .authenticationEntryPoint(entryPoint)
                 .jwt(Customizer.withDefaults())
                 .protectedResourceMetadata(metadata -> metadata.protectedResourceMetadataCustomizer(resource -> resource
                     .authorizationServer(ServletUriComponentsBuilder.fromCurrentContextPath().toUriString())
-                    .scope(MCP_SCOPE)
                     .tlsClientCertificateBoundAccessTokens(false))))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .requestCache(cache -> cache.requestCache(new NullRequestCache()))

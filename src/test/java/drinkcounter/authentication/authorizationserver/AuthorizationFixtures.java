@@ -29,7 +29,6 @@ public final class AuthorizationFixtures {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .redirectUri(REDIRECT_URI)
-                .scope(AuthorizationServerConfiguration.MCP_SCOPE)
                 .clientSettings(ClientSettings.builder().requireProofKey(true).requireAuthorizationConsent(true).build())
                 .build();
     }
