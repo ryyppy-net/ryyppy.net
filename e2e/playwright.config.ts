@@ -41,7 +41,7 @@ export default defineConfig({
     ? undefined
     : {
         command: 'mvn -f .. spring-boot:run -Dspring-boot.run.profiles=seed',
-        env: { SPRING_FLYWAY_PLACEHOLDERS_SCALE: '0.01' },
+        env: { SPRING_FLYWAY_PLACEHOLDERS_SCALE: '0.01', AUTH_CIMD_ALLOW_LOOPBACK_CLIENT_ID: 'true' },
         url: BASE_URL,
         reuseExistingServer: true,
         timeout: 180_000,

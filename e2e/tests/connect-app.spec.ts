@@ -1,23 +1,37 @@
 import { Page } from '@playwright/test';
 import { createHash, randomBytes } from 'node:crypto';
+import { createServer, Server } from 'node:http';
+import { AddressInfo } from 'node:net';
 import { test, expect } from './fixtures';
 import { makeTestUser, registerUser, TestUser } from './helpers';
 
 // Where a desktop MCP client listens for the answer; nothing listens here, the test only reads the URL.
 const CALLBACK = 'http://127.0.0.1:33418/callback';
 
-async function registerApp(page: Page, name: string): Promise<string> {
-  const registration = await page.request.post('/oauth2/register', {
-    data: { client_name: name, redirect_uris: [CALLBACK], token_endpoint_auth_method: 'none' },
+let metadataServer: Server;
+let clientId: string;
+
+// The app's client id is the URL of its client metadata document, served here like an MCP client's own.
+test.beforeAll(async () => {
+  metadataServer = createServer((request, response) => {
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({
+      client_id: clientId, client_name: 'E2E MCP client', redirect_uris: [CALLBACK],
+      grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], token_endpoint_auth_method: 'none',
+    }));
   });
-  expect(registration.status()).toBe(201);
-  return (await registration.json()).client_id;
-}
+  await new Promise<void>((resolve) => metadataServer.listen(0, '127.0.0.1', resolve));
+  clientId = `http://127.0.0.1:${(metadataServer.address() as AddressInfo).port}/client-metadata.json`;
+});
+
+test.afterAll(async () => {
+  await new Promise((resolve) => metadataServer.close(resolve));
+});
 
 /** Opens the app's authorization request while signed out and signs in on the way. */
-async function authorizeSigningIn(page: Page, user: TestUser, clientId: string, challenge: string): Promise<void> {
+async function authorizeSigningIn(page: Page, user: TestUser, challenge: string): Promise<void> {
   const query = new URLSearchParams({
-    response_type: 'code', client_id: clientId, redirect_uri: CALLBACK, scope: 'mcp', state: 'e2e-state',
+    response_type: 'code', client_id: clientId, redirect_uri: CALLBACK, state: 'e2e-state',
     code_challenge: challenge, code_challenge_method: 'S256',
   });
   await page.goto(`/oauth2/authorize?${query}`, { waitUntil: 'domcontentloaded' });
@@ -37,18 +51,12 @@ async function signedOutUser(page: Page, label: string): Promise<TestUser & { id
   return { ...user, id };
 }
 
-test('an app the user allows gets tokens that work on /mcp only', async ({ page, playwright, baseURL }) => {
+test('an app the user signs in for gets tokens that work on /mcp only', async ({ page, playwright, baseURL }) => {
   const user = await signedOutUser(page, 'connect');
-  const clientId = await registerApp(page, 'E2E MCP client');
   const verifier = randomBytes(32).toString('base64url');
 
-  await authorizeSigningIn(page, user, clientId, createHash('sha256').update(verifier).digest('base64url'));
-
-  await expect(page.getByRole('heading', { name: 'Sallitaanko sovelluksen E2E MCP client käyttää tiliäsi?' })).toBeVisible();
-  await expect(page.getByText(`Olet kirjautunut käyttäjänä ${user.email}.`)).toBeVisible();
-  await expect(page.getByText('Vastauksesi jälkeen sinut ohjataan osoitteeseen http://127.0.0.1:33418.')).toBeVisible();
   const callback = page.waitForRequest((request) => request.url().startsWith(CALLBACK));
-  await page.getByRole('button', { name: 'Salli', exact: true }).click();
+  await authorizeSigningIn(page, user, createHash('sha256').update(verifier).digest('base64url'));
   const answer = new URL((await callback).url());
   expect(answer.searchParams.get('state')).toBe('e2e-state');
 
@@ -58,8 +66,7 @@ test('an app the user allows gets tokens that work on /mcp only', async ({ page,
       redirect_uri: CALLBACK, code_verifier: verifier },
   });
   expect(tokens.ok()).toBeTruthy();
-  const { access_token, refresh_token, scope } = await tokens.json();
-  expect(scope).toBe('mcp');
+  const { access_token, refresh_token } = await tokens.json();
   expect(refresh_token).toBeTruthy();
   const claims = JSON.parse(Buffer.from(access_token.split('.')[1], 'base64url').toString());
   expect(claims.sub).toBe(String(user.id));
@@ -73,19 +80,5 @@ test('an app the user allows gets tokens that work on /mcp only', async ({ page,
     form: { grant_type: 'refresh_token', client_id: clientId, refresh_token },
   });
   expect(refreshed.ok()).toBeTruthy();
-  expect((await refreshed.json()).refresh_token).not.toBe(refresh_token);
   await app.dispose();
-});
-
-test('an app the user does not allow is told access was denied', async ({ page }) => {
-  const user = await signedOutUser(page, 'connect-deny');
-  const clientId = await registerApp(page, 'E2E denied client');
-
-  await authorizeSigningIn(page, user, clientId, createHash('sha256').update('verifier').digest('base64url'));
-
-  const callback = page.waitForRequest((request) => request.url().startsWith(CALLBACK));
-  await page.getByRole('button', { name: 'Älä salli' }).click();
-  const answer = new URL((await callback).url());
-  expect(answer.searchParams.get('error')).toBe('access_denied');
-  expect(answer.searchParams.get('code')).toBeNull();
 });

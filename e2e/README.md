@@ -39,6 +39,10 @@ BASE_URL=http://localhost:9090 npm test   # point at a different instance
 SKIP_WEBSERVER=1 npm test                  # don't let Playwright manage the app process
 ```
 
+An app you start yourself needs `AUTH_CIMD_ALLOW_LOOPBACK_CLIENT_ID=true` for
+`connect-app.spec.ts`, which serves its app's client metadata document on
+`http://127.0.0.1`.
+
 ### Sandboxed / pre-provisioned Chromium
 
 Some dev containers pre-install a pinned Chromium build that doesn't match

@@ -1,10 +1,12 @@
 package drinkcounter.authentication.authorizationserver;
 
 import org.springaicommunity.mcp.security.common.url.DefaultUrlValidator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.ClientIdMetadataDocumentRegisteredClientRepository;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.ClientIdUrlValidator;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.DefaultClientMetadataValidator;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService.JsonMapperOAuth2AuthorizationParametersMapper;
@@ -21,10 +23,14 @@ import tools.jackson.databind.json.JsonMapper;
 public class AuthorizationStorageConfiguration {
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
+    public RegisteredClientRepository registeredClientRepository(
+            @Value("${auth.cimd.allow-loopback-client-id:false}") boolean allowLoopbackClientId) {
         ClientIdMetadataDocumentRegisteredClientRepository repository = new ClientIdMetadataDocumentRegisteredClientRepository();
         // Desktop and command-line MCP clients receive the answer on a loopback http address.
         repository.setMetadataValidator(new DefaultClientMetadataValidator(new DefaultUrlValidator(true)));
+        if (allowLoopbackClientId) {
+            repository.setClientIdUrlValidator(new ClientIdUrlValidator(true));
+        }
         return repository;
     }
 

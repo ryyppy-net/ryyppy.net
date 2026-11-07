@@ -59,6 +59,9 @@ auth:
   jwt:
     # PKCS#8 PEM RSA private key that signs access tokens; without it each start signs with a new key.
     signing-key: ${AUTH_JWT_SIGNING_KEY:}
+  cimd:
+    # Lets an app's client id be an http://localhost or 127.0.0.1 URL; the e2e suite serves its document there.
+    allow-loopback-client-id: ${AUTH_CIMD_ALLOW_LOOPBACK_CLIENT_ID:false}
 
 server:
   # Railway assigns the container's public port via $PORT. The old Railpack
