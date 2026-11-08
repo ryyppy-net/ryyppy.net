@@ -53,7 +53,7 @@ public class AuthorizationServerWebTest {
         when(userAccounts.byEmail("ville@example.com")).thenReturn(user);
 
         MockHttpSession session = (MockHttpSession) mvc.perform(get(AUTHORIZATION_REQUEST))
-                .andExpect(redirectedUrl("/ui/login?connect"))
+                .andExpect(redirectedUrl("/ui/login"))
                 .andReturn().getRequest().getSession(false);
 
         mvc.perform(post("/login").session(session)

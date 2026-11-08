@@ -60,7 +60,7 @@ public class AuthorizationServerConfiguration {
                 }))
             .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
             .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
-                new LoginUrlAuthenticationEntryPoint("/ui/login?connect"),
+                new LoginUrlAuthenticationEntryPoint("/ui/login"),
                 PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, settings.getAuthorizationEndpoint())));
         return http.build();
     }

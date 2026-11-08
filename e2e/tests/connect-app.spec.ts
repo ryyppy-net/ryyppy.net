@@ -36,8 +36,7 @@ async function authorizeSigningIn(page: Page, user: TestUser, challenge: string)
   });
   await page.goto(`/oauth2/authorize?${query}`, { waitUntil: 'domcontentloaded' });
 
-  await expect(page).toHaveURL(/\/ui\/login\?connect$/);
-  await expect(page.getByText('Kirjaudu sisään yhdistääksesi sovelluksen tiliisi.')).toBeVisible();
+  await expect(page).toHaveURL(/\/ui\/login$/);
   await page.fill('#username', user.email);
   await page.fill('#password', user.password);
   await page.click('input[type="submit"]');
