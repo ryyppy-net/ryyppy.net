@@ -9,10 +9,12 @@ import drinkcounter.DrinkLog;
 import drinkcounter.PassphraseLogin;
 import drinkcounter.Promilles;
 import drinkcounter.UserAccounts;
+import drinkcounter.authentication.CustomOAuth2UserService;
 import drinkcounter.authentication.GoogleIdentityLinkingService;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
+import drinkcounter.authentication.relay.RelayAwareAuthenticationSuccessHandler;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.PartyRepository;
 import java.lang.annotation.ElementType;
@@ -21,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
@@ -45,8 +47,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         UserAccounts.class,
         PassphraseLogin.class,
         GoogleIdentityLinkingService.class,
-        AuthRelayTokenService.class
+        AuthRelayTokenService.class,
+        CustomOAuth2UserService.class,
+        OidcUserService.class,
+        RelayAwareAuthenticationSuccessHandler.class
 })
-@MockitoBean(name = "oauth2LoginCustomizer", types = Customizer.class)
 public @interface ControllerWebTest {
 }

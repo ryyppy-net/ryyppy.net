@@ -4,8 +4,6 @@ import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.authentication.relay.RelayAwareAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 
 /**
@@ -15,30 +13,6 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
  */
 @Configuration
 public class OAuth2Configuration {
-
-    /**
-     * Provides a customizer that configures OAuth2 login for the security filter chain.
-     */
-    @Bean
-    public Customizer<HttpSecurity> oauth2LoginCustomizer(
-            CustomOAuth2UserService customOAuth2UserService,
-            OidcUserService oidcUserService,
-            RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler) {
-        return http -> {
-            try {
-                http.oauth2Login(oauth2 -> oauth2
-                    .loginPage("/ui/login")
-                    .userInfoEndpoint(userInfo -> userInfo
-                        .oidcUserService(oidcUserService)
-                        .userService(customOAuth2UserService)
-                    )
-                    .successHandler(relayAwareAuthenticationSuccessHandler)
-                );
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to configure OAuth2 login", e);
-            }
-        };
-    }
 
     /**
      * Completes classical OAuth2 login. When the login was started via the cross-environment
