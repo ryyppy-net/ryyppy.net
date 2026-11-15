@@ -62,6 +62,7 @@ Set configuration using environment variables:
 * GOOGLE_CLIENT_ID - (Optional) Google OAuth2 client ID to enable Google login
 * GOOGLE_CLIENT_SECRET - (Optional) Google OAuth2 client secret to enable Google login
 * AUTH_RELAY_SECRET - (Optional) Shared secret signing the Google sign-in handoff between environments
+* AUTH_JWT_SIGNING_KEY - (Optional) 2048-bit RSA private key, PKCS#8 PEM, signing the MCP access tokens; without it a key is generated at each start
 * GOOGLE_AUTH_HUB_URL - (Optional) Environment that hosts Google sign-in (set to `https://ryyppy.net` by the `production` profile)
 * GOOGLE_FEDCM_ENABLED - (Optional) Enables FedCM for Google One Tap (default `false`)
 

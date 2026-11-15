@@ -25,6 +25,8 @@ spring:
         registration:
           google:
             client-id: 6115241938-fkfn0jc12l66aelicc3v19so1e9gl58o.apps.googleusercontent.com
+      authorizationserver:
+        issuer: https://${RAILWAY_PUBLIC_DOMAIN}
 
 # Railway terminates TLS at its edge, so trust X-Forwarded-* to see the
 # original https scheme and host.
