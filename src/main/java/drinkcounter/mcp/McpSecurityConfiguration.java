@@ -77,7 +77,7 @@ public class McpSecurityConfiguration {
         http
             .securityMatcher("/mcp", "/.well-known/oauth-protected-resource/**")
             .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-            // Clients authenticate with a bearer token, never a cookie, so there is no CSRF to guard.
+            // As in the library's sample server: a token-less POST must get the 401 that starts MCP sign-in.
             .csrf(CsrfConfigurer::disable)
             // The issuer is this app, so its keys are read in-process rather than fetched over HTTP.
             .with(mcpServerOAuth2(), mcp -> mcp.authorizationServer(issuer).jwtDecoder(jwtDecoder));
