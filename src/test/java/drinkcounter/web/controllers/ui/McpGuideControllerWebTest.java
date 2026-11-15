@@ -12,7 +12,6 @@ import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -46,9 +45,9 @@ public class McpGuideControllerWebTest {
 
     @Test
     @WithAnonymousUser
-    public void guideIsForSignedInUsersOnly() throws Exception {
+    public void guideIsOpenToVisitorsWhoAreNotSignedIn() throws Exception {
         mvc.perform(get("/ui/mcp"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/ui/login"));
+                .andExpect(status().isOk())
+                .andExpect(view().name("mcp"));
     }
 }

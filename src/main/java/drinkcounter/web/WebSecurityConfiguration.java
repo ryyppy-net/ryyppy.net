@@ -62,6 +62,7 @@ public class WebSecurityConfiguration {
                         "/ui/login",
                         "/ui/privacy",
                         "/ui/terms",
+                        "/ui/mcp",
                         "/static/**",
                         "/ui/newuser",
                         "/ui/addUser",

@@ -24,11 +24,13 @@ test.describe('MCP guide', () => {
     await expect(page.locator('#mcpAddress')).toBeVisible();
   });
 
-  test('a signed-out visitor is sent to the login page', async ({ browser }) => {
+  test('a signed-out visitor reaches the guide from the login page', async ({ browser }) => {
     const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const page = await context.newPage();
-    await page.goto('/ui/mcp', { waitUntil: 'domcontentloaded' });
-    await expect(page).toHaveURL(/\/ui\/login/);
+    await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
+    await page.locator('a[href="/ui/mcp"]').click();
+    await expect(page).toHaveURL(/\/ui\/mcp$/);
+    await expect(page.locator('#mcpAddress')).toBeVisible();
     await context.close();
   });
 });
