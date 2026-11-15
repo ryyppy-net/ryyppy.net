@@ -18,6 +18,7 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
+import java.time.Duration;
 import java.util.Set;
 import org.springaicommunity.mcp.security.authorizationserver.config.LocalhostWildcardPortValidator;
 import org.springaicommunity.mcp.security.common.url.DefaultUrlValidator;
@@ -26,12 +27,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.ClientIdMetadataDocumentRegisteredClientRepository;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.DefaultClientMetadataValidator;
 import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.converter.OAuth2ClientRegistrationRegisteredClientConverter;
+import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -54,7 +63,8 @@ public class McpSecurityConfiguration {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain mcpAuthorizationServerFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain mcpAuthorizationServerFilterChain(HttpSecurity http,
+            ClientIdMetadataDocumentRegisteredClientRepository registeredClients) throws Exception {
         http
             .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
             .with(mcpAuthorizationServer(), mcp -> mcp
@@ -63,9 +73,18 @@ public class McpSecurityConfiguration {
                 // Claude Code registers http://localhost/callback and listens on a random port.
                 .authorizationCodeRequestValidator(
                         new LocalhostWildcardPortValidator().andThen(DEFAULT_SCOPE_VALIDATOR))
-                .authorizationServer(authorizationServer -> http.securityMatcher(new OrRequestMatcher(
-                        authorizationServer.getEndpointsMatcher(),
-                        PathPatternRequestMatcher.withDefaults().matcher("/.well-known/openid-configuration")))))
+                .authorizationServer(authorizationServer -> {
+                    http.securityMatcher(new OrRequestMatcher(
+                            authorizationServer.getEndpointsMatcher(),
+                            PathPatternRequestMatcher.withDefaults().matcher("/.well-known/openid-configuration")));
+                    // MCP clients are public clients, and they stay signed in by refreshing their tokens.
+                    authorizationServer
+                            .tokenGenerator(new DelegatingOAuth2TokenGenerator(
+                                    http.getSharedObject(OAuth2TokenGenerator.class), new PublicClientRefreshTokenGenerator()))
+                            .clientAuthentication(clientAuthentication -> clientAuthentication
+                                    .authenticationConverter(new PublicClientRefreshTokenAuthenticationConverter())
+                                    .authenticationProvider(new PublicClientRefreshTokenAuthenticationProvider(registeredClients)));
+                }))
             .exceptionHandling(exceptions -> exceptions.defaultAuthenticationEntryPointFor(
                     new LoginUrlAuthenticationEntryPoint("/ui/login"), browserRequests()));
         return http.build();
@@ -89,7 +108,47 @@ public class McpSecurityConfiguration {
         ClientIdMetadataDocumentRegisteredClientRepository repository = new ClientIdMetadataDocumentRegisteredClientRepository();
         // Native MCP clients such as Claude Code redirect to http://localhost or http://127.0.0.1.
         repository.setMetadataValidator(new DefaultClientMetadataValidator(new DefaultUrlValidator(true)));
+        OAuth2ClientRegistrationRegisteredClientConverter converter = new OAuth2ClientRegistrationRegisteredClientConverter();
+        // Public clients' refresh tokens must rotate. Each one lives a year from its issue, so a client
+        // stays signed in until it goes unused for a year.
+        converter.setTokenSettingsCustomizer(tokenSettings -> tokenSettings
+                .reuseRefreshTokens(false)
+                .refreshTokenTimeToLive(Duration.ofDays(365)));
+        repository.setRegisteredClientConverter(converter);
         return repository;
+    }
+
+    /**
+     * Keeps authorizations, and so refresh tokens, in the database: Railway sleeps the service when
+     * idle and every wake restores it from the image's checkpoint.
+     */
+    @Bean
+    public OAuth2AuthorizationService oauth2AuthorizationService(JdbcOperations jdbcOperations,
+            ClientIdMetadataDocumentRegisteredClientRepository registeredClients) {
+        return new JdbcOAuth2AuthorizationService(jdbcOperations, new RegisteredClientsById(registeredClients));
+    }
+
+    /**
+     * A Client ID Metadata Document client's id is its client_id URL, which this resolves again when
+     * the repository no longer holds the client, such as after a restart.
+     */
+    private record RegisteredClientsById(RegisteredClientRepository registeredClients) implements RegisteredClientRepository {
+
+        @Override
+        public void save(RegisteredClient registeredClient) {
+            registeredClients.save(registeredClient);
+        }
+
+        @Override
+        public RegisteredClient findById(String id) {
+            RegisteredClient client = registeredClients.findById(id);
+            return client != null ? client : registeredClients.findByClientId(id);
+        }
+
+        @Override
+        public RegisteredClient findByClientId(String clientId) {
+            return registeredClients.findByClientId(clientId);
+        }
     }
 
     /**
