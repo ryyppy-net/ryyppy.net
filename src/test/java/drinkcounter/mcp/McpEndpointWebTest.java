@@ -3,6 +3,7 @@ package drinkcounter.mcp;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,8 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import drinkcounter.PartyRoster;
 import drinkcounter.UserAccounts;
+import drinkcounter.model.Party;
 import drinkcounter.model.User;
+import drinkcounter.repository.PartyRepository;
+import java.time.Instant;
+import java.util.List;
 import drinkcounter.web.ControllerWebTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
         "spring.ai.mcp.server.protocol=STATELESS",
         "spring.security.oauth2.authorizationserver.issuer=http://localhost"
 })
-@Import({McpSecurityConfiguration.class, McpErrorSerializer.class, PartyTools.class})
+@Import({McpSecurityConfiguration.class, McpErrorSerializer.class, PartyTools.class, StatusTools.class})
 @ImportAutoConfiguration(classes = {
         org.springframework.boot.security.oauth2.server.authorization.autoconfigure.servlet.OAuth2AuthorizationServerAutoConfiguration.class,
         org.springframework.boot.security.oauth2.server.authorization.autoconfigure.servlet.OAuth2AuthorizationServerJwtAutoConfiguration.class,
@@ -50,6 +56,12 @@ class McpEndpointWebTest {
     @Autowired
     UserAccounts userAccounts;
 
+    @Autowired
+    PartyRoster partyRoster;
+
+    @Autowired
+    PartyRepository partyRepository;
+
     @Test
     void authorizationServerAcceptsClientsWithoutASecret() throws Exception {
         mockMvc.perform(get("/.well-known/oauth-authorization-server"))
@@ -65,9 +77,61 @@ class McpEndpointWebTest {
         mockMvc.perform(post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
                         .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.tools[0].name").value("list_parties"))
-                .andExpect(jsonPath("$.result.tools[0].annotations.readOnlyHint").value(true))
-                .andExpect(jsonPath("$.result.tools[0].annotations.destructiveHint").value(false));
+                .andExpect(jsonPath("$.result.tools[?(@.name=='list_parties')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='list_parties')].annotations.destructiveHint").value(false));
+    }
+
+    @Test
+    void readToolsAreMarkedReadOnly() throws Exception {
+        mockMvc.perform(post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                        .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='get_my_status')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='list_my_drinks')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='get_party_status')].annotations.readOnlyHint").value(true));
+    }
+
+    @Test
+    void aMemberReadsThePartyStatus() throws Exception {
+        signedInMatti();
+        when(partyRepository.countUserParticipations(5, 7)).thenReturn(1L);
+        Party party = new Party();
+        party.setId(5);
+        party.setName("Sauna night");
+        party.setStartTime(Instant.parse("2026-01-01T18:00:00Z"));
+        party.setEndTime(Instant.parse("2026-01-02T18:00:00Z"));
+        when(partyRoster.get(5)).thenReturn(party);
+        when(partyRoster.members(5)).thenReturn(List.of());
+
+        mockMvc.perform(callTool("get_party_status", "{\"partyId\":5}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.isError").value(false))
+                .andExpect(jsonPath("$.result.content[0].text", containsString("Sauna night")));
+    }
+
+    @Test
+    void anOutsiderGetsAToolErrorAndNothingOfThePartyIsRead() throws Exception {
+        signedInMatti();
+        when(partyRepository.countUserParticipations(5, 7)).thenReturn(0L);
+
+        mockMvc.perform(callTool("get_party_status", "{\"partyId\":5}"))
+                .andExpect(jsonPath("$.result.isError").value(true))
+                .andExpect(content().string(not(containsString("Sauna night"))));
+
+        verifyNoInteractions(partyRoster);
+    }
+
+    private void signedInMatti() {
+        User matti = new User();
+        matti.setId(7);
+        when(userAccounts.byEmail("matti@example.com")).thenReturn(matti);
+    }
+
+    private static org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder callTool(String name, String arguments) {
+        return post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE)
+                .content("{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"" + name
+                        + "\",\"arguments\":" + arguments + "}}");
     }
 
     @Test
