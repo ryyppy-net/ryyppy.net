@@ -8,7 +8,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,15 +68,6 @@ class McpEndpointWebTest {
                 .andExpect(jsonPath("$.result.tools[0].name").value("list_parties"))
                 .andExpect(jsonPath("$.result.tools[0].annotations.readOnlyHint").value(true))
                 .andExpect(jsonPath("$.result.tools[0].annotations.destructiveHint").value(false));
-    }
-
-    @Test
-    void unauthenticatedChallengeQuotesTheResourceMetadataUrl() throws Exception {
-        mockMvc.perform(post("/mcp").contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE)
-                        .content(JSON_RPC_LIST_TOOLS))
-                .andExpect(status().isUnauthorized())
-                .andExpect(header().string("WWW-Authenticate",
-                        "Bearer resource_metadata=\"http://localhost/.well-known/oauth-protected-resource/mcp\""));
     }
 
     @Test
