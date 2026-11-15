@@ -20,9 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** The MCP server and its authorization server, behind the real security filter chains. */
@@ -50,8 +48,6 @@ class McpEndpointWebTest {
     @Autowired
     MockMvc mockMvc;
 
-    @MockitoBean
-    JdbcOperations jdbcOperations;
     @Autowired
     UserAccounts userAccounts;
 
