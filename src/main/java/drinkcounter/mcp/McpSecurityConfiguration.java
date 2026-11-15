@@ -41,11 +41,14 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.converter.OAuth2ClientRegistrationRegisteredClientConverter;
 import org.springframework.security.oauth2.server.authorization.token.DelegatingOAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.UrlUtils;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * The MCP server at {@code /mcp} and the OAuth2 authorization server that issues its tokens.
@@ -54,6 +57,8 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
  */
 @Configuration
 public class McpSecurityConfiguration {
+
+    private static final String PROTECTED_RESOURCE_METADATA_PATH = "/.well-known/oauth-protected-resource/mcp";
 
     private final String issuer;
 
@@ -74,6 +79,12 @@ public class McpSecurityConfiguration {
                 .authorizationCodeRequestValidator(
                         new LocalhostWildcardPortValidator().andThen(DEFAULT_SCOPE_VALIDATOR))
                 .authorizationServer(authorizationServer -> {
+                    // Claude's hosted apps use a client metadata document only if "none" is listed too.
+                    // This replaces the library's customizer, so it repeats the CIMD claim.
+                    authorizationServer.authorizationServerMetadataEndpoint(metadata -> metadata
+                            .authorizationServerMetadataCustomizer(builder -> builder
+                                    .claim("client_id_metadata_document_supported", true)
+                                    .tokenEndpointAuthenticationMethods(methods -> methods.add("none"))));
                     http.securityMatcher(new OrRequestMatcher(
                             authorizationServer.getEndpointsMatcher(),
                             PathPatternRequestMatcher.withDefaults().matcher("/.well-known/openid-configuration")));
@@ -99,8 +110,21 @@ public class McpSecurityConfiguration {
             // As in the library's sample server: a token-less POST must get the 401 that starts MCP sign-in.
             .csrf(CsrfConfigurer::disable)
             // The issuer is this app, so its keys are read in-process rather than fetched over HTTP.
-            .with(mcpServerOAuth2(), mcp -> mcp.authorizationServer(issuer).jwtDecoder(jwtDecoder));
+            .with(mcpServerOAuth2(), mcp -> mcp.authorizationServer(issuer).jwtDecoder(jwtDecoder)
+                    .oauth2ResourceServer(resourceServer -> resourceServer
+                            .authenticationEntryPoint(bearerChallenge())));
         return http.build();
+    }
+
+    private static BearerTokenAuthenticationEntryPoint bearerChallenge() {
+        BearerTokenAuthenticationEntryPoint entryPoint = new BearerTokenAuthenticationEntryPoint();
+        entryPoint.setResourceMetadataParameterResolver(request -> UriComponentsBuilder
+                .fromUriString(UrlUtils.buildFullRequestUrl(request))
+                .replacePath(request.getContextPath() + PROTECTED_RESOURCE_METADATA_PATH)
+                .replaceQuery(null)
+                .fragment(null)
+                .toUriString());
+        return entryPoint;
     }
 
     @Bean
