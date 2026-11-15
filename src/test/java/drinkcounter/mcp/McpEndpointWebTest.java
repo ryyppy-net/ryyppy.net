@@ -3,6 +3,9 @@ package drinkcounter.mcp;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,9 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import drinkcounter.DrinkLog;
 import drinkcounter.UserAccounts;
+import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import drinkcounter.repository.PartyRepository;
 import drinkcounter.web.ControllerWebTest;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -21,6 +28,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /** The MCP server and its authorization server, behind the real security filter chains. */
 @ControllerWebTest
@@ -28,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
         "spring.ai.mcp.server.protocol=STATELESS",
         "spring.security.oauth2.authorizationserver.issuer=http://localhost"
 })
-@Import({McpSecurityConfiguration.class, McpErrorSerializer.class, PartyTools.class})
+@Import({McpSecurityConfiguration.class, McpErrorSerializer.class, PartyTools.class, DrinkTools.class})
 @ImportAutoConfiguration(classes = {
         org.springframework.boot.security.oauth2.server.authorization.autoconfigure.servlet.OAuth2AuthorizationServerAutoConfiguration.class,
         org.springframework.boot.security.oauth2.server.authorization.autoconfigure.servlet.OAuth2AuthorizationServerJwtAutoConfiguration.class,
@@ -50,6 +58,12 @@ class McpEndpointWebTest {
     @Autowired
     UserAccounts userAccounts;
 
+    @Autowired
+    PartyRepository partyRepository;
+
+    @Autowired
+    DrinkLog drinkLog;
+
     @Test
     void authorizationServerAcceptsClientsWithoutASecret() throws Exception {
         mockMvc.perform(get("/.well-known/oauth-authorization-server"))
@@ -65,9 +79,77 @@ class McpEndpointWebTest {
         mockMvc.perform(post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
                         .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.tools[0].name").value("list_parties"))
-                .andExpect(jsonPath("$.result.tools[0].annotations.readOnlyHint").value(true))
-                .andExpect(jsonPath("$.result.tools[0].annotations.destructiveHint").value(false));
+                .andExpect(jsonPath("$.result.tools[?(@.name=='list_parties')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='list_parties')].annotations.destructiveHint").value(false));
+    }
+
+    @Test
+    void drinkToolsAreWritesAndOnlyUndoIsDestructive() throws Exception {
+        mockMvc.perform(post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                        .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='log_drink')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='log_drink')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='correct_drink')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='undo_drink')].annotations.destructiveHint").value(true));
+    }
+
+    @Test
+    void anOutsiderLogsNoDrinkForAPartyMemberThroughTheirParty() throws Exception {
+        signedInAs(7);
+        when(partyRepository.countUserParticipations(3, 7)).thenReturn(0L);
+        when(partyRepository.countUserParticipations(3, 8)).thenReturn(1L);
+
+        mockMvc.perform(callTool("log_drink", "{\"partyId\":3,\"userId\":8}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.isError").value(true));
+
+        verifyNoInteractions(drinkLog);
+    }
+
+    @Test
+    void aMemberLogsADrinkForAPartyMate() throws Exception {
+        signedInAs(7);
+        when(partyRepository.countUserParticipations(3, 7)).thenReturn(1L);
+        when(partyRepository.countUserParticipations(3, 8)).thenReturn(1L);
+        Drink drink = new Drink();
+        drink.setId(41);
+        drink.setTimeStamp(Instant.parse("2026-11-15T20:00:00Z"));
+        drink.setAlcohol(12f);
+        when(drinkLog.recordInParty(eq(3), eq(8), any(), eq(12f))).thenReturn(drink);
+
+        mockMvc.perform(callTool("log_drink", "{\"partyId\":3,\"userId\":8}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.isError").value(false))
+                .andExpect(jsonPath("$.result.content[0].text").value(containsString("\"id\":41")))
+                .andExpect(jsonPath("$.result.content[0].text").value(containsString("\"userId\":8")));
+    }
+
+    @Test
+    void anOutsiderCorrectsAndUndoesNothingOfAPartyMate() throws Exception {
+        signedInAs(7);
+        when(partyRepository.countUserParticipations(3, 7)).thenReturn(0L);
+        when(partyRepository.countUserParticipations(3, 8)).thenReturn(1L);
+
+        mockMvc.perform(callTool("correct_drink", "{\"drinkId\":5,\"volumeMl\":500,\"alcoholPercent\":5,\"partyId\":3,\"userId\":8}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("undo_drink", "{\"drinkId\":5,\"partyId\":3,\"userId\":8}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+
+        verifyNoInteractions(drinkLog);
+    }
+
+    private void signedInAs(int userId) {
+        User user = new User();
+        user.setId(userId);
+        when(userAccounts.byEmail("matti@example.com")).thenReturn(user);
+    }
+
+    private static MockHttpServletRequestBuilder callTool(String name, String arguments) {
+        return post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE)
+                .content("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"" + name
+                        + "\",\"arguments\":" + arguments + "}}");
     }
 
     @Test
