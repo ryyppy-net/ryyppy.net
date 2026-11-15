@@ -13,7 +13,6 @@
             .mcp-guide pre { background-color: #252525; padding: 10px; border-radius: 4px; overflow-x: auto; }
             .mcp-guide p, .mcp-guide li { color: #cccccc; }
             .mcp-guide a { color: #aaaaaa; }
-            .mcp-guide .links { text-align: center; }
         </style>
     </div>
 </head>
@@ -36,17 +35,6 @@
                 <li th:text="#{mcp.signin.step2}">Step 2</li>
                 <li th:text="#{mcp.signin.step3}">Step 3</li>
             </ol>
-
-            <h2 th:text="#{mcp.access.header}">What a connected client can see and do</h2>
-            <p th:text="#{mcp.access.acts_as}">Acts as you.</p>
-            <p th:text="#{mcp.access.tool}">One tool, list_parties.</p>
-            <p th:text="#{mcp.access.readonly}">Read only.</p>
-
-            <p class="links">
-                <a href="/app/" th:text="#{ui.modern_ui_label}">New UI</a>
-                <span> | </span>
-                <a href="/ui/user" th:text="#{ui.classic_ui_label}">Classic UI</a>
-            </p>
         </div>
     </div>
 </body>
