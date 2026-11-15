@@ -15,10 +15,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import drinkcounter.DrinkLog;
+import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyJoinLinks;
 import drinkcounter.PartyRoster;
 import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
+import drinkcounter.model.PartyJoinLink;
 import drinkcounter.model.User;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.web.ControllerWebTest;
@@ -69,6 +72,12 @@ class McpEndpointWebTest {
 
     @Autowired
     DrinkLog drinkLog;
+
+    @Autowired
+    InvitationSuggestions invitationSuggestions;
+
+    @Autowired
+    PartyJoinLinks joinLinks;
 
     @Test
     void authorizationServerAcceptsClientsWithoutASecret() throws Exception {
@@ -127,6 +136,55 @@ class McpEndpointWebTest {
                 .andExpect(content().string(not(containsString("Sauna night"))));
 
         verifyNoInteractions(partyRoster);
+    }
+
+    @Test
+    void partyToolsAreAnnotatedByWhatTheyDo() throws Exception {
+        mockMvc.perform(post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                        .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='start_party')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='start_party')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='suggest_invitees')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='invite_friend')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='add_user_by_email')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='get_join_link')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='create_join_link')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='create_join_link')].annotations.destructiveHint").value(true));
+    }
+
+    @Test
+    void anOutsiderCanDoNothingWithAPartyThroughThePartyTools() throws Exception {
+        signedInAs(7);
+        when(partyRepository.countUserParticipations(5, 7)).thenReturn(0L);
+
+        mockMvc.perform(callTool("suggest_invitees", "{\"partyId\":5}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("invite_friend", "{\"partyId\":5,\"userId\":8}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("add_user_by_email", "{\"partyId\":5,\"email\":\"make@example.com\"}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("get_join_link", "{\"partyId\":5}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("create_join_link", "{\"partyId\":5}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+
+        verifyNoInteractions(partyRoster, invitationSuggestions, joinLinks);
+    }
+
+    @Test
+    void aMemberReplacesTheJoinLink() throws Exception {
+        signedInAs(7);
+        when(partyRepository.countUserParticipations(5, 7)).thenReturn(1L);
+        PartyJoinLink link = new PartyJoinLink();
+        link.setPartyId(5);
+        link.setToken("fresh");
+        link.setCreatedAt(Instant.parse("2026-11-15T20:00:00Z"));
+        when(joinLinks.regenerate(5, 7)).thenReturn(link);
+
+        mockMvc.perform(callTool("create_join_link", "{\"partyId\":5}"))
+                .andExpect(jsonPath("$.result.isError").value(false))
+                .andExpect(jsonPath("$.result.content[0].text", containsString("/join/fresh")));
     }
 
     void drinkToolsAreWritesAndOnlyUndoIsDestructive() throws Exception {
