@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-/** The page that tells signed-in users how to connect an MCP client. */
+/** The page that tells people how to connect an MCP client. */
 @Controller
 @RequestMapping("ui")
 public class McpGuideController {
