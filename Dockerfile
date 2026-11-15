@@ -38,8 +38,6 @@ ARG SPRING_DATASOURCE_PASSWORD
 ARG GOOGLE_CLIENT_SECRET
 ARG AUTH_RELAY_SECRET
 ARG AUTH_JWT_SIGNING_KEY
-# Not a secret, but the checkpoint freezes the issuer built from it.
-ARG RAILWAY_PUBLIC_DOMAIN
 
 RUN ./checkpoint.sh
 
