@@ -17,6 +17,7 @@ Everything about drinks, parties and people requires signing in. A visitor who i
 Without signing in, a visitor can only:
 
 - read the privacy policy and the terms of use
+- read the guide to connecting an MCP client
 - register an account with name, sex, weight, email and password
 - sign in with email and password, or with Google
 
