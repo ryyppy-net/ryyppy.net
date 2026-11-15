@@ -94,8 +94,8 @@ public class McpSecurityConfiguration {
 
     /**
      * Signs the access tokens with AUTH_JWT_SIGNING_KEY, a PKCS#8 PEM RSA private key. Where it is
-     * not set, such as locally and in PR previews, a key is generated at startup, so tokens do not
-     * outlive a restart.
+     * not set, such as locally and in PR previews, a key is generated as the context starts: on each
+     * cold boot, or once per image where the CRaC checkpoint captures it.
      */
     @Bean
     public JWKSource<SecurityContext> mcpJwkSource(@Value("${auth.jwt.signing-key:}") String signingKey)
