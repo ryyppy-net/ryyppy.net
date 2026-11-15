@@ -5,7 +5,7 @@ spring:
     mcp:
       server:
         name: ryyppy.net
-        protocol: STREAMABLE
+        protocol: STATELESS
   datasource:
     url: jdbc:postgresql://localhost/ryyppynet
     username: ryyppynet
