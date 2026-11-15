@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -16,17 +18,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import drinkcounter.DrinkLog;
 import drinkcounter.InvitationSuggestions;
+import drinkcounter.NearbyParties;
 import drinkcounter.PartyJoinLinks;
+import drinkcounter.PartyLocationInvites;
+import drinkcounter.Position;
 import drinkcounter.PartyRoster;
 import drinkcounter.UserAccounts;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Party;
 import drinkcounter.model.PartyJoinLink;
+import drinkcounter.model.PartyLocationInvite;
 import drinkcounter.model.User;
 import drinkcounter.repository.PartyRepository;
 import drinkcounter.web.ControllerWebTest;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -78,6 +85,12 @@ class McpEndpointWebTest {
 
     @Autowired
     PartyJoinLinks joinLinks;
+
+    @Autowired
+    PartyLocationInvites locationInvites;
+
+    @Autowired
+    NearbyParties nearbyParties;
 
     @Test
     void authorizationServerAcceptsClientsWithoutASecret() throws Exception {
@@ -145,46 +158,85 @@ class McpEndpointWebTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.tools[?(@.name=='start_party')].annotations.readOnlyHint").value(false))
                 .andExpect(jsonPath("$.result.tools[?(@.name=='start_party')].annotations.destructiveHint").value(false))
-                .andExpect(jsonPath("$.result.tools[?(@.name=='suggest_invitees')].annotations.readOnlyHint").value(true))
-                .andExpect(jsonPath("$.result.tools[?(@.name=='invite_friend')].annotations.destructiveHint").value(false))
-                .andExpect(jsonPath("$.result.tools[?(@.name=='add_user_by_email')].annotations.destructiveHint").value(false))
-                .andExpect(jsonPath("$.result.tools[?(@.name=='get_join_link')].annotations.readOnlyHint").value(true))
-                .andExpect(jsonPath("$.result.tools[?(@.name=='create_join_link')].annotations.readOnlyHint").value(false))
-                .andExpect(jsonPath("$.result.tools[?(@.name=='create_join_link')].annotations.destructiveHint").value(true));
+                .andExpect(jsonPath("$.result.tools[?(@.name=='invite_to_party')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='invite_to_party')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='get_party_invite')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='get_party_invite')].annotations.destructiveHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='join_party')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='join_party')].annotations.destructiveHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='join_party')].annotations.idempotentHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='find_nearby_parties')].annotations.readOnlyHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='update_party')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='update_party')].annotations.destructiveHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='remove_participant')].annotations.destructiveHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='suggest_invitees')]").isEmpty())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='invite_friend')]").isEmpty())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='add_user_by_email')]").isEmpty())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='get_join_link')]").isEmpty())
+                .andExpect(jsonPath("$.result.tools[?(@.name=='create_join_link')]").isEmpty());
     }
 
     @Test
     void anOutsiderCanDoNothingWithAPartyThroughThePartyTools() throws Exception {
         signedInAs(7);
         when(partyRepository.countUserParticipations(5, 7)).thenReturn(0L);
+        when(partyRepository.countUserParticipations(5, 8)).thenReturn(1L);
 
-        mockMvc.perform(callTool("suggest_invitees", "{\"partyId\":5}"))
+        mockMvc.perform(callTool("invite_to_party", "{\"partyId\":5,\"people\":[{\"name\":\"Liisa\"},"
+                        + "{\"email\":\"make@example.com\"},{\"name\":\"Veli\",\"sex\":\"MALE\",\"weight\":80}]}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
-        mockMvc.perform(callTool("invite_friend", "{\"partyId\":5,\"userId\":8}"))
+        mockMvc.perform(callTool("get_party_invite", "{\"partyId\":5}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
-        mockMvc.perform(callTool("add_user_by_email", "{\"partyId\":5,\"email\":\"make@example.com\"}"))
+        mockMvc.perform(callTool("get_party_invite", "{\"partyId\":5,\"replaceLink\":true}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
-        mockMvc.perform(callTool("get_join_link", "{\"partyId\":5}"))
+        mockMvc.perform(callTool("update_party", "{\"partyId\":5,\"days\":2}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
-        mockMvc.perform(callTool("create_join_link", "{\"partyId\":5}"))
+        mockMvc.perform(callTool("update_party", "{\"partyId\":5,\"stopLocationInvite\":true}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("remove_participant", "{\"partyId\":5,\"userId\":8}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
 
-        verifyNoInteractions(partyRoster, invitationSuggestions, joinLinks);
+        verifyNoInteractions(partyRoster, invitationSuggestions, joinLinks, locationInvites, nearbyParties);
+        verify(userAccounts, never()).add(any());
     }
 
     @Test
-    void aMemberReplacesTheJoinLink() throws Exception {
+    void aMemberGetsTheJoinLinkAndTheLocationInvite() throws Exception {
         signedInAs(7);
         when(partyRepository.countUserParticipations(5, 7)).thenReturn(1L);
         PartyJoinLink link = new PartyJoinLink();
         link.setPartyId(5);
         link.setToken("fresh");
         link.setCreatedAt(Instant.parse("2026-11-15T20:00:00Z"));
-        when(joinLinks.regenerate(5, 7)).thenReturn(link);
+        when(joinLinks.current(5)).thenReturn(Optional.of(link));
+        Party party = new Party();
+        party.setId(5);
+        party.setName("Sauna night");
+        party.setStartTime(Instant.parse("2026-01-01T18:00:00Z"));
+        party.setEndTime(Instant.parse("2026-01-02T18:00:00Z"));
+        when(partyRoster.get(5)).thenReturn(party);
+        PartyLocationInvite place = new PartyLocationInvite();
+        place.setLatitude(62.5);
+        place.setLongitude(27.5);
+        place.setRadiusM(400);
+        when(locationInvites.current(5)).thenReturn(Optional.of(place));
 
-        mockMvc.perform(callTool("create_join_link", "{\"partyId\":5}"))
+        mockMvc.perform(callTool("get_party_invite", "{\"partyId\":5}"))
                 .andExpect(jsonPath("$.result.isError").value(false))
-                .andExpect(jsonPath("$.result.content[0].text", containsString("/join/fresh")));
+                .andExpect(jsonPath("$.result.content[0].text", containsString("/join/fresh")))
+                .andExpect(jsonPath("$.result.content[0].text", containsString("\"radiusM\":400")));
+    }
+
+    @Test
+    void anyoneSignedInFindsNearbyPartiesAndAnInvalidPositionIsAToolError() throws Exception {
+        signedInAs(7);
+        when(nearbyParties.around(new Position(62.5, 27.5))).thenReturn(List.of());
+
+        mockMvc.perform(callTool("find_nearby_parties", "{\"latitude\":62.5,\"longitude\":27.5}"))
+                .andExpect(jsonPath("$.result.isError").value(false));
+        mockMvc.perform(callTool("find_nearby_parties", "{\"latitude\":962.5,\"longitude\":27.5}"))
+                .andExpect(jsonPath("$.result.isError").value(true))
+                .andExpect(content().string(not(containsString("962"))));
     }
 
     void drinkToolsAreWritesAndOnlyUndoIsDestructive() throws Exception {
