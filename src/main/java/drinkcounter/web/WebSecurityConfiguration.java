@@ -1,19 +1,21 @@
 package drinkcounter.web;
 
 import drinkcounter.UserAccounts;
+import drinkcounter.authentication.CustomOAuth2UserService;
 import drinkcounter.authentication.UserDetailsServiceImpl;
+import drinkcounter.authentication.relay.RelayAwareAuthenticationSuccessHandler;
 import drinkcounter.web.controllers.DefaultController;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.security.autoconfigure.web.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -22,14 +24,20 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfiguration {
 
     private final UserAccounts userAccounts;
-    private final Customizer<HttpSecurity> oauth2LoginCustomizer;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OidcUserService oidcUserService;
+    private final RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler;
 
     @Autowired
     public WebSecurityConfiguration(
             UserAccounts userAccounts,
-            Customizer<HttpSecurity> oauth2LoginCustomizer) {
+            CustomOAuth2UserService customOAuth2UserService,
+            OidcUserService oidcUserService,
+            RelayAwareAuthenticationSuccessHandler relayAwareAuthenticationSuccessHandler) {
         this.userAccounts = userAccounts;
-        this.oauth2LoginCustomizer = oauth2LoginCustomizer;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.oidcUserService = oidcUserService;
+        this.relayAwareAuthenticationSuccessHandler = relayAwareAuthenticationSuccessHandler;
     }
 
     @Bean
@@ -72,10 +80,15 @@ public class WebSecurityConfiguration {
                         "/actuator/health"
                     ).permitAll()
                     .anyRequest().authenticated();
-            });
-
-        // Apply OAuth2 login configuration
-        oauth2LoginCustomizer.customize(http);
+            })
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/ui/login")
+                .userInfoEndpoint(userInfo -> userInfo
+                    .oidcUserService(oidcUserService)
+                    .userService(customOAuth2UserService)
+                )
+                .successHandler(relayAwareAuthenticationSuccessHandler)
+            );
 
         return http.build();
     }

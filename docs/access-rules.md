@@ -30,6 +30,7 @@ Only you can see and change your profile and your full drink log.
 - You can log drinks for yourself, now or at an earlier time, and change or delete them. This works from your own dashboard whether or not a party has ended.
 - Only you can see your full list of drinks with their times, and your drinks per day.
 - You see the parties you are a member of, and no others.
+- An MCP client you sign in to ryyppy.net acts as you: it sees the parties you are a member of, and no others.
 
 ## Seeing a party
 

@@ -1,6 +1,11 @@
 spring:
   application:
     name: ryyppy.net
+  ai:
+    mcp:
+      server:
+        name: ryyppy.net
+        protocol: STREAMABLE
   datasource:
     url: jdbc:postgresql://localhost/ryyppynet
     username: ryyppynet
@@ -47,6 +52,9 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID:REPLACE_THIS}
             client-secret: ${GOOGLE_CLIENT_SECRET:REPLACE_THIS}
+      # Issues the tokens MCP clients send to /mcp (see McpSecurityConfiguration).
+      authorizationserver:
+        issuer: http://localhost:${server.port}
 
 google:
   fedcm-enabled: ${GOOGLE_FEDCM_ENABLED:false}
@@ -56,6 +64,8 @@ google:
 auth:
   relay:
     secret: ${AUTH_RELAY_SECRET:}
+  jwt:
+    signing-key: ${AUTH_JWT_SIGNING_KEY:}
 
 server:
   # Railway assigns the container's public port via $PORT. The old Railpack
