@@ -87,6 +87,8 @@
                         </div>
                     </div>
                 </form>
+
+                <p><a id="mcp-link" href="/ui/mcp">Yhdistä MCP-asiakasohjelma</a></p>
             </div>
         </div>
     </div>`
