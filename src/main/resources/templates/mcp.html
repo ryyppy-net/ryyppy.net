@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<head>
+    <title>Ryyppy.net</title>
+
+    <div id="customHead" th:remove="tag">
+        <link rel="stylesheet" type="text/css" th:href="@{/static/css/login.css}" />
+        <style>
+            .mcp-guide { max-width: 800px; text-align: left; padding: 20px 30px; line-height: 1.6; }
+            .mcp-guide h1 { text-align: center; font-size: 1.8em; }
+            .mcp-guide h2 { text-align: left; border-bottom: 1px solid #505050; padding-bottom: 5px; }
+            .mcp-guide code { color: #ffffff; background-color: #252525; padding: 1px 5px; border-radius: 3px; }
+            .mcp-guide pre { background-color: #252525; padding: 10px; border-radius: 4px; overflow-x: auto; }
+            .mcp-guide p, .mcp-guide li { color: #cccccc; }
+            .mcp-guide a { color: #aaaaaa; }
+            .mcp-guide .links { text-align: center; }
+        </style>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
+        <div class="login mcp-guide">
+            <h1 th:text="#{mcp.title}">Connect an MCP client</h1>
+
+            <p th:text="#{mcp.intro}">Intro</p>
+
+            <h2 th:text="#{mcp.connect.header}">Adding the server</h2>
+            <p><span th:text="#{mcp.connect.address}">The server address is</span> <code id="mcpAddress" th:text="${mcpUrl}">https://ryyppy.net/mcp</code></p>
+            <p th:text="#{mcp.connect.claude_code}">In Claude Code, add it with this command:</p>
+            <pre id="mcpAddCommand"><code th:text="${'claude mcp add --transport http ryyppynet ' + mcpUrl}">claude mcp add --transport http ryyppynet https://ryyppy.net/mcp</code></pre>
+
+            <h2 th:text="#{mcp.signin.header}">Signing in</h2>
+            <p th:text="#{mcp.signin.intro}">The client has to sign in as you:</p>
+            <ol>
+                <li th:text="#{mcp.signin.step1}">Step 1</li>
+                <li th:text="#{mcp.signin.step2}">Step 2</li>
+                <li th:text="#{mcp.signin.step3}">Step 3</li>
+            </ol>
+            <p th:text="#{mcp.signin.no_approval}">No separate approval.</p>
+
+            <h2 th:text="#{mcp.access.header}">What a connected client can see and do</h2>
+            <p th:text="#{mcp.access.acts_as}">Acts as you.</p>
+            <p th:text="#{mcp.access.tool}">One tool, list_parties.</p>
+            <p th:text="#{mcp.access.readonly}">Read only.</p>
+
+            <h2 th:text="#{mcp.duration.header}">How long a connection lasts</h2>
+            <p th:text="#{mcp.duration.text}">5 minutes.</p>
+
+            <h2 th:text="#{mcp.limits.header}">Clients that cannot connect yet</h2>
+            <p th:text="#{mcp.limits.text}">Claude Desktop and claude.ai cannot connect yet.</p>
+
+            <p class="links">
+                <a href="/app/" th:text="#{ui.modern_ui_label}">New UI</a>
+                <span> | </span>
+                <a href="/ui/user" th:text="#{ui.classic_ui_label}">Classic UI</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
