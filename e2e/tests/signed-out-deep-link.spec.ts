@@ -8,7 +8,11 @@ test('a party page opened signed out is where signing in lands', async ({ page }
   await createParty(page, partyName);
   const partyPath = new URL(page.url()).pathname;
 
+  // The login page's timezone request opens a session of its own; until it answers,
+  // its cookie can replace the one holding the saved party request.
+  const timezoneSent = page.waitForResponse((response) => response.url().includes('/ui/timezone/'));
   await page.goto('/logout');
+  await timezoneSent;
   await page.goto(partyPath, { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/ui\/login/);
 
