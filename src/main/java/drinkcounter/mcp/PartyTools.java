@@ -32,7 +32,8 @@ public class PartyTools {
 
     @McpTool(name = "list_parties", description = """
             Lists the parties the signed-in ryyppy.net user is a member of, newest first, \
-            with each party's id, name, start and end time, and whether it has ended.""")
+            with each party's id, name, start and end time, and whether it has ended.""",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<PartySummary> listParties() {
         // The token's subject is the email the user signed in with.
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

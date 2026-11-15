@@ -74,6 +74,12 @@ public class McpSecurityConfiguration {
                 .authorizationCodeRequestValidator(
                         new LocalhostWildcardPortValidator().andThen(DEFAULT_SCOPE_VALIDATOR))
                 .authorizationServer(authorizationServer -> {
+                    // Claude's hosted apps use a client metadata document only if "none" is listed.
+                    // Setting the customizer replaces the library's, so it repeats the CIMD claim.
+                    authorizationServer.authorizationServerMetadataEndpoint(metadata -> metadata
+                            .authorizationServerMetadataCustomizer(builder -> builder
+                                    .claim("client_id_metadata_document_supported", true)
+                                    .tokenEndpointAuthenticationMethods(methods -> methods.add("none"))));
                     http.securityMatcher(new OrRequestMatcher(
                             authorizationServer.getEndpointsMatcher(),
                             PathPatternRequestMatcher.withDefaults().matcher("/.well-known/openid-configuration")));

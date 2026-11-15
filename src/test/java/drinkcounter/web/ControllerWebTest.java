@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -50,7 +51,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         AuthRelayTokenService.class,
         CustomOAuth2UserService.class,
         OidcUserService.class,
-        RelayAwareAuthenticationSuccessHandler.class
+        RelayAwareAuthenticationSuccessHandler.class,
+        JdbcOperations.class
 })
 public @interface ControllerWebTest {
 }
