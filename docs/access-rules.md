@@ -55,11 +55,11 @@ A member does not see other participants' email, weight or individual drink time
 
 ## Who is in a party
 
-All members of a party are equal: any member can add and remove participants, and nobody outside the party can change who is in it.
+All members of a party are equal: any member can add and remove participants, and nobody outside the party can change who is in it. The one exception is deleting the party, which only the person who started it, or its last user, can do.
 
 | Action | Who can do it | How it works |
 | --- | --- | --- |
-| Create a party | Any signed-in user | You become its first member. The party lasts 1 day unless you give a number of days. |
+| Create a party | Any signed-in user | You become its first member, and the party records that you started it. The party lasts 1 day unless you give a number of days. |
 | Change a party's duration | Any member | In whole days, at least 1. The party ends that many days after it started. |
 | Add a user | Any member | Found by their exact email address, or picked from people you have been in parties with. The party then appears in their list. |
 | Add a guest | Any member | Give a name, sex and weight. The guest belongs to that party only. |
@@ -68,6 +68,7 @@ All members of a party are equal: any member can add and remove participants, an
 | Share a location invite | Any member | A party has one location invite at a time: a place and a radius from 100 m to 5 km around it. Any member can turn it on, change its place or radius, or turn it off. |
 | Join with a link | Any signed-in user with a valid link | Adds only yourself; works until the party ends. A link that is unknown, replaced, turned off or past its party's end does not work, and does not say which. |
 | Join by location | Any signed-in user within a location invite's radius | Adds only yourself; works until the party ends. The server checks the distance again from the position sent with the join. A party that is unknown, has no location invite, has ended or is out of range cannot be found or joined, and does not say which. |
+| Delete a party | The member who started it, or a member who is its only user (guests don't count) | Deletes it for everyone, ended or not, and cannot be undone. Its join link and location invite stop working. Users' drinks stay in their own logs. Its guests who are in no other party are deleted with their drinks. A starter who has left the party can no longer delete it. Parties started before the starter was recorded can be deleted only by their only user. |
 
 ## Party-mates
 

@@ -93,8 +93,8 @@ test('removing yourself on the party admin page returns to the party list', asyn
 
   await page.goto(`/app/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
   const ownRow = page.locator('.row-fluid', { has: page.getByText(user.name, { exact: true }) })
-    .filter({ has: page.getByRole('button', { name: 'Poista' }) });
-  await ownRow.getByRole('button', { name: 'Poista' }).click();
+    .filter({ has: page.getByRole('button', { name: 'Poista', exact: true }) });
+  await ownRow.getByRole('button', { name: 'Poista', exact: true }).click();
 
   await expect(page).toHaveURL(/\/app\/party-admin\/$/);
   await expect(page.getByText(partyName)).toHaveCount(0);

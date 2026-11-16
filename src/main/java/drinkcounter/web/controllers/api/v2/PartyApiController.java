@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyDeletions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.Promilles;
@@ -11,6 +12,7 @@ import drinkcounter.authentication.LoggedInUser;
 import drinkcounter.authentication.LoggedInUserId;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.PartyMember;
+import drinkcounter.authentication.PartyStarterOrLastUser;
 import drinkcounter.model.Drink;
 import drinkcounter.model.Friend;
 import drinkcounter.model.Party;
@@ -41,15 +43,18 @@ public class PartyApiController {
     private final UserAccounts userAccounts;
     private final PartyAccess partyAccess;
     private final Promilles promilles;
+    private final PartyDeletions partyDeletions;
 
     public PartyApiController(PartyRoster partyRoster, InvitationSuggestions invitationSuggestions,
-            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess, Promilles promilles) {
+            DrinkLog drinkLog, UserAccounts userAccounts, PartyAccess partyAccess, Promilles promilles,
+            PartyDeletions partyDeletions) {
         this.partyRoster = partyRoster;
         this.invitationSuggestions = invitationSuggestions;
         this.drinkLog = drinkLog;
         this.userAccounts = userAccounts;
         this.partyAccess = partyAccess;
         this.promilles = promilles;
+        this.partyDeletions = partyDeletions;
     }
 
     /** The user's parties; {@code limit} keeps only that many of the newest, newest first. */
@@ -73,7 +78,7 @@ public class PartyApiController {
     public PartyDTO addParty(@LoggedInUserId int userId, @RequestParam("name") String partyName,
             @RequestParam(value="days", defaultValue="1") int days){
         requireDays(days);
-        Party party = partyRoster.start(partyName, days);
+        Party party = partyRoster.start(partyName, days, userId);
         partyRoster.join(party.getId(), userId);
         return PartyDTO.fromParty(party);
     }
@@ -83,6 +88,18 @@ public class PartyApiController {
     public PartyDTO getParty(@PathVariable Integer partyId){
         Party party = partyRoster.get(partyId);
         return PartyDTO.fromParty(party);
+    }
+
+    @DeleteMapping("{partyId}")
+    @PartyStarterOrLastUser
+    public void deleteParty(@PathVariable Integer partyId){
+        partyDeletions.delete(partyId);
+    }
+
+    @GetMapping("{partyId}/deletion")
+    @PartyMember
+    public PartyDeletionDTO deletion(@LoggedInUserId int userId, @PathVariable Integer partyId){
+        return PartyDeletionDTO.of(partyDeletions.preview(partyId, userId));
     }
 
     @PutMapping("{partyId}/duration")

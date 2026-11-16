@@ -31,12 +31,7 @@ public class PartyRoster {
     }
 
     @Transactional
-    public Party start(String partyName) {
-        return start(partyName, DEFAULT_DAYS);
-    }
-
-    @Transactional
-    public Party start(String partyName, int days) {
+    public Party start(String partyName, int days, int startedBy) {
         if(partyName == null || partyName.isBlank()) {
             throw new IllegalArgumentException("Party name cannot be empty");
         }
@@ -48,6 +43,7 @@ public class PartyRoster {
         Instant startTime = Instant.now();
         party.setStartTime(startTime);
         party.setEndTime(startTime.plus(Duration.ofDays(days)));
+        party.setStartedBy(startedBy);
         partyRepository.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());

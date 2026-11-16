@@ -19,6 +19,11 @@ public class PartyAccess {
         return partyRepository.countUserParticipations(partyId, userId) > 0;
     }
 
+    /** See {@link PartyStarterOrLastUser}. */
+    public boolean canDelete(int partyId, int userId) {
+        return partyRepository.countDeletableBy(partyId, userId) > 0;
+    }
+
     public boolean isPartyMate(int userId, int otherUserId) {
         return partyRepository.countSharedParties(userId, otherUserId) > 0;
     }

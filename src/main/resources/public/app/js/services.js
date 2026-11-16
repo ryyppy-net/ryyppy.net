@@ -95,6 +95,14 @@
             return http.post(baseUrl + "/parties", serialize({ name: partyName, days: days })).then(data);
         };
 
+        this.getPartyDeletion = function (partyId) {
+            return http.get(baseUrl + "/parties/" + partyId + "/deletion").then(data);
+        };
+
+        this.deleteParty = function (partyId) {
+            return http.delete(baseUrl + "/parties/" + partyId).then(data);
+        };
+
         this.changePartyDuration = function (partyId, days) {
             return http.put(baseUrl + "/parties/" + partyId + "/duration", null, {params: {days: days}}).then(data);
         };

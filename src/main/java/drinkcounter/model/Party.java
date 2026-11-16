@@ -22,6 +22,7 @@ public class Party extends AbstractEntity{
     private String name;
     private Instant startTime;
     private Instant endTime;
+    private Integer startedBy;
 
     public void setStartTime(Instant startTime) {
         this.startTime = startTime;
@@ -46,6 +47,15 @@ public class Party extends AbstractEntity{
     /** A party ends at its end time; at that instant it has ended. */
     public boolean hasEnded(Instant now) {
         return endTime != null && !now.isBefore(endTime);
+    }
+
+    /** The user who started the party; null for parties older than this record. */
+    public Integer getStartedBy() {
+        return startedBy;
+    }
+
+    public void setStartedBy(Integer startedBy) {
+        this.startedBy = startedBy;
     }
 
     public String getName(){

@@ -31,6 +31,10 @@ public class AccessAnnotationsTest {
         public void party(int partyId) {
         }
 
+        @PartyStarterOrLastUser
+        public void deleteParty(int partyId) {
+        }
+
         @OwnUser
         public void ownUser(int userId) {
         }
@@ -88,6 +92,21 @@ public class AccessAnnotationsTest {
         when(partyRepository.countUserParticipations(1, 42)).thenReturn(0L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.party(1));
+    }
+
+    @Test
+    public void partyStarterOrLastUserAllowsWhomTheRepositoryCountsAsDeleter() {
+        when(partyRepository.countDeletableBy(1, 42)).thenReturn(1L);
+
+        assertDoesNotThrow(() -> handlers.deleteParty(1));
+    }
+
+    @Test
+    public void partyStarterOrLastUserDeniesOtherMembers() {
+        when(partyRepository.countUserParticipations(1, 42)).thenReturn(1L);
+        when(partyRepository.countDeletableBy(1, 42)).thenReturn(0L);
+
+        assertThrows(AccessDeniedException.class, () -> handlers.deleteParty(1));
     }
 
     @Test

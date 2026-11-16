@@ -2,6 +2,7 @@ package drinkcounter.web;
 
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.NearbyParties;
+import drinkcounter.PartyDeletions;
 import drinkcounter.PartyJoinLinks;
 import drinkcounter.PartyLocationInvites;
 import drinkcounter.PartyRoster;
@@ -38,6 +39,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class, SignInDestination.class})
 @MockitoBean(types = {
         PartyRoster.class,
+        PartyDeletions.class,
         PartyJoinLinks.class,
         PartyLocationInvites.class,
         NearbyParties.class,

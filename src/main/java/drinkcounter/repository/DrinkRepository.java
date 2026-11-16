@@ -2,6 +2,7 @@ package drinkcounter.repository;
 
 import drinkcounter.model.Drink;
 import drinkcounter.model.User;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +29,8 @@ public interface DrinkRepository extends CrudRepository<Drink, Integer> {
 
     /** The drinkers' drinks from {@code start} to {@code end}, both included, oldest first. */
     List<Drink> findByDrinkerIdInAndTimeStampBetweenOrderByTimeStampAsc(Collection<Integer> drinkerIds, Instant start, Instant end);
+
+    @Modifying
+    @Query("delete from Drink d where d.drinker.id in :drinkerIds")
+    void deleteByDrinkerIdIn(@Param("drinkerIds") Collection<Integer> drinkerIds);
 }

@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyDeletions;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PartyEndedException;
@@ -89,6 +90,9 @@ public class PartyApiControllerWebTest {
 
     @Autowired
     private DrinkRepository drinkRepository;
+
+    @Autowired
+    private PartyDeletions partyDeletions;
 
     private final List<Drink> stored = new ArrayList<>();
 
@@ -193,7 +197,7 @@ public class PartyApiControllerWebTest {
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
         started.setEndTime(Instant.parse("2024-03-06T12:00:00Z"));
-        when(partyRoster.start("Mökki", 1)).thenReturn(started);
+        when(partyRoster.start("Mökki", 1, 42)).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki"))
                 .andExpect(status().isOk())
@@ -209,7 +213,7 @@ public class PartyApiControllerWebTest {
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
         started.setEndTime(Instant.parse("2024-03-08T12:00:00Z"));
-        when(partyRoster.start("Mökki", 3)).thenReturn(started);
+        when(partyRoster.start("Mökki", 3, 42)).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki").param("days", "3"))
                 .andExpect(status().isOk())
@@ -516,6 +520,7 @@ public class PartyApiControllerWebTest {
                 Arguments.of("remove drink", delete(PARTIES + "/1/participants/2/drinks/7")),
                 Arguments.of("suggest invitations", get(PARTIES + "/1/invitations")),
                 Arguments.of("change duration", put(PARTIES + "/1/duration").param("days", "3")),
+                Arguments.of("deletion preview", get(PARTIES + "/1/deletion")),
                 Arguments.of("invite", post(PARTIES + "/1/invitations").param("userId", "42")));
     }
 
@@ -529,6 +534,42 @@ public class PartyApiControllerWebTest {
         verify(partyRepository).countUserParticipations(1, 42);
         verifyNoMoreInteractions(partyRoster, invitationSuggestions, drinkLog);
         verifyNoInteractions(userAccounts);
+    }
+
+    @Test
+    public void partyIsDeletedByAMemberAllowedToDeleteIt() throws Exception {
+        when(partyRepository.countDeletableBy(1, 42)).thenReturn(1L);
+
+        mvc.perform(delete(PARTIES + "/1")).andExpect(status().isOk());
+
+        verify(partyDeletions).delete(1);
+    }
+
+    @Test
+    public void memberNotAllowedToDeleteThePartyIsForbiddenAndNothingIsDeleted() throws Exception {
+        when(partyRepository.countDeletableBy(1, 42)).thenReturn(0L);
+
+        mvc.perform(delete(PARTIES + "/1")).andExpect(status().isForbidden());
+
+        verifyNoInteractions(partyDeletions);
+    }
+
+    @Test
+    public void deletionPreviewNamesTheOtherUsersAndTheGuests() throws Exception {
+        User liisa = new User();
+        liisa.setId(2);
+        liisa.setName("Liisa");
+        User veli = new User();
+        veli.setId(9);
+        veli.setName("Veli");
+        veli.setGuest(true);
+        when(partyDeletions.preview(1, 42)).thenReturn(new PartyDeletions.Preview(party, false, List.of(liisa), List.of(veli)));
+
+        mvc.perform(get(PARTIES + "/1/deletion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.allowed").value(false))
+                .andExpect(jsonPath("$.otherUsers[0].name").value("Liisa"))
+                .andExpect(jsonPath("$.guests[0].name").value("Veli"));
     }
 
     @Test

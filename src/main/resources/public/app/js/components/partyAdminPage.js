@@ -132,6 +132,55 @@
             });
         };
 
+        this.otherUsers = function () {
+            var deletion = self.store.deletion.data;
+            return deletion ? deletion.otherUsers : [];
+        };
+
+        this.guests = function () {
+            var deletion = self.store.deletion.data;
+            return deletion ? deletion.guests : [];
+        };
+
+        this.names = function (people) {
+            return people.map(function (person) { return person.name; }).join(', ');
+        };
+
+        this.othersText = function () {
+            var count = self.otherUsers().length;
+            return count === 1
+                ? "Bileissä on 1 muu käyttäjä: " + self.names(self.otherUsers()) + ". Bileet katoavat myös hänen listaltaan."
+                : "Bileissä on " + count + " muuta käyttäjää: " + self.names(self.otherUsers()) + ". Bileet katoavat myös heidän listoiltaan.";
+        };
+
+        this.startDelete = function () {
+            self.deleteConfirmName = '';
+            self.confirmingDelete = true;
+        };
+
+        // With other users in the party, deleting it takes typing its name.
+        this.canConfirmDelete = function () {
+            if (self.deleting) {
+                return false;
+            }
+            if (self.otherUsers().length === 0) {
+                return true;
+            }
+            var party = self.store.party.data;
+            return !!party && (self.deleteConfirmName || '').trim() === party.name.trim();
+        };
+
+        this.deleteParty = function () {
+            var name = self.store.party.data ? self.store.party.data.name : '';
+            self.deleting = true;
+            PartyStore.deleteParty(partyId).then(function () {
+                Notify.success("Bileet poistettu", "Poistettiin bileet " + name + ".");
+                $location.path('/party-admin/');
+            }).finally(function () {
+                self.deleting = false;
+            });
+        };
+
         this.$onInit = function () {
             self.email = null;
             self.name = null;
@@ -148,6 +197,9 @@
             self.joinLinkLoaded = false;
             self.joinLinkBusy = false;
             self.confirmingNewJoinLink = false;
+            self.confirmingDelete = false;
+            self.deleting = false;
+            self.deleteConfirmName = '';
 
             ProfileStore.profile.load();
             self.store.party.load().then(function () {
@@ -157,7 +209,8 @@
                 self.store.party.use(),
                 self.store.participants.use(),
                 self.store.invitations.use(),
-                self.store.joinLink.use()
+                self.store.joinLink.use(),
+                self.store.deletion.use()
             ];
             self.store.joinLink.load().then(function () {
                 self.joinLinkLoaded = true;
@@ -308,6 +361,25 @@
                     <div class="span11">{{ participant.name }}</div>
                     <div class="span1"><button ng-click="$ctrl.removeUser(participant)" class="btn btn-danger">Poista</button></div>
                 </div>
+
+                <section class="party-delete" ng-if="$ctrl.store.deletion.data.allowed">
+                    <h1>Poista bileet</h1>
+                    <p>Bileet poistuvat kaikilta. Jokaisen omat juomat jäävät heidän omaan historiaansa.</p>
+                    <button type="button" class="btn btn-danger party-delete-start" ng-if="!$ctrl.confirmingDelete" ng-click="$ctrl.startDelete()">Poista bileet</button>
+                    <div class="join-link-confirm party-delete-confirm" role="alertdialog" aria-label="Poista bileet" ng-if="$ctrl.confirmingDelete">
+                        <p><strong>Poistetaanko bileet {{ $ctrl.store.party.data.name }}?</strong> Tätä ei voi perua.</p>
+                        <p class="party-delete-others" ng-if="$ctrl.otherUsers().length > 0">{{ $ctrl.othersText() }}</p>
+                        <p class="party-delete-guests" ng-if="$ctrl.guests().length > 0">Vieraat poistetaan juomineen: {{ $ctrl.names($ctrl.guests()) }}.</p>
+                        <div ng-if="$ctrl.otherUsers().length > 0">
+                            <label for="deleteConfirmName">Vahvista kirjoittamalla bileiden nimi</label>
+                            <input id="deleteConfirmName" type="text" autocomplete="off" ng-model="$ctrl.deleteConfirmName" placeholder="{{ $ctrl.store.party.data.name }}" />
+                        </div>
+                        <div class="join-link-actions">
+                            <button type="button" class="btn" ng-click="$ctrl.confirmingDelete = false">Peruuta</button>
+                            <button type="button" class="btn btn-danger party-delete-confirm-button" ng-click="$ctrl.deleteParty()" ng-disabled="!$ctrl.canConfirmDelete()">Poista pysyvästi</button>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </div>`
