@@ -9,7 +9,26 @@
         this.partyId = partyId;
         this.store = PartyStore.get(partyId);
 
+        this.name = null;
         this.days = null;
+
+        this.savedName = function () {
+            var party = self.store.party.data;
+            return party ? party.name : null;
+        };
+
+        this.canRename = function () {
+            return !!self.name && self.name.trim() !== '' && self.name !== self.savedName();
+        };
+
+        this.saveName = function () {
+            if (!self.canRename()) {
+                return;
+            }
+            PartyStore.rename(partyId, self.name).then(function (party) {
+                Notify.success("Nimi päivitetty!", "Bileiden nimi on nyt " + party.name + ".");
+            });
+        };
 
         this.savedDays = function () {
             var party = self.store.party.data;
@@ -151,6 +170,7 @@
 
             ProfileStore.profile.load();
             self.store.party.load().then(function () {
+                self.name = self.savedName();
                 self.days = self.savedDays();
             });
             releases = [
@@ -181,6 +201,25 @@
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span10 offset1">
+                <div ng-if="$ctrl.name !== null">
+                    <h1>Bileiden nimi</h1>
+
+                    <form class="form-horizontal" ng-submit="$ctrl.saveName()">
+                        <div class="control-group">
+                            <label class="control-label" for="partyName">Nimi</label>
+                            <div class="controls">
+                                <input id="partyName" type="text" ng-model="$ctrl.name" />
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="controls">
+                                <button type="submit" class="btn btn-success name-save" ng-disabled="!$ctrl.canRename()">Tallenna nimi</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
                 <div ng-if="$ctrl.days !== null">
                     <h1>Bileiden aika</h1>
 

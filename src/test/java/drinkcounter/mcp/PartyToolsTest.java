@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -415,10 +416,25 @@ class PartyToolsTest {
         when(partyRoster.changeDuration(5, 2)).thenReturn(party);
         when(locationInvites.current(5)).thenReturn(Optional.of(invite(5, 62.1, 27.9, 1000)));
 
-        UpdatedParty updated = tools.updateParty(5, 2, 62.1, 27.9, 1000, null);
+        UpdatedParty updated = tools.updateParty(5, null, 2, 62.1, 27.9, 1000, null);
 
         verify(locationInvites).set(5, 62.1, 27.9, 1000, 7);
         assertEquals(1000, updated.locationInvite().radiusM());
+    }
+
+    @Test
+    void renamesTheParty() {
+        members(7);
+        when(partyRoster.get(5)).thenReturn(party(5, "Cottage", Instant.now(), Instant.now()));
+        when(partyRoster.rename(5, "Mökki")).thenReturn(party(5, "Mökki", Instant.now(), Instant.now()));
+        when(locationInvites.current(5)).thenReturn(Optional.empty());
+
+        UpdatedParty updated = tools.updateParty(5, "Mökki", null, null, null, null, null);
+
+        verify(partyRoster).rename(5, "Mökki");
+        assertEquals("Mökki", updated.party().name());
+        verify(partyRoster, never()).changeDuration(anyInt(), anyInt());
+        verify(locationInvites, never()).set(anyInt(), anyDouble(), anyDouble(), anyInt(), anyInt());
     }
 
     @Test
@@ -427,7 +443,7 @@ class PartyToolsTest {
         when(partyRoster.get(5)).thenReturn(party(5, "Cottage", Instant.now(), Instant.now()));
         when(locationInvites.current(5)).thenReturn(Optional.empty());
 
-        UpdatedParty updated = tools.updateParty(5, null, null, null, null, true);
+        UpdatedParty updated = tools.updateParty(5, null, null, null, null, null, true);
 
         verify(locationInvites).revoke(5);
         assertNull(updated.locationInvite());
@@ -437,9 +453,10 @@ class PartyToolsTest {
     void anUpdateThatChangesNothingOrContradictsItselfChangesNothing() {
         members(7);
 
-        assertThrows(IllegalArgumentException.class, () -> tools.updateParty(5, null, null, null, null, null));
-        assertThrows(IllegalArgumentException.class, () -> tools.updateParty(5, 2, 62.1, 27.9, 1000, true));
-        assertThrows(InvalidLocationInviteException.class, () -> tools.updateParty(5, 2, 62.1, 27.9, 9000, null));
+        assertThrows(IllegalArgumentException.class, () -> tools.updateParty(5, null, null, null, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> tools.updateParty(5, null, 2, 62.1, 27.9, 1000, true));
+        assertThrows(InvalidLocationInviteException.class, () -> tools.updateParty(5, null, 2, 62.1, 27.9, 9000, null));
+        assertThrows(IllegalArgumentException.class, () -> tools.updateParty(5, " ", null, null, null, null, null));
 
         verifyNoInteractions(partyRoster, locationInvites);
     }
@@ -448,8 +465,9 @@ class PartyToolsTest {
     void anOutsiderUpdatesNothing() {
         members();
 
-        assertThrows(AccessDeniedException.class, () -> tools.updateParty(5, 2, 62.1, 27.9, 1000, null));
-        assertThrows(AccessDeniedException.class, () -> tools.updateParty(5, null, null, null, null, true));
+        assertThrows(AccessDeniedException.class, () -> tools.updateParty(5, null, 2, 62.1, 27.9, 1000, null));
+        assertThrows(AccessDeniedException.class, () -> tools.updateParty(5, null, null, null, null, null, true));
+        assertThrows(AccessDeniedException.class, () -> tools.updateParty(5, "Mökki", null, null, null, null, null));
 
         verifyNoInteractions(partyRoster, locationInvites);
     }

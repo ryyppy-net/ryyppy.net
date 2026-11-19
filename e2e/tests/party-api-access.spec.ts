@@ -84,6 +84,37 @@ test("an outsider cannot change a party's length, and a length below 1 vrk is re
   }
 });
 
+test("an outsider cannot rename a party, and a blank name is rejected", async ({ browser, baseURL }) => {
+  const contexts: BrowserContext[] = [];
+  try {
+    const ownerContext = await signedInContext(browser, baseURL!, 'rename-owner');
+    contexts.push(ownerContext);
+    const outsiderContext = await signedInContext(browser, baseURL!, 'rename-outsider');
+    contexts.push(outsiderContext);
+    const owner = ownerContext.request;
+    const outsider = outsiderContext.request;
+
+    const party = await (await owner.post(PARTIES, { form: { name: 'Named party' } })).json();
+    const name = `${PARTIES}/${party.id}/name`;
+
+    const outsiderResponse = await outsider.put(name, { params: { name: 'Hijacked' } });
+    expect(outsiderResponse.status()).toBe(403);
+    expect((await (await owner.get(`${PARTIES}/${party.id}`)).json()).name).toBe('Named party');
+
+    const blank = await owner.put(name, { params: { name: ' ' } });
+    expect(blank.status()).toBe(400);
+    expect((await (await owner.get(`${PARTIES}/${party.id}`)).json()).name).toBe('Named party');
+
+    const renamed = await owner.put(name, { params: { name: 'Renamed party' } });
+    expect(renamed.ok()).toBeTruthy();
+    expect((await renamed.json()).name).toBe('Renamed party');
+  } finally {
+    for (const context of contexts) {
+      await context.close();
+    }
+  }
+});
+
 test('removing yourself on the party admin page returns to the party list', async ({ page }) => {
   const user = makeTestUser('party-leaver');
   await registerUser(page, user);

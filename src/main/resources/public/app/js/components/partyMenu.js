@@ -7,7 +7,7 @@
     <div class="navbar hidden-phone">
         <div class="navbar-inner">
             <ul class="nav">
-                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="/app/party/{{ ::$ctrl.party.id }}">{{ ::$ctrl.party.name }}</a></li>
+                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="/app/party/{{ ::$ctrl.party.id }}">{{ $ctrl.party.name }}</a></li>
                 <li ng-class="$ctrl.active == 'admin' && 'active'"><a ng-href="/app/party-admin/{{ ::$ctrl.party.id }}">Bilettäjät</a></li>
             </ul>
             <ul class="nav pull-right">
@@ -20,7 +20,7 @@
     <div class="navbar mobile-navbar visible-phone">
         <div class="navbar-inner">
             <ul class="nav">
-                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="/app/party/{{ ::$ctrl.party.id }}">{{ ::$ctrl.party.name }}</a></li>
+                <li ng-class="$ctrl.active == 'party' && 'active'"><a ng-href="/app/party/{{ ::$ctrl.party.id }}">{{ $ctrl.party.name }}</a></li>
                 <li ng-class="$ctrl.active == 'admin' && 'active'"><a ng-href="/app/party-admin/{{ ::$ctrl.party.id }}"><i class="icon-plus-sign"></i></a></li>
             </ul>
             <ul class="nav pull-right">

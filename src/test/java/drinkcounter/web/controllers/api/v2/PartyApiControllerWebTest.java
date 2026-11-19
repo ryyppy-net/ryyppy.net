@@ -247,6 +247,29 @@ public class PartyApiControllerWebTest {
     }
 
     @Test
+    public void memberRenamesTheParty() throws Exception {
+        Party renamed = new Party();
+        renamed.setId(1);
+        renamed.setName("Saunailta");
+        renamed.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
+        renamed.setEndTime(Instant.parse("2024-03-06T12:00:00Z"));
+        when(partyRoster.rename(1, "Saunailta")).thenReturn(renamed);
+
+        mvc.perform(put(PARTIES + "/1/name").param("name", "Saunailta"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Saunailta"));
+    }
+
+    @Test
+    public void blankPartyNameIsRejected() throws Exception {
+        mvc.perform(put(PARTIES + "/1/name").param("name", " "))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(partyRoster);
+    }
+
+    @Test
     public void durationOfLessThanADayIsRejected() throws Exception {
         mvc.perform(put(PARTIES + "/1/duration").param("days", "0"))
                 .andExpect(status().isBadRequest());
@@ -516,6 +539,7 @@ public class PartyApiControllerWebTest {
                 Arguments.of("remove drink", delete(PARTIES + "/1/participants/2/drinks/7")),
                 Arguments.of("suggest invitations", get(PARTIES + "/1/invitations")),
                 Arguments.of("change duration", put(PARTIES + "/1/duration").param("days", "3")),
+                Arguments.of("rename", put(PARTIES + "/1/name").param("name", "Saunailta")),
                 Arguments.of("invite", post(PARTIES + "/1/invitations").param("userId", "42")));
     }
 

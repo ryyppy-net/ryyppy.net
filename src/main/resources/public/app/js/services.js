@@ -95,6 +95,10 @@
             return http.post(baseUrl + "/parties", serialize({ name: partyName, days: days })).then(data);
         };
 
+        this.renameParty = function (partyId, name) {
+            return http.put(baseUrl + "/parties/" + partyId + "/name", null, {params: {name: name}}).then(data);
+        };
+
         this.changePartyDuration = function (partyId, days) {
             return http.put(baseUrl + "/parties/" + partyId + "/duration", null, {params: {days: days}}).then(data);
         };

@@ -251,8 +251,9 @@ public class PartyTools {
     }
 
     @McpTool(name = "update_party", description = """
-            Changes a party the signed-in ryyppy.net user is a member of: its length, its location \
-            invite, or both. days sets the length in whole days from the party's start. Giving \
+            Changes a party the signed-in ryyppy.net user is a member of: its name, its length, its \
+            location invite, or any of them together. name renames the party for all its members. \
+            days sets the length in whole days from the party's start. Giving \
             latitude, longitude and radiusM (100 to 5000 metres) together turns the location invite on \
             or moves it, replacing the previous place; ryyppy.net does no geocoding, so work \
             coordinates out from the place the user names. stopLocationInvite turns the location \
@@ -260,6 +261,7 @@ public class PartyTools {
             annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = true, idempotentHint = true))
     public UpdatedParty updateParty(
             @McpToolParam(description = "The party's id, from list_parties") int partyId,
+            @McpToolParam(description = "New name of the party, not blank", required = false) String name,
             @McpToolParam(description = "New length of the party in whole days, at least 1", required = false) Integer days,
             @McpToolParam(description = "Latitude of the new place in degrees, between -90 and 90", required = false) Double latitude,
             @McpToolParam(description = "Longitude of the new place in degrees, between -180 and 180", required = false) Double longitude,
@@ -271,10 +273,16 @@ public class PartyTools {
         if (stop && located) {
             throw new IllegalArgumentException("Give a place or stopLocationInvite, not both");
         }
-        if (days == null && !stop && !located) {
-            throw new IllegalArgumentException("Give days, a place or stopLocationInvite");
+        if (name != null && name.isBlank()) {
+            throw new IllegalArgumentException("A party's name cannot be blank");
+        }
+        if (name == null && days == null && !stop && !located) {
+            throw new IllegalArgumentException("Give a name, days, a place or stopLocationInvite");
         }
         Party party = days == null ? partyRoster.get(partyId) : partyRoster.changeDuration(partyId, days);
+        if (name != null) {
+            party = partyRoster.rename(partyId, name);
+        }
         if (stop) {
             locationInvites.revoke(partyId);
         } else if (located) {

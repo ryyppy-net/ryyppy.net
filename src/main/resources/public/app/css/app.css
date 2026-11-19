@@ -394,7 +394,8 @@ p {
     opacity: 1;
 }
 
-.btn.duration-save[disabled] {
+.btn.duration-save[disabled],
+.btn.name-save[disabled] {
     background-color: #D0D0D0;
     background-image: none;
     border-color: #D0D0D0;

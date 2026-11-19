@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import drinkcounter.model.Party;
 import drinkcounter.repository.PartyRepository;
@@ -50,6 +51,26 @@ class PartyRosterTest {
         roster.changeDuration(1, 4);
 
         assertEquals(Instant.parse("2024-03-09T12:00:00Z"), party.getEndTime());
+    }
+
+    @Test
+    void renamingSavesTheNewName() {
+        Party party = new Party();
+        party.setName("Sauna");
+        when(parties.findById(1)).thenReturn(Optional.of(party));
+
+        roster.rename(1, "Saunailta");
+
+        assertEquals("Saunailta", party.getName());
+        verify(parties).save(party);
+    }
+
+    @Test
+    void renamingToABlankNameIsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> roster.rename(1, " "));
+        assertThrows(IllegalArgumentException.class, () -> roster.rename(1, null));
+
+        verifyNoInteractions(parties);
     }
 
     @Test
