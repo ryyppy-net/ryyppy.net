@@ -37,10 +37,7 @@ public class PartyRoster {
 
     @Transactional
     public Party start(String partyName, int days) {
-        if(partyName == null || partyName.isBlank()) {
-            throw new IllegalArgumentException("Party name cannot be empty");
-        }
-
+        requireName(partyName);
         requireDays(days);
 
         Party party = new Party();
@@ -63,6 +60,23 @@ public class PartyRoster {
         partyRepository.save(party);
         log.info("Party {} now lasts {} days", party.getName(), days);
         return party;
+    }
+
+    @Transactional
+    public Party rename(int partyId, String name) {
+        requireName(name);
+        Party party = get(partyId);
+        String previous = party.getName();
+        party.setName(name);
+        partyRepository.save(party);
+        log.info("Party {}, id {} was renamed to {}", previous, partyId, name);
+        return party;
+    }
+
+    private static void requireName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Party name cannot be empty");
+        }
     }
 
     private static void requireDays(int days) {

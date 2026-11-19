@@ -85,7 +85,7 @@ test('the party admin page changes the length only once the value differs from t
   const before = await partyTimes(page, partyId);
 
   await page.goto(`/app/party-admin/${partyId}`, { waitUntil: 'domcontentloaded' });
-  const save = page.getByRole('button', { name: 'Tallenna' });
+  const save = page.getByRole('button', { name: 'Tallenna', exact: true });
   await expect(page.locator('.day-stepper-value')).toHaveText('1 vrk');
   await expect(save).toBeDisabled();
 

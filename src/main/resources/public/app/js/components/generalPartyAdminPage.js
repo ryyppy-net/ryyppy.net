@@ -101,7 +101,7 @@
                         <div class="row-fluid">
                             <div class="span10 party color{{ ($index % 12) + 1 }}">
                                 <div class="party-header">
-                                    <span class="party-header-title">{{ ::party.name }}</span>
+                                    <span class="party-header-title">{{ party.name }}</span>
                                     <small class="party-header-range">{{ $ctrl.range(party) }}</small>
                                 </div>
                                 <ul class="inline" ng-if="party.participants.length > 0" style="margin-top: 5px; margin-bottom: 0px;">

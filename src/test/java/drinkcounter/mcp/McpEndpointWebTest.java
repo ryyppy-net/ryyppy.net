@@ -193,6 +193,8 @@ class McpEndpointWebTest {
                 .andExpect(jsonPath("$.result.isError").value(true));
         mockMvc.perform(callTool("update_party", "{\"partyId\":5,\"stopLocationInvite\":true}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("update_party", "{\"partyId\":5,\"name\":\"Mökki\"}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
         mockMvc.perform(callTool("remove_participant", "{\"partyId\":5,\"userId\":8}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
 

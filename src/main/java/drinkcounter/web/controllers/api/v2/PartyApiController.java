@@ -92,6 +92,15 @@ public class PartyApiController {
         return PartyDTO.fromParty(partyRoster.changeDuration(partyId, days));
     }
 
+    @PutMapping("{partyId}/name")
+    @PartyMember
+    public PartyDTO rename(@PathVariable Integer partyId, @RequestParam("name") String name){
+        if (name.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Party name cannot be empty");
+        }
+        return PartyDTO.fromParty(partyRoster.rename(partyId, name));
+    }
+
     private static void requireDays(int days) {
         if (days < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A party lasts at least 1 day");

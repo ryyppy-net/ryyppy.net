@@ -327,6 +327,15 @@
             });
         };
 
+        this.rename = function (partyId, name) {
+            var ticket = Resource.ticket();
+            return RyyppyAPI.renameParty(partyId, name).then(function (party) {
+                self.get(partyId).party.set(party, ticket);
+                PartiesStore.parties.invalidate();
+                return party;
+            });
+        };
+
         this.changeDuration = function (partyId, days) {
             var ticket = Resource.ticket();
             return RyyppyAPI.changePartyDuration(partyId, days).then(function (party) {

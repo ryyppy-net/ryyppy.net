@@ -60,6 +60,7 @@ All members of a party are equal: any member can add and remove participants, an
 | Action | Who can do it | How it works |
 | --- | --- | --- |
 | Create a party | Any signed-in user | You become its first member. The party lasts 1 day unless you give a number of days. |
+| Rename a party | Any member | Any name that is not blank. Every member sees the new name. |
 | Change a party's duration | Any member | In whole days, at least 1. The party ends that many days after it started. |
 | Add a user | Any member | Found by their exact email address, or picked from people you have been in parties with. The party then appears in their list. |
 | Add a guest | Any member | Give a name, sex and weight. The guest belongs to that party only. |
