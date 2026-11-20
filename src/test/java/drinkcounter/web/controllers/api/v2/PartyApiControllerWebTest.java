@@ -1,6 +1,7 @@
 package drinkcounter.web.controllers.api.v2;
 
 import drinkcounter.InvitationSuggestions;
+import drinkcounter.PartyDeletion;
 import drinkcounter.PartyRoster;
 import drinkcounter.DrinkLog;
 import drinkcounter.PartyEndedException;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -89,6 +91,9 @@ public class PartyApiControllerWebTest {
 
     @Autowired
     private DrinkRepository drinkRepository;
+
+    @Autowired
+    private PartyDeletion partyDeletion;
 
     private final List<Drink> stored = new ArrayList<>();
 
@@ -193,7 +198,7 @@ public class PartyApiControllerWebTest {
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
         started.setEndTime(Instant.parse("2024-03-06T12:00:00Z"));
-        when(partyRoster.start("Mökki", 1)).thenReturn(started);
+        when(partyRoster.start("Mökki", 1, 42)).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki"))
                 .andExpect(status().isOk())
@@ -209,7 +214,7 @@ public class PartyApiControllerWebTest {
         started.setName("Mökki");
         started.setStartTime(Instant.parse("2024-03-05T12:00:00Z"));
         started.setEndTime(Instant.parse("2024-03-08T12:00:00Z"));
-        when(partyRoster.start("Mökki", 3)).thenReturn(started);
+        when(partyRoster.start("Mökki", 3, 42)).thenReturn(started);
 
         mvc.perform(post(PARTIES).param("name", "Mökki").param("days", "3"))
                 .andExpect(status().isOk())
@@ -545,6 +550,7 @@ public class PartyApiControllerWebTest {
                 Arguments.of("suggest invitations", get(PARTIES + "/1/invitations")),
                 Arguments.of("change duration", put(PARTIES + "/1/duration").param("days", "3")),
                 Arguments.of("rename", put(PARTIES + "/1/name").param("name", "Saunailta")),
+                Arguments.of("deletion preview", get(PARTIES + "/1/deletion")),
                 Arguments.of("invite", post(PARTIES + "/1/invitations").param("userId", "42")));
     }
 
@@ -557,7 +563,87 @@ public class PartyApiControllerWebTest {
 
         verify(partyRepository).countUserParticipations(1, 42);
         verifyNoMoreInteractions(partyRoster, invitationSuggestions, drinkLog);
-        verifyNoInteractions(userAccounts);
+        verifyNoInteractions(userAccounts, partyDeletion);
+    }
+
+    @Test
+    public void memberSeesWhomDeletingThePartyWouldAffect() throws Exception {
+        User guest = user(9, "Pekka");
+        guest.setGuest(true);
+        when(partyDeletion.impact(1, 42)).thenReturn(
+                new PartyDeletion.Impact(deletableParty(), true, List.of(user(2, "Liisa")), List.of(guest)));
+
+        mvc.perform(get(PARTIES + "/1/deletion"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deletable").value(true))
+                .andExpect(jsonPath("$.otherUsers[0].name").value("Liisa"))
+                .andExpect(jsonPath("$.deletedGuests[0].name").value("Pekka"));
+    }
+
+    @Test
+    public void starterDeletesTheParty() throws Exception {
+        Party started = deletableParty();
+        started.setStartedBy(42);
+        started.addParticipant(user(2, "Liisa"));
+        when(partyRepository.findById(1)).thenReturn(Optional.of(started));
+
+        mvc.perform(delete(PARTIES + "/1"))
+                .andExpect(status().isNoContent());
+
+        verify(partyDeletion).delete(1, 42);
+    }
+
+    @Test
+    public void onlyUserLeftDeletesAPartyWithNoRecordedStarter() throws Exception {
+        when(partyRepository.findById(1)).thenReturn(Optional.of(deletableParty()));
+
+        mvc.perform(delete(PARTIES + "/1"))
+                .andExpect(status().isNoContent());
+
+        verify(partyDeletion).delete(1, 42);
+    }
+
+    @Test
+    public void memberWhoDidNotStartThePartyCannotDeleteItWhileOtherUsersAreIn() throws Exception {
+        Party party = deletableParty();
+        party.setStartedBy(2);
+        party.addParticipant(user(2, "Liisa"));
+        when(partyRepository.findById(1)).thenReturn(Optional.of(party));
+
+        mvc.perform(delete(PARTIES + "/1"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(partyDeletion);
+    }
+
+    @Test
+    public void outsiderCannotDeleteTheParty() throws Exception {
+        Party party = new Party();
+        party.setId(1);
+        party.setStartedBy(2);
+        party.addParticipant(user(2, "Liisa"));
+        when(partyRepository.findById(1)).thenReturn(Optional.of(party));
+
+        mvc.perform(delete(PARTIES + "/1"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(partyDeletion);
+    }
+
+    /** Party 1 with the signed-in user as its only participant and no recorded starter. */
+    private static Party deletableParty() {
+        Party party = new Party();
+        party.setId(1);
+        party.setName("Mökki");
+        party.addParticipant(user(42, "Matti"));
+        return party;
+    }
+
+    private static User user(int id, String name) {
+        User user = new User();
+        user.setId(id);
+        user.setName(name);
+        return user;
     }
 
     @Test

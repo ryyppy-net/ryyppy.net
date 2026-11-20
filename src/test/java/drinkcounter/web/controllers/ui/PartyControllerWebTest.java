@@ -75,7 +75,7 @@ public class PartyControllerWebTest {
     public void addPartyStartsAndLinksThePartyThenRedirectsToIt() throws Exception {
         Party party = new Party();
         party.setId(8);
-        when(partyRoster.start("Sauna")).thenReturn(party);
+        when(partyRoster.start("Sauna", 1, 42)).thenReturn(party);
 
         mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "42"))
                 .andExpect(status().is3xxRedirection())

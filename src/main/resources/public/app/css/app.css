@@ -776,3 +776,54 @@ p {
     width: 64px;
     height: 64px;
 }
+
+.party-delete {
+    margin-bottom: 30px;
+}
+
+.party-delete .btn {
+    min-height: 44px;
+}
+
+.party-delete-confirm {
+    background-color: white;
+    color: #222;
+    border-radius: 6px;
+    padding: 14px;
+    margin: 0;
+}
+
+.party-delete-confirm p {
+    margin: 0 0 10px;
+}
+
+.party-delete-confirm ul {
+    margin: 0 0 10px 25px;
+}
+
+.party-delete-confirm li,
+.party-delete-confirm label {
+    line-height: 1.4em;
+}
+
+.party-delete-confirm .party-delete-name {
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    min-height: 44px;
+    font-size: 16px;
+}
+
+.party-delete-confirm .join-link-actions {
+    justify-content: flex-end;
+    margin-bottom: 0;
+}
+
+.btn.party-delete-submit[disabled] {
+    background-color: #D0D0D0;
+    background-image: none;
+    border-color: #D0D0D0;
+    color: #404040;
+    text-shadow: none;
+    opacity: 1;
+}

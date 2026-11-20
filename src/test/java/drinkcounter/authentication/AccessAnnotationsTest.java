@@ -1,7 +1,10 @@
 package drinkcounter.authentication;
 
+import drinkcounter.model.Party;
+import drinkcounter.model.User;
 import drinkcounter.repository.PartyRepository;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,10 @@ public class AccessAnnotationsTest {
 
         @PartyMemberAndOwnUserOrPartyMate
         public void partyMemberAndOwnUserOrPartyMate(int partyId, int userId) {
+        }
+
+        @PartyStarterOrOnlyUser
+        public void deleteParty(int partyId) {
         }
     }
 
@@ -151,5 +158,51 @@ public class AccessAnnotationsTest {
         when(partyRepository.countSharedParties(42, 7)).thenReturn(0L);
 
         assertThrows(AccessDeniedException.class, () -> handlers.partyMemberAndOwnUserOrPartyMate(1, 7));
+    }
+
+    @Test
+    public void partyStarterOrOnlyUserAllowsTheStarter() {
+        Party party = partyWith(42, 7);
+        party.setStartedBy(42);
+        when(partyRepository.findById(1)).thenReturn(Optional.of(party));
+
+        assertDoesNotThrow(() -> handlers.deleteParty(1));
+    }
+
+    @Test
+    public void partyStarterOrOnlyUserAllowsTheOnlyUserLeft() {
+        when(partyRepository.findById(1)).thenReturn(Optional.of(partyWith(42)));
+
+        assertDoesNotThrow(() -> handlers.deleteParty(1));
+    }
+
+    @Test
+    public void partyStarterOrOnlyUserDeniesAnotherMemberWhileOtherUsersAreIn() {
+        Party party = partyWith(42, 7);
+        party.setStartedBy(7);
+        when(partyRepository.findById(1)).thenReturn(Optional.of(party));
+
+        assertThrows(AccessDeniedException.class, () -> handlers.deleteParty(1));
+    }
+
+    @Test
+    public void partyStarterOrOnlyUserDeniesNonParticipantAndUnknownParty() {
+        Party party = partyWith(7);
+        party.setStartedBy(42);
+        when(partyRepository.findById(1)).thenReturn(Optional.of(party));
+        when(partyRepository.findById(2)).thenReturn(Optional.empty());
+
+        assertThrows(AccessDeniedException.class, () -> handlers.deleteParty(1));
+        assertThrows(AccessDeniedException.class, () -> handlers.deleteParty(2));
+    }
+
+    private static Party partyWith(int... userIds) {
+        Party party = new Party();
+        for (int userId : userIds) {
+            User user = new User();
+            user.setId(userId);
+            party.addParticipant(user);
+        }
+        return party;
     }
 }

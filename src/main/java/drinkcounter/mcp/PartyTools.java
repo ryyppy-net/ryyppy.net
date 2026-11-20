@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.NearbyParties;
 import drinkcounter.NearbyParty;
+import drinkcounter.PartyDeletion;
 import drinkcounter.PartyJoinLinks;
 import drinkcounter.PartyLocationInvites;
 import drinkcounter.PartyRoster;
@@ -44,11 +45,13 @@ public class PartyTools {
     private final PartyJoinLinks joinLinks;
     private final PartyLocationInvites locationInvites;
     private final NearbyParties nearbyParties;
+    private final PartyDeletion partyDeletion;
     private final HttpServletRequest request;
 
     public PartyTools(UserAccounts userAccounts, PartyRoster partyRoster, PartyAccess partyAccess,
             InvitationSuggestions invitationSuggestions, PartyJoinLinks joinLinks,
-            PartyLocationInvites locationInvites, NearbyParties nearbyParties, HttpServletRequest request) {
+            PartyLocationInvites locationInvites, NearbyParties nearbyParties, PartyDeletion partyDeletion,
+            HttpServletRequest request) {
         this.userAccounts = userAccounts;
         this.partyRoster = partyRoster;
         this.partyAccess = partyAccess;
@@ -56,6 +59,7 @@ public class PartyTools {
         this.joinLinks = joinLinks;
         this.locationInvites = locationInvites;
         this.nearbyParties = nearbyParties;
+        this.partyDeletion = partyDeletion;
         this.request = request;
     }
 
@@ -65,6 +69,10 @@ public class PartyTools {
             return new PartySummary(party.getId(), party.getName(), party.getStartTime(), party.getEndTime(),
                     party.hasEnded(now));
         }
+    }
+
+    public record ListedParty(int id, String name, Instant startTime, Instant endTime, boolean ended,
+            boolean deletable) {
     }
 
     public record JoinLink(int partyId, String url, Instant createdAt) {
@@ -128,14 +136,28 @@ public class PartyTools {
     public record Removed(int partyId, int userId, String name) {
     }
 
+    public record Named(int userId, String name) {
+
+        static List<Named> of(List<User> users) {
+            return users.stream().map(user -> new Named(user.getId(), user.getName())).toList();
+        }
+    }
+
+    public record DeletedParty(int partyId, String name, boolean deleted, List<Named> otherUsers,
+            List<Named> deletedGuests) {
+    }
+
     @McpTool(name = "list_parties", description = """
             Lists the parties the signed-in ryyppy.net user is a member of, newest first, \
-            with each party's id, name, start and end time, and whether it has ended.""",
+            with each party's id, name, start and end time, whether it has ended, and whether the \
+            user can delete it with delete_party.""",
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
-    public List<PartySummary> listParties() {
+    public List<ListedParty> listParties() {
+        int self = signedInUser().getId();
         Instant now = Instant.now();
-        return partyRoster.newestOf(signedInUser().getId(), Integer.MAX_VALUE).stream()
-                .map(party -> PartySummary.of(party, now))
+        return partyRoster.allWithParticipantsOf(self).stream()
+                .map(party -> new ListedParty(party.getId(), party.getName(), party.getStartTime(),
+                        party.getEndTime(), party.hasEnded(now), party.canBeDeletedBy(self)))
                 .toList();
     }
 
@@ -156,7 +178,7 @@ public class PartyTools {
             @McpToolParam(description = "People to invite as soon as the party exists", required = false) List<Person> invite) {
         int self = signedInUser().getId();
         boolean located = location(latitude, longitude, radiusM);
-        Party party = days == null ? partyRoster.start(name) : partyRoster.start(name, days);
+        Party party = partyRoster.start(name, days == null ? PartyRoster.DEFAULT_DAYS : days, self);
         int partyId = party.getId();
         partyRoster.join(partyId, self);
         LocationInvite place = located
@@ -308,6 +330,32 @@ public class PartyTools {
         String name = userAccounts.get(userId).getName();
         partyRoster.leave(partyId, userId);
         return new Removed(partyId, userId, name);
+    }
+
+    @McpTool(name = "delete_party", description = """
+            Deletes a party for all its members; it cannot be undone. Only the member who started the \
+            party, or a member who is its only user left (guests aside), can delete it: list_parties \
+            says which parties the user can delete. The party, its join link and its location invite \
+            are gone, and so are its guests who are in no other party. Users' drinks stay in their \
+            own logs. If other users are in the party, a call without confirm deletes nothing and \
+            returns those users and the guests that would be deleted: tell the user, and call again \
+            with confirm true only once they agree. With no other users the party is deleted at once.""",
+            annotations = @McpTool.McpAnnotations(readOnlyHint = false, destructiveHint = true, idempotentHint = false))
+    public DeletedParty deleteParty(
+            @McpToolParam(description = "The party's id, from list_parties") int partyId,
+            @McpToolParam(description = "true to delete a party other users are in, once the user has agreed; default false", required = false) Boolean confirm) {
+        int self = requireMember(partyId);
+        PartyDeletion.Impact impact = partyDeletion.impact(partyId, self);
+        if (!impact.deletable()) {
+            throw new AccessDeniedException("Only the member who started party " + partyId
+                    + ", or its only user left, can delete it");
+        }
+        boolean deleted = impact.otherUsers().isEmpty() || Boolean.TRUE.equals(confirm);
+        if (deleted) {
+            partyDeletion.delete(partyId, self);
+        }
+        return new DeletedParty(partyId, impact.party().getName(), deleted, Named.of(impact.otherUsers()),
+                Named.of(impact.deletedGuests()));
     }
 
     private InviteReport invitePeople(int self, int partyId, List<Person> people) {

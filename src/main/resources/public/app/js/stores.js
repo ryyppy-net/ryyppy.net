@@ -236,6 +236,8 @@
             entry.participants = new Resource(forgetOnForbidden(RyyppyAPI.getPartyParticipants),
                 {pollMs: POLL_MS, merge: keepNewerWrites});
             entry.invitations = new Resource(forgetOnForbidden(RyyppyAPI.getPartyInvitations));
+            // Whether the user may delete the party, and whom deleting it would affect.
+            entry.deletion = new Resource(forgetOnForbidden(RyyppyAPI.getPartyDeletion));
             // null while the party has no join link.
             entry.joinLink = new Resource(forgetOnForbidden(function (partyId) {
                 return RyyppyAPI.getJoinLink(partyId).catch(function (response) {
@@ -295,6 +297,7 @@
             var entry = self.get(partyId);
             entry.participants.invalidate();
             entry.invitations.invalidate();
+            entry.deletion.invalidate();
             // The party list shows each party's participants.
             PartiesStore.parties.invalidate();
         }
@@ -372,6 +375,13 @@
             var ticket = Resource.ticket();
             return RyyppyAPI.revokeLocationInvite(partyId).then(function () {
                 self.get(partyId).locationInvite.set(null, ticket);
+            });
+        };
+
+        this.deleteParty = function (partyId) {
+            return RyyppyAPI.deleteParty(partyId).then(function () {
+                delete entries[String(partyId)];
+                PartiesStore.parties.invalidate();
             });
         };
 
