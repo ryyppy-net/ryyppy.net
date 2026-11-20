@@ -32,6 +32,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.ClientIdMetadataDocumentRegisteredClientRepository;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.client.metadata.DefaultClientMetadataValidator;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
@@ -110,6 +111,8 @@ public class McpSecurityConfiguration {
         http
             .securityMatcher("/mcp", "/.well-known/oauth-protected-resource/**")
             .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+            // MCP clients authenticate with the bearer token alone; the app's session cookie does not count here.
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // As in the library's sample server: a token-less POST must get the 401 that starts MCP sign-in.
             .csrf(CsrfConfigurer::disable)
             // The issuer is this app, so its keys are read in-process rather than fetched over HTTP.

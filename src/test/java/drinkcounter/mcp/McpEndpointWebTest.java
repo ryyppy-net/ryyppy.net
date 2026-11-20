@@ -1,5 +1,6 @@
 package drinkcounter.mcp;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -13,6 +14,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +41,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -107,6 +116,49 @@ class McpEndpointWebTest {
                 .andExpect(jsonPath("$.scopes_supported", hasItem("mcp")))
                 .andExpect(jsonPath("$.authorization_servers", hasItem("http://localhost")))
                 .andExpect(jsonPath("$.resource_name").value("Spring MCP Resource Server"));
+    }
+
+    @Test
+    void aRequestWithoutATokenGetsTheChallengeThatStartsSignIn() throws Exception {
+        mockMvc.perform(post("/mcp").contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE)
+                        .content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate",
+                        containsString("resource_metadata=http://localhost/.well-known/oauth-protected-resource/mcp")));
+    }
+
+    @Test
+    void theSessionCookieAloneDoesNotSignInToMcp() throws Exception {
+        mockMvc.perform(post("/mcp").session(signedInSession())
+                        .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("WWW-Authenticate", containsString("resource_metadata=")));
+    }
+
+    @Test
+    void theTokenSignsInEvenWhenASessionIsPresent() throws Exception {
+        mockMvc.perform(post("/mcp").session(signedInSession()).with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                        .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void aRequestToMcpCreatesNoSession() throws Exception {
+        MockHttpServletRequest request = mockMvc.perform(post("/mcp").with(jwt().jwt(jwt -> jwt.subject("matti@example.com")))
+                        .contentType(MediaType.APPLICATION_JSON).header("Accept", JSON_AND_SSE).content(JSON_RPC_LIST_TOOLS))
+                .andExpect(status().isOk())
+                .andReturn().getRequest();
+
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    private static MockHttpSession signedInSession() {
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
+                "matti@example.com", null, List.of(new SimpleGrantedAuthority("ROLE_USER"))));
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+        return session;
     }
 
     @Test
