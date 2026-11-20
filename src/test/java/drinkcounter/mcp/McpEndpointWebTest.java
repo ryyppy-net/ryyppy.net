@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import drinkcounter.DrinkLog;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.NearbyParties;
+import drinkcounter.PartyDeletion;
 import drinkcounter.PartyJoinLinks;
 import drinkcounter.PartyLocationInvites;
 import drinkcounter.Position;
@@ -91,6 +92,9 @@ class McpEndpointWebTest {
 
     @Autowired
     NearbyParties nearbyParties;
+
+    @Autowired
+    PartyDeletion partyDeletion;
 
     @Test
     void authorizationServerAcceptsClientsWithoutASecret() throws Exception {
@@ -178,6 +182,8 @@ class McpEndpointWebTest {
                 .andExpect(jsonPath("$.result.tools[?(@.name=='update_party')].annotations.readOnlyHint").value(false))
                 .andExpect(jsonPath("$.result.tools[?(@.name=='update_party')].annotations.destructiveHint").value(true))
                 .andExpect(jsonPath("$.result.tools[?(@.name=='remove_participant')].annotations.destructiveHint").value(true))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='delete_party')].annotations.readOnlyHint").value(false))
+                .andExpect(jsonPath("$.result.tools[?(@.name=='delete_party')].annotations.destructiveHint").value(true))
                 .andExpect(jsonPath("$.result.tools[?(@.name=='suggest_invitees')]").isEmpty())
                 .andExpect(jsonPath("$.result.tools[?(@.name=='invite_friend')]").isEmpty())
                 .andExpect(jsonPath("$.result.tools[?(@.name=='add_user_by_email')]").isEmpty())
@@ -206,8 +212,10 @@ class McpEndpointWebTest {
                 .andExpect(jsonPath("$.result.isError").value(true));
         mockMvc.perform(callTool("remove_participant", "{\"partyId\":5,\"userId\":8}"))
                 .andExpect(jsonPath("$.result.isError").value(true));
+        mockMvc.perform(callTool("delete_party", "{\"partyId\":5,\"confirm\":true}"))
+                .andExpect(jsonPath("$.result.isError").value(true));
 
-        verifyNoInteractions(partyRoster, invitationSuggestions, joinLinks, locationInvites, nearbyParties);
+        verifyNoInteractions(partyRoster, invitationSuggestions, joinLinks, locationInvites, nearbyParties, partyDeletion);
         verify(userAccounts, never()).add(any());
     }
 

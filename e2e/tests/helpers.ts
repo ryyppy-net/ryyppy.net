@@ -155,16 +155,25 @@ export async function waitForSoundsReady(page: Page): Promise<void> {
  * docker/docker-compose.yml starts for the app; set E2E_DATABASE_URL for any other.
  */
 export async function endPartyInDatabase(partyId: number | string): Promise<void> {
+  await inDatabase(
+    "update party set start_time = (now() at time zone 'utc') - interval '25 hours', " +
+    "end_time = (now() at time zone 'utc') - interval '1 hour' where id = $1",
+    [partyId],
+  );
+}
+
+/** Clears who started a party, in the database, as for parties started before that was recorded. */
+export async function forgetPartyStarterInDatabase(partyId: number | string): Promise<void> {
+  await inDatabase('update party set started_by = null where id = $1', [partyId]);
+}
+
+async function inDatabase(sql: string, values: unknown[]): Promise<void> {
   const client = new Client({
     connectionString: process.env.E2E_DATABASE_URL ?? 'postgres://postgres:demo@127.0.0.1:5432/postgres',
   });
   await client.connect();
   try {
-    await client.query(
-      "update party set start_time = (now() at time zone 'utc') - interval '25 hours', " +
-      "end_time = (now() at time zone 'utc') - interval '1 hour' where id = $1",
-      [partyId],
-    );
+    await client.query(sql, values);
   } finally {
     await client.end();
   }

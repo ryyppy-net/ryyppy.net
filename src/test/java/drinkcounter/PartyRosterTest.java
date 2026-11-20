@@ -21,22 +21,22 @@ class PartyRosterTest {
     private final PartyRoster roster = new PartyRoster(parties, mock(UserRepository.class));
 
     @Test
-    void newPartyEndsOneDayAfterItStarts() {
-        Party party = roster.start("Sauna night");
+    void newPartyRecordsWhoStartedIt() {
+        Party party = roster.start("Sauna night", 1, 42);
 
-        assertEquals(Duration.ofDays(1), Duration.between(party.getStartTime(), party.getEndTime()));
+        assertEquals(42, party.getStartedBy());
     }
 
     @Test
     void newPartyEndsGivenNumberOfDaysAfterItStarts() {
-        Party party = roster.start("Mökki", 3);
+        Party party = roster.start("Mökki", 3, 42);
 
         assertEquals(Duration.ofDays(3), Duration.between(party.getStartTime(), party.getEndTime()));
     }
 
     @Test
     void newPartyLastingLessThanADayIsRejected() {
-        assertThrows(IllegalArgumentException.class, () -> roster.start("Mökki", 0));
+        assertThrows(IllegalArgumentException.class, () -> roster.start("Mökki", 0, 42));
 
         verifyNoInteractions(parties);
     }

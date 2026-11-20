@@ -30,13 +30,9 @@ public class PartyRoster {
         this.userRepository = userRepository;
     }
 
+    /** Starts a party recording {@code startedBy} as its starter; the caller adds them as a member. */
     @Transactional
-    public Party start(String partyName) {
-        return start(partyName, DEFAULT_DAYS);
-    }
-
-    @Transactional
-    public Party start(String partyName, int days) {
+    public Party start(String partyName, int days, int startedBy) {
         requireName(partyName);
         requireDays(days);
 
@@ -45,6 +41,7 @@ public class PartyRoster {
         Instant startTime = Instant.now();
         party.setStartTime(startTime);
         party.setEndTime(startTime.plus(Duration.ofDays(days)));
+        party.setStartedBy(startedBy);
         partyRepository.save(party);
 
         log.info("Party {}, id {} was started!", partyName, party.getId());

@@ -17,6 +17,7 @@ import drinkcounter.InvalidLocationInviteException;
 import drinkcounter.InvitationSuggestions;
 import drinkcounter.NearbyParties;
 import drinkcounter.NearbyParty;
+import drinkcounter.PartyDeletion;
 import drinkcounter.PartyJoinLinks;
 import drinkcounter.PartyLocationInvites;
 import drinkcounter.PartyRoster;
@@ -26,6 +27,8 @@ import drinkcounter.UnusableJoinLinkException;
 import drinkcounter.UserAccounts;
 import drinkcounter.authentication.PartyAccess;
 import drinkcounter.mcp.PartyTools.Candidate;
+import drinkcounter.mcp.PartyTools.DeletedParty;
+import drinkcounter.mcp.PartyTools.ListedParty;
 import drinkcounter.mcp.PartyTools.InviteReport;
 import drinkcounter.mcp.PartyTools.JoinOutcome;
 import drinkcounter.mcp.PartyTools.Person;
@@ -61,9 +64,10 @@ class PartyToolsTest {
     private final PartyJoinLinks joinLinks = mock(PartyJoinLinks.class);
     private final PartyLocationInvites locationInvites = mock(PartyLocationInvites.class);
     private final NearbyParties nearbyParties = mock(NearbyParties.class);
+    private final PartyDeletion partyDeletion = mock(PartyDeletion.class);
     private final HttpServletRequest request = mock(HttpServletRequest.class);
     private final PartyTools tools = new PartyTools(userAccounts, partyRoster, partyAccess, invitationSuggestions,
-            joinLinks, locationInvites, nearbyParties, request);
+            joinLinks, locationInvites, nearbyParties, partyDeletion, request);
 
     @BeforeEach
     void signIn() {
@@ -83,19 +87,84 @@ class PartyToolsTest {
     void listsThePartiesOfTheUserTheTokenWasIssuedTo() {
         Party ongoing = party(1, "Sauna night", Instant.now().minus(Duration.ofHours(2)), Instant.now().plus(Duration.ofHours(22)));
         Party ended = party(2, "Vappu", Instant.parse("2024-04-30T12:00:00Z"), Instant.parse("2024-05-01T12:00:00Z"));
-        when(partyRoster.newestOf(7, Integer.MAX_VALUE)).thenReturn(List.of(ongoing, ended));
+        when(partyRoster.allWithParticipantsOf(7)).thenReturn(List.of(ongoing, ended));
 
-        List<PartySummary> parties = tools.listParties();
+        List<ListedParty> parties = tools.listParties();
 
-        assertEquals(List.of(1, 2), parties.stream().map(PartySummary::id).toList());
+        assertEquals(List.of(1, 2), parties.stream().map(ListedParty::id).toList());
         assertEquals(false, parties.get(0).ended());
         assertEquals(true, parties.get(1).ended());
     }
 
     @Test
+    void listsWhichPartiesTheUserCanDelete() {
+        Party started = party(1, "Sauna night", Instant.now(), Instant.now().plus(Duration.ofDays(1)));
+        started.setStartedBy(7);
+        started.addParticipant(user(7, "Matti", "matti@example.com"));
+        started.addParticipant(user(8, "Liisa", "liisa@example.com"));
+        Party joined = party(2, "Mökki", Instant.now(), Instant.now().plus(Duration.ofDays(1)));
+        joined.setStartedBy(8);
+        joined.addParticipant(user(7, "Matti", "matti@example.com"));
+        joined.addParticipant(user(8, "Liisa", "liisa@example.com"));
+        when(partyRoster.allWithParticipantsOf(7)).thenReturn(List.of(started, joined));
+
+        List<ListedParty> parties = tools.listParties();
+
+        assertEquals(List.of(true, false), parties.stream().map(ListedParty::deletable).toList());
+    }
+
+    @Test
+    void deletesAPartyNoOtherUserIsInAtOnce() {
+        members(7);
+        when(partyDeletion.impact(5, 7)).thenReturn(impact(true, List.of(), List.of(guest(9, "Pekka"))));
+
+        DeletedParty deleted = tools.deleteParty(5, null);
+
+        verify(partyDeletion).delete(5, 7);
+        assertTrue(deleted.deleted());
+        assertEquals(List.of("Pekka"), deleted.deletedGuests().stream().map(PartyTools.Named::name).toList());
+    }
+
+    @Test
+    void aPartyOtherUsersAreInIsDeletedOnlyOnConfirmation() {
+        members(7);
+        when(partyDeletion.impact(5, 7)).thenReturn(impact(true, List.of(user(8, "Liisa", null)), List.of()));
+
+        DeletedParty asked = tools.deleteParty(5, null);
+
+        assertEquals(false, asked.deleted());
+        assertEquals(List.of("Liisa"), asked.otherUsers().stream().map(PartyTools.Named::name).toList());
+        verify(partyDeletion, never()).delete(anyInt(), anyInt());
+
+        DeletedParty confirmed = tools.deleteParty(5, true);
+
+        assertTrue(confirmed.deleted());
+        verify(partyDeletion).delete(5, 7);
+    }
+
+    @Test
+    void aMemberWhoMayNotDeleteThePartyDeletesNothing() {
+        members(7);
+        when(partyDeletion.impact(5, 7)).thenReturn(impact(false, List.of(user(8, "Liisa", null)), List.of()));
+
+        assertThrows(AccessDeniedException.class, () -> tools.deleteParty(5, true));
+
+        verify(partyDeletion, never()).delete(anyInt(), anyInt());
+    }
+
+    @Test
+    void anOutsiderDeletesNothing() {
+        members();
+
+        assertThrows(AccessDeniedException.class, () -> tools.deleteParty(5, true));
+
+        verifyNoInteractions(partyDeletion);
+    }
+
+    @Test
     void startsAPartyWithTheSignedInUserInItAndALinkToShare() {
         Party party = party(4, "Sauna night", Instant.now(), Instant.now().plus(Duration.ofDays(2)));
-        when(partyRoster.start("Sauna night", 2)).thenReturn(party);
+        when(partyRoster.start("Sauna night", 2, 7)).thenReturn(party);
         when(joinLinks.regenerate(4, 7)).thenReturn(link(4, "abc"));
 
         StartedParty started = tools.startParty("Sauna night", 2, null, null, null, null);
@@ -110,17 +179,17 @@ class PartyToolsTest {
 
     @Test
     void aPartyLastsADayUnlessToldOtherwise() {
-        when(partyRoster.start("Sauna night")).thenReturn(party(4, "Sauna night", Instant.now(), Instant.now()));
+        when(partyRoster.start("Sauna night", 1, 7)).thenReturn(party(4, "Sauna night", Instant.now(), Instant.now()));
         when(joinLinks.regenerate(4, 7)).thenReturn(link(4, "abc"));
 
         tools.startParty("Sauna night", null, null, null, null, null);
 
-        verify(partyRoster).start("Sauna night");
+        verify(partyRoster).start("Sauna night", 1, 7);
     }
 
     @Test
     void startsAPartyAtAPlaceAndInvitesPeople() {
-        when(partyRoster.start("Cottage")).thenReturn(party(4, "Cottage", Instant.now(), Instant.now()));
+        when(partyRoster.start("Cottage", 1, 7)).thenReturn(party(4, "Cottage", Instant.now(), Instant.now()));
         when(joinLinks.regenerate(4, 7)).thenReturn(link(4, "abc"));
         PartyLocationInvite place = invite(4, 62.5, 27.5, 500);
         when(locationInvites.set(4, 62.5, 27.5, 500, 7)).thenReturn(place);
@@ -542,6 +611,16 @@ class PartyToolsTest {
         user.setName(name);
         user.setEmail(email);
         return user;
+    }
+
+    private static PartyDeletion.Impact impact(boolean deletable, List<User> otherUsers, List<User> guests) {
+        return new PartyDeletion.Impact(party(5, "Cottage", Instant.now(), Instant.now()), deletable, otherUsers, guests);
+    }
+
+    private static User guest(int id, String name) {
+        User guest = user(id, name, null);
+        guest.setGuest(true);
+        return guest;
     }
 
     private static Party party(int id, String name, Instant start, Instant end) {
