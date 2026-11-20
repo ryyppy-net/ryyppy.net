@@ -33,44 +33,57 @@ public class PromilleHistory {
         Instant start = now.minus(Duration.ofMinutes(300));
 
         List<Float> history = new ArrayList<Float>(bloodAlcohol.promillesAt(start, now, interval));
-        int nowIndex = history.size() - 1;
-        if (history.get(nowIndex) > 0) {
-            Instant limit = now.plus(PROJECTION_LIMIT);
-            for (Instant t = now.plus(interval); !t.isAfter(limit); t = t.plus(interval)) {
-                float promilles = bloodAlcohol.promillesAt(t, t, interval).get(0);
-                history.add(promilles);
-                if (promilles <= 0) {
-                    break;
-                }
-            }
-        }
-
         List<Long> timestamps = new ArrayList<Long>();
         for (int i = 0; i < history.size(); i++) {
             timestamps.add(start.plus(interval.multipliedBy(i)).toEpochMilli());
         }
+        int nowIndex = history.size() - 1;
+        project(bloodAlcohol, timestamps, history);
         return bends(timestamps, history, nowIndex);
     }
 
     /**
-     * From {@code start} up to the blood alcohol's now, and nothing projected after it. Sampled
-     * every minute, or for a party over a day long, at most {@value #MAX_PARTY_SAMPLES} times.
+     * From {@code start} up to the blood alcohol's now, sampled every minute, or for a party over
+     * a day long, at most {@value #MAX_PARTY_SAMPLES} times. While the party runs, that is until
+     * {@code end}, the minutes until the drinker is sober follow, projected as in {@link #of}.
      */
-    public static List<HistoryPoint> during(BloodAlcohol bloodAlcohol, Instant start) {
-        Instant end = bloodAlcohol.now();
-        long minutes = Duration.between(start, end).toMinutes();
+    public static List<HistoryPoint> during(BloodAlcohol bloodAlcohol, Instant start, Instant end) {
+        Instant now = bloodAlcohol.now();
+        long minutes = Duration.between(start, now).toMinutes();
         Duration interval = Duration.ofMinutes(Math.max(1, Math.ceilDiv(minutes, MAX_PARTY_SAMPLES)));
 
-        List<Float> history = new ArrayList<Float>(bloodAlcohol.promillesAt(start, end, interval));
+        List<Float> history = new ArrayList<Float>(bloodAlcohol.promillesAt(start, now, interval));
         List<Long> timestamps = new ArrayList<Long>();
         for (int i = 0; i < history.size(); i++) {
             timestamps.add(start.plus(interval.multipliedBy(i)).toEpochMilli());
         }
-        if (timestamps.get(timestamps.size() - 1) < end.toEpochMilli()) {
-            timestamps.add(end.toEpochMilli());
+        if (timestamps.get(timestamps.size() - 1) < now.toEpochMilli()) {
+            timestamps.add(now.toEpochMilli());
             history.add(bloodAlcohol.promilles());
         }
-        return bends(timestamps, history, history.size() - 1);
+        int nowIndex = history.size() - 1;
+        if (now.isBefore(end)) {
+            project(bloodAlcohol, timestamps, history);
+        }
+        return bends(timestamps, history, nowIndex);
+    }
+
+    // The last sample is now; for someone not sober, the minutes after it until they are follow.
+    private static void project(BloodAlcohol bloodAlcohol, List<Long> timestamps, List<Float> history) {
+        if (history.get(history.size() - 1) <= 0) {
+            return;
+        }
+        Duration interval = Duration.ofMinutes(1);
+        Instant now = bloodAlcohol.now();
+        Instant limit = now.plus(PROJECTION_LIMIT);
+        for (Instant t = now.plus(interval); !t.isAfter(limit); t = t.plus(interval)) {
+            float promilles = bloodAlcohol.promillesAt(t, t, interval).get(0);
+            timestamps.add(t.toEpochMilli());
+            history.add(promilles);
+            if (promilles <= 0) {
+                break;
+            }
+        }
     }
 
     // Promilles fall in straight lines between drinks and the charts draw straight lines

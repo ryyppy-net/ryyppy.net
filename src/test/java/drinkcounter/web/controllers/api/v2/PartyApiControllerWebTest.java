@@ -436,7 +436,7 @@ public class PartyApiControllerWebTest {
     }
 
     @Test
-    public void runningPartysParticipantsShowWhatWasDrunkFromItsStartToNow() throws Exception {
+    public void runningPartysParticipantsShowWhatWasDrunkFromItsStartToNowThenUntilSober() throws Exception {
         when(partyRoster.members(1)).thenReturn(List.of(signedIn, participant));
         Instant before = Instant.now();
         runParty(before);
@@ -451,9 +451,14 @@ public class PartyApiControllerWebTest {
                 .andExpect(jsonPath("$[1].promilles").value(greaterThan(0.0)))
                 .andExpect(jsonPath("$[1].history[0].timestamp").value(start.toEpochMilli()))
                 .andExpect(jsonPath("$[1].history[0].promilles").value(0.0))
-                .andExpect(jsonPath("$[1].history[-1].timestamp", allOf(
-                        greaterThanOrEqualTo(before.toEpochMilli()), lessThanOrEqualTo(Instant.now().toEpochMilli()))))
-                .andExpect(jsonPath("$[*].history[*].projected", everyItem(is(false))));
+                .andExpect(jsonPath("$[1].history[?(@.projected == false)].timestamp", everyItem(
+                        lessThanOrEqualTo(Instant.now().toEpochMilli()))))
+                .andExpect(jsonPath("$[1].history[?(@.projected == true)].timestamp", everyItem(
+                        greaterThan(before.toEpochMilli()))))
+                .andExpect(jsonPath("$[1].history[-1].projected").value(true))
+                .andExpect(jsonPath("$[1].history[-1].promilles").value(0.0))
+                // Sober, so nothing is projected.
+                .andExpect(jsonPath("$[0].history[*].projected", everyItem(is(false))));
     }
 
     @Test

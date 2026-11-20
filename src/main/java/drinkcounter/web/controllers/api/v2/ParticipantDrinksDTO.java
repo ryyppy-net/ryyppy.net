@@ -13,7 +13,7 @@ public record ParticipantDrinksDTO(DrinkDTO drink, ParticipantDTO participant) {
     /** @param bloodAlcohol the participant's, from {@link drinkcounter.Promilles#during} the party */
     public static ParticipantDrinksDTO of(Drink drink, BloodAlcohol bloodAlcohol, Party party) {
         ParticipantDTO participantDTO = ParticipantDTO.inParty(bloodAlcohol);
-        participantDTO.setHistory(PromilleHistory.during(bloodAlcohol, party.getStartTime()));
+        participantDTO.setHistory(PromilleHistory.during(bloodAlcohol, party.getStartTime(), party.getEndTime()));
         return new ParticipantDrinksDTO(drink == null ? null : DrinkDTO.fromDrink(drink), participantDTO);
     }
 }
