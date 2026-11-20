@@ -55,6 +55,11 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 @Configuration
 public class McpSecurityConfiguration {
 
+    /** The one scope: everything the MCP tools can do as the user. */
+    public static final String MCP_SCOPE = "mcp";
+
+    static final String CONSENT_PAGE = "/ui/mcp/consent";
+
     private final String issuer;
 
     public McpSecurityConfiguration(@Value("${spring.security.oauth2.authorizationserver.issuer}") String issuer) {
@@ -74,6 +79,9 @@ public class McpSecurityConfiguration {
                 .authorizationCodeRequestValidator(
                         new LocalhostWildcardPortValidator().andThen(DEFAULT_SCOPE_VALIDATOR))
                 .authorizationServer(authorizationServer -> {
+                    authorizationServer.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
+                            .authorizationRequestConverters(converters -> converters.replaceAll(DefaultScopeAuthorizationRequestConverter::new))
+                            .consentPage(CONSENT_PAGE));
                     // Claude's hosted apps use a client metadata document only if "none" is listed.
                     // Setting the customizer replaces the library's, so it repeats the CIMD claim.
                     authorizationServer.authorizationServerMetadataEndpoint(metadata -> metadata
@@ -105,7 +113,12 @@ public class McpSecurityConfiguration {
             // As in the library's sample server: a token-less POST must get the 401 that starts MCP sign-in.
             .csrf(CsrfConfigurer::disable)
             // The issuer is this app, so its keys are read in-process rather than fetched over HTTP.
-            .with(mcpServerOAuth2(), mcp -> mcp.authorizationServer(issuer).jwtDecoder(jwtDecoder));
+            .with(mcpServerOAuth2(), mcp -> mcp.authorizationServer(issuer).jwtDecoder(jwtDecoder)
+                    // Setting the customizer replaces the library's, so it repeats the library's two claims.
+                    .protectedResourceMetadataCustomizer(metadata -> metadata
+                            .authorizationServer(issuer)
+                            .resourceName("Spring MCP Resource Server")
+                            .scope(MCP_SCOPE)));
         return http.build();
     }
 
@@ -120,7 +133,10 @@ public class McpSecurityConfiguration {
         converter.setTokenSettingsCustomizer(tokenSettings -> tokenSettings
                 .reuseRefreshTokens(false)
                 .refreshTokenTimeToLive(Duration.ofDays(365)));
-        repository.setRegisteredClientConverter(converter);
+        // Client metadata documents name no scopes, so every client is given the one scope there is.
+        repository.setRegisteredClientConverter(registration -> RegisteredClient.from(converter.convert(registration))
+                .scope(MCP_SCOPE)
+                .build());
         return repository;
     }
 

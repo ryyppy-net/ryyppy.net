@@ -101,6 +101,15 @@ class McpEndpointWebTest {
     }
 
     @Test
+    void protectedResourceNamesTheMcpScope() throws Exception {
+        mockMvc.perform(get("/.well-known/oauth-protected-resource/mcp"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.scopes_supported", hasItem("mcp")))
+                .andExpect(jsonPath("$.authorization_servers", hasItem("http://localhost")))
+                .andExpect(jsonPath("$.resource_name").value("Spring MCP Resource Server"));
+    }
+
+    @Test
     void listPartiesIsMarkedReadOnly() throws Exception {
         when(userAccounts.byEmail("matti@example.com")).thenReturn(new User());
 
