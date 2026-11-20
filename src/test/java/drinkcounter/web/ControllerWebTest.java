@@ -15,6 +15,7 @@ import drinkcounter.authentication.PartyAccess;
 import drinkcounter.authentication.SignInDestination;
 import drinkcounter.authentication.relay.AuthRelayTokenService;
 import drinkcounter.authentication.relay.RelayAwareAuthenticationSuccessHandler;
+import drinkcounter.mcp.McpConsentRequests;
 import drinkcounter.repository.DrinkRepository;
 import drinkcounter.repository.PartyRepository;
 import java.lang.annotation.ElementType;
@@ -52,7 +53,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
         CustomOAuth2UserService.class,
         OidcUserService.class,
         RelayAwareAuthenticationSuccessHandler.class,
-        JdbcOperations.class
+        JdbcOperations.class,
+        McpConsentRequests.class
 })
 public @interface ControllerWebTest {
 }

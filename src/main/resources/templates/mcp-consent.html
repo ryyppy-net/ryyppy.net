@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/master :: layout(~{::title}, ~{::#customHead}, ~{::#content})}">
+<head>
+    <title>Ryyppy.net</title>
+
+    <div id="customHead" th:remove="tag">
+        <link rel="stylesheet" type="text/css" th:href="@{/static/css/login.css}" />
+        <style>
+            .mcp-consent { max-width: 600px; text-align: left; padding: 20px 30px; line-height: 1.6; }
+            .mcp-consent h1 { text-align: center; font-size: 1.6em; }
+            .mcp-consent p, .mcp-consent dd { color: #cccccc; }
+            .mcp-consent dt { font-weight: bold; }
+            .mcp-consent dd { margin: 0 0 10px 0; }
+            .mcp-consent code { color: #ffffff; background-color: #252525; padding: 1px 5px; border-radius: 3px; }
+            .mcp-consent .warning { border: 1px solid #c9a227; border-radius: 4px; padding: 10px; color: #f0d77a; }
+            .mcp-consent .actions { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        </style>
+    </div>
+</head>
+<body>
+    <div id="content" th:remove="tag">
+        <div class="login mcp-consent">
+            <h1 id="consentTitle" th:text="#{mcp.consent.title(${consent.clientName})}">Allow Claude Code to use your account?</h1>
+
+            <p th:text="#{mcp.consent.intro(${consent.clientName}, ${account})}">Claude Code wants to use Ryyppy.net as you.</p>
+
+            <dl>
+                <dt th:text="#{mcp.consent.client}">Client</dt>
+                <dd><span th:text="${consent.clientName}">Claude Code</span> (<code id="consentClientHost" th:text="${consent.clientHost}">claude.ai</code>)</dd>
+                <dt th:text="#{mcp.consent.redirect}">Access is sent to</dt>
+                <dd><code id="consentRedirectHost" th:text="${consent.redirectHost}">localhost</code></dd>
+                <dt th:text="#{mcp.consent.access}">It can</dt>
+                <dd th:text="#{mcp.consent.access.mcp}">Read and change your drinks and parties as you.</dd>
+            </dl>
+
+            <p class="warning" id="consentLocalhostWarning" th:if="${consent.redirectsToLocalhost()}"
+               th:text="#{mcp.consent.localhost}">The access goes to a program on this computer. Allow it only if you started connecting this client yourself.</p>
+
+            <div class="actions">
+                <form method="post" th:action="@{/oauth2/authorize}">
+                    <input type="hidden" name="client_id" th:value="${consent.clientId}">
+                    <input type="hidden" name="state" th:value="${consent.state}">
+                    <input type="hidden" name="scope" th:each="scope : ${consent.scopes}" th:value="${scope}">
+                    <input type="submit" id="consentAllow" th:value="#{mcp.consent.allow}" value="Allow">
+                </form>
+                <form method="post" th:action="@{/oauth2/authorize}">
+                    <input type="hidden" name="client_id" th:value="${consent.clientId}">
+                    <input type="hidden" name="state" th:value="${consent.state}">
+                    <input type="submit" id="consentDeny" th:value="#{mcp.consent.deny}" value="Deny">
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
