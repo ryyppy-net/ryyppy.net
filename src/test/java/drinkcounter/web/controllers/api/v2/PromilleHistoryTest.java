@@ -130,18 +130,48 @@ public class PromilleHistoryTest {
     }
 
     @Test
-    public void duringRunsFromTheStartToNowWithNothingProjected() {
+    public void duringAnEndedPartyRunsFromTheStartToTheEndWithNothingProjected() {
         User user = user(6, 80);
         Instant now = Instant.parse("2024-03-05T22:00:30Z");
         Instant start = now.minus(Duration.ofHours(3));
         drinkAt(user, now.minus(Duration.ofMinutes(20)));
 
-        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user, user.getDrinks(), now), start);
+        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user, user.getDrinks(), now), start, now);
 
         assertEquals(start.toEpochMilli(), points.get(0).getTimestamp());
         assertEquals(0.0, points.get(0).getPromilles(), 0.0001);
         assertEquals(now.toEpochMilli(), points.get(points.size() - 1).getTimestamp());
         assertTrue(points.get(points.size() - 1).getPromilles() > 0);
+        assertTrue(points.stream().noneMatch(HistoryPoint::isProjected));
+    }
+
+    @Test
+    public void duringARunningPartyProjectsPromillesDownToZero() {
+        User user = user(9, 80);
+        Instant now = Instant.parse("2024-03-05T22:00:30Z");
+        Instant start = now.minus(Duration.ofHours(3));
+        drinkAt(user, now.minus(Duration.ofMinutes(20)));
+
+        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user, user.getDrinks(), now), start, now.plus(Duration.ofHours(5)));
+
+        HistoryPoint nowPoint = lastNotProjected(points);
+        assertEquals(now.toEpochMilli(), nowPoint.getTimestamp());
+        assertTrue(nowPoint.getPromilles() > 0);
+        HistoryPoint last = points.get(points.size() - 1);
+        assertTrue(last.isProjected());
+        assertEquals(0.0, last.getPromilles(), 0.0001);
+        assertTrue(points.stream().filter(HistoryPoint::isProjected).allMatch(p -> p.getTimestamp() > now.toEpochMilli()));
+    }
+
+    @Test
+    public void duringARunningPartyProjectsNothingForSomeoneSober() {
+        User user = user(10, 80);
+        Instant now = Instant.parse("2024-03-05T22:00:30Z");
+        Instant start = now.minus(Duration.ofHours(3));
+
+        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user, List.of(), now), start, now.plus(Duration.ofHours(5)));
+
+        assertEquals(now.toEpochMilli(), points.get(points.size() - 1).getTimestamp());
         assertTrue(points.stream().noneMatch(HistoryPoint::isProjected));
     }
 
@@ -155,7 +185,7 @@ public class PromilleHistoryTest {
         }
         BloodAlcohol bloodAlcohol = new BloodAlcohol(user, user.getDrinks(), now);
 
-        List<HistoryPoint> points = PromilleHistory.during(bloodAlcohol, start);
+        List<HistoryPoint> points = PromilleHistory.during(bloodAlcohol, start, now);
 
         assertTrue(points.size() < 40, "only bends are sent, got " + points.size());
         assertEquals(start.toEpochMilli(), points.get(0).getTimestamp());
@@ -172,7 +202,7 @@ public class PromilleHistoryTest {
     public void duringAPartyThatJustStartedIsOnePoint() {
         Instant now = Instant.parse("2024-03-05T22:00:00Z");
 
-        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user(8, 80), List.of(), now), now);
+        List<HistoryPoint> points = PromilleHistory.during(new BloodAlcohol(user(8, 80), List.of(), now), now, now.plus(Duration.ofDays(1)));
 
         assertEquals(1, points.size());
         assertEquals(now.toEpochMilli(), points.get(0).getTimestamp());

@@ -115,7 +115,7 @@ public class PartyApiController {
         List<ParticipantDTO> participantDTOs = new ArrayList<ParticipantDTO>();
         for (BloodAlcohol participant : promilles.during(party, participants)) {
             ParticipantDTO participantDTO = ParticipantDTO.inParty(participant);
-            participantDTO.setHistory(PromilleHistory.during(participant, party.getStartTime()));
+            participantDTO.setHistory(PromilleHistory.during(participant, party.getStartTime(), party.getEndTime()));
             participantDTOs.add(participantDTO);
         }
         return participantDTOs;

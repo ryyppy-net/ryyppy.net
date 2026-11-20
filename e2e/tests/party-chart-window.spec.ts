@@ -42,7 +42,7 @@ async function shifted(page: Page, timestamp: number): Promise<number> {
   return timestamp + (await page.evaluate(() => -60000 * new Date().getTimezoneOffset()));
 }
 
-test('a running party graph runs from the party start to now and leaves out drinks from before it', async ({ page }) => {
+test('a running party graph runs from the party start to now, then until sober, and leaves out drinks from before it', async ({ page }) => {
   const user = makeTestUser('party-window');
   await registerUser(page, user);
   const profile = await (await page.request.get('/API/v2/profile')).json();
@@ -62,7 +62,10 @@ test('a running party graph runs from the party start to now and leaves out drin
   const participants = await (await page.request.get(`/API/v2/parties/${party.id}/participants`)).json();
   const history: { timestamp: number; projected: boolean }[] = participants[0].history;
   expect(history[0].timestamp).toBe(start);
-  expect(history.every((point) => point.timestamp >= start && point.timestamp <= Date.now() && !point.projected)).toBe(true);
+  const now = Date.now();
+  expect(history.every((point) => point.timestamp >= start)).toBe(true);
+  expect(history.filter((point) => !point.projected).every((point) => point.timestamp <= now)).toBe(true);
+  expect(history[history.length - 1].projected).toBe(true);
 
   await page.goto(`/app/party/${party.id}`, { waitUntil: 'domcontentloaded' });
   const tile = page.locator('.drinker', { has: page.getByText(user.name) });
@@ -72,13 +75,16 @@ test('a running party graph runs from the party start to now and leaves out drin
   await expect.poll(async () => (await chart())?.points.length ?? 0).toBeGreaterThan(1);
   const state = (await chart())!;
   const first = state.points[0];
+  const nowPoint = state.points.filter((point) => !point.projected).pop()!;
   const last = state.points[state.points.length - 1];
   expect(first.x).toBe(await shifted(page, start));
   // Two hours before the party, a drink would still show at its start.
   expect(first.y).toBe(0);
-  expect(last.y).toBeGreaterThan(0);
-  expect(last.x).toBeLessThanOrEqual(await shifted(page, Date.now()));
-  expect(state.points.some((point) => point.projected)).toBe(false);
+  expect(nowPoint.y).toBeGreaterThan(0);
+  expect(nowPoint.x).toBeLessThanOrEqual(await shifted(page, Date.now()));
+  expect(last.projected).toBe(true);
+  expect(last.y).toBe(0);
+  expect(last.x).toBeGreaterThan(await shifted(page, Date.now()));
   expect(state.min).toBe(first.x);
   expect(state.max).toBe(last.x);
 });
