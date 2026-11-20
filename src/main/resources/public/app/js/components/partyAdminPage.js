@@ -110,7 +110,7 @@
             if (self.selectedUserTypeId === 2)
                 self._addRegisteredUser(self.email);
             if (self.selectedUserTypeId === 3)
-                self._addGuestUser(self.name, self.sex, self.weight);
+                self._addGuestUser(self.guestName, self.sex, self.weight);
         };
 
         this._addRegisteredUser = function (email) {
@@ -122,7 +122,7 @@
         this._addGuestUser = function (name, sex, weight) {
             var guest = { name: name, sex: sex, weight: weight };
             PartyStore.addGuest(partyId, guest).then(function () {
-                Notify.success("Tervetuloa vieraalle!", "Lisätty vieras " + self.name + ".");
+                Notify.success("Tervetuloa vieraalle!", "Lisätty vieras " + name + ".");
             });
         };
 
@@ -154,6 +154,7 @@
         this.$onInit = function () {
             self.email = null;
             self.name = null;
+            self.guestName = null;
             self.sex = 'MALE';
             self.weight = null;
             self.inviting = false;
@@ -312,7 +313,7 @@
                         <div class="control-group">
                             <label class="control-label" for="name">Nimi</label>
                             <div class="controls">
-                                <input id="name" type="text" ng-model="$ctrl.name" />
+                                <input id="name" type="text" ng-model="$ctrl.guestName" />
                             </div>
                         </div>
 
