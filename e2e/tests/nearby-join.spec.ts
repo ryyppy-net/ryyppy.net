@@ -1,21 +1,21 @@
 import { BrowserContext, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { signedInContext } from './helpers';
-import { Place, lonelyPlace, north, partyWithInvite, searcherAt } from './nearby';
+import { Place, north, partyWithInvite, searcherAt } from './nearby';
 
 // Separate contexts for both users: one signed in through storageState would hand its session to the other.
 let owner: BrowserContext;
 let joinerContext: BrowserContext;
 let joiner: Page;
 let place: Place;
-let party: { partyId: number; name: string };
+let party: { partyId: number; name: string; place: Place };
 
 test.beforeEach(async ({ browser, baseURL }) => {
   owner = await signedInContext(browser, baseURL!, 'nearby-join-owner');
   joinerContext = await signedInContext(browser, baseURL!, 'nearby-joiner');
   joiner = joinerContext.pages()[0];
-  place = lonelyPlace();
-  party = await partyWithInvite(owner, place, 1000);
+  party = await partyWithInvite(owner, 1000);
+  place = party.place;
 });
 
 test.afterEach(async () => {
