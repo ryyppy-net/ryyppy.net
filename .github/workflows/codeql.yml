@@ -25,12 +25,29 @@ jobs:
           - language: actions
             build-mode: none
           - language: java-kotlin
-            build-mode: none
+            build-mode: manual
           - language: javascript-typescript
             build-mode: none
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        if: matrix.build-mode == 'manual'
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Cache Maven packages
+        if: matrix.build-mode == 'manual'
+        uses: actions/cache@v6
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ github.job }}-${{ hashFiles('pom.xml') }}
+          restore-keys: |
+            maven-${{ github.job }}-
+            maven-
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -38,6 +55,10 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Build
+        if: matrix.build-mode == 'manual'
+        run: mvn -B compile
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
