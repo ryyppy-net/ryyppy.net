@@ -1,15 +1,15 @@
 import { test, expect } from './fixtures';
 import { signedInContext } from './helpers';
 import { SHARED_STORAGE_STATE } from './shared-user';
-import { lonelyPlace, north, partyWithInvite, searcherAt } from './nearby';
+import { north, partyWithInvite, searcherAt } from './nearby';
 
 test('someone inside the area finds the party from the front page with a rough distance', async ({ browser, baseURL }) => {
   // Separate contexts for both: one signed in through storageState would hand its session to the other.
   const owner = await signedInContext(browser, baseURL!, 'nearby-owner');
   const context = await signedInContext(browser, baseURL!, 'nearby-in');
   try {
-    const place = lonelyPlace();
-    const party = await partyWithInvite(owner, place, 5000);
+    const party = await partyWithInvite(owner, 5000);
+    const place = party.place;
     await searcherAt(context, baseURL, north(place, 300));
     const searcher = context.pages()[0];
 
@@ -51,8 +51,8 @@ test('someone outside the area is told there are no parties nearby and can retry
   const owner = await signedInContext(browser, baseURL!, 'nearby-owner');
   const context = await signedInContext(browser, baseURL!, 'nearby-out');
   try {
-    const place = lonelyPlace();
-    const party = await partyWithInvite(owner, place, 1000);
+    const party = await partyWithInvite(owner, 1000);
+    const place = party.place;
     await searcherAt(context, baseURL, north(place, 1500));
     const searcher = context.pages()[0];
 

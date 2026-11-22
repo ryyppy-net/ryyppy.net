@@ -80,7 +80,7 @@ test('deleting a party other users are in names them and needs its name typed; i
   const name = `E2E Delete Shared ${Date.now()}`;
   const partyId = await startParty(starter, name);
   const token = await joinWithLink(starter, mate, partyId);
-  const place = lonelyPlace();
+  const place = lonelyPlace(partyId);
   expect((await starter.request.put(`${PARTIES}/${partyId}/location-invite`,
     { data: { ...place, radiusM: 1000 } })).ok()).toBeTruthy();
   const mateId = await ownId(mate);
