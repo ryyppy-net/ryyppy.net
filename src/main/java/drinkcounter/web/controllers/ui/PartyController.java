@@ -8,6 +8,7 @@ import drinkcounter.authentication.PartyMemberAndOwnUserOrPartyMate;
 import drinkcounter.model.Party;
 import drinkcounter.model.User;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -46,7 +47,7 @@ public class PartyController {
         return "redirect:party?id="+party.getId();
     }
    
-    @RequestMapping("/removeUserFromParty")
+    @PostMapping("/removeUserFromParty")
     @PartyMemberAndOwnUserOrPartyMate
     public String removeUserFromParty(@RequestParam("partyId") int partyId,
             @RequestParam("userId") int userId){

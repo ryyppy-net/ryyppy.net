@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -177,9 +178,9 @@ public class PartyControllerWebTest {
         mvc.perform(get("/ui/party").param("id", "abc")).andExpect(status().isBadRequest());
         mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "abc"))
                 .andExpect(status().isBadRequest());
-        mvc.perform(get("/ui/removeUserFromParty").param("partyId", "abc").param("userId", "42"))
+        mvc.perform(post("/ui/removeUserFromParty").param("partyId", "abc").param("userId", "42"))
                 .andExpect(status().isBadRequest());
-        mvc.perform(get("/ui/removeUserFromParty").param("partyId", "5").param("userId", "abc"))
+        mvc.perform(post("/ui/removeUserFromParty").param("partyId", "5").param("userId", "abc"))
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(partyRoster);
@@ -197,7 +198,7 @@ public class PartyControllerWebTest {
     }
 
     private static MockHttpServletRequestBuilder removeUserFromParty(int partyId, int userId) {
-        return get("/ui/removeUserFromParty").param("partyId", String.valueOf(partyId))
+        return post("/ui/removeUserFromParty").param("partyId", String.valueOf(partyId))
                 .param("userId", String.valueOf(userId));
     }
 }

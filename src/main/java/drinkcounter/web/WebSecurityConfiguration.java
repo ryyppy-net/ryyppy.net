@@ -52,7 +52,11 @@ public class WebSecurityConfiguration {
             .logout(logout -> logout
                 .permitAll()
             )
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                .spa()
+                // The passphrase in the URL authenticates these, not the session.
+                .ignoringRequestMatchers("/API/passphrase/**")
+            )
             .authorizeHttpRequests(authorize -> {
                 authorize
                     .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()

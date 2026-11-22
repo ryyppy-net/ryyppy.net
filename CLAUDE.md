@@ -66,7 +66,10 @@ args; omit them locally and it is skipped. Two invariants:
   (`GOOGLE_AUTH_HUB_URL`, `https://ryyppy.net` in production). Other environments,
   such as PR previews, reach it through `authentication/relay/`, signed with
   `AUTH_RELAY_SECRET`.
-- CSRF is disabled for the legacy front ends.
+- CSRF protection is on for the session-cookie chain (`csrf.spa()`): the `XSRF-TOKEN` cookie must come
+  back as `X-XSRF-TOKEN` on every unsafe request. `$.ajaxSetup` in `common.js` and AngularJS's `$http` do
+  this; forms use `th:action`. State changes are never GET, and logout is a POST. `/API/passphrase/**` and
+  the bearer-token `/mcp` chain are exempt.
 - UI text goes in both `messages_fi.properties` and `messages_en.properties`;
   Finnish is the default locale.
 - Drink sounds: adding a clip means dropping an `.ogg` + `.mp3` pair with the same

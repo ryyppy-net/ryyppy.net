@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures';
-import { createParty, makeTestUser, registerUser } from './helpers';
+import { createParty, makeTestUser, registerUser, logout } from './helpers';
 
 test('a party page opened signed out is where signing in lands', async ({ page }) => {
   const user = makeTestUser('deep-link');
@@ -11,7 +11,7 @@ test('a party page opened signed out is where signing in lands', async ({ page }
   // The login page's timezone request opens a session of its own; until it answers,
   // its cookie can replace the one holding the saved party request.
   const timezoneSent = page.waitForResponse((response) => response.url().includes('/ui/timezone/'));
-  await page.goto('/logout');
+  await logout(page);
   await timezoneSent;
   await page.goto(partyPath, { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/ui\/login/);

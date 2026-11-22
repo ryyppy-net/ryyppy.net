@@ -1,10 +1,10 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty } from './helpers';
+import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty, logout } from './helpers';
 
 test('a user can log in to the classic UI, create a party and add a guest drinker', async ({ page }) => {
   const user = makeTestUser('classicflow');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
 
   await loginClassic(page, user);
   await expect(page.locator('h1.topic', { hasText: user.name })).toBeVisible();

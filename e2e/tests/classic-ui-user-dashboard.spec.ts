@@ -1,15 +1,6 @@
 import { test, expect } from './fixtures';
 import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
-import {
-  makeTestUser,
-  gotoClassicDashboard,
-  registerUser,
-  loginClassic,
-  createPartyClassic,
-  getClassicUserId,
-  addDrinkClassic,
-  getOwnDrinks,
-} from './helpers';
+import { makeTestUser, gotoClassicDashboard, registerUser, loginClassic, createPartyClassic, getClassicUserId, addDrinkClassic, getOwnDrinks, logout } from './helpers';
 
 // Read-only, and the shared user never drinks, so its reading stays 0.00.
 test.describe('classic dashboard, shared user', () => {
@@ -28,7 +19,7 @@ test.describe('classic dashboard, shared user', () => {
 test('U2: party list shows each party name and formatted start time, newest first', async ({ page }) => {
   const user = makeTestUser('dash-u2');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   const firstParty = `E2E U2 First ${Date.now()}`;
@@ -49,7 +40,7 @@ test('U2: party list shows each party name and formatted start time, newest firs
 test('U3: add-party dialog creates a party and lands on its page', async ({ page }) => {
   const user = makeTestUser('dash-u3');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   await page.click('#addPartyButtonLink');
@@ -65,7 +56,7 @@ test('U3: add-party dialog creates a party and lands on its page', async ({ page
 test('U4: edit-profile dialog is prefilled and saving a new name redirects and updates the heading', async ({ page }) => {
   const user = makeTestUser('dash-u4');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   await page.click('#configureButton');
@@ -85,7 +76,7 @@ test('U4: edit-profile dialog is prefilled and saving a new name redirects and u
 test('U5: drinks dialog lists existing drinks and removing one via confirm removes it', async ({ page }) => {
   const user = makeTestUser('dash-u5');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   const userId = await getClassicUserId(page);
@@ -107,7 +98,7 @@ test('U5: drinks dialog lists existing drinks and removing one via confirm remov
 test('U6: adding a drink at a chosen past time via the datetimepicker adds it to the list', async ({ page }) => {
   const user = makeTestUser('dash-u6');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   await page.click('#configureDrinksButton');
@@ -126,7 +117,7 @@ test('U6: adding a drink at a chosen past time via the datetimepicker adds it to
 test('U7: leaving a party drops it from the party list', async ({ page }) => {
   const user = makeTestUser('dash-u7');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   const partyName = `E2E U7 Party ${Date.now()}`;
@@ -144,7 +135,7 @@ test('U7: leaving a party drops it from the party list', async ({ page }) => {
 test('U8: clicking the drinker button adds a drink and changes the promille reading', async ({ page }) => {
   const user = makeTestUser('dash-u8');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   const userId = await getClassicUserId(page);
@@ -159,7 +150,7 @@ test('U8: clicking the drinker button adds a drink and changes the promille read
 test('U9: cancelling right after the click deletes the saved drink', async ({ page }) => {
   const user = makeTestUser('dash-u9');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   const userId = await getClassicUserId(page);
@@ -177,7 +168,7 @@ test('U9: cancelling right after the click deletes the saved drink', async ({ pa
 test('U10: editing right after the click changes the saved drink', async ({ page }) => {
   const user = makeTestUser('dash-u10');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   const userId = await getClassicUserId(page);

@@ -1,5 +1,6 @@
 import { Browser, BrowserContext, Page, expect } from '@playwright/test';
 import { Client } from 'pg';
+import { sendXsrfToken } from './xsrf';
 
 export interface TestUser {
   name: string;
@@ -36,11 +37,18 @@ export async function registerUser(page: Page, user: TestUser): Promise<void> {
 /** Opens a browser context signed in as a freshly registered user, blocking other origins as fixtures.ts does. */
 export async function signedInContext(browser: Browser, baseURL: string, label: string): Promise<BrowserContext> {
   const context = await browser.newContext();
+  sendXsrfToken(context);
   const appOrigin = new URL(baseURL).origin;
   await context.route((url) => url.origin !== appOrigin, (route) => route.abort());
   const page = await context.newPage();
   await registerUser(page, makeTestUser(label));
   return context;
+}
+
+/** Signs the page's user out the way the logout links do, with a POST, and lands on the login page. */
+export async function logout(page: Page): Promise<void> {
+  expect((await page.request.post('/logout')).ok()).toBeTruthy();
+  await page.goto('/ui/login?logout', { waitUntil: 'domcontentloaded' });
 }
 
 /** Logs an already-registered user in via the /ui/login form. */
