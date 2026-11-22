@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html
-FROM maven:3.9-eclipse-temurin-25 AS build
+FROM maven:3.9.16-eclipse-temurin-25 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src src
@@ -15,12 +15,12 @@ RUN --mount=type=cache,id=s/051f3916-5603-418f-a470-2c39ca314729-/root/.m2,targe
 
 # Zulu is the only JDK shipping CRaC's warp engine, and the JDK rather than the
 # JRE because checkpoint.sh triggers the checkpoint through jcmd.
-FROM azul/zulu-openjdk:25.0.2-jdk-crac AS builder
+FROM azul/zulu-openjdk:25.0.5.1-jdk-crac AS builder
 WORKDIR /builder
 COPY --from=build /build/target/ryyppynet.jar application.jar
 RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted
 
-FROM azul/zulu-openjdk:25.0.2-jdk-crac
+FROM azul/zulu-openjdk:25.0.5.1-jdk-crac
 WORKDIR /application
 COPY --from=builder /builder/extracted/dependencies/ ./
 COPY --from=builder /builder/extracted/spring-boot-loader/ ./
