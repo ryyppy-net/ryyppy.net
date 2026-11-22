@@ -1,0 +1,6 @@
+name: CodeQL config
+
+# Third-party libraries committed as-is; not our code to fix.
+paths-ignore:
+  - src/main/resources/public/static/vendor
+  - src/main/resources/public/static/js/flot
