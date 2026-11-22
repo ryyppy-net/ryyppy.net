@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # https://docs.spring.io/spring-boot/reference/packaging/container-images/dockerfiles.html
-FROM maven:3.9.16-eclipse-temurin-25 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /build
 COPY pom.xml .
 COPY src src
