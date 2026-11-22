@@ -13,6 +13,11 @@ updates:
     schedule:
       interval: "daily"
 
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -26,3 +31,8 @@ updates:
       # Only LTS JDKs (25, then 29): a feature release is a manual bump.
       - dependency-name: "azul/zulu-openjdk"
         update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "docker-compose"
+    directory: "/docker"
+    schedule:
+      interval: "daily"
