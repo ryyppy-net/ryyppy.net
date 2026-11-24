@@ -1,4 +1,4 @@
-// Spring Security sets the XSRF-TOKEN cookie and expects it back as X-XSRF-TOKEN on unsafe requests.
+// Every request echoes the XSRF-TOKEN cookie as X-XSRF-TOKEN.
 $.ajaxSetup({
     beforeSend: function(xhr) {
         var match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);

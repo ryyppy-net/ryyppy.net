@@ -1,6 +1,16 @@
 import { test, expect } from './fixtures';
 import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
-import { makeTestUser, gotoClassicDashboard, registerUser, loginClassic, createPartyClassic, getClassicUserId, addDrinkClassic, getOwnDrinks, logout } from './helpers';
+import {
+  makeTestUser,
+  gotoClassicDashboard,
+  registerUser,
+  loginClassic,
+  createPartyClassic,
+  getClassicUserId,
+  addDrinkClassic,
+  getOwnDrinks,
+  logout,
+} from './helpers';
 
 // Read-only, and the shared user never drinks, so its reading stays 0.00.
 test.describe('classic dashboard, shared user', () => {
