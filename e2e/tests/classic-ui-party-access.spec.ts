@@ -23,7 +23,7 @@ test("an outsider is forbidden from the classic /ui party endpoints and changes 
     const noRedirect = { maxRedirects: 0 };
     const requests: (() => Promise<APIResponse>)[] = [
       () => outsider.get('/ui/party', { params: { id: party.id }, ...noRedirect }),
-      () => outsider.get('/ui/addParty', { params: { name: 'Planted', userId: ownerId }, ...noRedirect }),
+      () => outsider.post('/ui/addParty', { form: { name: 'Planted', userId: String(ownerId) }, ...noRedirect }),
       () => outsider.post('/ui/removeUserFromParty', { form: { partyId: String(party.id), userId: String(ownerId) }, ...noRedirect }),
       () => outsider.post('/ui/removeUserFromParty', { form: { partyId: String(party.id), userId: String(outsiderId) }, ...noRedirect }),
     ];

@@ -23,13 +23,13 @@ test('a user can reach the passphrase page from the classic UI settings dialog a
   await expect(page).toHaveURL(/\/ui\/passphrase/);
   await expect(page.locator('input[name="passphrase"]')).toHaveValue('');
 
-  // "Generate a new key" is location.href='passphrase-generate', which 302s
+  // "Generate a new key" is a POST form to passphrase-generate, which 302s
   // back to /ui/passphrase - two navigations. The URL match has to be anchored
   // because /\/ui\/passphrase/ also matches the page we are on and the
   // intermediate .../passphrase-generate, and the key's arrival is the only
   // signal that the reload has settled. Clicking before then lands on a
   // document that is about to be replaced.
-  await page.click('input[type="button"]');
+  await page.click('input[type="submit"]');
   await expect(page).toHaveURL(/\/ui\/passphrase$/);
   await expect(page.locator('input[name="passphrase"]')).not.toHaveValue('');
   const passphrase = await page.locator('input[name="passphrase"]').inputValue();

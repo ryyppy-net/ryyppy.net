@@ -78,7 +78,7 @@ public class PartyControllerWebTest {
         party.setId(8);
         when(partyRoster.start("Sauna", 1, 42)).thenReturn(party);
 
-        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "42"))
+        mvc.perform(post("/ui/addParty").param("name", "Sauna").param("userId", "42"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("party?id=8"));
 
@@ -121,7 +121,7 @@ public class PartyControllerWebTest {
 
     @Test
     public void addPartyIsForbiddenForAnotherUser() throws Exception {
-        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
+        mvc.perform(post("/ui/addParty").param("name", "Sauna").param("userId", "7"))
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(partyRoster);
@@ -131,7 +131,7 @@ public class PartyControllerWebTest {
     public void addPartyIsForbiddenForAPartyMate() throws Exception {
         when(partyRepository.countSharedParties(42, 7)).thenReturn(1L);
 
-        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "7"))
+        mvc.perform(post("/ui/addParty").param("name", "Sauna").param("userId", "7"))
                 .andExpect(status().isForbidden());
 
         verifyNoInteractions(partyRoster);
@@ -176,7 +176,7 @@ public class PartyControllerWebTest {
     @Test
     public void nonNumericIdsAreRejectedBeforeAnyAccessCheck() throws Exception {
         mvc.perform(get("/ui/party").param("id", "abc")).andExpect(status().isBadRequest());
-        mvc.perform(get("/ui/addParty").param("name", "Sauna").param("userId", "abc"))
+        mvc.perform(post("/ui/addParty").param("name", "Sauna").param("userId", "abc"))
                 .andExpect(status().isBadRequest());
         mvc.perform(post("/ui/removeUserFromParty").param("partyId", "abc").param("userId", "42"))
                 .andExpect(status().isBadRequest());

@@ -39,7 +39,7 @@ public class PartyController {
         return mav;
     }
 
-    @RequestMapping("/addParty")
+    @PostMapping("/addParty")
     @OwnUser
     public String addParty(@RequestParam("name") String partyName, @RequestParam("userId") int userId){
         Party party = partyRoster.start(partyName, PartyRoster.DEFAULT_DAYS, userId);

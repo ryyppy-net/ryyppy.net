@@ -95,7 +95,7 @@
                         $('.drink').bind('click', function() {
                             var element = $.tmplItem(this);
                             if (confirm(/*[[#{user.remove_drink.confirm}]]*/ ''))
-                                $.get('/ui/removeDrink?userId=' + element.data.UserId + '&drinkId=' + element.data.DrinkId, configureDrinksDialogOpened);
+                                $.post('/ui/removeDrink', { userId: element.data.UserId, drinkId: element.data.DrinkId }, configureDrinksDialogOpened);
                         });
                     });
                 }
