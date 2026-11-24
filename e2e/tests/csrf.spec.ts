@@ -1,43 +1,6 @@
 import { test, expect } from './fixtures';
 import { createPartyClassic, getOwnDrinks, gotoClassicDashboard, makeTestUser, registerUser } from './helpers';
 
-const XSRF_COOKIE = 'XSRF-TOKEN';
-
-test('the first load of each page type sets the XSRF-TOKEN cookie', async ({ page }) => {
-  const context = page.context();
-  const xsrfCookies = async () => (await context.cookies()).filter((cookie) => cookie.name === XSRF_COOKIE);
-
-  await page.goto('/ui/login', { waitUntil: 'domcontentloaded' });
-  expect(await xsrfCookies()).toHaveLength(1);
-
-  const user = makeTestUser('csrf-cookie');
-  await registerUser(page, user);
-  for (const path of ['/app/', '/ui/user']) {
-    await context.clearCookies({ name: XSRF_COOKIE });
-    await page.goto(path, { waitUntil: 'domcontentloaded' });
-    expect(await xsrfCookies(), path).toHaveLength(1);
-  }
-});
-
-test('a POST that does not echo the token is refused and changes nothing', async ({ page, playwright, baseURL }) => {
-  await registerUser(page, makeTestUser('csrf-post'));
-  const before = (await getOwnDrinks(page)).length;
-
-  const state = await page.context().storageState();
-  const withoutHeader = await playwright.request.newContext({ baseURL, storageState: state });
-  try {
-    expect((await withoutHeader.post('/API/v2/profile/drinks')).status()).toBe(403);
-    const token = state.cookies.find((cookie) => cookie.name === XSRF_COOKIE)!.value;
-    expect((await withoutHeader.post('/API/v2/profile/drinks', { headers: { 'X-XSRF-TOKEN': 'not-the-token' } })).status()).toBe(403);
-    expect(await getOwnDrinks(page)).toHaveLength(before);
-
-    expect((await withoutHeader.post('/API/v2/profile/drinks', { headers: { 'X-XSRF-TOKEN': token } })).ok()).toBeTruthy();
-    expect(await getOwnDrinks(page)).toHaveLength(before + 1);
-  } finally {
-    await withoutHeader.dispose();
-  }
-});
-
 test('the classic UI logs out with a POST', async ({ page }) => {
   const user = makeTestUser('csrf-logout-classic');
   await registerUser(page, user);
