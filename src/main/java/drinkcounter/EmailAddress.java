@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public final class EmailAddress {
 
-    private static final Pattern FORMAT = Pattern.compile("^(.+)@(.+)\\.(.+)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FORMAT = Pattern.compile("^[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+$", Pattern.CASE_INSENSITIVE);
 
     private EmailAddress() {
     }
