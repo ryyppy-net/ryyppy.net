@@ -43,7 +43,8 @@ test('the classic dashboard leaves a party with a POST', async ({ page }) => {
 
 test('the passphrase endpoints take no token, only the passphrase', async ({ page, playwright, baseURL }) => {
   await registerUser(page, makeTestUser('csrf-passphrase'));
-  await page.goto('/ui/passphrase-generate', { waitUntil: 'domcontentloaded' });
+  await page.goto('/ui/passphrase', { waitUntil: 'domcontentloaded' });
+  await page.click('input[type="submit"]');
   await expect(page).toHaveURL(/\/ui\/passphrase$/);
   const passphrase = await page.locator('input[name="passphrase"]').inputValue();
   expect(passphrase).not.toBe('');

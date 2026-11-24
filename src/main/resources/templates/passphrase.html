@@ -32,9 +32,9 @@
                 With this key, you can use other Ryyppy.net services, like the Android client. The key is personal. If you generate a new key, the old one stops working.
             </p>
 
-            <form>
-                <input type="text" readonly="readonly" size="35" name="passphrase" th:value="${passphrase}" /> <br />
-                <input type="button" th:value="#{passphrase.generate_new}" onclick="location.href='passphrase-generate'" />
+            <input type="text" readonly="readonly" size="35" name="passphrase" th:value="${passphrase}" /> <br />
+            <form method="post" th:action="@{/ui/passphrase-generate}">
+                <input type="submit" th:value="#{passphrase.generate_new}" />
             </form>
             <br />
             <span th:text="#{passphrase.copy_clipboard}">Press here to copy key to clipboard:</span>

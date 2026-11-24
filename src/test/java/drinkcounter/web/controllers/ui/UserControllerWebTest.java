@@ -118,11 +118,18 @@ public class UserControllerWebTest {
 
     @Test
     public void passphraseIsGeneratedForTheSignedInUser() throws Exception {
-        mvc.perform(get("/ui/passphrase-generate"))
+        mvc.perform(post("/ui/passphrase-generate"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("passphrase"));
 
         verify(passphraseLogin).issue(user);
+    }
+
+    @Test
+    public void stateChangingHandlersRejectGet() throws Exception {
+        for (String path : List.of("/ui/passphrase-generate", "/ui/removeDrink", "/ui/modifyUser", "/ui/addDrinkToDate")) {
+            mvc.perform(get(path)).andExpect(status().isMethodNotAllowed());
+        }
     }
 
     @Test
@@ -273,7 +280,7 @@ public class UserControllerWebTest {
     }
 
     private MockHttpServletRequestBuilder removeDrink(Object userId) {
-        return get("/ui/removeDrink")
+        return post("/ui/removeDrink")
                 .param("userId", userId.toString())
                 .param("drinkId", "5");
     }

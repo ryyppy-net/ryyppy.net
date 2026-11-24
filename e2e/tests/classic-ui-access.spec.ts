@@ -27,9 +27,9 @@ test("an outsider is forbidden from another user's classic /ui actions and chang
         ...noFollow,
         form: { userId: String(profile.id), date: '01.01.2024 12:00' },
       }),
-      () => outsider.get('/ui/removeDrink', {
+      () => outsider.post('/ui/removeDrink', {
         ...noFollow,
-        params: { userId: String(profile.id), drinkId },
+        form: { userId: String(profile.id), drinkId },
       }),
       () => outsider.get('/ui/getUserByEmail', {
         ...noFollow,

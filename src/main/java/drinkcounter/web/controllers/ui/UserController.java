@@ -3,6 +3,7 @@ package drinkcounter.web.controllers.ui;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import drinkcounter.model.User;
@@ -82,7 +83,7 @@ public class UserController {
         return "newuser";
     }
     
-    @RequestMapping("/addUser")
+    @PostMapping("/addUser")
     public String addUser(
             @RequestParam("name") String name,
             @RequestParam("sex") String sex,
@@ -127,7 +128,7 @@ public class UserController {
         securityContextRepository.saveContext(context, request, response);
     }
 
-    @RequestMapping("/modifyUser")
+    @PostMapping("/modifyUser")
     @OwnUser
     public String modifyUser(
             @RequestParam("userId") int userId,
@@ -152,14 +153,14 @@ public class UserController {
         return "redirect:user";
     }
 
-    @RequestMapping("/addDrinkToDate")
+    @PostMapping("/addDrinkToDate")
     @OwnUser
     public String addDrinkToDate(HttpSession session, @RequestParam("userId") int userId, @RequestParam("date") String date){
         drinkLog.recordAt(userId, date, AuthenticationController.timezoneOffset(session));
         return "redirect:user";
     }
 
-    @RequestMapping("/removeDrink")
+    @PostMapping("/removeDrink")
     @OwnUser
     public String removeDrink(@RequestParam("userId") int userId, @RequestParam("drinkId") int drinkId){
         drinkLog.undo(userId, drinkId);
@@ -219,7 +220,7 @@ public class UserController {
         return mav;
     }
     
-    @RequestMapping("/passphrase-generate")
+    @PostMapping("/passphrase-generate")
     public String generatePassphrase(@LoggedInUser User user) {
         passphraseLogin.issue(user);
         return "redirect:passphrase";
