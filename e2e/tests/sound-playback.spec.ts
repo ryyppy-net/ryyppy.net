@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures';
 import { SHARED_STORAGE_STATE } from './shared-user';
-import { getClassicUserId, loginClassic, makeTestUser, registerUser, waitForSoundsReady } from './helpers';
+import { getClassicUserId, loginClassic, makeTestUser, registerUser, waitForSoundsReady, logout } from './helpers';
 import { Page } from '@playwright/test';
 
 /**
@@ -82,7 +82,7 @@ test('the classic UI plays a drink sound on the click', async ({ page }) => {
 
   const user = makeTestUser('sound-classic');
   await registerUser(page, user);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, user);
 
   await waitForSoundsReady(page);

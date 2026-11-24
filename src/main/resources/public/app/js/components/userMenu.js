@@ -3,6 +3,14 @@
 
     angular.module('ryyppy').component('userMenu', {
         bindings: {active: '@'},
+        controller: ['$http', '$window', function ($http, $window) {
+            this.logout = function ($event) {
+                $event.preventDefault();
+                $http.post('/logout').finally(function () {
+                    $window.location.href = '/ui/login?logout';
+                });
+            };
+        }],
         template: `
     <div class="navbar hidden-phone">
         <div class="navbar-inner">
@@ -14,7 +22,7 @@
             </ul>
             <ul class="nav pull-right">
                 <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään">Vanha käyttöliittymä</a></li>
-                <li><a href="/logout" class="g_id_signout">Kirjaudu ulos</a></li>
+                <li><a href="#" class="g_id_signout" ng-click="$ctrl.logout($event)">Kirjaudu ulos</a></li>
             </ul>
         </div>
     </div>
@@ -28,7 +36,7 @@
             </ul>
             <ul class="nav mobile-nav pull-right">
                 <li><a href="/ui/user" title="Vaihda vanhaan käyttöliittymään"><i class="icon-share"></i></a></li>
-                <li><a href="/logout" class="g_id_signout"><i class="icon-signout"></i></a></li>
+                <li><a href="#" class="g_id_signout" ng-click="$ctrl.logout($event)"><i class="icon-signout"></i></a></li>
             </ul>
         </div>
     </div>`

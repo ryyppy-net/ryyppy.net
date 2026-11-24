@@ -1,3 +1,13 @@
+// Every request echoes the XSRF-TOKEN cookie as X-XSRF-TOKEN.
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        var match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+        if (match) {
+            xhr.setRequestHeader('X-XSRF-TOKEN', decodeURIComponent(match[1]));
+        }
+    }
+});
+
 var RyyppyNet = {
     inProgress: [],
     graph: null,

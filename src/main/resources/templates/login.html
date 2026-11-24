@@ -35,7 +35,7 @@
             <p class="loginError" style="color:#c00;" th:if="${param.error != null}" th:text="#{login.error}">Login failed. Check your username and password and try again.</p>
 
             <p>
-                <form action="/login" method="post" >
+                <form th:action="@{/login}" method="post" >
                     <label for="username">Käyttäjätunnus</label>
                     <input id="username" type="text" name="username"><br>
                     <label for="password">Salasana</label>

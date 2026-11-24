@@ -102,11 +102,11 @@
             }
 
             $(document).ready(function() {
-                $('#logoutLink').click(function() {
-                    return confirm($(this).data('confirmMessage'));
-                });
-                $('.leavePartyLink').click(function() {
-                    return confirm($(this).data('confirmMessage'));
+                $('#logoutLink, .leavePartyLink').click(function(e) {
+                    e.preventDefault();
+                    if (confirm($(this).data('confirmMessage'))) {
+                        $(this).closest('form').submit();
+                    }
                 });
 
                 $('#addPartyButtonLink').click(function() {
@@ -181,7 +181,7 @@
         <div class="header">
             <table style="width: 100%;" class="noBorders">
                 <tr>
-                    <td class="headerButton"><a id="logoutLink" class="headerButtonA headerButtonLeft" th:title="#{user.logout_dialog.title}" href="logout" th:attr="data-confirm-message=#{user.logout_dialog.msg}"><div class="headerButton" id="goBack"></div></a></td>
+                    <td class="headerButton"><form th:action="@{/logout}" method="post" style="display:inline"><a id="logoutLink" class="headerButtonA headerButtonLeft" th:title="#{user.logout_dialog.title}" href="#" th:attr="data-confirm-message=#{user.logout_dialog.msg}"><div class="headerButton" id="goBack"></div></a></form></td>
                     <td class="topic"><h1 class="topic" th:text="${user.name}">User name</h1></td>
                     <td class="headerButton"><a id="configureDrinkerButtonLink" class="headerButtonA headerButtonRight" th:title="#{user.settings}" href="#"><div class="headerButton" id="configureButton"></div></a></td>
                     <td class="headerButton"><a id="uiSwitchButton" class="headerButtonText" th:title="#{ui.switch_to_modern}" href="/app/" th:text="#{ui.modern_ui_label}">New UI</a></td>
@@ -212,9 +212,13 @@
                             <span th:text="#{user.start_time}">Starting time</span> <script type="text/javascript" th:inline="javascript">document.write(formatDate(new Date(/*[[${party.startTime.toEpochMilli()}]]*/ 0)));</script>
                         </span>
                     </a>
-                        <a class="headerButtonA leavePartyLink" th:title="#{user.exit_dialog.title}" th:attr="data-confirm-message=#{user.exit_dialog.msg}" th:href="@{removeUserFromParty(partyId=${party.id},userId=${user.id})}">
-                        <img th:src="@{/static/images/x.png}" alt="sulje" style="margin-right: 5px;" />
-                    </a>
+                    <form th:action="@{removeUserFromParty}" method="post" style="display:inline">
+                        <input type="hidden" name="partyId" th:value="${party.id}" />
+                        <input type="hidden" name="userId" th:value="${user.id}" />
+                        <a class="headerButtonA leavePartyLink" th:title="#{user.exit_dialog.title}" th:attr="data-confirm-message=#{user.exit_dialog.msg}" href="#">
+                            <img th:src="@{/static/images/x.png}" alt="sulje" style="margin-right: 5px;" />
+                        </a>
+                    </form>
                 </div>
             </div>
             <a id="morePartiesLink" th:if="${morePartiesShown}" th:href="@{user(parties=${morePartiesShown})}" th:text="#{user.more_parties}">Show more parties</a>

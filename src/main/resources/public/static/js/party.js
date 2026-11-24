@@ -38,7 +38,7 @@ function initializeButtons() {
         e.preventDefault();
         var link = $(this);
         if (confirm(link.data('confirm'))) {
-            $.get('/ui/removeUserFromParty?partyId=' + partyId + '&userId=' + link.data('userId'), function() {
+            $.post('/ui/removeUserFromParty', {partyId: partyId, userId: link.data('userId')}, function() {
                 location.reload(true);
             });
         }

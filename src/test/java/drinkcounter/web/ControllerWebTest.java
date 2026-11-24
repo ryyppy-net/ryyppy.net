@@ -37,7 +37,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @WebMvcTest
-@Import({WebSecurityConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class, SignInDestination.class})
+@Import({WebSecurityConfiguration.class, CsrfTokenConfiguration.class, SoundManifest.class, PartyAccess.class, Promilles.class, SignInDestination.class})
 @MockitoBean(types = {
         PartyRoster.class,
         PartyDeletion.class,

@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures';
-import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty, gotoClassicDashboard } from './helpers';
+import { makeTestUser, registerUser, loginClassic, createPartyClassic, addGuestToParty, gotoClassicDashboard, logout } from './helpers';
 import { SHARED_STORAGE_STATE, sharedUser } from './shared-user';
 
 // Each of these creates its own fresh party and asserts only on that party's
@@ -121,7 +121,7 @@ test('add-registered-user form enables its submit button for a known email and a
 
   const owner = makeTestUser('party-owner');
   await registerUser(page, owner);
-  await page.goto('/logout');
+  await logout(page);
 
   await loginClassic(page, owner);
   await createPartyClassic(page, `E2E Registered Party ${Date.now()}`);
@@ -142,7 +142,7 @@ test('add-registered-user form enables its submit button for a known email and a
 test('kick dialog lists other participants but not the current user, and removing one drops them from the grid', async ({ page }) => {
   const owner = makeTestUser('party-kicker');
   await registerUser(page, owner);
-  await page.goto('/logout');
+  await logout(page);
   await loginClassic(page, owner);
 
   await createPartyClassic(page, `E2E Kick Party ${Date.now()}`);
