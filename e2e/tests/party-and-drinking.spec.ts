@@ -22,7 +22,7 @@ test.describe('party start date', () => {
 
   const partyTile = page.locator('.party', { has: page.getByText(partyName) });
   await expect(partyTile.locator('small')).toHaveText(
-    new RegExp(`^\\S{2} ${startDate.replace(/\./g, '\\.')} \\d{2}:\\d{2} – \\S{2} \\d+\\.\\d+\\. \\d{2}:\\d{2}$`));
+    new RegExp(`^\\S{2} ${startDate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\d{2}:\\d{2} – \\S{2} \\d+\\.\\d+\\. \\d{2}:\\d{2}$`));
   await expect(partyTile.locator('.party-progress')).toBeVisible();
   await expect(partyTile).not.toContainText('Alkamisaika');
 });
