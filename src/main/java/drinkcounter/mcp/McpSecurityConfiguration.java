@@ -20,6 +20,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.time.Duration;
 import java.util.Set;
+import java.util.function.Consumer;
 import org.springaicommunity.mcp.security.authorizationserver.config.LocalhostWildcardPortValidator;
 import org.springaicommunity.mcp.security.common.url.DefaultUrlValidator;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +38,7 @@ import org.springframework.security.converter.RsaKeyConverters;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationContext;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.converter.OAuth2ClientRegistrationRegisteredClientConverter;
@@ -71,18 +73,20 @@ public class McpSecurityConfiguration {
     @Order(1)
     public SecurityFilterChain mcpAuthorizationServerFilterChain(HttpSecurity http,
             ClientIdMetadataDocumentRegisteredClientRepository registeredClients) throws Exception {
+        Consumer<OAuth2AuthorizationCodeRequestAuthenticationContext> authorizationCodeRequestValidator =
+                new LocalhostWildcardPortValidator().andThen(DEFAULT_SCOPE_VALIDATOR);
         http
             .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
             .with(mcpAuthorizationServer(), mcp -> mcp
                 .dynamicClientRegistration(false)
                 .cimd(true)
                 // Claude Code registers http://localhost/callback and listens on a random port.
-                .authorizationCodeRequestValidator(
-                        new LocalhostWildcardPortValidator().andThen(DEFAULT_SCOPE_VALIDATOR))
+                .authorizationCodeRequestValidator(authorizationCodeRequestValidator)
                 .authorizationServer(authorizationServer -> {
                     authorizationServer.authorizationEndpoint(authorizationEndpoint -> authorizationEndpoint
                             .authorizationRequestConverters(converters -> converters.replaceAll(DefaultScopeAuthorizationRequestConverter::new))
-                            .consentPage(CONSENT_PAGE));
+                            .consentPage(CONSENT_PAGE)
+                            .authorizationCodeRequestAuthenticationValidator(authorizationCodeRequestValidator));
                     // Claude's hosted apps use a client metadata document only if "none" is listed.
                     // Setting the customizer replaces the library's, so it repeats the CIMD claim.
                     authorizationServer.authorizationServerMetadataEndpoint(metadata -> metadata
