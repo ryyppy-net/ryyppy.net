@@ -129,9 +129,9 @@ or open a PR for it; `mvn test` alone is not enough. If you could not run it, sa
 and why instead of reporting the change as finished.
 
 The app's Postgres runs in Docker. If `docker info` cannot connect, the daemon is
-stopped, not missing: start it with `nohup dockerd >/tmp/dockerd.log 2>&1 &` (cloud
-sessions do this in `.claude/hooks/session-start.sh`). If Playwright asks for
-`npx playwright install`, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` instead (see below).
+stopped, not missing: start it with `nohup dockerd >/tmp/dockerd.log 2>&1 &`. If
+Playwright asks for `npx playwright install`, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE`
+instead (see below).
 
 ```bash
 cd e2e
