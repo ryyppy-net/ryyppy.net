@@ -124,8 +124,14 @@ service side effect.
 ### End-to-end tests (Playwright)
 
 A Playwright suite in `e2e/` drives the real app through a browser, covering both
-front ends. Use it to verify a change actually works end-to-end (auth flows, the UIs,
-REST API together), not just that units pass in isolation.
+front ends. Run it, and see it pass, before you call a change under `src/main/` done
+or open a PR for it; `mvn test` alone is not enough. If you could not run it, say so
+and why instead of reporting the change as finished.
+
+The app's Postgres runs in Docker. If `docker info` cannot connect, the daemon is
+stopped, not missing: start it with `nohup dockerd >/tmp/dockerd.log 2>&1 &`. If
+Playwright asks for `npx playwright install`, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE`
+instead (see below).
 
 ```bash
 cd e2e
