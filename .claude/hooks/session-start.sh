@@ -12,6 +12,11 @@ cd "${CLAUDE_PROJECT_DIR:-.}"
 
 # The cloud container has Docker installed but does not start the daemon.
 if ! docker info >/dev/null 2>&1 && command -v dockerd >/dev/null; then
+  # /run survives a container restore, so pid files can name a process that is
+  # now something else; dockerd then waits on it and exits.
+  if ! pgrep -x dockerd >/dev/null && ! pgrep -x containerd >/dev/null; then
+    rm -f /var/run/docker.pid /var/run/docker/containerd/containerd.pid
+  fi
   nohup dockerd >/tmp/dockerd.log 2>&1 &
   for _ in $(seq 1 30); do
     docker info >/dev/null 2>&1 && break
